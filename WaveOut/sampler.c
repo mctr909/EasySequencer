@@ -284,5 +284,5 @@ inline void filter(FILTER *filter, double input) {
     filter->pole12 = filter->pole01;
     filter->pole13 = filter->pole02;
 
-    filter->pole03 -= (filter->pole03 * filter->pole03 * filter->pole03) / 6.0;
+    //filter->pole03 -= (filter->pole03 * filter->pole03 * filter->pole03) / 6.0;
 }
