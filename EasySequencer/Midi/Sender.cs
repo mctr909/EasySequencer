@@ -33,7 +33,7 @@ namespace MIDI {
                 Channel[i] = new Channel(mInst, ppChannel[i], i);
             }
 
-            WaveOutOpen((uint)Const.SampleRate, 256);
+            WaveOutOpen((uint)Const.SampleRate, 512);
         }
 
         public void Send(Message msg) {

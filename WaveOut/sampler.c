@@ -268,21 +268,19 @@ inline void chorus(CHANNEL *ch, DELAY *delay, CHORUS *chorus) {
 }
 
 inline void filter(FILTER *filter, double input) {
-    double k1 = 3.6*filter->cutoff - 1.60*filter->cutoff*filter->cutoff - 1.0;
-    double k2 = 3.0*filter->cutoff - 1.15*filter->cutoff*filter->cutoff - 2.0;
-    double p = (k1 + 1.0) * 0.5;
+    double fi = 1.0 - filter->cutoff;
+    double p = filter->cutoff + 0.8 * filter->cutoff * fi;
+    double q = p + p - 1.0;
 
-    input -= filter->pole03 * filter->resonance * (k2*k2*0.75 + 1.0);
+    input -= 0.9 * (1.0 + 0.5 * fi * (1.0 - fi + 5.6 * fi * fi)) * filter->resonance * filter->pole03;
 
-    filter->pole00 = input * p          + filter->pole10 * p - filter->pole00 * k1;
-    filter->pole01 = filter->pole00 * p + filter->pole11 * p - filter->pole01 * k1;
-    filter->pole02 = filter->pole01 * p + filter->pole12 * p - filter->pole02 * k1;
-    filter->pole03 = filter->pole02 * p + filter->pole13 * p - filter->pole03 * k1;
+    filter->pole00 = (input          + filter->pole10) * p - filter->pole00 * q;
+    filter->pole01 = (filter->pole00 + filter->pole11) * p - filter->pole01 * q;
+    filter->pole02 = (filter->pole01 + filter->pole12) * p - filter->pole02 * q;
+    filter->pole03 = (filter->pole02 + filter->pole13) * p - filter->pole03 * q;
 
     filter->pole10 = input;
     filter->pole11 = filter->pole00;
     filter->pole12 = filter->pole01;
     filter->pole13 = filter->pole02;
-
-    //filter->pole03 -= (filter->pole03 * filter->pole03 * filter->pole03) / 6.0;
 }
