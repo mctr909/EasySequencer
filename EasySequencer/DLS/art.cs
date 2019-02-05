@@ -71,8 +71,7 @@ namespace DLS {
                 art = new ART(ptr);
                 break;
             default:
-                // "Unknown ChunkType"
-                break;
+                throw new Exception("[LART]Unknown ChunkType");
             }
         }
     }

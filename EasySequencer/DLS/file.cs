@@ -34,8 +34,7 @@ namespace DLS {
             case CHUNK_TYPE.DLID:
                 break;
             default:
-                //"Unknown ChunkType"
-                break;
+                throw new Exception("[File]Unknown ChunkType");
             }
         }
 
@@ -50,8 +49,7 @@ namespace DLS {
             case LIST_TYPE.INFO:
                 break;
             default:
-                // "Unknown ListType"
-                break;
+                throw new Exception("[File]Unknown ListType");
             }
         }
     }

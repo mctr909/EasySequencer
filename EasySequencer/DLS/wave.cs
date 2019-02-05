@@ -49,15 +49,18 @@ namespace DLS {
                 }
                 break;
             default:
-                // "Unknown ChunkType"
-                break;
+                throw new Exception("[WAVE]Unknown ChunkType");
             }
         }
 
         protected override void LoadList(LIST_TYPE type, byte* ptr, uint size) {
             switch (type) {
+            case LIST_TYPE.WAVE:
+                break;
             case LIST_TYPE.INFO:
                 break;
+            default:
+                throw new Exception("[WAVE]Unknown ListType");
             }
         }
     }
@@ -86,8 +89,10 @@ namespace DLS {
                     List.Add(new WAVE(ptr, size));
                 }
                 break;
-            default:
+            case LIST_TYPE.INFO:
                 break;
+            default:
+                throw new Exception("[WVPL]Unknown ListType");
             }
         }
     }

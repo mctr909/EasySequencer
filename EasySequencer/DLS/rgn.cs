@@ -50,8 +50,7 @@ namespace DLS {
                 pWaveLink = (CK_WLNK*)ptr;
                 break;
             default:
-                // "Unknown ChunkType"
-                break;
+                throw new Exception("[RGN_]Unknown ChunkType");
             }
         }
 
@@ -61,19 +60,22 @@ namespace DLS {
             case LIST_TYPE.LAR2:
                 articulations = new LART(ptr, size);
                 break;
-            default:
-                // "Unknown ListType"
+            case LIST_TYPE.RGN_:
                 break;
+            case LIST_TYPE.INFO:
+                break;
+            default:
+                throw new Exception("[RGN_]Unknown ListType");
             }
         }
     }
 
     unsafe public class LRGN : Chunk {
-        public List<RGN_> List = new List<RGN_>();
+        public HashSet<RGN_> List = new HashSet<RGN_>();
         private uint m_listCount;
 
-        public LRGN(byte* ptr, uint size, uint waveCount) {
-            m_listCount = waveCount;
+        public LRGN(byte* ptr, uint size, uint regions) {
+            m_listCount = regions;
             Load(ptr, size);
         }
 
@@ -84,9 +86,13 @@ namespace DLS {
                     List.Add(new RGN_(ptr, size));
                 }
                 break;
-            default:
-                // "Unknown ListType"
+            case LIST_TYPE.LART:
+            case LIST_TYPE.LAR2:
                 break;
+            case LIST_TYPE.INFO:
+                break;
+            default:
+                throw new Exception("[LRGN]Unknown ListType");
             }
         }
     }

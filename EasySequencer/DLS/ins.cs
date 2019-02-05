@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 
 namespace DLS {
     unsafe public class INS_ : Chunk {
@@ -15,9 +16,10 @@ namespace DLS {
             case CHUNK_TYPE.INSH:
                 pHeader = (CK_INSH*)ptr;
                 break;
-            default:
-                // "Unknown ChunkType"
+            case CHUNK_TYPE.PTBL:
                 break;
+            default:
+                throw new Exception("[INS_]Unknown ChunkType");
             }
         }
 
@@ -38,21 +40,22 @@ namespace DLS {
                 }
                 articulations = new LART(ptr, size);
                 break;
+            case LIST_TYPE.INS_:
+                break;
             case LIST_TYPE.INFO:
                 break;
             default:
-                // "Unknown ListType"
-                break;
+                throw new Exception("[INS_]Unknown ListType");
             }
         }
     }
 
     unsafe public class LINS : Chunk {
-        public List<INS_> List = new List<INS_>();
+        public HashSet<INS_> List = new HashSet<INS_>();
         private uint m_listCount;
 
-        public LINS(byte* ptr, uint size, uint waveCount) {
-            m_listCount = waveCount;
+        public LINS(byte* ptr, uint size, uint instruments) {
+            m_listCount = instruments;
             Load(ptr, size);
         }
 
@@ -64,8 +67,7 @@ namespace DLS {
                 }
                 break;
             default:
-                // "Unknown ListId"
-                break;
+                throw new Exception("[LINS]Unknown ListType");
             }
         }
     }
