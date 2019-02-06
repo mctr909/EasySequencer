@@ -1,8 +1,8 @@
 #pragma once
 typedef unsigned    int     UInt32;
-typedef signed      int     Int32;
+typedef signed      int     SInt32;
 typedef unsigned    short   UInt16;
-typedef signed      short   Int16;
+typedef signed      short   SInt16;
 typedef unsigned    char    bool;
 
 #define true    ((bool)1)
@@ -14,8 +14,8 @@ typedef struct DELAY {
     double rate;
     double *pTapL;
     double *pTapR;
-    Int32 writeIndex;
-    Int32 readIndex;
+    SInt32 writeIndex;
+    SInt32 readIndex;
 } DELAY;
 #pragma
 
@@ -118,4 +118,27 @@ typedef struct SAMPLER {
     ENVELOPE envEq;
     FILTER eq;
 } SAMPLER;
+#pragma
+
+#pragma pack(4)
+typedef struct {
+    UInt32 riff;
+    UInt32 fileSize;
+    UInt32 dataId;
+} RIFF;
+#pragma
+
+#pragma pack(4)
+typedef struct {
+    UInt32 chunkId;
+    UInt32 chunkSize;
+    UInt16 formatId;
+    UInt16 channels;
+    UInt32 sampleRate;
+    UInt32 bytePerSec;
+    UInt16 blockAlign;
+    UInt16 bitPerSample;
+    UInt32 dataId;
+    UInt32 dataSize;
+} FMT_;
 #pragma

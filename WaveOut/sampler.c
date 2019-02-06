@@ -8,7 +8,7 @@
 #define     DELAY_TAPS      1048576
 
 LPBYTE      __pBuffer = NULL;
-Int32       __sampleRate = 44100;
+SInt32      __sampleRate = 44100;
 double      __deltaTime = 2.26757e-05;
 
 /******************************************************************************/
@@ -86,7 +86,7 @@ CHANNEL** createChannels(UInt32 count) {
         chorus->pLfoRe = (double*)malloc(sizeof(double) * CHORUS_PHASES);
         chorus->pLfoIm = (double*)malloc(sizeof(double) * CHORUS_PHASES);
 
-        for (Int32 p = 0; p < CHORUS_PHASES; ++p) {
+        for (SInt32 p = 0; p < CHORUS_PHASES; ++p) {
             chorus->pPanL[p] = cos(3.1416 * p / CHORUS_PHASES);
             chorus->pPanR[p] = sin(3.1416 * p / CHORUS_PHASES);
             chorus->pLfoRe[p] = cos(6.283 * p / CHORUS_PHASES);
@@ -173,9 +173,9 @@ inline extern void sampler(CHANNEL **chs, SAMPLER *smpl) {
     }
 
     //
-    Int16 *pcm = (Int16*)(__pBuffer + smpl->pcmAddr);
-    Int32 cur = (Int32)smpl->index;
-    Int32 pre = cur - 1;
+    SInt16 *pcm = (SInt16*)(__pBuffer + smpl->pcmAddr);
+    SInt32 cur = (SInt32)smpl->index;
+    SInt32 pre = cur - 1;
     double dt = smpl->index - cur;
     if (pre < 0) {
         pre = 0;
@@ -213,7 +213,7 @@ inline void delay(CHANNEL *ch, DELAY *delay) {
         delay->writeIndex = 0;
     }
 
-    delay->readIndex = delay->writeIndex - (Int32)(delay->rate * __sampleRate);
+    delay->readIndex = delay->writeIndex - (SInt32)(delay->rate * __sampleRate);
     if (delay->readIndex < 0) {
         delay->readIndex += DELAY_TAPS;
     }
@@ -233,12 +233,12 @@ inline void chorus(CHANNEL *ch, DELAY *delay, CHORUS *chorus) {
     double chorusR = 0.0;
     double index;
     double dt;
-    Int32 indexCur;
-    Int32 indexPre;
+    SInt32 indexCur;
+    SInt32 indexPre;
 
     for (register ph = 0; ph < CHORUS_PHASES; ++ph) {
         index = delay->writeIndex - (0.5 - 0.45 * chorus->pLfoRe[ph]) * __sampleRate * 0.1;
-        indexCur = (Int32)index;
+        indexCur = (SInt32)index;
         indexPre = indexCur - 1;
         dt = index - indexCur;
 

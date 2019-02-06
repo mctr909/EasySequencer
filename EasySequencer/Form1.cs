@@ -192,6 +192,22 @@ namespace EasySequencer {
         }
 
         private void wavファイル出力ToolStripMenuItem_Click(Object sender, EventArgs e) {
+            if(null == mSMF || null == mMidiSender || MIDI.Sender.IsFileOutput) {
+                return;
+            }
+
+            saveFileDialog1.Filter = "wavファイル(*.wav)|*.wav";
+            saveFileDialog1.ShowDialog();
+            var filePath = saveFileDialog1.FileName;
+
+            var fm = new StatusWindow();
+            var ev = mSMF.EventList;
+            fm.TimeMax = (int)(ev[ev.Length - 1].Time / mSMF.Ticks);
+            fixed (int* p = &mMidiSender.OutputTime) {
+                fm.Time = p;
+            }
+            mMidiSender.FileOut(filePath, ev, mSMF.Ticks);
+            fm.Show();
         }
 
         private void btnPalyStop_Click(object sender, EventArgs e) {
