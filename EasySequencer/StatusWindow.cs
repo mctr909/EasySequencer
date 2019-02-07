@@ -1,5 +1,4 @@
 ﻿using System.Windows.Forms;
-using System.Threading.Tasks;
 
 namespace EasySequencer {
     unsafe public partial class StatusWindow : Form {

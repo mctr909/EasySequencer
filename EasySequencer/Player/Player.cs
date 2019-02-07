@@ -1,11 +1,12 @@
 ﻿using System.Threading;
 using System.Threading.Tasks;
+using MIDI;
 
-namespace MIDI {
+namespace Player {
     unsafe public class Player {
         private Sender mSender;
-        private Task mTask;
         private Event[] mEventList;
+        private Task mTask;
 
         private int mTicks;
         private double mBPM;

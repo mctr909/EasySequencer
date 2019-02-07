@@ -66,6 +66,7 @@
     <Compile Include="Player\DoubleBuffer.cs" />
     <Compile Include="Midi\Instruments.cs" />
     <Compile Include="Midi\Message.cs" />
+    <Compile Include="Player\Keyboard.cs" />
     <Compile Include="Player\Player.cs" />
     <Compile Include="Midi\Sender.cs" />
     <Compile Include="Midi\SMF.cs" />

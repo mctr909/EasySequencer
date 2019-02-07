@@ -2,7 +2,7 @@
 using System.Drawing;
 using System.Windows.Forms;
 
-namespace MIDI {
+namespace Player {
     public class DoubleBuffer : IDisposable {
         private BufferedGraphics mBuffer;
         private Image mBackGround;
