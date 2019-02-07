@@ -2,7 +2,7 @@
 
 namespace DLS {
     [StructLayout(LayoutKind.Sequential, Pack = 4)]
-    public struct MidiLocale {
+    public struct MIDI_LOCALE {
         public byte bankLSB;
         public byte bankMSB;
         private byte reserve1;
@@ -14,13 +14,13 @@ namespace DLS {
     };
 
     [StructLayout(LayoutKind.Sequential, Pack = 4)]
-    public struct Range {
+    public struct RANGE {
         public ushort low;
         public ushort high;
     };
 
     [StructLayout(LayoutKind.Sequential, Pack = 4)]
-    public struct Connection {
+    public struct CONNECTION {
         public SRC_TYPE source;
         public SRC_TYPE control;
         public DST_TYPE destination;
@@ -29,7 +29,7 @@ namespace DLS {
     };
 
     [StructLayout(LayoutKind.Sequential, Pack = 4)]
-    public struct WaveLoop {
+    public struct WAVE_LOOP {
         public uint size;
         public uint type;
         public uint start;
@@ -61,13 +61,13 @@ namespace DLS {
     [StructLayout(LayoutKind.Sequential, Pack = 4)]
     public struct CK_INSH {
         public uint regions;
-        public MidiLocale locale;
+        public MIDI_LOCALE locale;
     };
 
     [StructLayout(LayoutKind.Sequential, Pack = 2)]
     public struct CK_RGNH {
-        public Range key;
-        public Range velocity;
+        public RANGE key;
+        public RANGE velocity;
         public ushort options;
         public ushort keyGroup;
         //public ushort layer;

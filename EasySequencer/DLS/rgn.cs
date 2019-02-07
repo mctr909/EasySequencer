@@ -7,7 +7,7 @@ namespace DLS {
         public CK_RGNH* pHeader = null;
         public CK_WSMP* pSampler = null;
         public CK_WLNK* pWaveLink = null;
-        public WaveLoop* pLoops = null;
+        public WAVE_LOOP* pLoops = null;
         public LART articulations = null;
 
         public RGN_(byte* ptr, uint size) {
@@ -39,10 +39,10 @@ namespace DLS {
 
                     pSampler = (CK_WSMP*)ptr;
                     var pLoop = ptr + sizeof(CK_WSMP);
-                    pLoops = (WaveLoop*)Marshal.AllocHGlobal(sizeof(WaveLoop) * (int)pSampler->loopCount);
+                    pLoops = (WAVE_LOOP*)Marshal.AllocHGlobal(sizeof(WAVE_LOOP) * (int)pSampler->loopCount);
                     for (uint i = 0; i < pSampler->loopCount; ++i) {
-                        pLoops[i] = *(WaveLoop*)pLoop;
-                        pLoop += sizeof(WaveLoop);
+                        pLoops[i] = *(WAVE_LOOP*)pLoop;
+                        pLoop += sizeof(WAVE_LOOP);
                     }
                 }
                 break;

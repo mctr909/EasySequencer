@@ -3,21 +3,21 @@ using System.Collections.Generic;
 
 namespace DLS {
     unsafe public class ART {
-        public HashSet<Connection> List = null;
+        public HashSet<CONNECTION> List = null;
 
         public ART(byte* ptr) {
             CK_ART1* pInfo = (CK_ART1*)ptr;
             ptr += sizeof(CK_ART1);
 
-            List = new HashSet<Connection>();
+            List = new HashSet<CONNECTION>();
 
             for (uint i = 0; i < pInfo->count; ++i) {
-                List.Add(*(Connection*)ptr);
-                ptr += sizeof(Connection);
+                List.Add(*(CONNECTION*)ptr);
+                ptr += sizeof(CONNECTION);
             }
         }
 
-        public static double GetValue(Connection conn) {
+        public static double GetValue(CONNECTION conn) {
             switch (conn.destination) {
             case DST_TYPE.ATTENUATION:
             case DST_TYPE.FILTER_Q:
