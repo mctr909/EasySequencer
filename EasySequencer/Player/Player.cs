@@ -1,5 +1,6 @@
 ﻿using System.Threading;
 using System.Threading.Tasks;
+
 using MIDI;
 
 namespace Player {
@@ -12,7 +13,6 @@ namespace Player {
         private double mBPM;
         private double mCurrentTime;
 
-        #region プロパティ
         public Channel[] Channel {
             get { return mSender.Channel; }
         }
@@ -65,7 +65,6 @@ namespace Player {
         public string TempoText {
             get { return (mBPM * Speed).ToString("000.00"); }
         }
-        #endregion
 
         public Player(Sender sender) {
             mSender = sender;
