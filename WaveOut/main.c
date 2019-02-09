@@ -17,7 +17,7 @@ SAMPLER         **gpp_samplers = NULL;
 CHANNEL         **gpp_fileOutChannels = NULL;
 SAMPLER         **gpp_fileOutSamplers = NULL;
 
-SInt16          *gp_fileOutBuff = NULL;
+float           *gp_fileOutBuff = NULL;
 FILE            *gp_file = NULL;
 RIFF            g_riff;
 FMT_            g_fmt;
@@ -128,7 +128,7 @@ VOID WINAPI FileOutOpen(LPWSTR filePath, UInt32 bufferLength) {
     }
 
     g_fileOutBufferLength = bufferLength;
-    gp_fileOutBuff = (SInt16*)malloc(sizeof(SInt16) * 2 * bufferLength);
+    gp_fileOutBuff = (float*)malloc(sizeof(float) * 2 * bufferLength);
 
     if (NULL != gp_file) {
         fclose(gp_file);
@@ -145,10 +145,10 @@ VOID WINAPI FileOutOpen(LPWSTR filePath, UInt32 bufferLength) {
     //
     g_fmt.chunkId      = 0x20746D66;
     g_fmt.chunkSize    = 16;
-    g_fmt.formatId     = 1;
+    g_fmt.formatId     = 3;
     g_fmt.channels     = 2;
     g_fmt.sampleRate   = 44100;
-    g_fmt.bitPerSample = 16;
+    g_fmt.bitPerSample = 32;
     g_fmt.blockAlign   = g_fmt.channels * g_fmt.bitPerSample >> 3;
     g_fmt.bytePerSec   = g_fmt.sampleRate * g_fmt.blockAlign;
     g_fmt.dataId       = 0x61746164;
@@ -161,7 +161,7 @@ VOID WINAPI FileOutOpen(LPWSTR filePath, UInt32 bufferLength) {
 
 VOID WINAPI FileOut() {
     register SInt32 t, s, c;
-    register SInt16 *pWave;
+    register float *pWave;
     static double waveL;
     static double waveR;
 
@@ -178,16 +178,12 @@ VOID WINAPI FileOut() {
             channel(gpp_fileOutChannels[c], &waveL, &waveR);
         }
 
-        if (1.0 < waveL) waveL = 1.0;
-        if (waveL < -1.0) waveL = -1.0;
-        if (1.0 < waveR) waveR = 1.0;
-        if (waveR < -1.0) waveR = -1.0;
-        *pWave = (SInt16)(waveL * 32767); ++pWave;
-        *pWave = (SInt16)(waveR * 32767); ++pWave;
+        *pWave = (float)waveL; ++pWave;
+        *pWave = (float)waveR; ++pWave;
     }
 
-    fwrite(gp_fileOutBuff, sizeof(SInt16) * 2 * g_fileOutBufferLength, 1, gp_file);
-    g_fmt.dataSize += sizeof(SInt16) * 2 * g_fileOutBufferLength;
+    fwrite(gp_fileOutBuff, sizeof(float) * 2 * g_fileOutBufferLength, 1, gp_file);
+    g_fmt.dataSize += sizeof(float) * 2 * g_fileOutBufferLength;
 }
 
 VOID WINAPI FileOutClose() {

@@ -67,6 +67,7 @@ namespace EasySequencer {
             }
 
             saveFileDialog1.Filter = "wavファイル(*.wav)|*.wav";
+            saveFileDialog1.FileName = Path.GetFileNameWithoutExtension(Text);
             saveFileDialog1.ShowDialog();
             var filePath = saveFileDialog1.FileName;
 
