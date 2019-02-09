@@ -93,7 +93,7 @@ namespace Player {
             Task.Run(() => {
                 while (true) {
                     draw();
-                    Thread.Sleep(10);
+                    Thread.Sleep(30);
                 }
             });
         }
