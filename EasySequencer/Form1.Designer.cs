@@ -109,7 +109,7 @@
             this.menuStrip1.Location = new System.Drawing.Point(0, 0);
             this.menuStrip1.Name = "menuStrip1";
             this.menuStrip1.Padding = new System.Windows.Forms.Padding(13, 4, 0, 4);
-            this.menuStrip1.Size = new System.Drawing.Size(2425, 44);
+            this.menuStrip1.Size = new System.Drawing.Size(2603, 44);
             this.menuStrip1.TabIndex = 26;
             this.menuStrip1.Text = "menuStrip1";
             // 
@@ -251,7 +251,7 @@
             this.tabControl1.Margin = new System.Windows.Forms.Padding(7, 6, 7, 6);
             this.tabControl1.Name = "tabControl1";
             this.tabControl1.SelectedIndex = 0;
-            this.tabControl1.Size = new System.Drawing.Size(2373, 1372);
+            this.tabControl1.Size = new System.Drawing.Size(2561, 1372);
             this.tabControl1.TabIndex = 36;
             // 
             // tabPage2
@@ -263,7 +263,7 @@
             this.tabPage2.Margin = new System.Windows.Forms.Padding(7, 6, 7, 6);
             this.tabPage2.Name = "tabPage2";
             this.tabPage2.Padding = new System.Windows.Forms.Padding(7, 6, 7, 6);
-            this.tabPage2.Size = new System.Drawing.Size(2357, 1325);
+            this.tabPage2.Size = new System.Drawing.Size(2545, 1325);
             this.tabPage2.TabIndex = 1;
             this.tabPage2.Text = "演奏画面";
             // 
@@ -287,7 +287,7 @@
             this.picKey.Location = new System.Drawing.Point(0, 0);
             this.picKey.Margin = new System.Windows.Forms.Padding(7, 6, 7, 6);
             this.picKey.Name = "picKey";
-            this.picKey.Size = new System.Drawing.Size(2168, 1282);
+            this.picKey.Size = new System.Drawing.Size(2509, 1282);
             this.picKey.TabIndex = 0;
             this.picKey.TabStop = false;
             // 
@@ -310,7 +310,7 @@
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(13F, 24F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(2425, 1632);
+            this.ClientSize = new System.Drawing.Size(2603, 1632);
             this.Controls.Add(this.tabControl1);
             this.Controls.Add(this.pnlPlayer);
             this.Controls.Add(this.menuStrip1);

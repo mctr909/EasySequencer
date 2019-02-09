@@ -21,7 +21,7 @@ namespace Player {
 
         private static readonly Font mFont = new Font("ＭＳ ゴシック", 9.0f, FontStyle.Regular, GraphicsUnit.Point);
         private static readonly int ChannelHeight = 40;
-        private static readonly int KnobRadius = 7;
+        private static readonly int KnobRadius = 14;
 
         private static readonly Rectangle[] KeyboardPos = {
             new Rectangle( 1, 20, 7, 11),   // C
@@ -39,25 +39,25 @@ namespace Player {
         };
 
         private static readonly Point[] KnobPos = {
-            new Point(611, 9),  // Vol.
-            new Point(635, 9),  // Exp.
-            new Point(659, 9),  // Pan.
-            new Point(683, 9),  // Rev.
-            new Point(707, 9),  // Cho.
-            new Point(731, 9),  // Del.
-            new Point(755, 9),  // Fc
-            new Point(779, 9)   // Q
+            new Point(619, 19),  // Vol.
+            new Point(659, 19),  // Exp.
+            new Point(699, 19),  // Pan.
+            new Point(739, 19),  // Rev.
+            new Point(779, 19),  // Cho.
+            new Point(819, 19),  // Del.
+            new Point(859, 19),  // Fc
+            new Point(899, 19)   // Q
         };
 
         private static readonly Point[] KnobValPos = {
-            new Point(602, 28), // Vol.
-            new Point(626, 28), // Exp.
-            new Point(650, 28), // Pan.
-            new Point(674, 28), // Rev.
-            new Point(698, 28), // Cho.
-            new Point(722, 28), // Del.
-            new Point(746, 28), // Fc
-            new Point(770, 28)  // Q
+            new Point(610, 15),  // Vol.
+            new Point(650, 15),  // Exp.
+            new Point(690, 15),  // Pan.
+            new Point(730, 15),  // Rev.
+            new Point(770, 15),  // Cho.
+            new Point(810, 15),  // Del.
+            new Point(850, 15),  // Fc
+            new Point(890, 15)   // Q
         };
 
         private static readonly PointF[] Knob = {
@@ -109,14 +109,14 @@ namespace Player {
                 while (true) {
                     draw();
                     sendValue();
-                    Thread.Sleep(20);
+                    Thread.Sleep(10);
                 }
             });
         }
 
         private void picKeyboard_MouseDown(Object sender, MouseEventArgs e) {
             var pos = mCtrl.PointToClient(Cursor.Position);
-            var knobX = (pos.X - KnobValPos[0].X) / 24;
+            var knobX = (pos.X - KnobValPos[0].X + 10) / 40;
             var knobY = pos.Y / ChannelHeight;
 
             if (0 <= knobY && knobY <= 15) {
@@ -223,7 +223,7 @@ namespace Player {
                 );
                 g.DrawString(
                     channel.Vol.ToString("000"),
-                    mFont, Brushes.Black,
+                    mFont, Brushes.LightGray,
                     KnobValPos[0].X, KnobValPos[0].Y + y_ch
                 );
 
@@ -236,7 +236,7 @@ namespace Player {
                 );
                 g.DrawString(
                     channel.Exp.ToString("000"),
-                    mFont, Brushes.Black,
+                    mFont, Brushes.LightGray,
                     KnobValPos[1].X, KnobValPos[1].Y + y_ch
                 );
 
@@ -251,21 +251,21 @@ namespace Player {
                 if (0 == pan) {
                     g.DrawString(
                         " C ",
-                        mFont, Brushes.Black,
+                        mFont, Brushes.LightGray,
                         KnobValPos[2].X, KnobValPos[2].Y + y_ch
                     );
                 }
                 else if (pan < 0) {
                     g.DrawString(
                         "L" + (-pan).ToString("00"),
-                        mFont, Brushes.Black,
+                        mFont, Brushes.LightGray,
                         KnobValPos[2].X, KnobValPos[2].Y + y_ch
                     );
                 }
                 else {
                     g.DrawString(
                         "R" + pan.ToString("00"),
-                        mFont, Brushes.Black,
+                        mFont, Brushes.LightGray,
                         KnobValPos[2].X, KnobValPos[2].Y + y_ch
                     );
                 }
@@ -279,7 +279,7 @@ namespace Player {
                 );
                 g.DrawString(
                     channel.Rev.ToString("000"),
-                    mFont, Brushes.Black,
+                    mFont, Brushes.LightGray,
                     KnobValPos[3].X, KnobValPos[3].Y + y_ch
                 );
 
@@ -292,7 +292,7 @@ namespace Player {
                 );
                 g.DrawString(
                     channel.Cho.ToString("000"),
-                    mFont, Brushes.Black,
+                    mFont, Brushes.LightGray,
                     KnobValPos[4].X, KnobValPos[4].Y + y_ch
                 );
 
@@ -305,7 +305,7 @@ namespace Player {
                 );
                 g.DrawString(
                     channel.Del.ToString("000"),
-                    mFont, Brushes.Black,
+                    mFont, Brushes.LightGray,
                     KnobValPos[5].X, KnobValPos[5].Y + y_ch
                 );
 
@@ -318,7 +318,7 @@ namespace Player {
                 );
                 g.DrawString(
                     channel.Fc.ToString("000"),
-                    mFont, Brushes.Black,
+                    mFont, Brushes.LightGray,
                     KnobValPos[6].X, KnobValPos[6].Y + y_ch
                 );
 
@@ -331,12 +331,12 @@ namespace Player {
                 );
                 g.DrawString(
                     channel.Fq.ToString("000"),
-                    mFont, Brushes.Black,
+                    mFont, Brushes.LightGray,
                     KnobValPos[7].X, KnobValPos[7].Y + y_ch
                 );
 
                 if (!channel.Enable) {
-                    g.FillRectangle(Brushes.Red, 797, 4 + y_ch, 13, 18);
+                    g.FillRectangle(Brushes.Red, 925, 4 + y_ch, 13, 18);
                 }
             }
 
