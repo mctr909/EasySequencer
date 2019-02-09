@@ -15,6 +15,15 @@ namespace MIDI {
         private static extern void WaveOutClose();
 
         [DllImport("WaveOut.dll", SetLastError = true, CharSet = CharSet.Auto)]
+        private static extern void FileOutOpen(IntPtr filePath, uint bufferLength);
+
+        [DllImport("WaveOut.dll", SetLastError = true, CharSet = CharSet.Auto)]
+        private static extern void FileOutClose();
+
+        [DllImport("WaveOut.dll", SetLastError = true, CharSet = CharSet.Auto)]
+        private static extern void FileOut();
+
+        [DllImport("WaveOut.dll", SetLastError = true, CharSet = CharSet.Auto)]
         private static extern CHANNEL** GetChannelPtr();
 
         [DllImport("WaveOut.dll", SetLastError = true, CharSet = CharSet.Auto)]
@@ -25,15 +34,6 @@ namespace MIDI {
 
         [DllImport("WaveOut.dll", SetLastError = true, CharSet = CharSet.Auto)]
         private static extern SAMPLER** GetFileOutSamplerPtr();
-
-        [DllImport("WaveOut.dll", SetLastError = true, CharSet = CharSet.Auto)]
-        private static extern void FileOutOpen(IntPtr filePath, uint bufferLength);
-
-        [DllImport("WaveOut.dll", SetLastError = true, CharSet = CharSet.Auto)]
-        private static extern void FileOut();
-
-        [DllImport("WaveOut.dll", SetLastError = true, CharSet = CharSet.Auto)]
-        private static extern void FileOutClose();
 
         private const int CHANNEL_COUNT = 16;
         private const int SAMPLER_COUNT = 128;

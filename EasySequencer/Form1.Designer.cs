@@ -290,9 +290,6 @@
             this.picKey.Size = new System.Drawing.Size(2168, 1282);
             this.picKey.TabIndex = 0;
             this.picKey.TabStop = false;
-            this.picKey.MouseDown += new System.Windows.Forms.MouseEventHandler(this.picKeyboard_MouseDown);
-            this.picKey.MouseMove += new System.Windows.Forms.MouseEventHandler(this.picKeyboard_MouseMove);
-            this.picKey.MouseUp += new System.Windows.Forms.MouseEventHandler(this.picKeyboard_MouseUp);
             // 
             // tabPage1
             // 

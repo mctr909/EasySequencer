@@ -7,18 +7,13 @@ using MIDI;
 
 namespace EasySequencer {
     unsafe public partial class Form1 : Form {
-        private string mDlsFilePath;
-
-        private bool mIsSeek = false;
-        private bool mIsParamChg = false;
-        private int mKnobX = 0;
-        private int mKnobY = 0;
-        private int mChangeValue = 0;
-
         private SMF mSMF;
         private Sender mMidiSender;
         private Player.Player mPlayer;
         private Keyboard mKeyboard;
+
+        private string mDlsFilePath;
+        private bool mIsSeek = false;
 
         public Form1() {
             InitializeComponent();
@@ -28,7 +23,7 @@ namespace EasySequencer {
             mDlsFilePath = "C:\\Users\\owner\\Desktop\\gm.dls";
             mMidiSender = new Sender(mDlsFilePath);
             mPlayer = new Player.Player(mMidiSender);
-            mKeyboard = new Keyboard(picKey, mPlayer);
+            mKeyboard = new Keyboard(picKey, mMidiSender, mPlayer);
 
             setSize();
 
@@ -51,7 +46,7 @@ namespace EasySequencer {
             }
 
             try {
-                mSMF = new MIDI.SMF(filePath);
+                mSMF = new SMF(filePath);
                 mPlayer.SetEventList(mSMF.EventList, mSMF.Ticks);
                 hsbSeek.Maximum = mPlayer.MaxTime;
                 Text = Path.GetFileNameWithoutExtension(filePath);
@@ -62,7 +57,7 @@ namespace EasySequencer {
         }
 
         private void wavファイル出力ToolStripMenuItem_Click(Object sender, EventArgs e) {
-            if(null == mSMF || null == mMidiSender || MIDI.Sender.IsFileOutput) {
+            if(null == mSMF || null == mMidiSender || Sender.IsFileOutput) {
                 return;
             }
 
@@ -115,82 +110,6 @@ namespace EasySequencer {
             mIsSeek = false;
         }
 
-        private void picKeyboard_MouseDown(Object sender, MouseEventArgs e) {
-            var pos = picKey.PointToClient(Cursor.Position);
-            var knobX = (pos.X - Keyboard.KnobValPos[0].X) / 24;
-            var knobY = pos.Y / 40;
-
-            if (0 <= knobY && knobY <= 15) {
-                if (knobX == 8) {
-                    if (e.Button == MouseButtons.Right) {
-                        if (mPlayer.Channel[knobY].Enable) {
-                            for (int i = 0; i < mPlayer.Channel.Length; ++i) {
-                                if (knobY == i) {
-                                    mPlayer.Channel[i].Enable = false;
-                                }
-                                else {
-                                    mPlayer.Channel[i].Enable = true;
-                                }
-                            }
-                        }
-                        else {
-                            for (int i = 0; i < mPlayer.Channel.Length; ++i) {
-                                if (knobY == i) {
-                                    mPlayer.Channel[i].Enable = true;
-                                }
-                                else {
-                                    mPlayer.Channel[i].Enable = false;
-                                }
-                            }
-                        }
-                    }
-                    else {
-                        mPlayer.Channel[knobY].Enable = !mPlayer.Channel[knobY].Enable;
-                    }
-                }
-
-                if (0 <= knobX && knobX <= 7) {
-                    mIsParamChg = true;
-                    mKnobX = knobX;
-                    mKnobY = knobY;
-                }
-            }
-        }
-
-        private void picKeyboard_MouseUp(Object sender, MouseEventArgs e) {
-            if (mIsParamChg) {
-                mIsParamChg = false;
-                mKnobX = 0;
-                mKnobY = 0;
-            }
-        }
-
-        private void picKeyboard_MouseMove(Object sender, MouseEventArgs e) {
-            if (mIsParamChg) {
-                var pos = picKey.PointToClient(Cursor.Position);
-                var knobCenter = Keyboard.KnobPos[mKnobX];
-                knobCenter.Y += mKnobY * 40;
-
-                var sx = pos.X - knobCenter.X;
-                var sy = pos.Y - knobCenter.Y;
-                var th = 0.625 * Math.Atan2(sx, -sy) / Math.PI;
-                if (th < -0.5) {
-                    th = -0.5;
-                }
-                if (0.5 < th) {
-                    th = 0.5;
-                }
-
-                mChangeValue = (int)((th + 0.5) * 127.0);
-                if (mChangeValue < 0) {
-                    mChangeValue = 0;
-                }
-                if (127 < mChangeValue) {
-                    mChangeValue = 127;
-                }
-            }
-        }
-
         private void Form1_SizeChanged(object sender, EventArgs e) {
             setSize();
         }
@@ -213,74 +132,6 @@ namespace EasySequencer {
                 else {
                     hsbSeek.Value = 0;
                     mPlayer.SeekTime = hsbSeek.Value;
-                }
-            }
-
-            if (mIsParamChg) {
-                switch (mKnobX) {
-                case 0:
-                    mMidiSender.Send(new MIDI.Message(
-                        CTRL_TYPE.VOLUME,
-                        (byte)mKnobY,
-                        (byte)mChangeValue
-                    ));
-                    break;
-
-                case 1:
-                    mMidiSender.Send(new MIDI.Message(
-                        CTRL_TYPE.EXPRESSION,
-                        (byte)mKnobY,
-                        (byte)mChangeValue
-                    ));
-                    break;
-
-                case 2:
-                    mMidiSender.Send(new MIDI.Message(
-                        CTRL_TYPE.PAN,
-                        (byte)mKnobY,
-                        (byte)mChangeValue
-                    ));
-                    break;
-
-                case 3:
-                    mMidiSender.Send(new MIDI.Message(
-                        CTRL_TYPE.REVERB,
-                        (byte)mKnobY,
-                        (byte)mChangeValue
-                    ));
-                    break;
-
-                case 4:
-                    mMidiSender.Send(new MIDI.Message(
-                        CTRL_TYPE.CHORUS,
-                        (byte)mKnobY,
-                        (byte)mChangeValue
-                    ));
-                    break;
-
-                case 5:
-                    mMidiSender.Send(new MIDI.Message(
-                        CTRL_TYPE.DELAY,
-                        (byte)mKnobY,
-                        (byte)mChangeValue
-                    ));
-                    break;
-
-                case 6:
-                    mMidiSender.Send(new MIDI.Message(
-                        CTRL_TYPE.CUTOFF,
-                        (byte)mKnobY,
-                        (byte)mChangeValue
-                    ));
-                    break;
-
-                case 7:
-                    mMidiSender.Send(new MIDI.Message(
-                        CTRL_TYPE.RESONANCE,
-                        (byte)mKnobY,
-                        (byte)mChangeValue
-                    ));
-                    break;
                 }
             }
         }

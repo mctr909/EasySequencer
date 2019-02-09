@@ -94,34 +94,6 @@ VOID WINAPI WaveOutClose() {
     g_hWaveOut = NULL;
 }
 
-CHANNEL** WINAPI GetChannelPtr() {
-    if (NULL == gpp_channels) {
-        gpp_channels = createChannels(CHANNEL_COUNT);
-    }
-    return gpp_channels;
-}
-
-SAMPLER** WINAPI GetSamplerPtr() {
-    if (NULL == gpp_samplers) {
-        gpp_samplers = createSamplers(SAMPLER_COUNT);
-    }
-    return gpp_samplers;
-}
-
-CHANNEL** WINAPI GetFileOutChannelPtr() {
-    if (NULL == gpp_fileOutChannels) {
-        gpp_fileOutChannels = createChannels(CHANNEL_COUNT);
-    }
-    return gpp_fileOutChannels;
-}
-
-SAMPLER** WINAPI GetFileOutSamplerPtr() {
-    if (NULL == gpp_fileOutSamplers) {
-        gpp_fileOutSamplers = createSamplers(SAMPLER_COUNT);
-    }
-    return gpp_fileOutSamplers;
-}
-
 VOID WINAPI FileOutOpen(LPWSTR filePath, UInt32 bufferLength) {
     if (NULL != gp_fileOutBuff) {
         free(gp_fileOutBuff);
@@ -159,6 +131,24 @@ VOID WINAPI FileOutOpen(LPWSTR filePath, UInt32 bufferLength) {
     fwrite(&g_fmt, sizeof(g_fmt), 1, gp_file);
 }
 
+VOID WINAPI FileOutClose() {
+    if (NULL == gp_file) {
+        return;
+    }
+
+    //
+    g_riff.fileSize = g_fmt.dataSize + sizeof(g_fmt) + 4;
+
+    //
+    fseek(gp_file, 0, SEEK_SET);
+    fwrite(&g_riff, sizeof(g_riff), 1, gp_file);
+    fwrite(&g_fmt, sizeof(g_fmt), 1, gp_file);
+
+    //
+    fclose(gp_file);
+    gp_file = NULL;
+}
+
 VOID WINAPI FileOut() {
     register SInt32 t, s, c;
     register float *pWave;
@@ -186,22 +176,32 @@ VOID WINAPI FileOut() {
     g_fmt.dataSize += sizeof(float) * 2 * g_fileOutBufferLength;
 }
 
-VOID WINAPI FileOutClose() {
-    if (NULL == gp_file) {
-        return;
+CHANNEL** WINAPI GetChannelPtr() {
+    if (NULL == gpp_channels) {
+        gpp_channels = createChannels(CHANNEL_COUNT);
     }
+    return gpp_channels;
+}
 
-    //
-    g_riff.fileSize = g_fmt.dataSize + sizeof(g_fmt) + 4;
+SAMPLER** WINAPI GetSamplerPtr() {
+    if (NULL == gpp_samplers) {
+        gpp_samplers = createSamplers(SAMPLER_COUNT);
+    }
+    return gpp_samplers;
+}
 
-    //
-    fseek(gp_file, 0, SEEK_SET);
-    fwrite(&g_riff, sizeof(g_riff), 1, gp_file);
-    fwrite(&g_fmt, sizeof(g_fmt), 1, gp_file);
+CHANNEL** WINAPI GetFileOutChannelPtr() {
+    if (NULL == gpp_fileOutChannels) {
+        gpp_fileOutChannels = createChannels(CHANNEL_COUNT);
+    }
+    return gpp_fileOutChannels;
+}
 
-    //
-    fclose(gp_file);
-    gp_file = NULL;
+SAMPLER** WINAPI GetFileOutSamplerPtr() {
+    if (NULL == gpp_fileOutSamplers) {
+        gpp_fileOutSamplers = createSamplers(SAMPLER_COUNT);
+    }
+    return gpp_fileOutSamplers;
 }
 
 LPBYTE WINAPI LoadDLS(LPWSTR filePath, UInt32 *size, UInt32 sampleRate) {

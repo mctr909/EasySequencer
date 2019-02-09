@@ -1,4 +1,5 @@
 ﻿using System.Windows.Forms;
+using System;
 using System.Drawing;
 using System.Threading;
 using System.Threading.Tasks;
@@ -7,10 +8,18 @@ using MIDI;
 
 namespace Player {
     public class Keyboard {
-        private static readonly Font mFont = new Font("ＭＳ ゴシック", 9.0f, FontStyle.Regular, GraphicsUnit.Point);
+        private PictureBox mCtrl;
         private DoubleBuffer mBuffer;
+        private Sender mSender;
         private Player mPlayer;
 
+        private bool mIsDrag;
+        private bool mIsParamChg;
+        private int mChannelNo;
+        private int mKnobNo;
+        private int mChangeValue;
+
+        private static readonly Font mFont = new Font("ＭＳ ゴシック", 9.0f, FontStyle.Regular, GraphicsUnit.Point);
         private static readonly int ChannelHeight = 40;
         private static readonly int KnobRadius = 7;
 
@@ -29,7 +38,7 @@ namespace Player {
             new Rectangle(49, 20, 7, 11)     // B
         };
 
-        public static readonly Point[] KnobPos = {
+        private static readonly Point[] KnobPos = {
             new Point(611, 9),
             new Point(635, 9),
             new Point(659, 9),
@@ -40,7 +49,7 @@ namespace Player {
             new Point(779, 9)
         };
 
-        public static readonly Point[] KnobValPos = {
+        private static readonly Point[] KnobValPos = {
             new Point(602, 28),
             new Point(626, 28),
             new Point(650, 28),
@@ -51,7 +60,7 @@ namespace Player {
             new Point(770, 28)
         };
 
-        public static readonly PointF[] Knob = {
+        private static readonly PointF[] Knob = {
             new PointF(-0.604f,  0.797f), new PointF(-0.635f,  0.773f), new PointF(-0.665f,  0.747f), new PointF(-0.694f,  0.720f),
             new PointF(-0.721f,  0.693f), new PointF(-0.748f,  0.664f), new PointF(-0.774f,  0.634f), new PointF(-0.798f,  0.603f),
             new PointF(-0.821f,  0.571f), new PointF(-0.843f,  0.539f), new PointF(-0.863f,  0.505f), new PointF(-0.882f,  0.471f),
@@ -86,16 +95,97 @@ namespace Player {
             new PointF( 0.693f,  0.720f), new PointF( 0.664f,  0.747f), new PointF( 0.634f,  0.773f), new PointF( 0.603f,  0.797f)
         };
 
-        public Keyboard(PictureBox picKey, Player player) {
-            mBuffer = new DoubleBuffer(picKey, (Image)picKey.BackgroundImage.Clone());
+        public Keyboard(PictureBox picKey, Sender sender, Player player) {
+            mCtrl = picKey;
+            mBuffer = new DoubleBuffer(mCtrl, (Image)mCtrl.BackgroundImage.Clone());
+            mSender = sender;
             mPlayer = player;
+
+            mCtrl.MouseDown += new MouseEventHandler(picKeyboard_MouseDown);
+            mCtrl.MouseMove += new MouseEventHandler(picKeyboard_MouseMove);
+            mCtrl.MouseUp += new MouseEventHandler(picKeyboard_MouseUp);
 
             Task.Run(() => {
                 while (true) {
                     draw();
+                    sendValue();
                     Thread.Sleep(30);
                 }
             });
+        }
+
+        private void picKeyboard_MouseDown(Object sender, MouseEventArgs e) {
+            var pos = mCtrl.PointToClient(Cursor.Position);
+            var knobX = (pos.X - KnobValPos[0].X) / 24;
+            var knobY = pos.Y / ChannelHeight;
+
+            if (0 <= knobY && knobY <= 15) {
+                if (knobX == 8) {
+                    if (e.Button == MouseButtons.Right) {
+                        if (mPlayer.Channel[knobY].Enable) {
+                            for (int i = 0; i < mPlayer.Channel.Length; ++i) {
+                                if (knobY == i) {
+                                    mPlayer.Channel[i].Enable = false;
+                                }
+                                else {
+                                    mPlayer.Channel[i].Enable = true;
+                                }
+                            }
+                        }
+                        else {
+                            for (int i = 0; i < mPlayer.Channel.Length; ++i) {
+                                if (knobY == i) {
+                                    mPlayer.Channel[i].Enable = true;
+                                }
+                                else {
+                                    mPlayer.Channel[i].Enable = false;
+                                }
+                            }
+                        }
+                    }
+                    else {
+                        mPlayer.Channel[knobY].Enable = !mPlayer.Channel[knobY].Enable;
+                    }
+                }
+
+                if (0 <= knobX && knobX <= 7) {
+                    mChannelNo = knobY;
+                    mKnobNo = knobX;
+                    mIsDrag = true;
+                }
+            }
+        }
+
+        private void picKeyboard_MouseUp(Object sender, MouseEventArgs e) {
+            mIsDrag = false;
+        }
+
+        private void picKeyboard_MouseMove(Object sender, MouseEventArgs e) {
+            if (mIsDrag) {
+                var pos = mCtrl.PointToClient(Cursor.Position);
+                var knobCenter = KnobPos[mKnobNo];
+                knobCenter.Y += mChannelNo * ChannelHeight;
+
+                var sx = pos.X - knobCenter.X;
+                var sy = pos.Y - knobCenter.Y;
+                var th = 0.625 * Math.Atan2(sx, -sy) / Math.PI;
+                if (th < -0.5) {
+                    th = -0.5;
+                }
+                if (0.5 < th) {
+                    th = 0.5;
+                }
+
+                mChangeValue = (int)((th + 0.5) * 127.0);
+                if (mChangeValue < 0) {
+                    mChangeValue = 0;
+                }
+                if (127 < mChangeValue) {
+                    mChangeValue = 127;
+                }
+
+                mIsParamChg = true;
+            }
         }
 
         private void draw() {
@@ -251,6 +341,80 @@ namespace Player {
             }
 
             mBuffer.Render();
+        }
+
+        private void sendValue() {
+            if (!mIsParamChg) {
+                return;
+            }
+
+            mIsParamChg = false;
+
+            switch (mKnobNo) {
+            case 0:
+                mSender.Send(new MIDI.Message(
+                    CTRL_TYPE.VOLUME,
+                    (byte)mChannelNo,
+                    (byte)mChangeValue
+                ));
+                break;
+
+            case 1:
+                mSender.Send(new MIDI.Message(
+                    CTRL_TYPE.EXPRESSION,
+                    (byte)mChannelNo,
+                    (byte)mChangeValue
+                ));
+                break;
+
+            case 2:
+                mSender.Send(new MIDI.Message(
+                    CTRL_TYPE.PAN,
+                    (byte)mChannelNo,
+                    (byte)mChangeValue
+                ));
+                break;
+
+            case 3:
+                mSender.Send(new MIDI.Message(
+                    CTRL_TYPE.REVERB,
+                    (byte)mChannelNo,
+                    (byte)mChangeValue
+                ));
+                break;
+
+            case 4:
+                mSender.Send(new MIDI.Message(
+                    CTRL_TYPE.CHORUS,
+                    (byte)mChannelNo,
+                    (byte)mChangeValue
+                ));
+                break;
+
+            case 5:
+                mSender.Send(new MIDI.Message(
+                    CTRL_TYPE.DELAY,
+                    (byte)mChannelNo,
+                    (byte)mChangeValue
+                ));
+                break;
+
+            case 6:
+                mSender.Send(new MIDI.Message(
+                    CTRL_TYPE.CUTOFF,
+                    (byte)mChannelNo,
+                    (byte)mChangeValue
+                ));
+                break;
+
+            case 7:
+                mSender.Send(new MIDI.Message(
+                    CTRL_TYPE.RESONANCE,
+                    (byte)mChannelNo,
+                    (byte)mChangeValue
+                ));
+                break;
+            }
         }
     }
 }
