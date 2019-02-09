@@ -24,40 +24,40 @@ namespace Player {
         private static readonly int KnobRadius = 7;
 
         private static readonly Rectangle[] KeyboardPos = {
-            new Rectangle( 1, 20, 7, 11),    // C
-            new Rectangle( 6,  0, 5, 21),    // Db
-            new Rectangle( 9, 20, 7, 11),    // D
-            new Rectangle(14,  0, 5, 21),    // Eb
-            new Rectangle(17, 20, 7, 11),    // E
-            new Rectangle(25, 20, 7, 11),    // F
-            new Rectangle(30,  0, 5, 21),    // Gb
-            new Rectangle(33, 20, 7, 11),    // G
-            new Rectangle(38,  0, 5, 21),    // Ab
-            new Rectangle(41, 20, 7, 11),    // A
-            new Rectangle(46,  0, 5, 21),    // Bb
-            new Rectangle(49, 20, 7, 11)     // B
+            new Rectangle( 1, 20, 7, 11),   // C
+            new Rectangle( 6,  0, 5, 21),   // Db
+            new Rectangle( 9, 20, 7, 11),   // D
+            new Rectangle(14,  0, 5, 21),   // Eb
+            new Rectangle(17, 20, 7, 11),   // E
+            new Rectangle(25, 20, 7, 11),   // F
+            new Rectangle(30,  0, 5, 21),   // Gb
+            new Rectangle(33, 20, 7, 11),   // G
+            new Rectangle(38,  0, 5, 21),   // Ab
+            new Rectangle(41, 20, 7, 11),   // A
+            new Rectangle(46,  0, 5, 21),   // Bb
+            new Rectangle(49, 20, 7, 11)    // B
         };
 
         private static readonly Point[] KnobPos = {
-            new Point(611, 9),
-            new Point(635, 9),
-            new Point(659, 9),
-            new Point(683, 9),
-            new Point(707, 9),
-            new Point(731, 9),
-            new Point(755, 9),
-            new Point(779, 9)
+            new Point(611, 9),  // Vol.
+            new Point(635, 9),  // Exp.
+            new Point(659, 9),  // Pan.
+            new Point(683, 9),  // Rev.
+            new Point(707, 9),  // Cho.
+            new Point(731, 9),  // Del.
+            new Point(755, 9),  // Fc
+            new Point(779, 9)   // Q
         };
 
         private static readonly Point[] KnobValPos = {
-            new Point(602, 28),
-            new Point(626, 28),
-            new Point(650, 28),
-            new Point(674, 28),
-            new Point(698, 28),
-            new Point(722, 28),
-            new Point(746, 28),
-            new Point(770, 28)
+            new Point(602, 28), // Vol.
+            new Point(626, 28), // Exp.
+            new Point(650, 28), // Pan.
+            new Point(674, 28), // Rev.
+            new Point(698, 28), // Cho.
+            new Point(722, 28), // Del.
+            new Point(746, 28), // Fc
+            new Point(770, 28)  // Q
         };
 
         private static readonly PointF[] Knob = {
@@ -109,7 +109,7 @@ namespace Player {
                 while (true) {
                     draw();
                     sendValue();
-                    Thread.Sleep(30);
+                    Thread.Sleep(20);
                 }
             });
         }
