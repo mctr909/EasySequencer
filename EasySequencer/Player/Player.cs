@@ -160,7 +160,7 @@ namespace Player {
                 }
 
                 if (EVENT_TYPE.NOTE_ON == type && msg.V2 != 0) {
-                    if (0.25 * mTicks < (mCurrentTime - eventTime)) {
+                    if (mTicks < (mCurrentTime - eventTime)) {
                         continue;
                     }
 

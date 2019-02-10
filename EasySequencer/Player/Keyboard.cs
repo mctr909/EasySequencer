@@ -22,6 +22,7 @@ namespace Player {
         private static readonly Font mFont = new Font("ＭＳ ゴシック", 9.0f, FontStyle.Regular, GraphicsUnit.Point);
         private static readonly int ChannelHeight = 40;
         private static readonly int KnobRadius = 14;
+        private static readonly int KnobWidth = 40;
 
         private static readonly Rectangle[] KeyboardPos = {
             new Rectangle( 1, 20, 7, 11),   // C
@@ -95,6 +96,8 @@ namespace Player {
             new PointF( 0.693f,  0.720f), new PointF( 0.664f,  0.747f), new PointF( 0.634f,  0.773f), new PointF( 0.603f,  0.797f)
         };
 
+        private static readonly Rectangle MuteButton = new Rectangle(925, 4, 13, 18);
+
         public Keyboard(PictureBox picKey, Sender sender, Player player) {
             mCtrl = picKey;
             mBuffer = new DoubleBuffer(mCtrl, (Image)mCtrl.BackgroundImage.Clone());
@@ -116,11 +119,11 @@ namespace Player {
 
         private void picKeyboard_MouseDown(Object sender, MouseEventArgs e) {
             var pos = mCtrl.PointToClient(Cursor.Position);
-            var knobX = (pos.X - KnobValPos[0].X + 10) / 40;
+            var knobX = (pos.X - KnobValPos[0].X + KnobWidth / 4) / KnobWidth;
             var knobY = pos.Y / ChannelHeight;
 
             if (0 <= knobY && knobY <= 15) {
-                if (knobX == 8) {
+                if (MuteButton.X <= pos.X && pos.X < MuteButton.X + MuteButton.Width) {
                     if (e.Button == MouseButtons.Right) {
                         if (mPlayer.Channel[knobY].Enable) {
                             for (int i = 0; i < mPlayer.Channel.Length; ++i) {
@@ -336,7 +339,7 @@ namespace Player {
                 );
 
                 if (!channel.Enable) {
-                    g.FillRectangle(Brushes.Red, 925, 4 + y_ch, 13, 18);
+                    g.FillRectangle(Brushes.Red, MuteButton.X, MuteButton.Y + y_ch, MuteButton.Width, MuteButton.Height);
                 }
             }
 
