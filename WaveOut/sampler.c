@@ -111,7 +111,7 @@ SAMPLER** createSamplers(UInt32 count) {
 inline extern void channel(CHANNEL *ch, double *waveL, double *waveR) {
     //
     filter(&ch->eq, ch->curAmp * ch->wave);
-    ch->wave = ch->eq.pole03;
+    ch->wave = ch->eq.pole07;
 
     //
     ch->waveL = ch->wave * ch->panLeft;
@@ -122,9 +122,9 @@ inline extern void channel(CHANNEL *ch, double *waveL, double *waveR) {
     chorus(ch, &ch->delay, &ch->chorus);
 
     //
-    ch->curAmp += 200 * (ch->tarAmp - ch->curAmp) * __deltaTime;
-    ch->eq.cutoff += 200 * (ch->tarCutoff - ch->eq.cutoff) * __deltaTime;
-    ch->eq.resonance += 200 * (ch->tarResonance - ch->eq.resonance) * __deltaTime;
+    ch->curAmp += 500 * (ch->tarAmp - ch->curAmp) * __deltaTime;
+    ch->eq.cutoff += 500 * (ch->tarCutoff - ch->eq.cutoff) * __deltaTime;
+    ch->eq.resonance += 500 * (ch->tarResonance - ch->eq.resonance) * __deltaTime;
 
     //
     *waveL += ch->waveL;
@@ -191,7 +191,7 @@ inline extern void sampler(CHANNEL **chs, SAMPLER *smpl) {
 
     //
     filter(&smpl->eq, (pcm[cur] * dt + pcm[pre] * (1.0 - dt)) * smpl->gain * smpl->tarAmp * smpl->curAmp);
-    ch->wave += smpl->eq.pole03;
+    ch->wave += smpl->eq.pole07;
 
     //
     smpl->index += smpl->delta * ch->pitch;
@@ -272,15 +272,23 @@ inline void filter(FILTER *filter, double input) {
     double p = filter->cutoff + 0.8 * filter->cutoff * fi;
     double q = p + p - 1.0;
 
-    input -= 0.9 * (1.0 + 0.5 * fi * (1.0 - fi + 5.6 * fi * fi)) * filter->resonance * filter->pole03;
+    input -= filter->resonance * filter->pole07;
 
     filter->pole00 = (input          + filter->pole10) * p - filter->pole00 * q;
     filter->pole01 = (filter->pole00 + filter->pole11) * p - filter->pole01 * q;
     filter->pole02 = (filter->pole01 + filter->pole12) * p - filter->pole02 * q;
     filter->pole03 = (filter->pole02 + filter->pole13) * p - filter->pole03 * q;
+    filter->pole04 = (filter->pole03 + filter->pole14) * p - filter->pole04 * q;
+    filter->pole05 = (filter->pole04 + filter->pole15) * p - filter->pole05 * q;
+    filter->pole06 = (filter->pole05 + filter->pole16) * p - filter->pole06 * q;
+    filter->pole07 = (filter->pole06 + filter->pole17) * p - filter->pole07 * q;
 
     filter->pole10 = input;
     filter->pole11 = filter->pole00;
     filter->pole12 = filter->pole01;
     filter->pole13 = filter->pole02;
+    filter->pole14 = filter->pole03;
+    filter->pole15 = filter->pole04;
+    filter->pole16 = filter->pole05;
+    filter->pole17 = filter->pole06;
 }

@@ -221,10 +221,18 @@ namespace MIDI {
                 pSmpl->eq.pole01 = 0.0;
                 pSmpl->eq.pole02 = 0.0;
                 pSmpl->eq.pole03 = 0.0;
+                pSmpl->eq.pole04 = 0.0;
+                pSmpl->eq.pole05 = 0.0;
+                pSmpl->eq.pole06 = 0.0;
+                pSmpl->eq.pole07 = 0.0;
                 pSmpl->eq.pole10 = 0.0;
                 pSmpl->eq.pole11 = 0.0;
                 pSmpl->eq.pole12 = 0.0;
                 pSmpl->eq.pole13 = 0.0;
+                pSmpl->eq.pole14 = 0.0;
+                pSmpl->eq.pole15 = 0.0;
+                pSmpl->eq.pole16 = 0.0;
+                pSmpl->eq.pole17 = 0.0;
 
                 pSmpl->onKey = true;
                 pSmpl->isActive = true;

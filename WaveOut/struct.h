@@ -39,10 +39,18 @@ typedef struct FILTER {
     double pole01;
     double pole02;
     double pole03;
+    double pole04;
+    double pole05;
+    double pole06;
+    double pole07;
     double pole10;
     double pole11;
     double pole12;
     double pole13;
+    double pole14;
+    double pole15;
+    double pole16;
+    double pole17;
 } FILTER;
 #pragma
 

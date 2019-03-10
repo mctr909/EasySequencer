@@ -28,10 +28,18 @@ namespace MIDI {
         public double pole01;
         public double pole02;
         public double pole03;
+        public double pole04;
+        public double pole05;
+        public double pole06;
+        public double pole07;
         public double pole10;
         public double pole11;
         public double pole12;
         public double pole13;
+        public double pole14;
+        public double pole15;
+        public double pole16;
+        public double pole17;
     };
 
     [StructLayout(LayoutKind.Sequential, Pack = 4)]
