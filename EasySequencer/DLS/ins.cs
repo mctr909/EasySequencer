@@ -6,9 +6,18 @@ namespace DLS {
         public CK_INSH* pHeader = null;
         public LRGN regions = null;
         public LART articulations = null;
+        public string name = "";
+        public string category = "";
 
         public INS_(byte* ptr, uint size) {
             Load(ptr, size);
+        }
+
+        protected override void LoadInfo(string type, string text) {
+            switch(type) {
+            case "INAM": name = text.Trim(); break;
+            case "IKEY": category = text.Trim(); break;
+            }
         }
 
         protected override void LoadChunk(CHUNK_TYPE type, byte* ptr, uint size) {

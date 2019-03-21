@@ -1,4 +1,6 @@
-﻿namespace MIDI {
+﻿using System.Collections.Generic;
+
+namespace MIDI {
     unsafe public class Channel {
         private CHANNEL* mpChannel = null;
         private Instruments mInst = null;
@@ -14,6 +16,10 @@
         public KEY_STATUS[] KeyBoard { get; set; }
 
         public WAVE_INFO[] WaveInfo { get; private set; }
+
+        public string InstName { get; private set; }
+
+        public Dictionary<INST_ID, string[]> InstList { get { return mInst.Names; } }
 
         public byte Vol {
             get { return ctrl.vol; }
@@ -115,8 +121,8 @@
             ProgramChange(0);
         }
 
-        public void CtrlChange(byte type, byte b1) {
-            switch ((CTRL_TYPE)type) {
+        public void CtrlChange(CTRL_TYPE type, byte b1) {
+            switch (type) {
                 case CTRL_TYPE.BANK_MSB:
                     mInstId.bankMSB = b1;
                     break;
@@ -202,6 +208,23 @@
             }
 
             WaveInfo = mInst.List[mInstId];
+            InstName = mInst.Names[mInstId][0];
+        }
+
+        public void ProgramChange(byte value, bool isDrum) {
+            mInstId.isDrum = (byte)(isDrum ? 0x80 : 0x00);
+            mInstId.programNo = value;
+
+            if (!mInst.List.ContainsKey(mInstId)) {
+                mInstId.bankMSB = 0;
+                mInstId.bankLSB = 0;
+                if (!mInst.List.ContainsKey(mInstId)) {
+                    mInstId.programNo = 0;
+                }
+            }
+
+            WaveInfo = mInst.List[mInstId];
+            InstName = mInst.Names[mInstId][0];
         }
 
         public void PitchBend(byte lsb, byte msb) {

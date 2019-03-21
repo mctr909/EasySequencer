@@ -74,7 +74,7 @@ namespace MIDI {
                 break;
 
             case EVENT_TYPE.CTRL_CHG:
-                Channel[msg.Channel].CtrlChange(msg.V1, msg.V2);
+                Channel[msg.Channel].CtrlChange((CTRL_TYPE)msg.V1, msg.V2);
                 break;
 
             case EVENT_TYPE.PRGM_CHG:
@@ -127,7 +127,7 @@ namespace MIDI {
                         break;
 
                     case EVENT_TYPE.CTRL_CHG:
-                        mFileOutChannel[msg.Channel].CtrlChange(msg.V1, msg.V2);
+                        mFileOutChannel[msg.Channel].CtrlChange((CTRL_TYPE)msg.V1, msg.V2);
                         break;
 
                     case EVENT_TYPE.PRGM_CHG:

@@ -9,6 +9,7 @@ namespace MIDI {
         unsafe private static extern IntPtr LoadDLS(IntPtr filePath, out uint size, int sampleRate);
 
         public Dictionary<INST_ID, WAVE_INFO[]> List;
+        public Dictionary<INST_ID, string[]> Names;
 
         public Instruments(string dlsPath, int sampleRate) {
             uint dlsSize = 0;
@@ -17,6 +18,7 @@ namespace MIDI {
             var deltaTime = 1.0 / sampleRate;
 
             List = new Dictionary<INST_ID, WAVE_INFO[]>();
+            Names = new Dictionary<INST_ID, string[]>();
 
             foreach (var inst in dls.instruments.List) {
                 var envAmp = new ENVELOPE();
@@ -179,6 +181,7 @@ namespace MIDI {
                 id.bankLSB = inst.pHeader->locale.bankLSB;
 
                 List.Add(id, waveInfo);
+                Names.Add(id, new string[] { inst.name, inst.category });
             }
         }
     }
