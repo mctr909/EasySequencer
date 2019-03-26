@@ -13,4 +13,3 @@ inline extern void sampler(CHANNEL **chs, SAMPLER *smpl);
 /******************************************************************************/
 inline void delay(CHANNEL *ch, DELAY *delay);
 inline void chorus(CHANNEL *ch, DELAY *delay, CHORUS *chorus);
-//inline void filter(FILTER *filter, double input);
