@@ -85,14 +85,21 @@ namespace MIDI {
 
             setRes(64);
             setCut(64);
-            mpChannel->eq.pole00 = 0.0;
-            mpChannel->eq.pole01 = 0.0;
-            mpChannel->eq.pole02 = 0.0;
-            mpChannel->eq.pole03 = 0.0;
-            mpChannel->eq.pole10 = 0.0;
-            mpChannel->eq.pole11 = 0.0;
-            mpChannel->eq.pole12 = 0.0;
-            mpChannel->eq.pole13 = 0.0;
+            mpChannel->eq.bi = 0.0;
+            mpChannel->eq.a0 = 0.0;
+            mpChannel->eq.b1 = 0.0;
+            mpChannel->eq.a1 = 0.0;
+            mpChannel->eq.a2 = 0.0;
+            mpChannel->eq.b2 = 0.0;
+            mpChannel->eq.a3 = 0.0;
+            mpChannel->eq.b3 = 0.0;
+            mpChannel->eq.a4 = 0.0;
+            mpChannel->eq.b4 = 0.0;
+            mpChannel->eq.a5 = 0.0;
+            mpChannel->eq.b5 = 0.0;
+            mpChannel->eq.a6 = 0.0;
+            mpChannel->eq.b6 = 0.0;
+            mpChannel->eq.a7 = 0.0;
 
             ctrl.rel = 64;
             ctrl.atk = 64;

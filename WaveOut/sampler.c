@@ -2,6 +2,7 @@
 #include <stdio.h>
 #include <math.h>
 #include "sampler.h"
+#include "filter.h"
 
 /******************************************************************************/
 #define     CHORUS_PHASES   3
@@ -110,8 +111,8 @@ SAMPLER** createSamplers(UInt32 count) {
 /******************************************************************************/
 inline extern void channel(CHANNEL *ch, double *waveL, double *waveR) {
     //
-    filter(&ch->eq, ch->curAmp * ch->wave);
-    ch->wave = ch->eq.pole07;
+    filter_exec(&ch->eq, ch->curAmp * ch->wave);
+    ch->wave = ch->eq.a7;
 
     //
     ch->waveL = ch->wave * ch->panLeft;
@@ -123,8 +124,8 @@ inline extern void channel(CHANNEL *ch, double *waveL, double *waveR) {
 
     //
     ch->curAmp += 500 * (ch->tarAmp - ch->curAmp) * __deltaTime;
-    ch->eq.cutoff += 500 * (ch->tarCutoff - ch->eq.cutoff) * __deltaTime;
-    ch->eq.resonance += 500 * (ch->tarResonance - ch->eq.resonance) * __deltaTime;
+    ch->eq.cut += 500 * (ch->tarCutoff - ch->eq.cut) * __deltaTime;
+    ch->eq.res += 500 * (ch->tarResonance - ch->eq.res) * __deltaTime;
 
     //
     *waveL += ch->waveL;
@@ -151,10 +152,10 @@ inline extern void sampler(CHANNEL **chs, SAMPLER *smpl) {
         }
 
         if (smpl->time < smpl->envEq.hold) {
-            smpl->eq.cutoff += (smpl->envEq.levelD - smpl->eq.cutoff) * smpl->envEq.deltaA;
+            smpl->eq.cut += (smpl->envEq.levelD - smpl->eq.cut) * smpl->envEq.deltaA;
         }
         else {
-            smpl->eq.cutoff += (smpl->envEq.levelS - smpl->eq.cutoff) * smpl->envEq.deltaD;
+            smpl->eq.cut += (smpl->envEq.levelS - smpl->eq.cut) * smpl->envEq.deltaD;
         }
     }
     else {
@@ -165,7 +166,7 @@ inline extern void sampler(CHANNEL **chs, SAMPLER *smpl) {
             smpl->curAmp -= smpl->curAmp * smpl->envAmp.deltaR;
         }
 
-        smpl->eq.cutoff += (smpl->envEq.levelR - smpl->eq.cutoff) * smpl->envEq.deltaR;
+        smpl->eq.cut += (smpl->envEq.levelR - smpl->eq.cut) * smpl->envEq.deltaR;
 
         if (smpl->curAmp < 0.001) {
             smpl->isActive = false;
@@ -190,8 +191,8 @@ inline extern void sampler(CHANNEL **chs, SAMPLER *smpl) {
     }
 
     //
-    filter(&smpl->eq, (pcm[cur] * dt + pcm[pre] * (1.0 - dt)) * smpl->gain * smpl->tarAmp * smpl->curAmp);
-    ch->wave += smpl->eq.pole07;
+    filter_exec(&smpl->eq, (pcm[cur] * dt + pcm[pre] * (1.0 - dt)) * smpl->gain * smpl->tarAmp * smpl->curAmp);
+    ch->wave += smpl->eq.a7;
 
     //
     smpl->index += smpl->delta * ch->pitch;
@@ -265,30 +266,4 @@ inline void chorus(CHANNEL *ch, DELAY *delay, CHORUS *chorus) {
 
     ch->waveL += chorusL * chorus->depth / CHORUS_PHASES;
     ch->waveR += chorusR * chorus->depth / CHORUS_PHASES;
-}
-
-inline void filter(FILTER *filter, double input) {
-    double fi = 1.0 - filter->cutoff;
-    double p = filter->cutoff + 0.8 * filter->cutoff * fi;
-    double q = p + p - 1.0;
-
-    input -= filter->resonance * filter->pole07;
-
-    filter->pole00 = (input          + filter->pole10) * p - filter->pole00 * q;
-    filter->pole01 = (filter->pole00 + filter->pole11) * p - filter->pole01 * q;
-    filter->pole02 = (filter->pole01 + filter->pole12) * p - filter->pole02 * q;
-    filter->pole03 = (filter->pole02 + filter->pole13) * p - filter->pole03 * q;
-    filter->pole04 = (filter->pole03 + filter->pole14) * p - filter->pole04 * q;
-    filter->pole05 = (filter->pole04 + filter->pole15) * p - filter->pole05 * q;
-    filter->pole06 = (filter->pole05 + filter->pole16) * p - filter->pole06 * q;
-    filter->pole07 = (filter->pole06 + filter->pole17) * p - filter->pole07 * q;
-
-    filter->pole10 = input;
-    filter->pole11 = filter->pole00;
-    filter->pole12 = filter->pole01;
-    filter->pole13 = filter->pole02;
-    filter->pole14 = filter->pole03;
-    filter->pole15 = filter->pole04;
-    filter->pole16 = filter->pole05;
-    filter->pole17 = filter->pole06;
 }

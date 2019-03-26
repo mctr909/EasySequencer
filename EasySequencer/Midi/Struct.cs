@@ -24,22 +24,22 @@ namespace MIDI {
     public struct FILTER {
         public double cutoff;
         public double resonance;
-        public double pole00;
-        public double pole01;
-        public double pole02;
-        public double pole03;
-        public double pole04;
-        public double pole05;
-        public double pole06;
-        public double pole07;
-        public double pole10;
-        public double pole11;
-        public double pole12;
-        public double pole13;
-        public double pole14;
-        public double pole15;
-        public double pole16;
-        public double pole17;
+        public double bi;
+        public double a0;
+        public double b0;
+        public double a1;
+        public double b1;
+        public double a2;
+        public double b2;
+        public double a3;
+        public double b3;
+        public double a4;
+        public double b4;
+        public double a5;
+        public double b5;
+        public double a6;
+        public double b6;
+        public double a7;
     };
 
     [StructLayout(LayoutKind.Sequential, Pack = 4)]
