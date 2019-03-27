@@ -1,5 +1,8 @@
 #include "filter.h"
 
+#define USE_MMX
+
+#ifdef USE_MMX
 #define CUT xmmword ptr[eax+0]
 #define RES xmmword ptr[eax+8]
 #define BI  xmmword ptr[eax+16]
@@ -19,94 +22,122 @@
 #define B6  xmmword ptr[eax+128]
 #define A7  xmmword ptr[eax+136]
 
+static const double DOUBLE_1 = 1.0;
+#endif
+
 inline void filter_exec(FILTER *filter, double input) {
+#ifdef USE_MMX
     __asm {
-        mov    eax , 1
-        cvtsi2sd xmm0, eax
-        mov    eax , dword ptr filter
-        movsd  xmm3, CUT
-        movsd  xmm4, RES
-        movsd  xmm5, xmm0
-        subsd  xmm5, xmm3
-        mulsd  xmm5, xmm3
-        addsd  xmm5, xmm3
-        movsd  xmm6, xmm5
-        addsd  xmm6, xmm5
-        subsd  xmm6, xmm0
-        movsd  xmm0, A7
-        mulsd  xmm0, xmm4
-        movsd  xmm7, input
-        subsd  xmm7, xmm0
-        movsd  xmm0, xmm7
+        mov    eax, dword ptr filter
+        movsd  xmm1, CUT
+        movsd  xmm2, RES
+        movsd  xmm6, DOUBLE_1
+        subsd  xmm6, xmm1
+        mulsd  xmm6, xmm1
+        addsd  xmm6, xmm1
+        movsd  xmm7, xmm6
+        addsd  xmm7, xmm6
+        subsd  xmm7, DOUBLE_1
+        movsd  xmm1, A7
+        mulsd  xmm1, xmm2
+        movsd  xmm0, input
+        subsd  xmm0, xmm1
+
+        movsd  xmm1, xmm0
         addsd  xmm0, BI
-        mulsd  xmm0, xmm5
+        movsd  BI  , xmm1
+        mulsd  xmm0, xmm6
         movsd  xmm1, A0
-        mulsd  xmm1, xmm6
+        mulsd  xmm1, xmm7
         subsd  xmm0, xmm1
         movsd  A0  , xmm0
-        movsd  xmm0, A0
+
+        movsd  xmm1, xmm0
         addsd  xmm0, B0
-        mulsd  xmm0, xmm5
+        movsd  B0  , xmm1
+        mulsd  xmm0, xmm6
         movsd  xmm1, A1
-        mulsd  xmm1, xmm6
+        mulsd  xmm1, xmm7
         subsd  xmm0, xmm1
         movsd  A1  , xmm0
-        movsd  xmm0, A1
+
+        movsd  xmm1, xmm0
         addsd  xmm0, B1
-        mulsd  xmm0, xmm5
+        movsd  B1  , xmm1
+        mulsd  xmm0, xmm6
         movsd  xmm1, A2
-        mulsd  xmm1, xmm6
+        mulsd  xmm1, xmm7
         subsd  xmm0, xmm1
         movsd  A2  , xmm0
-        movsd  xmm0, A2
+
+        movsd  xmm1, xmm0
         addsd  xmm0, B2
-        mulsd  xmm0, xmm5
+        movsd  B2  , xmm1
+        mulsd  xmm0, xmm6
         movsd  xmm1, A3
-        mulsd  xmm1, xmm6
+        mulsd  xmm1, xmm7
         subsd  xmm0, xmm1
         movsd  A3  , xmm0
-        movsd  xmm0, A3
+
+        movsd  xmm1, xmm0
         addsd  xmm0, B3
-        mulsd  xmm0, xmm5
+        movsd  B3  , xmm1
+        mulsd  xmm0, xmm6
         movsd  xmm1, A4
-        mulsd  xmm1, xmm6
+        mulsd  xmm1, xmm7
         subsd  xmm0, xmm1
         movsd  A4  , xmm0
-        movsd  xmm0, A4
+
+        movsd  xmm1, xmm0
         addsd  xmm0, B4
-        mulsd  xmm0, xmm5
+        movsd  B4  , xmm1
+        mulsd  xmm0, xmm6
         movsd  xmm1, A5
-        mulsd  xmm1, xmm6
+        mulsd  xmm1, xmm7
         subsd  xmm0, xmm1
         movsd  A5  , xmm0
-        movsd  xmm0, A5
+
+        movsd  xmm1, xmm0
         addsd  xmm0, B5
-        mulsd  xmm0, xmm5
+        movsd  B5  , xmm1
+        mulsd  xmm0, xmm6
         movsd  xmm1, A6
-        mulsd  xmm1, xmm6
+        mulsd  xmm1, xmm7
         subsd  xmm0, xmm1
         movsd  A6  , xmm0
-        movsd  xmm0, A6
+
+        movsd  xmm1, xmm0
         addsd  xmm0, B6
-        mulsd  xmm0, xmm5
+        movsd  B6  , xmm1
+        mulsd  xmm0, xmm6
         movsd  xmm1, A7
-        mulsd  xmm1, xmm6
+        mulsd  xmm1, xmm7
         subsd  xmm0, xmm1
         movsd  A7  , xmm0
-        movsd  BI  , xmm7
-        movsd  xmm0, A0
-        movsd  B0  , xmm0
-        movsd  xmm0, A1
-        movsd  B1  , xmm0
-        movsd  xmm0, A2
-        movsd  B2  , xmm0
-        movsd  xmm0, A3
-        movsd  B3  , xmm0
-        movsd  xmm0, A4
-        movsd  B4  , xmm0
-        movsd  xmm0, A5
-        movsd  B5  , xmm0
-        movsd  xmm0, A6
-        movsd  B6  , xmm0
     }
+#else
+    double fi = 1.0 - filter->cut;
+    double p = filter->cut * fi + filter->cut;
+    double q = p + p - 1.0;
+
+    input -= filter->res * filter->a7;
+
+    filter->a0 = (input      + filter->bi) * p - filter->a0 * q;
+    filter->a1 = (filter->a0 + filter->b0) * p - filter->a1 * q;
+    filter->a2 = (filter->a1 + filter->b1) * p - filter->a2 * q;
+    filter->a3 = (filter->a2 + filter->b2) * p - filter->a3 * q;
+    filter->a4 = (filter->a3 + filter->b3) * p - filter->a4 * q;
+    filter->a5 = (filter->a4 + filter->b4) * p - filter->a5 * q;
+    filter->a6 = (filter->a5 + filter->b5) * p - filter->a6 * q;
+    filter->a7 = (filter->a6 + filter->b6) * p - filter->a7 * q;
+
+    filter->bi = input;
+    filter->b0 = filter->a0;
+    filter->b1 = filter->a1;
+    filter->b2 = filter->a2;
+    filter->b3 = filter->a3;
+    filter->b4 = filter->a4;
+    filter->b5 = filter->a5;
+    filter->b6 = filter->a6;
+#endif
 }
