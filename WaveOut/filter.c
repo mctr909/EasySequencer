@@ -23,6 +23,7 @@
 #define A7  xmmword ptr[eax+136]
 
 static const double DOUBLE_1 = 1.0;
+static const double RES_ATT = 0.3;
 #endif
 
 inline void filter_exec(FILTER *filter, double input) {
@@ -31,6 +32,14 @@ inline void filter_exec(FILTER *filter, double input) {
         mov    eax , dword ptr filter
         movsd  xmm1, CUT
         movsd  xmm2, RES
+        movsd  xmm3, xmm1
+        mulsd  xmm3, xmm1
+        mulsd  xmm3, xmm1
+        mulsd  xmm3, xmm1
+        mulsd  xmm3, xmm1
+        mulsd  xmm3, RES_ATT
+        subsd  xmm2, xmm3
+
         movsd  xmm6, DOUBLE_1
         subsd  xmm6, xmm1
         mulsd  xmm6, xmm1

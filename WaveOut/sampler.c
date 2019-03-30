@@ -112,7 +112,7 @@ SAMPLER** createSamplers(UInt32 count) {
 inline extern void channel(CHANNEL *ch, double *waveL, double *waveR) {
     //
     filter_exec(&ch->eq, ch->curAmp * ch->wave);
-    ch->wave = ch->eq.a7;
+    ch->wave = ch->eq.a3;
 
     //
     ch->waveL = ch->wave * ch->panLeft;
@@ -192,7 +192,7 @@ inline extern void sampler(CHANNEL **chs, SAMPLER *smpl) {
 
     //
     filter_exec(&smpl->eq, (pcm[cur] * dt + pcm[pre] * (1.0 - dt)) * smpl->gain * smpl->tarAmp * smpl->curAmp);
-    ch->wave += smpl->eq.a7;
+    ch->wave += smpl->eq.a3;
 
     //
     smpl->index += smpl->delta * ch->pitch;
