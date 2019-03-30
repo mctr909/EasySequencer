@@ -238,7 +238,7 @@ inline void chorus(CHANNEL *ch, DELAY *delay, CHORUS *chorus) {
     SInt32 indexPre;
 
     for (register ph = 0; ph < CHORUS_PHASES; ++ph) {
-        index = delay->writeIndex - (0.5 - 0.45 * chorus->pLfoRe[ph]) * __sampleRate * 0.1;
+        index = delay->writeIndex - (0.5 - 0.45 * chorus->pLfoRe[ph]) * __sampleRate * 0.05;
         indexCur = (SInt32)index;
         indexPre = indexCur - 1;
         dt = index - indexCur;

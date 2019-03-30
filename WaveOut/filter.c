@@ -1,8 +1,8 @@
 #include "filter.h"
 
-#define USE_MMX
+#define USE_XMM
 
-#ifdef USE_MMX
+#ifdef USE_XMM
 #define CUT xmmword ptr[eax+0]
 #define RES xmmword ptr[eax+8]
 #define BI  xmmword ptr[eax+16]
@@ -26,9 +26,9 @@ static const double DOUBLE_1 = 1.0;
 #endif
 
 inline void filter_exec(FILTER *filter, double input) {
-#ifdef USE_MMX
+#ifdef USE_XMM
     __asm {
-        mov    eax, dword ptr filter
+        mov    eax , dword ptr filter
         movsd  xmm1, CUT
         movsd  xmm2, RES
         movsd  xmm6, DOUBLE_1

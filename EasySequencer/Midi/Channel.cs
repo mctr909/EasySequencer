@@ -280,7 +280,7 @@ namespace MIDI {
 
         private void setCut(byte value) {
             ctrl.cut = value;
-            mpChannel->tarCutoff = (value < 80) ? Const.Amp[(int)(1.6 * value)] : 1.0;
+            mpChannel->tarCutoff = (value < 80) ? Const.Level[(int)(1.6 * value)] : 1.0;
         }
 
         private void setDelayDepath(byte value) {
