@@ -1,31 +1,44 @@
 #include "filter.h"
 
-static const double PI      = 3.14159265;
-static const double INV2    = 0.50000000;
-static const double INV6    = 0.16666667;
-static const double INV24   = 0.04166667;
-static const double INV120  = 0.00833333;
-static const double INV720  = 0.00138889;
-static const double INV5040 = 0.00019841;
+static const double PI        = 3.14159265;
+static const double INV_FACT2 = 0.50000000;
+static const double INV_FACT3 = 0.16666667;
+static const double INV_FACT4 = 0.04166667;
+static const double INV_FACT5 = 0.00833333;
+static const double INV_FACT6 = 0.00138889;
+static const double INV_FACT7 = 0.00019841;
+static const double INV_FACT8 = 0.00002480;
+static const double INV_FACT9 = 0.00000276;
 
 inline void filter_exec(FILTER *filter, double input) {
-    double w = filter->cut * PI * 0.875;
-    double c = 1.0;
-    double s = w;
-    c -= w*w * INV2;
-    s -= w*w*w * INV6;
-    c += w*w*w*w * INV24;
-    s += w*w*w*w*w * INV120;
-    c -= w*w*w*w*w*w * INV720;
-    s -= w*w*w*w*w*w*w * INV5040;
+    double w = filter->cut * PI * 0.97;
+    double w2 = w * w;
+    double c = INV_FACT8;
+    double s = INV_FACT9;
+    c *= w2;
+    s *= w2;
+    c -= INV_FACT6;
+    s -= INV_FACT7;
+    c *= w2;
+    s *= w2;
+    c += INV_FACT4;
+    s += INV_FACT5;
+    c *= w2;
+    s *= w2;
+    c -= INV_FACT2;
+    s -= INV_FACT3;
+    c *= w2;
+    s *= w2;
+    c += 1.0;
+    s += 1.0;
+    s *= w;
 
     double a = s / (filter->res * 16.0 + 1.0);
     double m = 1.0 / (a + 1.0);
     double ka0 = -2.0 * c  * m;
     double ka1 = (1.0 - a) * m;
     double kb0 = (1.0 - c) * m;
-    double kb1 = kb0;
-    kb1 *= 0.5;
+    double kb1 = kb0 * 0.5;
 
     double output =
           kb1 * input
