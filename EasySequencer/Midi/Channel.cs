@@ -85,7 +85,6 @@ namespace MIDI {
 
             setRes(64);
             setCut(64);
-            mpChannel->eq.bi = 0.0;
             mpChannel->eq.a0 = 0.0;
             mpChannel->eq.b1 = 0.0;
             mpChannel->eq.a1 = 0.0;
@@ -93,13 +92,6 @@ namespace MIDI {
             mpChannel->eq.b2 = 0.0;
             mpChannel->eq.a3 = 0.0;
             mpChannel->eq.b3 = 0.0;
-            mpChannel->eq.a4 = 0.0;
-            mpChannel->eq.b4 = 0.0;
-            mpChannel->eq.a5 = 0.0;
-            mpChannel->eq.b5 = 0.0;
-            mpChannel->eq.a6 = 0.0;
-            mpChannel->eq.b6 = 0.0;
-            mpChannel->eq.a7 = 0.0;
 
             ctrl.rel = 64;
             ctrl.atk = 64;
@@ -256,8 +248,8 @@ namespace MIDI {
 
         private void setPan(byte value) {
             ctrl.pan = value;
-            mpChannel->panLeft = Const.Cos[value];
-            mpChannel->panRight = Const.Sin[value];
+            mpChannel->tarPanLeft = Const.Cos[value];
+            mpChannel->tarPanRight = Const.Sin[value];
         }
 
         private void setHold(byte value) {
@@ -280,7 +272,7 @@ namespace MIDI {
 
         private void setCut(byte value) {
             ctrl.cut = value;
-            mpChannel->tarCutoff = (value < 80) ? Const.Level[(int)(1.6 * value)] : 1.0;
+            mpChannel->tarCutoff = (value < 64) ? Const.Level[(int)(2.0 * value)] : 1.0;
         }
 
         private void setDelayDepath(byte value) {

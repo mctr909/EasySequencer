@@ -66,8 +66,10 @@ typedef struct CHANNEL {
     double pitch;
     double holdDelta;
 
-    double panLeft;
-    double panRight;
+    double tarPanLeft;
+    double tarPanRight;
+    double curPanLeft;
+    double curPanRight;
 
     double tarCutoff;
     double tarResonance;

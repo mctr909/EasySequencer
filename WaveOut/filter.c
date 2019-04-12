@@ -33,7 +33,7 @@ inline void filter_exec(FILTER *filter, double input) {
     s += 1.0;
     s *= w;
 
-    double a = s / (filter->res * 16.0 + 1.0);
+    double a = s / (filter->res * 4.0 + 1.0);
     double m = 1.0 / (a + 1.0);
     double ka0 = -2.0 * c  * m;
     double ka1 = (1.0 - a) * m;

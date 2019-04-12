@@ -215,7 +215,6 @@ namespace MIDI {
                 pSmpl->envEq.deltaR = 1000 * Const.DeltaTime;
                 pSmpl->envEq.hold = 0.0;
 
-                pSmpl->eq.bi = 0.0;
                 pSmpl->eq.a0 = 0.0;
                 pSmpl->eq.b0 = 0.0;
                 pSmpl->eq.a1 = 0.0;
@@ -224,13 +223,6 @@ namespace MIDI {
                 pSmpl->eq.b2 = 0.0;
                 pSmpl->eq.a3 = 0.0;
                 pSmpl->eq.b3 = 0.0;
-                pSmpl->eq.a4 = 0.0;
-                pSmpl->eq.b4 = 0.0;
-                pSmpl->eq.a5 = 0.0;
-                pSmpl->eq.b5 = 0.0;
-                pSmpl->eq.a6 = 0.0;
-                pSmpl->eq.b6 = 0.0;
-                pSmpl->eq.a7 = 0.0;
                 pSmpl->eq.cutoff = 1.0;
                 pSmpl->eq.resonance = 0.0;
 

@@ -112,20 +112,22 @@ SAMPLER** createSamplers(UInt32 count) {
 inline extern void channel(CHANNEL *ch, double *waveL, double *waveR) {
     //
     filter_exec(&ch->eq, ch->curAmp * ch->wave);
-    ch->wave = ch->eq.a3;
+    ch->wave = ch->eq.a2;
 
     //
-    ch->waveL = ch->wave * ch->panLeft;
-    ch->waveR = ch->wave * ch->panRight;
+    ch->waveL = ch->wave * ch->curPanLeft;
+    ch->waveR = ch->wave * ch->curPanRight;
 
     //
     delay(ch, &ch->delay);
     chorus(ch, &ch->delay, &ch->chorus);
 
     //
-    ch->curAmp += 500 * (ch->tarAmp - ch->curAmp) * __deltaTime;
-    ch->eq.cut += 500 * (ch->tarCutoff - ch->eq.cut) * __deltaTime;
-    ch->eq.res += 500 * (ch->tarResonance - ch->eq.res) * __deltaTime;
+    ch->curPanLeft  += 250 * (ch->tarPanLeft   - ch->curPanLeft)  * __deltaTime;
+    ch->curPanRight += 250 * (ch->tarPanRight  - ch->curPanRight) * __deltaTime;
+    ch->curAmp      += 250 * (ch->tarAmp       - ch->curAmp)      * __deltaTime;
+    ch->eq.cut      += 250 * (ch->tarCutoff    - ch->eq.cut)      * __deltaTime;
+    ch->eq.res      += 250 * (ch->tarResonance - ch->eq.res)      * __deltaTime;
 
     //
     *waveL += ch->waveL;
@@ -192,7 +194,7 @@ inline extern void sampler(CHANNEL **chs, SAMPLER *smpl) {
 
     //
     filter_exec(&smpl->eq, (pcm[cur] * dt + pcm[pre] * (1.0 - dt)) * smpl->gain * smpl->tarAmp * smpl->curAmp);
-    ch->wave += smpl->eq.a3;
+    ch->wave += smpl->eq.a2;
 
     //
     smpl->index += smpl->delta * ch->pitch;
