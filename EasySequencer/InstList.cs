@@ -56,7 +56,7 @@ namespace EasySequencer {
         }
 
         private void lstInst_SelectedIndexChanged(object sender, EventArgs e) {
-            if (!mInstList.ContainsKey((string)cmbCategory.SelectedItem)) {
+            if (null == cmbCategory.SelectedItem || !mInstList.ContainsKey((string)cmbCategory.SelectedItem)) {
                 return;
             }
             var list = mInstList[(string)cmbCategory.SelectedItem].ToArray();

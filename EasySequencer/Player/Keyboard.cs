@@ -109,6 +109,7 @@ namespace Player {
             mSender = sender;
             mPlayer = player;
 
+            mCtrl.DoubleClick += new EventHandler(picKeyboard_DoubleClick);
             mCtrl.MouseDown += new MouseEventHandler(picKeyboard_MouseDown);
             mCtrl.MouseMove += new MouseEventHandler(picKeyboard_MouseMove);
             mCtrl.MouseUp += new MouseEventHandler(picKeyboard_MouseUp);
@@ -120,6 +121,15 @@ namespace Player {
                     Thread.Sleep(10);
                 }
             });
+        }
+
+        private void picKeyboard_DoubleClick(Object sender, EventArgs e) {
+            mMouseDownPos = mCtrl.PointToClient(Cursor.Position);
+            var channel = mMouseDownPos.Y / ChannelHeight;
+            if (InstName.X <= mMouseDownPos.X && channel < 16) {
+                var fm = new InstList(mPlayer.Channel[channel]);
+                fm.ShowDialog();
+            }
         }
 
         private void picKeyboard_MouseDown(Object sender, MouseEventArgs e) {
@@ -165,10 +175,6 @@ namespace Player {
 
         private void picKeyboard_MouseUp(Object sender, MouseEventArgs e) {
             mIsDrag = false;
-            if(InstName.X <= mMouseDownPos.X) {
-                var fm = new InstList(mPlayer.Channel[mChannelNo]);
-                fm.ShowDialog();
-            }
         }
 
         private void picKeyboard_MouseMove(Object sender, MouseEventArgs e) {

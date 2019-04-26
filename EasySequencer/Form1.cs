@@ -20,7 +20,7 @@ namespace EasySequencer {
         }
 
         private void Form1_Load(object sender, EventArgs e) {
-            mDlsFilePath = "C:\\Users\\owner\\Desktop\\gm.dls";
+            mDlsFilePath = "C:\\Users\\user\\Desktop\\dls\\gm.dls";
             mMidiSender = new Sender(mDlsFilePath);
             mPlayer = new Player.Player(mMidiSender);
             mKeyboard = new Keyboard(picKey, mMidiSender, mPlayer);
@@ -124,6 +124,7 @@ namespace EasySequencer {
         private void timer1_Tick(object sender, EventArgs e) {
             lblPosition.Text = mPlayer.TimeText;
             lblTempo.Text = mPlayer.TempoText;
+            lblTempoPercent.Text = trkSpeed.Value + "%";
 
             if (!mIsSeek) {
                 if (mPlayer.CurrentTime <= hsbSeek.Maximum) {
