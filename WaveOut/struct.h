@@ -1,16 +1,39 @@
 #pragma once
-#include "filter.h"
-
 typedef unsigned    int     UInt32;
 typedef signed      int     SInt32;
 typedef unsigned    short   UInt16;
 typedef signed      short   SInt16;
+typedef unsigned    char    byte;
+typedef signed      char    sbyte;
 typedef unsigned    char    bool;
 
 #define true    ((bool)1)
 #define false   ((bool)0)
 
 #pragma pack(4)
+typedef struct {
+    UInt32 riff;
+    UInt32 fileSize;
+    UInt32 dataId;
+} RIFF;
+#pragma
+
+#pragma pack(4)
+typedef struct {
+    UInt32 chunkId;
+    UInt32 chunkSize;
+    UInt16 formatId;
+    UInt16 channels;
+    UInt32 sampleRate;
+    UInt32 bytePerSec;
+    UInt16 blockAlign;
+    UInt16 bitPerSample;
+    UInt32 dataId;
+    UInt32 dataSize;
+} FMT_;
+#pragma
+
+#pragma pack(8)
 typedef struct DELAY {
     double depth;
     double rate;
@@ -21,7 +44,7 @@ typedef struct DELAY {
 } DELAY;
 #pragma
 
-#pragma pack(4)
+#pragma pack(8)
 typedef struct CHORUS {
     double depth;
     double rate;
@@ -33,7 +56,7 @@ typedef struct CHORUS {
 } CHORUS;
 #pragma
 
-#pragma pack(4)
+#pragma pack(8)
 typedef struct ENVELOPE {
     double levelA;
     double levelD;
@@ -55,6 +78,21 @@ typedef struct WAVE_LOOP {
     byte reserved2;
     byte reserved3;
 } WAVE_LOOP;
+#pragma
+
+#pragma pack(8)
+typedef struct FILTER {
+    double cut; //   0
+    double res; //   8
+    double a0;  //  16
+    double b0;  //  24
+    double a1;  //  32
+    double b1;  //  40
+    double a2;  //  48
+    double b2;  //  56
+    double a3;  //  64
+    double b3;  //  72
+} FILTER;
 #pragma
 
 #pragma pack(4)
@@ -107,27 +145,4 @@ typedef struct SAMPLER {
     ENVELOPE envEq;
     FILTER eq;
 } SAMPLER;
-#pragma
-
-#pragma pack(4)
-typedef struct {
-    UInt32 riff;
-    UInt32 fileSize;
-    UInt32 dataId;
-} RIFF;
-#pragma
-
-#pragma pack(4)
-typedef struct {
-    UInt32 chunkId;
-    UInt32 chunkSize;
-    UInt16 formatId;
-    UInt16 channels;
-    UInt32 sampleRate;
-    UInt32 bytePerSec;
-    UInt16 blockAlign;
-    UInt16 bitPerSample;
-    UInt32 dataId;
-    UInt32 dataSize;
-} FMT_;
 #pragma

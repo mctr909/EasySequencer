@@ -24,13 +24,13 @@ namespace MIDI {
         private static extern void FileOut();
 
         [DllImport("WaveOut.dll", SetLastError = true, CharSet = CharSet.Auto)]
-        private static extern CHANNEL** GetChannelPtr();
-
-        [DllImport("WaveOut.dll", SetLastError = true, CharSet = CharSet.Auto)]
-        private static extern SAMPLER** GetSamplerPtr();
+        private static extern CHANNEL** GetWaveOutChannelPtr();
 
         [DllImport("WaveOut.dll", SetLastError = true, CharSet = CharSet.Auto)]
         private static extern CHANNEL** GetFileOutChannelPtr();
+
+        [DllImport("WaveOut.dll", SetLastError = true, CharSet = CharSet.Auto)]
+        private static extern SAMPLER** GetWaveOutSamplerPtr();
 
         [DllImport("WaveOut.dll", SetLastError = true, CharSet = CharSet.Auto)]
         private static extern SAMPLER** GetFileOutSamplerPtr();
@@ -46,8 +46,8 @@ namespace MIDI {
         public Sender(string dlsPath) {
             mInst = new Instruments(dlsPath, Const.SampleRate);
 
-            var ppChannel = GetChannelPtr();
-            mppSampler = GetSamplerPtr();
+            var ppChannel = GetWaveOutChannelPtr();
+            mppSampler = GetWaveOutSamplerPtr();
             Channel = new Channel[CHANNEL_COUNT];
             for (int i = 0; i < CHANNEL_COUNT; ++i) {
                 Channel[i] = new Channel(mInst, ppChannel[i], i);
@@ -60,7 +60,7 @@ namespace MIDI {
                 mFileOutChannel[i] = new Channel(mInst, ppFileOutChannel[i], i);
             }
 
-            WaveOutOpen((uint)Const.SampleRate, 512);
+            WaveOutOpen((uint)Const.SampleRate, 128);
         }
 
         public void Send(Message msg) {

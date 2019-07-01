@@ -2,7 +2,6 @@
 #include <stdio.h>
 #include <math.h>
 #include "sampler.h"
-#include "filter.h"
 
 /******************************************************************************/
 #define     CHORUS_PHASES   3
@@ -11,6 +10,16 @@
 LPBYTE      __pBuffer = NULL;
 SInt32      __sampleRate = 44100;
 double      __deltaTime = 2.26757e-05;
+
+static const double PI = 3.14159265;
+static const double INV_FACT2 = 0.50000000;
+static const double INV_FACT3 = 0.16666667;
+static const double INV_FACT4 = 0.04166667;
+static const double INV_FACT5 = 0.00833333;
+static const double INV_FACT6 = 0.00138889;
+static const double INV_FACT7 = 0.00019841;
+static const double INV_FACT8 = 0.00002480;
+static const double INV_FACT9 = 0.00000276;
 
 /******************************************************************************/
 LPBYTE loadDLS(LPWSTR filePath, UInt32 *size, UInt32 sampleRate) {
@@ -111,7 +120,7 @@ SAMPLER** createSamplers(UInt32 count) {
 /******************************************************************************/
 inline extern void channel(CHANNEL *ch, double *waveL, double *waveR) {
     //
-    filter_exec(&ch->eq, ch->curAmp * ch->wave);
+    filter(&ch->eq, ch->curAmp * ch->wave);
     ch->wave = ch->eq.a2;
 
     //
@@ -193,7 +202,7 @@ inline extern void sampler(CHANNEL **chs, SAMPLER *smpl) {
     }
 
     //
-    filter_exec(&smpl->eq, (pcm[cur] * dt + pcm[pre] * (1.0 - dt)) * smpl->gain * smpl->tarAmp * smpl->curAmp);
+    filter(&smpl->eq, (pcm[cur] * dt + pcm[pre] * (1.0 - dt)) * smpl->gain * smpl->tarAmp * smpl->curAmp);
     ch->wave += smpl->eq.a2;
 
     //
@@ -268,4 +277,60 @@ inline void chorus(CHANNEL *ch, DELAY *delay, CHORUS *chorus) {
 
     ch->waveL += chorusL * chorus->depth / CHORUS_PHASES;
     ch->waveR += chorusR * chorus->depth / CHORUS_PHASES;
+}
+
+inline void filter(FILTER *param, double input) {
+    double w = param->cut * PI * 0.97;
+    double w2 = w * w;
+    double c = INV_FACT8;
+    double s = INV_FACT9;
+    c *= w2;
+    s *= w2;
+    c -= INV_FACT6;
+    s -= INV_FACT7;
+    c *= w2;
+    s *= w2;
+    c += INV_FACT4;
+    s += INV_FACT5;
+    c *= w2;
+    s *= w2;
+    c -= INV_FACT2;
+    s -= INV_FACT3;
+    c *= w2;
+    s *= w2;
+    c += 1.0;
+    s += 1.0;
+    s *= w;
+
+    double a = s / (param->res * 4.0 + 1.0);
+    double m = 1.0 / (a + 1.0);
+    double ka0 = -2.0 * c  * m;
+    double ka1 = (1.0 - a) * m;
+    double kb0 = (1.0 - c) * m;
+    double kb1 = kb0 * 0.5;
+
+    double output =
+        kb1 * input
+        + kb0 * param->b0
+        + kb1 * param->b1
+        - ka0 * param->a0
+        - ka1 * param->a1
+    ;
+    param->b1 = param->b0;
+    param->b0 = input;
+    param->a1 = param->a0;
+    param->a0 = output;
+
+    input = output;
+    output =
+        kb1 * input
+        + kb0 * param->b2
+        + kb1 * param->b3
+        - ka0 * param->a2
+        - ka1 * param->a3
+    ;
+    param->b3 = param->b2;
+    param->b2 = input;
+    param->a3 = param->a2;
+    param->a2 = output;
 }

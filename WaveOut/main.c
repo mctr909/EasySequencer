@@ -3,73 +3,73 @@
 #include <stdio.h>
 
 /******************************************************************************/
-HWAVEOUT        g_hWaveOut = NULL;
-WAVEFORMATEX    g_waveFmt = { 0 };
-WAVEHDR         g_waveHdr[BUFFER_COUNT] = { NULL };
+bool            gIsStop = true;
+bool            gIsMute = true;
+bool            gIssueMute = false;
 
-LPBYTE          gp_dlsBuffer = NULL;
+HWAVEOUT        ghWaveOut = NULL;
+WAVEFORMATEX    gWaveFmt = { 0 };
+WAVEHDR         gWaveHdr[BUFFER_COUNT] = { NULL };
 
-SInt32          g_bufferLength = 4096;
-SInt32          g_fileOutBufferLength = 4096;
+LPBYTE          gpDlsBuffer = NULL;
 
-CHANNEL         **gpp_channels = NULL;
-SAMPLER         **gpp_samplers = NULL;
-CHANNEL         **gpp_fileOutChannels = NULL;
-SAMPLER         **gpp_fileOutSamplers = NULL;
+SInt32          gWaveBufferLength = 0;
+SInt32          gFileBufferLength = 0;
 
-float           *gp_fileOutBuff = NULL;
-FILE            *gp_file = NULL;
-RIFF            g_riff;
-FMT_            g_fmt;
+CHANNEL         **gppWaveOutChannels = NULL;
+CHANNEL         **gppFileOutChannels = NULL;
+SAMPLER         **gppWaveOutSamplers = NULL;
+SAMPLER         **gppFileOutSamplers = NULL;
 
-bool            g_isStop = true;
-bool            g_isMute = true;
-bool            g_issueMute = false;
+float           *gpFileOutBuffer = NULL;
+FILE            *gfpFileOut = NULL;
+RIFF            gRiff;
+FMT_            gFmt;
 
 /******************************************************************************/
-BOOL WINAPI WaveOutOpen(UInt32 sampleRate, UInt32 bufferLength) {
-    if (NULL != g_hWaveOut) {
+BOOL WINAPI WaveOutOpen(UInt32 sampleRate, UInt32 waveBufferLength) {
+    if (NULL != ghWaveOut) {
         WaveOutClose();
     }
 
     //
-    g_bufferLength = bufferLength;
+    gWaveBufferLength = waveBufferLength;
 
     //
-    g_waveFmt.wFormatTag = WAVE_FORMAT_PCM;
-    g_waveFmt.nChannels = 2;
-    g_waveFmt.wBitsPerSample = 16;
-    g_waveFmt.nSamplesPerSec = sampleRate;
-    g_waveFmt.nBlockAlign = g_waveFmt.nChannels * g_waveFmt.wBitsPerSample / 8;
-    g_waveFmt.nAvgBytesPerSec = g_waveFmt.nSamplesPerSec * g_waveFmt.nBlockAlign;
+    gWaveFmt.wFormatTag = WAVE_FORMAT_PCM;
+    gWaveFmt.nChannels = 2;
+    gWaveFmt.wBitsPerSample = 16;
+    gWaveFmt.nSamplesPerSec = sampleRate;
+    gWaveFmt.nBlockAlign = gWaveFmt.nChannels * gWaveFmt.wBitsPerSample / 8;
+    gWaveFmt.nAvgBytesPerSec = gWaveFmt.nSamplesPerSec * gWaveFmt.nBlockAlign;
 
     //
     if (MMSYSERR_NOERROR != waveOutOpen(
-        &g_hWaveOut,
+        &ghWaveOut,
         WAVE_MAPPER,
-        &g_waveFmt,
+        &gWaveFmt,
         (DWORD_PTR)WaveOutProc,
-        (DWORD_PTR)g_waveHdr,
+        (DWORD_PTR)gWaveHdr,
         CALLBACK_FUNCTION
     )) {
         return false;
     }
 
     //
-    g_isStop = false;
+    gIsStop = false;
 
     //
     for (UInt32 n = 0; n < BUFFER_COUNT; ++n) {
-        g_waveHdr[n].dwBufferLength = g_bufferLength * g_waveFmt.nBlockAlign;
-        g_waveHdr[n].dwFlags = WHDR_BEGINLOOP | WHDR_ENDLOOP;
-        g_waveHdr[n].dwLoops = 0;
-        g_waveHdr[n].dwUser = 0;
-        if (NULL == g_waveHdr[n].lpData) {
-            g_waveHdr[n].lpData = (LPSTR)malloc(g_bufferLength * g_waveFmt.nBlockAlign);
-            if (NULL != g_waveHdr[n].lpData) {
-                memset(g_waveHdr[n].lpData, 0, g_bufferLength * g_waveFmt.nBlockAlign);
-                waveOutPrepareHeader(g_hWaveOut, &g_waveHdr[n], sizeof(WAVEHDR));
-                waveOutWrite(g_hWaveOut, &g_waveHdr[n], sizeof(WAVEHDR));
+        gWaveHdr[n].dwBufferLength = gWaveBufferLength * gWaveFmt.nBlockAlign;
+        gWaveHdr[n].dwFlags = WHDR_BEGINLOOP | WHDR_ENDLOOP;
+        gWaveHdr[n].dwLoops = 0;
+        gWaveHdr[n].dwUser = 0;
+        if (NULL == gWaveHdr[n].lpData) {
+            gWaveHdr[n].lpData = (LPSTR)malloc(gWaveBufferLength * gWaveFmt.nBlockAlign);
+            if (NULL != gWaveHdr[n].lpData) {
+                memset(gWaveHdr[n].lpData, 0, gWaveBufferLength * gWaveFmt.nBlockAlign);
+                waveOutPrepareHeader(ghWaveOut, &gWaveHdr[n], sizeof(WAVEHDR));
+                waveOutWrite(ghWaveOut, &gWaveHdr[n], sizeof(WAVEHDR));
             }
         }
     }
@@ -78,75 +78,75 @@ BOOL WINAPI WaveOutOpen(UInt32 sampleRate, UInt32 bufferLength) {
 }
 
 VOID WINAPI WaveOutClose() {
-    if (NULL == g_hWaveOut) {
+    if (NULL == ghWaveOut) {
         return;
     }
 
     //
-    g_isStop = true;
+    gIsStop = true;
 
     //
     for (UInt32 n = 0; n < BUFFER_COUNT; ++n) {
-        waveOutUnprepareHeader(g_hWaveOut, &g_waveHdr[n], sizeof(WAVEHDR));
+        waveOutUnprepareHeader(ghWaveOut, &gWaveHdr[n], sizeof(WAVEHDR));
     }
-    waveOutReset(g_hWaveOut);
-    waveOutClose(g_hWaveOut);
-    g_hWaveOut = NULL;
+    waveOutReset(ghWaveOut);
+    waveOutClose(ghWaveOut);
+    ghWaveOut = NULL;
 }
 
 VOID WINAPI FileOutOpen(LPWSTR filePath, UInt32 bufferLength) {
-    if (NULL != gp_fileOutBuff) {
-        free(gp_fileOutBuff);
+    if (NULL != gpFileOutBuffer) {
+        free(gpFileOutBuffer);
     }
 
-    g_fileOutBufferLength = bufferLength;
-    gp_fileOutBuff = (float*)malloc(sizeof(float) * 2 * bufferLength);
+    gFileBufferLength = bufferLength;
+    gpFileOutBuffer = (float*)malloc(sizeof(float) * 2 * bufferLength);
 
-    if (NULL != gp_file) {
-        fclose(gp_file);
-        gp_file = NULL;
+    if (NULL != gfpFileOut) {
+        fclose(gfpFileOut);
+        gfpFileOut = NULL;
     }
 
-    _wfopen_s(&gp_file, filePath, L"wb");
+    _wfopen_s(&gfpFileOut, filePath, L"wb");
 
     //
-    g_riff.riff     = 0x46464952;
-    g_riff.fileSize = 0;
-    g_riff.dataId   = 0x45564157;
+    gRiff.riff     = 0x46464952;
+    gRiff.fileSize = 0;
+    gRiff.dataId   = 0x45564157;
 
     //
-    g_fmt.chunkId      = 0x20746D66;
-    g_fmt.chunkSize    = 16;
-    g_fmt.formatId     = 3;
-    g_fmt.channels     = 2;
-    g_fmt.sampleRate   = 44100;
-    g_fmt.bitPerSample = 32;
-    g_fmt.blockAlign   = g_fmt.channels * g_fmt.bitPerSample >> 3;
-    g_fmt.bytePerSec   = g_fmt.sampleRate * g_fmt.blockAlign;
-    g_fmt.dataId       = 0x61746164;
-    g_fmt.dataSize     = 0;
+    gFmt.chunkId      = 0x20746D66;
+    gFmt.chunkSize    = 16;
+    gFmt.formatId     = 3;
+    gFmt.channels     = 2;
+    gFmt.sampleRate   = 44100;
+    gFmt.bitPerSample = 32;
+    gFmt.blockAlign   = gFmt.channels * gFmt.bitPerSample >> 3;
+    gFmt.bytePerSec   = gFmt.sampleRate * gFmt.blockAlign;
+    gFmt.dataId       = 0x61746164;
+    gFmt.dataSize     = 0;
 
     //
-    fwrite(&g_riff, sizeof(g_riff), 1, gp_file);
-    fwrite(&g_fmt, sizeof(g_fmt), 1, gp_file);
+    fwrite(&gRiff, sizeof(gRiff), 1, gfpFileOut);
+    fwrite(&gFmt, sizeof(gFmt), 1, gfpFileOut);
 }
 
 VOID WINAPI FileOutClose() {
-    if (NULL == gp_file) {
+    if (NULL == gfpFileOut) {
         return;
     }
 
     //
-    g_riff.fileSize = g_fmt.dataSize + sizeof(g_fmt) + 4;
+    gRiff.fileSize = gFmt.dataSize + sizeof(gFmt) + 4;
 
     //
-    fseek(gp_file, 0, SEEK_SET);
-    fwrite(&g_riff, sizeof(g_riff), 1, gp_file);
-    fwrite(&g_fmt, sizeof(g_fmt), 1, gp_file);
+    fseek(gfpFileOut, 0, SEEK_SET);
+    fwrite(&gRiff, sizeof(gRiff), 1, gfpFileOut);
+    fwrite(&gFmt, sizeof(gFmt), 1, gfpFileOut);
 
     //
-    fclose(gp_file);
-    gp_file = NULL;
+    fclose(gfpFileOut);
+    gfpFileOut = NULL;
 }
 
 VOID WINAPI FileOut() {
@@ -155,68 +155,68 @@ VOID WINAPI FileOut() {
     static double waveL;
     static double waveR;
 
-    pWave = gp_fileOutBuff;
+    pWave = gpFileOutBuffer;
 
-    for (t = 0; t < g_fileOutBufferLength; ++t) {
+    for (t = 0; t < gFileBufferLength; ++t) {
         for (s = 0; s < SAMPLER_COUNT; ++s) {
-            sampler(gpp_fileOutChannels, gpp_fileOutSamplers[s]);
+            sampler(gppFileOutChannels, gppFileOutSamplers[s]);
         }
 
         waveL = 0.0;
         waveR = 0.0;
         for (c = 0; c < CHANNEL_COUNT; ++c) {
-            channel(gpp_fileOutChannels[c], &waveL, &waveR);
+            channel(gppFileOutChannels[c], &waveL, &waveR);
         }
 
         *pWave = (float)waveL; ++pWave;
         *pWave = (float)waveR; ++pWave;
     }
 
-    fwrite(gp_fileOutBuff, sizeof(float) * 2 * g_fileOutBufferLength, 1, gp_file);
-    g_fmt.dataSize += sizeof(float) * 2 * g_fileOutBufferLength;
+    fwrite(gpFileOutBuffer, sizeof(float) * 2 * gFileBufferLength, 1, gfpFileOut);
+    gFmt.dataSize += sizeof(float) * 2 * gFileBufferLength;
 }
 
-CHANNEL** WINAPI GetChannelPtr() {
-    if (NULL == gpp_channels) {
-        gpp_channels = createChannels(CHANNEL_COUNT);
+CHANNEL** WINAPI GetWaveOutChannelPtr() {
+    if (NULL == gppWaveOutChannels) {
+        gppWaveOutChannels = createChannels(CHANNEL_COUNT);
     }
-    return gpp_channels;
-}
-
-SAMPLER** WINAPI GetSamplerPtr() {
-    if (NULL == gpp_samplers) {
-        gpp_samplers = createSamplers(SAMPLER_COUNT);
-    }
-    return gpp_samplers;
+    return gppWaveOutChannels;
 }
 
 CHANNEL** WINAPI GetFileOutChannelPtr() {
-    if (NULL == gpp_fileOutChannels) {
-        gpp_fileOutChannels = createChannels(CHANNEL_COUNT);
+    if (NULL == gppFileOutChannels) {
+        gppFileOutChannels = createChannels(CHANNEL_COUNT);
     }
-    return gpp_fileOutChannels;
+    return gppFileOutChannels;
+}
+
+SAMPLER** WINAPI GetWaveOutSamplerPtr() {
+    if (NULL == gppWaveOutSamplers) {
+        gppWaveOutSamplers = createSamplers(SAMPLER_COUNT);
+    }
+    return gppWaveOutSamplers;
 }
 
 SAMPLER** WINAPI GetFileOutSamplerPtr() {
-    if (NULL == gpp_fileOutSamplers) {
-        gpp_fileOutSamplers = createSamplers(SAMPLER_COUNT);
+    if (NULL == gppFileOutSamplers) {
+        gppFileOutSamplers = createSamplers(SAMPLER_COUNT);
     }
-    return gpp_fileOutSamplers;
+    return gppFileOutSamplers;
 }
 
 LPBYTE WINAPI LoadDLS(LPWSTR filePath, UInt32 *size, UInt32 sampleRate) {
     //
-    g_issueMute = true;
-    while (!g_isMute) {
+    gIssueMute = true;
+    while (!gIsMute) {
         Sleep(100);
     }
 
-    gp_dlsBuffer = loadDLS(filePath, size, sampleRate);
+    gpDlsBuffer = loadDLS(filePath, size, sampleRate);
 
     //
-    g_issueMute = false;
+    gIssueMute = false;
 
-    return gp_dlsBuffer;
+    return gpDlsBuffer;
 }
 
 /******************************************************************************/
@@ -232,44 +232,49 @@ void CALLBACK WaveOutProc(HWAVEOUT hwo, UInt32 uMsg) {
     case MM_WOM_OPEN:
         break;
     case MM_WOM_CLOSE:
+        gIssueMute = true;
+        while (!gIsMute) {
+            Sleep(100);
+        }
+        gIssueMute = false;
         for (b = 0; b < BUFFER_COUNT; ++b) {
-            free(g_waveHdr[b].lpData);
-            g_waveHdr[b].lpData = NULL;
+            free(gWaveHdr[b].lpData);
+            gWaveHdr[b].lpData = NULL;
         }
         break;
     case MM_WOM_DONE:
         //
-        if (g_isStop) {
+        if (gIsStop) {
             break;
         }
 
         //
-        if (g_issueMute || NULL == gpp_channels || NULL == gpp_samplers || NULL == gp_dlsBuffer) {
+        if (gIssueMute || NULL == gppWaveOutChannels || NULL == gppWaveOutSamplers || NULL == gpDlsBuffer) {
             for (b = 0; b < BUFFER_COUNT; ++b) {
-                if (0 == (g_waveHdr[b].dwFlags & WHDR_INQUEUE)) {
-                    memset(g_waveHdr[b].lpData, 0, g_waveFmt.nBlockAlign * g_bufferLength);
-                    waveOutWrite(g_hWaveOut, &g_waveHdr[b], sizeof(WAVEHDR));
+                if (0 == (gWaveHdr[b].dwFlags & WHDR_INQUEUE)) {
+                    memset(gWaveHdr[b].lpData, 0, gWaveFmt.nBlockAlign * gWaveBufferLength);
+                    waveOutWrite(ghWaveOut, &gWaveHdr[b], sizeof(WAVEHDR));
                 }
             }
-            g_isMute = true;
+            gIsMute = true;
             break;
         }
 
-        g_isMute = false;
+        gIsMute = false;
 
         //
         for (b = 0; b < BUFFER_COUNT; ++b) {
-            if (0 == (g_waveHdr[b].dwFlags & WHDR_INQUEUE)) {
-                pWave = (SInt16*)g_waveHdr[b].lpData;
-                for (t = 0; t < g_bufferLength; ++t) {
+            if (0 == (gWaveHdr[b].dwFlags & WHDR_INQUEUE)) {
+                pWave = (SInt16*)gWaveHdr[b].lpData;
+                for (t = 0; t < gWaveBufferLength; ++t) {
                     for (s = 0; s < SAMPLER_COUNT; ++s) {
-                        sampler(gpp_channels, gpp_samplers[s]);
+                        sampler(gppWaveOutChannels, gppWaveOutSamplers[s]);
                     }
 
                     waveL = 0.0;
                     waveR = 0.0;
                     for (c = 0; c < CHANNEL_COUNT; ++c) {
-                        channel(gpp_channels[c], &waveL, &waveR);
+                        channel(gppWaveOutChannels[c], &waveL, &waveR);
                     }
 
                     if (1.0 < waveL) waveL = 1.0;
@@ -279,7 +284,7 @@ void CALLBACK WaveOutProc(HWAVEOUT hwo, UInt32 uMsg) {
                     *pWave = (SInt16)(waveL * 32767); ++pWave;
                     *pWave = (SInt16)(waveR * 32767); ++pWave;
                 }
-                waveOutWrite(g_hWaveOut, &g_waveHdr[b], sizeof(WAVEHDR));
+                waveOutWrite(ghWaveOut, &gWaveHdr[b], sizeof(WAVEHDR));
             }
         }
         break;
