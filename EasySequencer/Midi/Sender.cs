@@ -60,7 +60,7 @@ namespace MIDI {
                 mFileOutChannel[i] = new Channel(mInst, ppFileOutChannel[i], i);
             }
 
-            WaveOutOpen((uint)Const.SampleRate, 128);
+            WaveOutOpen((uint)Const.SampleRate, 96);
         }
 
         public void Send(Message msg) {

@@ -147,7 +147,7 @@ namespace Player {
                     current_mSec = sw.ElapsedMilliseconds;
                     mCurrentTime += mBPM * Speed * (current_mSec - previous_mSec) / 60.0;
                     previous_mSec = current_mSec;
-                    Thread.Sleep(10);
+                    Thread.Sleep(1);
                 }
 
                 var msg = ev.Message;
@@ -160,7 +160,7 @@ namespace Player {
                 }
 
                 if (EVENT_TYPE.NOTE_ON == type && msg.V2 != 0) {
-                    if (mTicks < (mCurrentTime - eventTime)) {
+                    if (0.25 * mTicks < (mCurrentTime - eventTime)) {
                         continue;
                     }
 

@@ -29,7 +29,7 @@ namespace MIDI {
                     envAmp.levelR = 0.0;
                     envAmp.deltaA = 1.0;
                     envAmp.deltaD = 1.0;
-                    envAmp.deltaR = 1.0;
+                    envAmp.deltaR = 16.0;
                     envAmp.hold = 0.0;
                     var holdTime = 0.0;
 
@@ -96,7 +96,7 @@ namespace MIDI {
                         envAmp.levelR = 0.0;
                         envAmp.deltaA = 1.0;
                         envAmp.deltaD = 1.0;
-                        envAmp.deltaR = 1.0;
+                        envAmp.deltaR = 16.0;
                         envAmp.hold = 0.0;
                         var holdTime = 0.0;
 
@@ -141,17 +141,8 @@ namespace MIDI {
 
                     waveInfo[noteNo].envAmp = envAmp;
                     var wave = dls.wavePool.List[(int)region.pWaveLink->tableIndex];
-
-                    if (0 < wave.pSampler->loopCount) {
-                        waveInfo[noteNo].loop.start = wave.pLoops[0].start;
-                        waveInfo[noteNo].loop.length = wave.pLoops[0].length;
-                        waveInfo[noteNo].loop.enable = true;
-                    }
-                    else {
-                        waveInfo[noteNo].loop.start = 0;
-                        waveInfo[noteNo].loop.length = wave.pLoops->length;
-                        waveInfo[noteNo].loop.enable = false;
-                    }
+                    waveInfo[noteNo].pcmAddr = wave.pcmAddr - (uint)dlsPtr.ToInt32();
+                    waveInfo[noteNo].pcmLength = wave.dataSize / wave.pFormat->blockAlign;
 
                     if (null == region.pSampler) {
                         waveInfo[noteNo].unityNote = (byte)wave.pSampler->unityNote;
@@ -160,6 +151,15 @@ namespace MIDI {
                             * wave.pFormat->sampleRate / sampleRate
                         ;
                         waveInfo[noteNo].gain = wave.pSampler->Gain / 32768.0;
+                        if (0 < wave.pSampler->loopCount) {
+                            waveInfo[noteNo].loop.start = wave.pLoops[0].start;
+                            waveInfo[noteNo].loop.length = wave.pLoops[0].length;
+                            waveInfo[noteNo].loop.enable = true;
+                        } else {
+                            waveInfo[noteNo].loop.start = 0;
+                            waveInfo[noteNo].loop.length = waveInfo[noteNo].pcmLength;
+                            waveInfo[noteNo].loop.enable = false;
+                        }
                     }
                     else {
                         waveInfo[noteNo].unityNote = (byte)region.pSampler->unityNote;
@@ -168,10 +168,20 @@ namespace MIDI {
                             * wave.pFormat->sampleRate / sampleRate
                         ;
                         waveInfo[noteNo].gain = region.pSampler->Gain / 32768.0;
+                        if (0 < region.pSampler->loopCount) {
+                            waveInfo[noteNo].loop.start = region.pLoops[0].start;
+                            waveInfo[noteNo].loop.length = region.pLoops[0].length;
+                            waveInfo[noteNo].loop.enable = true;
+                        } else if (0 < wave.pSampler->loopCount) {
+                            waveInfo[noteNo].loop.start = wave.pLoops[0].start;
+                            waveInfo[noteNo].loop.length = wave.pLoops[0].length;
+                            waveInfo[noteNo].loop.enable = true;
+                        } else {
+                            waveInfo[noteNo].loop.start = 0;
+                            waveInfo[noteNo].loop.length = waveInfo[noteNo].pcmLength;
+                            waveInfo[noteNo].loop.enable = false;
+                        }
                     }
-
-                    waveInfo[noteNo].pcmAddr = wave.pcmAddr - (uint)dlsPtr.ToInt32();
-                    waveInfo[noteNo].pcmLength = wave.dataSize / wave.pFormat->blockAlign;
                 }
 
                 var id = new INST_ID();
