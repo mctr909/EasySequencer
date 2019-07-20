@@ -2,7 +2,7 @@
 #include "type.h"
 
 #pragma pack(4)
-typedef struct {
+typedef struct RIFF {
     UInt32 riff;
     UInt32 fileSize;
     UInt32 dataId;
@@ -10,7 +10,7 @@ typedef struct {
 #pragma
 
 #pragma pack(4)
-typedef struct {
+typedef struct FMT_ {
     UInt32 chunkId;
     UInt32 chunkSize;
     UInt16 formatId;
@@ -25,7 +25,7 @@ typedef struct {
 #pragma
 
 #pragma pack(8)
-typedef struct {
+typedef struct DELAY {
     SInt32 writeIndex;
     SInt32 readIndex;
     double *pTapL;
@@ -34,7 +34,7 @@ typedef struct {
 #pragma
 
 #pragma pack(8)
-typedef struct {
+typedef struct CHORUS {
     double lfoK;
     double *pPanL;
     double *pPanR;
@@ -44,7 +44,7 @@ typedef struct {
 #pragma
 
 #pragma pack(8)
-typedef struct {
+typedef struct FILTER {
     double cut; //   0
     double res; //   8
     double a0;  //  16
@@ -59,7 +59,7 @@ typedef struct {
 #pragma
 
 #pragma pack(8)
-typedef struct {
+typedef struct ENVELOPE {
     double levelA;
     double levelD;
     double levelS;
@@ -72,7 +72,7 @@ typedef struct {
 #pragma
 
 #pragma pack(4)
-typedef struct {
+typedef struct WAVE_LOOP {
     UInt32 start;
     UInt32 length;
     bool enable;
@@ -100,7 +100,7 @@ typedef struct CHANNEL_PARAM {
 #pragma
 
 #pragma pack(4)
-typedef struct {
+typedef struct CHANNEL {
     CHANNEL_PARAM *param;
 
     double wave;
