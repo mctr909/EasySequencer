@@ -24,10 +24,10 @@ namespace MIDI {
         private static extern void FileOut();
 
         [DllImport("WaveOut.dll", SetLastError = true, CharSet = CharSet.Auto)]
-        private static extern CHANNEL** GetWaveOutChannelPtr();
+        private static extern CHANNEL_PARAM** GetWaveOutChannelPtr();
 
         [DllImport("WaveOut.dll", SetLastError = true, CharSet = CharSet.Auto)]
-        private static extern CHANNEL** GetFileOutChannelPtr();
+        private static extern CHANNEL_PARAM** GetFileOutChannelPtr();
 
         [DllImport("WaveOut.dll", SetLastError = true, CharSet = CharSet.Auto)]
         private static extern SAMPLER** GetWaveOutSamplerPtr();
@@ -199,8 +199,8 @@ namespace MIDI {
                 pSmpl->index = 0.0;
                 pSmpl->time = 0.0;
 
-                pSmpl->tarAmp = velocity / 127.0;
-                pSmpl->curAmp = 0.0;
+                pSmpl->velocity = velocity / 127.0;
+                pSmpl->amp = 0.0;
 
                 pSmpl->loop = wave.loop;
 

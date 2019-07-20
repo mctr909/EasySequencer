@@ -67,29 +67,20 @@ namespace MIDI {
         public double hold;
     };
 
-    [StructLayout(LayoutKind.Sequential, Pack = 4)]
-    unsafe public struct CHANNEL {
-        public double wave;
-        public double waveL;
-        public double waveR;
-
+    [StructLayout(LayoutKind.Sequential, Pack = 8)]
+    unsafe public struct CHANNEL_PARAM {
+        public double amp;
         public double pitch;
         public double holdDelta;
+        public double panLeft;
+        public double panRight;
+        public double cutoff;
+        public double resonance;
 
-        public double tarPanLeft;
-        public double tarPanRight;
-        public double curPanLeft;
-        public double curPanRight;
-
-        public double tarCutoff;
-        public double tarResonance;
-
-        public double tarAmp;
-        public double curAmp;
-
-        public FILTER eq;
-        public DELAY delay;
-        public CHORUS chorus;
+        public double delayDepth;
+        public double delayTime;
+        public double chorusDepth;
+        public double chorusRate;
     }
 
     [StructLayout(LayoutKind.Sequential, Pack = 4)]
@@ -108,8 +99,8 @@ namespace MIDI {
         public double index;
         public double time;
 
-        public double tarAmp;
-        public double curAmp;
+        public double velocity;
+        public double amp;
 
         public WAVE_LOOP loop;
         public ENVELOPE envAmp;

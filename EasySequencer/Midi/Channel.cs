@@ -2,7 +2,7 @@
 
 namespace MIDI {
     unsafe public class Channel {
-        private CHANNEL* mpChannel = null;
+        private CHANNEL_PARAM* mpChannel = null;
         private Instruments mInst = null;
         private INST_ID mInstId;
         private CONTROL ctrl;
@@ -63,7 +63,7 @@ namespace MIDI {
 
         public int Pitch { get; private set; }
 
-        public Channel(Instruments inst, CHANNEL* pChannel, int no) {
+        public Channel(Instruments inst, CHANNEL_PARAM* pChannel, int no) {
             mInst = inst;
             mpChannel = pChannel;
             No = (byte)no;
@@ -74,8 +74,6 @@ namespace MIDI {
 
         /******************************************************************************/
         public void AllReset() {
-            mpChannel->wave = 0.0;
-
             mInstId = new INST_ID();
 
             setAmp(100, 100);
@@ -85,13 +83,6 @@ namespace MIDI {
 
             setRes(64);
             setCut(64);
-            mpChannel->eq.a0 = 0.0;
-            mpChannel->eq.b1 = 0.0;
-            mpChannel->eq.a1 = 0.0;
-            mpChannel->eq.a2 = 0.0;
-            mpChannel->eq.b2 = 0.0;
-            mpChannel->eq.a3 = 0.0;
-            mpChannel->eq.b3 = 0.0;
 
             ctrl.rel = 64;
             ctrl.atk = 64;
@@ -104,8 +95,8 @@ namespace MIDI {
             setChorusDepth(0);
             setDelayDepath(0);
 
-            mpChannel->chorus.rate = 0.01;
-            mpChannel->delay.rate = 0.2;
+            mpChannel->chorusRate = 0.01;
+            mpChannel->delayTime = 0.2;
 
             ctrl.nrpnLSB = 0xFF;
             ctrl.nrpnMSB = 0xFF;
@@ -243,13 +234,13 @@ namespace MIDI {
         private void setAmp(byte vol, byte exp) {
             ctrl.vol = vol;
             ctrl.exp = exp;
-            mpChannel->tarAmp = Const.Amp[vol] * Const.Amp[exp];
+            mpChannel->amp = Const.Amp[vol] * Const.Amp[exp];
         }
 
         private void setPan(byte value) {
             ctrl.pan = value;
-            mpChannel->tarPanLeft = Const.Cos[value];
-            mpChannel->tarPanRight = Const.Sin[value];
+            mpChannel->panLeft = Const.Cos[value];
+            mpChannel->panRight = Const.Sin[value];
         }
 
         private void setHold(byte value) {
@@ -267,22 +258,22 @@ namespace MIDI {
 
         private void setRes(byte value) {
             ctrl.res = value;
-            mpChannel->tarResonance = (value < 64) ? 0.0 : ((value - 64) / 64.0);
+            mpChannel->resonance = (value < 64) ? 0.0 : ((value - 64) / 64.0);
         }
 
         private void setCut(byte value) {
             ctrl.cut = value;
-            mpChannel->tarCutoff = (value < 64) ? Const.Level[(int)(2.0 * value)] : 1.0;
+            mpChannel->cutoff = (value < 64) ? Const.Level[(int)(2.0 * value)] : 1.0;
         }
 
         private void setDelayDepath(byte value) {
             ctrl.del = value;
-            mpChannel->delay.depth = 0.8 * Const.FeedBack[value];
+            mpChannel->delayDepth = 0.8 * Const.FeedBack[value];
         }
 
         private void setChorusDepth(byte value) {
             ctrl.cho = value;
-            mpChannel->chorus.depth = 2.0 * Const.FeedBack[value];
+            mpChannel->chorusDepth = 2.0 * Const.FeedBack[value];
         }
 
         private void rpn(byte b1) {
