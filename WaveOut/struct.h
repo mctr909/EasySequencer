@@ -107,9 +107,9 @@ typedef struct CHANNEL {
     double waveL;
     double waveR;
 
-    double curAmp;
-    double curPanLeft;
-    double curPanRight;
+    double amp;
+    double panLeft;
+    double panRight;
 
     FILTER eq;
     DELAY delay;

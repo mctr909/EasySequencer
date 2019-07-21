@@ -13,12 +13,7 @@
 #define CHORUS_PHASES       3
 #define DELAY_TAPS          1048576
 
-LPBYTE      __pBuffer = NULL;
-SInt32      __sampleRate = 44100;
-
-double      __deltaTime = 2.26757e-05;
-
-static const double PI = 3.14159265;
+static const double PI        = 3.14159265;
 static const double INV_FACT2 = 0.50000000;
 static const double INV_FACT3 = 0.16666667;
 static const double INV_FACT4 = 0.04166667;
@@ -29,15 +24,18 @@ static const double INV_FACT8 = 0.00002480;
 static const double INV_FACT9 = 0.00000276;
 
 /******************************************************************************/
-bool            gIsStop = true;
-bool            gIsMute = true;
-bool            gIssueMute = false;
+bool            gDoStop = false;
+bool            gDoMute = false;
+bool            gIsStopped = true;
+bool            gIsMuted = true;
 
 HWAVEOUT        ghWaveOut = NULL;
 WAVEFORMATEX    gWaveFmt = { 0 };
 WAVEHDR         gWaveHdr[BUFFER_COUNT] = { NULL };
 
 LPBYTE          gpDlsBuffer = NULL;
+SInt32          gSampleRate = 44100;
+double          gDeltaTime = 2.26757e-05;
 
 SInt32          gWaveBufferLength = 0;
 SInt32          gFileBufferLength = 0;
@@ -56,7 +54,6 @@ FMT_            gFmt;
 
 /******************************************************************************/
 void CALLBACK waveOutProc(HWAVEOUT hwo, UInt32 uMsg);
-LPBYTE loadDLS(LPWSTR filePath, UInt32 *size);
 CHANNEL** createChannels(UInt32 count);
 SAMPLER** createSamplers(UInt32 count);
 
@@ -96,8 +93,7 @@ BOOL WINAPI WaveOutOpen(UInt32 sampleRate, UInt32 waveBufferLength) {
         return false;
     }
 
-    //
-    gIsStop = false;
+    gDoStop = false;
 
     //
     for (UInt32 n = 0; n < BUFFER_COUNT; ++n) {
@@ -124,7 +120,10 @@ VOID WINAPI WaveOutClose() {
     }
 
     //
-    gIsStop = true;
+    gDoStop = true;
+    while (!gIsStopped) {
+        Sleep(100);
+    }
 
     //
     for (UInt32 n = 0; n < BUFFER_COUNT; ++n) {
@@ -255,16 +254,46 @@ SAMPLER** WINAPI GetFileOutSamplerPtr() {
 
 LPBYTE WINAPI LoadDLS(LPWSTR filePath, UInt32 *size, UInt32 sampleRate) {
     //
-    gIssueMute = true;
-    while (!gIsMute) {
+    gDoMute = true;
+    while (!gIsMuted) {
         Sleep(100);
     }
 
-    gpDlsBuffer = loadDLS(filePath, size);
-    __sampleRate = sampleRate;
+    if (NULL == size) {
+        return NULL;
+    }
 
     //
-    gIssueMute = false;
+    if (NULL != gpDlsBuffer) {
+        free(gpDlsBuffer);
+        gpDlsBuffer = NULL;
+    }
+
+    //
+    FILE *fpDLS = NULL;
+    _wfopen_s(&fpDLS, filePath, TEXT("rb"));
+    if (NULL != fpDLS) {
+        //
+        fseek(fpDLS, 4, SEEK_SET);
+        fread_s(size, sizeof(*size), sizeof(*size), 1, fpDLS);
+        *size -= 8;
+
+        //
+        gpDlsBuffer = (LPBYTE)malloc(*size);
+        if (NULL != gpDlsBuffer) {
+            fseek(fpDLS, 12, SEEK_SET);
+            fread_s(gpDlsBuffer, *size, *size, 1, fpDLS);
+        }
+
+        //
+        fclose(fpDLS);
+    }
+
+    gSampleRate = sampleRate;
+    gDeltaTime = 1.0 / sampleRate;
+
+    //
+    gDoMute = false;
 
     return gpDlsBuffer;
 }
@@ -282,11 +311,11 @@ void CALLBACK waveOutProc(HWAVEOUT hwo, UInt32 uMsg) {
     case MM_WOM_OPEN:
         break;
     case MM_WOM_CLOSE:
-        gIssueMute = true;
-        while (!gIsMute) {
+        gDoStop = true;
+        while (!gIsStopped) {
             Sleep(100);
         }
-        gIssueMute = false;
+        gDoStop = false;
         for (b = 0; b < BUFFER_COUNT; ++b) {
             free(gWaveHdr[b].lpData);
             gWaveHdr[b].lpData = NULL;
@@ -294,23 +323,24 @@ void CALLBACK waveOutProc(HWAVEOUT hwo, UInt32 uMsg) {
         break;
     case MM_WOM_DONE:
         //
-        if (gIsStop) {
+        if (gDoStop) {
+            gIsStopped = true;
             break;
         }
+        gIsStopped = false;
 
         //
-        if (gIssueMute || NULL == gppWaveOutChParams || NULL == gppWaveOutSamplers || NULL == gpDlsBuffer) {
+        if (gDoMute || NULL == gppWaveOutChParams || NULL == gppWaveOutSamplers || NULL == gpDlsBuffer) {
             for (b = 0; b < BUFFER_COUNT; ++b) {
                 if (0 == (gWaveHdr[b].dwFlags & WHDR_INQUEUE)) {
                     memset(gWaveHdr[b].lpData, 0, gWaveFmt.nBlockAlign * gWaveBufferLength);
                     waveOutWrite(ghWaveOut, &gWaveHdr[b], sizeof(WAVEHDR));
                 }
             }
-            gIsMute = true;
+            gIsMuted = true;
             break;
         }
-
-        gIsMute = false;
+        gIsMuted = false;
 
         //
         for (b = 0; b < BUFFER_COUNT; ++b) {
@@ -341,40 +371,6 @@ void CALLBACK waveOutProc(HWAVEOUT hwo, UInt32 uMsg) {
     default:
         break;
     }
-}
-
-LPBYTE loadDLS(LPWSTR filePath, UInt32 *size) {
-    if (NULL == size) {
-        return NULL;
-    }
-
-    //
-    if (NULL != __pBuffer) {
-        free(__pBuffer);
-        __pBuffer = NULL;
-    }
-
-    //
-    FILE *fpDLS = NULL;
-    _wfopen_s(&fpDLS, filePath, TEXT("rb"));
-    if (NULL != fpDLS) {
-        //
-        fseek(fpDLS, 4, SEEK_SET);
-        fread_s(size, sizeof(*size), sizeof(*size), 1, fpDLS);
-        *size -= 8;
-
-        //
-        __pBuffer = (LPBYTE)malloc(*size);
-        if (NULL != __pBuffer) {
-            fseek(fpDLS, 12, SEEK_SET);
-            fread_s(__pBuffer, *size, *size, 1, fpDLS);
-        }
-
-        //
-        fclose(fpDLS);
-    }
-
-    return __pBuffer;
 }
 
 CHANNEL** createChannels(UInt32 count) {
@@ -410,7 +406,7 @@ CHANNEL** createChannels(UInt32 count) {
         memset(&channel[i]->chorus, 0, sizeof(CHORUS));
 
         CHORUS *chorus = &channel[i]->chorus;
-        chorus->lfoK = 6.283 / __sampleRate;
+        chorus->lfoK = 6.283 * gDeltaTime;
         chorus->pPanL = (double*)malloc(sizeof(double) * CHORUS_PHASES);
         chorus->pPanR = (double*)malloc(sizeof(double) * CHORUS_PHASES);
         chorus->pLfoRe = (double*)malloc(sizeof(double) * CHORUS_PHASES);
@@ -440,23 +436,23 @@ SAMPLER** createSamplers(UInt32 count) {
 /******************************************************************************/
 inline void channel(CHANNEL *ch, double *waveL, double *waveR) {
     //
-    filter(&ch->eq, ch->curAmp * ch->wave);
+    filter(&ch->eq, ch->amp * ch->wave);
     ch->wave = ch->eq.a2;
 
     //
-    ch->waveL = ch->wave * ch->curPanLeft;
-    ch->waveR = ch->wave * ch->curPanRight;
+    ch->waveL = ch->wave * ch->panLeft;
+    ch->waveR = ch->wave * ch->panRight;
 
     //
     delay(ch, &ch->delay, &ch->waveL, &ch->waveR);
     chorus(ch, &ch->delay, &ch->chorus, &ch->waveL, &ch->waveR);
 
     //
-    ch->curPanLeft += 250 * (ch->param->panLeft - ch->curPanLeft)  * __deltaTime;
-    ch->curPanRight += 250 * (ch->param->panRight - ch->curPanRight) * __deltaTime;
-    ch->curAmp += 250 * (ch->param->amp - ch->curAmp)      * __deltaTime;
-    ch->eq.cut += 250 * (ch->param->cutoff - ch->eq.cut)      * __deltaTime;
-    ch->eq.res += 250 * (ch->param->resonance - ch->eq.res)      * __deltaTime;
+    ch->panLeft  += 250 * (ch->param->panLeft   - ch->panLeft)  * gDeltaTime;
+    ch->panRight += 250 * (ch->param->panRight  - ch->panRight) * gDeltaTime;
+    ch->amp      += 250 * (ch->param->amp       - ch->amp)      * gDeltaTime;
+    ch->eq.cut   += 250 * (ch->param->cutoff    - ch->eq.cut)   * gDeltaTime;
+    ch->eq.res   += 250 * (ch->param->resonance - ch->eq.res)   * gDeltaTime;
 
     //
     *waveL += ch->waveL;
@@ -505,7 +501,7 @@ inline void sampler(CHANNEL **chs, SAMPLER *smpl) {
     }
 
     //
-    SInt16 *pcm = (SInt16*)(__pBuffer + smpl->pcmAddr);
+    SInt16 *pcm = (SInt16*)(gpDlsBuffer + smpl->pcmAddr);
     SInt32 cur = (SInt32)smpl->index;
     SInt32 pre = cur - 1;
     double dt = smpl->index - cur;
@@ -527,7 +523,7 @@ inline void sampler(CHANNEL **chs, SAMPLER *smpl) {
 
     //
     smpl->index += smpl->delta * chParam->pitch;
-    smpl->time += __deltaTime;
+    smpl->time += gDeltaTime;
 
     //
     if ((smpl->loop.start + smpl->loop.length) < smpl->index) {
@@ -544,7 +540,7 @@ inline void delay(CHANNEL *ch, DELAY *delay, double *waveL, double *waveR) {
         delay->writeIndex = 0;
     }
 
-    delay->readIndex = delay->writeIndex - (SInt32)(ch->param->delayTime * __sampleRate);
+    delay->readIndex = delay->writeIndex - (SInt32)(ch->param->delayTime * gSampleRate);
     if (delay->readIndex < 0) {
         delay->readIndex += DELAY_TAPS;
     }
@@ -568,7 +564,7 @@ inline void chorus(CHANNEL *ch, DELAY *delay, CHORUS *chorus, double *waveL, dou
     SInt32 indexPre;
 
     for (register ph = 0; ph < CHORUS_PHASES; ++ph) {
-        index = delay->writeIndex - (0.5 - 0.45 * chorus->pLfoRe[ph]) * __sampleRate * 0.05;
+        index = delay->writeIndex - (0.5 - 0.45 * chorus->pLfoRe[ph]) * gSampleRate * 0.05;
         indexCur = (SInt32)index;
         indexPre = indexCur - 1;
         dt = index - indexCur;
@@ -599,7 +595,7 @@ inline void chorus(CHANNEL *ch, DELAY *delay, CHORUS *chorus, double *waveL, dou
 }
 
 inline void filter(FILTER *param, double input) {
-    double w = param->cut * PI * 0.97;
+    double w = param->cut * PI * 0.975;
     double w2 = w * w;
     double c = INV_FACT8;
     double s = INV_FACT9;
