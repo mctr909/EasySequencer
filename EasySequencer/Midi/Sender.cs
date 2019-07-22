@@ -4,9 +4,9 @@ using System.Threading.Tasks;
 
 namespace MIDI {
     unsafe public class Sender {
-        private SAMPLER** mppSampler = null;
+        private Instruments mInstruments = null;
+        private SAMPLER** mppWaveOutSampler = null;
         private SAMPLER** mppFileOutSampler = null;
-        private Instruments mInst = null;
 
         [DllImport("WaveOut.dll", SetLastError = true, CharSet = CharSet.Auto)]
         private static extern bool WaveOutOpen(uint sampleRate, uint bufferLength);
@@ -44,20 +44,20 @@ namespace MIDI {
         public int OutputTime;
 
         public Sender(string dlsPath) {
-            mInst = new Instruments(dlsPath, Const.SampleRate);
+            mInstruments = new Instruments(dlsPath, Const.SampleRate);
 
             var ppChannel = GetWaveOutChannelPtr();
-            mppSampler = GetWaveOutSamplerPtr();
+            mppWaveOutSampler = GetWaveOutSamplerPtr();
             Channel = new Channel[CHANNEL_COUNT];
             for (int i = 0; i < CHANNEL_COUNT; ++i) {
-                Channel[i] = new Channel(mInst, ppChannel[i], i);
+                Channel[i] = new Channel(mInstruments, ppChannel[i], i);
             }
 
             var ppFileOutChannel = GetFileOutChannelPtr();
             mppFileOutSampler = GetFileOutSamplerPtr();
             mFileOutChannel = new Channel[CHANNEL_COUNT];
             for (int i = 0; i < CHANNEL_COUNT; ++i) {
-                mFileOutChannel[i] = new Channel(mInst, ppFileOutChannel[i], i);
+                mFileOutChannel[i] = new Channel(mInstruments, ppFileOutChannel[i], i);
             }
 
             WaveOutOpen((uint)Const.SampleRate, 96);
@@ -66,11 +66,11 @@ namespace MIDI {
         public void Send(Message msg) {
             switch (msg.Type) {
             case EVENT_TYPE.NOTE_OFF:
-                noteOff(mppSampler, Channel[msg.Channel], msg.V1);
+                noteOff(mppWaveOutSampler, Channel[msg.Channel], msg.V1);
                 break;
 
             case EVENT_TYPE.NOTE_ON:
-                noteOn(mppSampler, Channel[msg.Channel], msg.V1, msg.V2);
+                noteOn(mppWaveOutSampler, Channel[msg.Channel], msg.V1, msg.V2);
                 break;
 
             case EVENT_TYPE.CTRL_CHG:
@@ -148,22 +148,22 @@ namespace MIDI {
             });
         }
 
-        private void noteOff(SAMPLER** ppSampler, Channel ch, byte noteNo) {
+        private void noteOff(SAMPLER** ppSmpl, Channel ch, byte noteNo) {
             for (var i = 0; i < SAMPLER_COUNT; ++i) {
-                if (ppSampler[i]->channelNo == ch.No && ppSampler[i]->noteNo == noteNo) {
+                if (ppSmpl[i]->channelNo == ch.No && ppSmpl[i]->noteNo == noteNo) {
                     if (!ch.Enable || ch.Hld < 64) {
                         ch.KeyBoard[noteNo] = KEY_STATUS.OFF;
                     }
                     else {
                         ch.KeyBoard[noteNo] = KEY_STATUS.HOLD;
                     }
-                    ppSampler[i]->onKey = false;
+                    ppSmpl[i]->onKey = false;
                 }
             }
         }
 
-        private void noteOn(SAMPLER** ppSampler, Channel ch, byte noteNo, byte velocity) {
-            noteOff(ppSampler, ch, noteNo);
+        private void noteOn(SAMPLER** ppSmpl, Channel ch, byte noteNo, byte velocity) {
+            noteOff(ppSmpl, ch, noteNo);
 
             if (0 == velocity) {
                 return;
@@ -175,7 +175,7 @@ namespace MIDI {
             }
 
             for (var i = 0; i < SAMPLER_COUNT; ++i) {
-                var pSmpl = ppSampler[i];
+                var pSmpl = ppSmpl[i];
                 if (pSmpl->isActive) {
                     continue;
                 }
