@@ -4,6 +4,7 @@ using System.IO;
 
 using Player;
 using MIDI;
+using WaveOut;
 
 namespace EasySequencer {
     unsafe public partial class Form1 : Form {

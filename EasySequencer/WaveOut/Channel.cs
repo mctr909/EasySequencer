@@ -1,6 +1,8 @@
 ﻿using System.Collections.Generic;
 
-namespace MIDI {
+using MIDI;
+
+namespace WaveOut {
     unsafe public class Channel {
         private CHANNEL_PARAM* mpChannel = null;
         private Instruments mInstruments = null;

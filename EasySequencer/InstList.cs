@@ -4,6 +4,7 @@ using System.Linq;
 using System.Windows.Forms;
 
 using MIDI;
+using WaveOut;
 
 namespace EasySequencer {
     public partial class InstList : Form {

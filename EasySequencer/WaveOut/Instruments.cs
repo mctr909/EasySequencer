@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Runtime.InteropServices;
 using DLS;
 
-namespace MIDI {
+namespace WaveOut {
     unsafe public class Instruments {
         [DllImport("WaveOut.dll", SetLastError = true, CharSet = CharSet.Auto)]
         unsafe private static extern IntPtr LoadDLS(IntPtr filePath, out uint size, int sampleRate);

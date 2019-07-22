@@ -2,6 +2,7 @@
 using System.Threading.Tasks;
 
 using MIDI;
+using WaveOut;
 
 namespace Player {
     unsafe public class Player {

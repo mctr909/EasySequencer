@@ -1,7 +1,6 @@
-﻿using System;
-using System.Runtime.InteropServices;
+﻿using System.Runtime.InteropServices;
 
-namespace MIDI {
+namespace WaveOut {
     [StructLayout(LayoutKind.Sequential, Pack = 4)]
     public struct INST_ID {
         public byte isDrum;

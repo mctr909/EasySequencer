@@ -4,6 +4,13 @@ using System.Collections.Generic;
 
 namespace MIDI {
     public class SMF {
+        public enum FORMAT : ushort {
+            FORMAT0 = 0x0000,
+            FORMAT1 = 0x0001,
+            FORMAT2 = 0x0002,
+            INVALID = 0xFFFF
+        }
+
         #region 構造体
         private struct Head {
             public readonly FORMAT Format;

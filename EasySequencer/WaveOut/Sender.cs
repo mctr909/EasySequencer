@@ -2,12 +2,10 @@
 using System.Runtime.InteropServices;
 using System.Threading.Tasks;
 
-namespace MIDI {
-    unsafe public class Sender {
-        private Instruments mInstruments = null;
-        private SAMPLER** mppWaveOutSampler = null;
-        private SAMPLER** mppFileOutSampler = null;
+using MIDI;
 
+namespace WaveOut {
+    unsafe public class Sender {
         [DllImport("WaveOut.dll", SetLastError = true, CharSet = CharSet.Auto)]
         private static extern bool WaveOutOpen(uint sampleRate, uint bufferLength);
 
@@ -38,9 +36,13 @@ namespace MIDI {
         private const int CHANNEL_COUNT = 16;
         private const int SAMPLER_COUNT = 128;
 
-        public static bool IsFileOutput { get; private set; }
+        private Instruments mInstruments = null;
+        private SAMPLER** mppWaveOutSampler = null;
+        private SAMPLER** mppFileOutSampler = null;
         private Channel[] mFileOutChannel;
+
         public Channel[] Channel { get; private set; }
+        public static bool IsFileOutput { get; private set; }
         public int OutputTime;
 
         public Sender(string dlsPath) {

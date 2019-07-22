@@ -5,6 +5,7 @@ using System.Threading;
 using System.Threading.Tasks;
 
 using MIDI;
+using WaveOut;
 using EasySequencer;
 
 namespace Player {

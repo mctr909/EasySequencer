@@ -67,16 +67,16 @@
     <Compile Include="InstList.Designer.cs">
       <DependentUpon>InstList.cs</DependentUpon>
     </Compile>
-    <Compile Include="Midi\Channel.cs" />
-    <Compile Include="Midi\Const.cs" />
+    <Compile Include="WaveOut\Channel.cs" />
+    <Compile Include="WaveOut\Const.cs" />
     <Compile Include="Player\DoubleBuffer.cs" />
-    <Compile Include="Midi\Instruments.cs" />
-    <Compile Include="Midi\Message.cs" />
+    <Compile Include="WaveOut\Instruments.cs" />
+    <Compile Include="MIDI\Message.cs" />
     <Compile Include="Player\Keyboard.cs" />
     <Compile Include="Player\Player.cs" />
-    <Compile Include="Midi\Sender.cs" />
-    <Compile Include="Midi\SMF.cs" />
-    <Compile Include="Midi\Struct.cs" />
+    <Compile Include="WaveOut\Sender.cs" />
+    <Compile Include="MIDI\SMF.cs" />
+    <Compile Include="WaveOut\Struct.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="StatusWindow.cs">
@@ -120,5 +120,6 @@
   <ItemGroup>
     <None Include="keyboard.bmp" />
   </ItemGroup>
+  <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>
