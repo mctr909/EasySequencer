@@ -20,7 +20,7 @@ namespace MIDI {
         private byte reserved3;
     }
 
-    [StructLayout(LayoutKind.Sequential, Pack = 4)]
+    [StructLayout(LayoutKind.Sequential, Pack = 8)]
     public struct FILTER {
         public double cutoff;
         public double resonance;
@@ -34,28 +34,7 @@ namespace MIDI {
         public double b3;  //  72
     };
 
-    [StructLayout(LayoutKind.Sequential, Pack = 4)]
-    public struct DELAY {
-        public double depth;
-        public double rate;
-        private IntPtr pTapL;
-        private IntPtr pTapR;
-        private Int32 writeIndex;
-        private Int32 readIndex;
-    };
-
-    [StructLayout(LayoutKind.Sequential, Pack = 4)]
-    public struct CHORUS {
-        public double depth;
-        public double rate;
-        private double lfoK;
-        private IntPtr pPanL;
-        private IntPtr pPanR;
-        private IntPtr pLfoRe;
-        private IntPtr pLfoIm;
-    };
-
-    [StructLayout(LayoutKind.Sequential, Pack = 4)]
+    [StructLayout(LayoutKind.Sequential, Pack = 8)]
     public struct ENVELOPE {
         public double levelA;
         public double levelD;
@@ -106,33 +85,6 @@ namespace MIDI {
         public ENVELOPE envAmp;
         public ENVELOPE envEq;
         public FILTER eq;
-    };
-
-    public struct CONTROL {
-        public byte vol;
-        public byte exp;
-        public byte pan;
-
-        public byte rev;
-        public byte cho;
-        public byte del;
-
-        public byte res;
-        public byte cut;
-        public byte atk;
-        public byte rel;
-
-        public byte vibRate;
-        public byte vibDepth;
-        public byte vibDelay;
-
-        public byte bendRange;
-        public byte hold;
-
-        public byte nrpnMSB;
-        public byte nrpnLSB;
-        public byte rpnMSB;
-        public byte rpnLSB;
     };
 
     public struct WAVE_INFO {
