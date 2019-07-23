@@ -120,6 +120,8 @@ namespace EasySequencer {
             tabControl1.Height = Height - tabControl1.Location.Y - 48;
             pnlKeyboard.Width = tabControl1.Width - 16;
             pnlKeyboard.Height = tabControl1.Height - 38;
+            hsbSeek.Width = lblPosition.Right;
+            pnlPlayer.Width = lblPosition.Right + 8;
         }
 
         private void timer1_Tick(object sender, EventArgs e) {

@@ -169,7 +169,9 @@ namespace Player {
                     }
                     previous_time = mCurrentTime;
                     previous_mSec = current_mSec;
-                    Thread.Sleep(1);
+                    if (eventTime - mCurrentTime < 50) {
+                        Thread.Sleep(1);
+                    }
                 }
 
                 var msg = ev.Message;

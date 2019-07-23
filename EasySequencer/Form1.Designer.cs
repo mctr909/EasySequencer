@@ -69,22 +69,22 @@
             // lblPosition
             // 
             this.lblPosition.AutoSize = true;
-            this.lblPosition.Font = new System.Drawing.Font("MS UI Gothic", 13.875F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(128)));
-            this.lblPosition.Location = new System.Drawing.Point(878, 8);
+            this.lblPosition.Font = new System.Drawing.Font("Meiryo UI", 13.875F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(128)));
+            this.lblPosition.Location = new System.Drawing.Point(860, 5);
             this.lblPosition.Margin = new System.Windows.Forms.Padding(9, 0, 9, 0);
             this.lblPosition.Name = "lblPosition";
-            this.lblPosition.Size = new System.Drawing.Size(204, 37);
+            this.lblPosition.Size = new System.Drawing.Size(259, 47);
             this.lblPosition.TabIndex = 4;
             this.lblPosition.Text = "0001:01:000";
             // 
             // lblTempo
             // 
             this.lblTempo.AutoSize = true;
-            this.lblTempo.Font = new System.Drawing.Font("MS UI Gothic", 13.875F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(128)));
-            this.lblTempo.Location = new System.Drawing.Point(717, 8);
+            this.lblTempo.Font = new System.Drawing.Font("Meiryo UI", 13.875F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(128)));
+            this.lblTempo.Location = new System.Drawing.Point(699, 5);
             this.lblTempo.Margin = new System.Windows.Forms.Padding(9, 0, 9, 0);
             this.lblTempo.Name = "lblTempo";
-            this.lblTempo.Size = new System.Drawing.Size(120, 37);
+            this.lblTempo.Size = new System.Drawing.Size(148, 47);
             this.lblTempo.TabIndex = 7;
             this.lblTempo.Text = "132.00";
             // 
