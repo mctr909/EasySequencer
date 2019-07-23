@@ -10,9 +10,14 @@ namespace Player {
         private Event[] mEventList;
         private Task mTask;
 
-        private int mTicks;
-        private double mBPM;
+        private int mTicksPerBeat;
         private double mCurrentTime;
+        private double mBPM;
+        private int mMeasureDenomi;
+        private int mMeasureNumer;
+        private int mMeasures;
+        private int mBeat;
+        private double mTicks;
 
         public Channel[] Channel {
             get { return mSender.Channel; }
@@ -50,15 +55,11 @@ namespace Player {
 
         public string TimeText {
             get {
-                int ib = (int)(mCurrentTime / 960);
-                int measure = ib / 4;
-                int beat = ib % 4 + 1;
-                int tick = (int)(mCurrentTime - 960 * ib);
                 return string.Format(
                     "{0}:{1}:{2}",
-                    measure.ToString("0000"),
-                    beat.ToString("00"),
-                    tick.ToString("000")
+                    (mMeasures + 1).ToString("0000"),
+                    (mBeat + 1).ToString("00"),
+                    ((int)mTicks).ToString("0000")
                 );
             }
         }
@@ -71,20 +72,23 @@ namespace Player {
             mSender = sender;
             mEventList = null;
             mTask = null;
-            mTicks = 960;
+            mTicksPerBeat = 960;
+            mBPM = 120;
+            mMeasureDenomi = 4;
+            mMeasureNumer = 4;
             IsPlay = false;
             SoloChannel = -1;
             Speed = 1.0;
         }
 
-        public void SetEventList(Event[] eventList, int ticks) {
+        public void SetEventList(Event[] eventList, int ticksPerBeat) {
             mEventList = eventList;
-            mTicks = ticks;
+            mTicksPerBeat = ticksPerBeat;
             MaxTime = 0;
 
             foreach (var ev in eventList) {
                 if (EVENT_TYPE.NOTE_OFF == ev.Message.Type || EVENT_TYPE.NOTE_ON == ev.Message.Type) {
-                    var time = 1000 * ev.Time / ticks;
+                    var time = 1000 * ev.Time / ticksPerBeat;
                     if (MaxTime < time) {
                         MaxTime = (int)time;
                     }
@@ -92,6 +96,8 @@ namespace Player {
             }
 
             mBPM = 120.0;
+            mMeasureDenomi = 4;
+            mMeasureNumer = 4;
             mCurrentTime = 0.0;
         }
 
@@ -101,6 +107,9 @@ namespace Player {
             }
 
             IsPlay = true;
+            mMeasures = 0;
+            mBeat = 0;
+            mTicks = 0.0;
             mTask = Task.Factory.StartNew(() => MainProc());
         }
 
@@ -130,6 +139,7 @@ namespace Player {
         private void MainProc() {
             long current_mSec = 0;
             long previous_mSec = 0;
+            double previous_time = 0.0;
 
             var sw = new System.Diagnostics.Stopwatch();
             sw.Start();
@@ -139,7 +149,7 @@ namespace Player {
                     break;
                 }
 
-                long eventTime = 1000 * ev.Time / mTicks;
+                long eventTime = 1000 * ev.Time / mTicksPerBeat;
                 while (mCurrentTime < eventTime) {
                     if (!IsPlay) {
                         break;
@@ -147,6 +157,17 @@ namespace Player {
 
                     current_mSec = sw.ElapsedMilliseconds;
                     mCurrentTime += mBPM * Speed * (current_mSec - previous_mSec) / 60.0;
+                    var deltaTime = mCurrentTime - previous_time;
+                    mTicks += deltaTime;
+                    if (4000.0 / mMeasureDenomi <= mTicks) {
+                        mTicks -= 4000.0 / mMeasureDenomi;
+                        ++mBeat;
+                        if (mMeasureNumer <= mBeat) {
+                            mBeat -= mMeasureNumer;
+                            ++mMeasures;
+                        }
+                    }
+                    previous_time = mCurrentTime;
                     previous_mSec = current_mSec;
                     Thread.Sleep(1);
                 }
@@ -158,10 +179,14 @@ namespace Player {
                     if (META_TYPE.TEMPO == msg.Meta.Type) {
                         mBPM = msg.Meta.BPM;
                     }
+                    if (META_TYPE.MEASURE == msg.Meta.Type) {
+                        mMeasureNumer = msg.Meta.Data[2];
+                        mMeasureDenomi = (int)System.Math.Pow(2.0, msg.Meta.Data[3]);
+                    }
                 }
 
                 if (EVENT_TYPE.NOTE_ON == type && msg.V2 != 0) {
-                    if (0.25 * mTicks < (mCurrentTime - eventTime)) {
+                    if (0.25 * mTicksPerBeat < (mCurrentTime - eventTime)) {
                         continue;
                     }
 

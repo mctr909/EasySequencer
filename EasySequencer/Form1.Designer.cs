@@ -47,6 +47,7 @@
             this.btnPalyStop = new System.Windows.Forms.Button();
             this.numericUpDown1 = new System.Windows.Forms.NumericUpDown();
             this.pnlPlayer = new System.Windows.Forms.Panel();
+            this.lblTempoPercent = new System.Windows.Forms.Label();
             this.trkSpeed = new System.Windows.Forms.TrackBar();
             this.tabControl1 = new System.Windows.Forms.TabControl();
             this.tabPage2 = new System.Windows.Forms.TabPage();
@@ -55,7 +56,6 @@
             this.tabPage1 = new System.Windows.Forms.TabPage();
             this.saveFileDialog1 = new System.Windows.Forms.SaveFileDialog();
             this.timer1 = new System.Windows.Forms.Timer(this.components);
-            this.lblTempoPercent = new System.Windows.Forms.Label();
             this.menuStrip1.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.numericUpDown1)).BeginInit();
             this.pnlPlayer.SuspendLayout();
@@ -69,30 +69,30 @@
             // lblPosition
             // 
             this.lblPosition.AutoSize = true;
-            this.lblPosition.Font = new System.Drawing.Font("Meiryo UI", 14.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(128)));
-            this.lblPosition.Location = new System.Drawing.Point(473, 4);
-            this.lblPosition.Margin = new System.Windows.Forms.Padding(5, 0, 5, 0);
+            this.lblPosition.Font = new System.Drawing.Font("MS UI Gothic", 13.875F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(128)));
+            this.lblPosition.Location = new System.Drawing.Point(878, 8);
+            this.lblPosition.Margin = new System.Windows.Forms.Padding(9, 0, 9, 0);
             this.lblPosition.Name = "lblPosition";
-            this.lblPosition.Size = new System.Drawing.Size(134, 24);
+            this.lblPosition.Size = new System.Drawing.Size(204, 37);
             this.lblPosition.TabIndex = 4;
             this.lblPosition.Text = "0001:01:000";
             // 
             // lblTempo
             // 
             this.lblTempo.AutoSize = true;
-            this.lblTempo.Font = new System.Drawing.Font("Meiryo UI", 14.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(128)));
-            this.lblTempo.Location = new System.Drawing.Point(386, 4);
-            this.lblTempo.Margin = new System.Windows.Forms.Padding(5, 0, 5, 0);
+            this.lblTempo.Font = new System.Drawing.Font("MS UI Gothic", 13.875F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(128)));
+            this.lblTempo.Location = new System.Drawing.Point(717, 8);
+            this.lblTempo.Margin = new System.Windows.Forms.Padding(9, 0, 9, 0);
             this.lblTempo.Name = "lblTempo";
-            this.lblTempo.Size = new System.Drawing.Size(77, 24);
+            this.lblTempo.Size = new System.Drawing.Size(120, 37);
             this.lblTempo.TabIndex = 7;
             this.lblTempo.Text = "132.00";
             // 
             // hsbSeek
             // 
-            this.hsbSeek.Location = new System.Drawing.Point(3, 28);
+            this.hsbSeek.Location = new System.Drawing.Point(6, 56);
             this.hsbSeek.Name = "hsbSeek";
-            this.hsbSeek.Size = new System.Drawing.Size(603, 20);
+            this.hsbSeek.Size = new System.Drawing.Size(1120, 20);
             this.hsbSeek.TabIndex = 8;
             this.hsbSeek.Scroll += new System.Windows.Forms.ScrollEventHandler(this.hsbSeek_Scroll);
             this.hsbSeek.MouseLeave += new System.EventHandler(this.hsbSeek_MouseLeave);
@@ -109,8 +109,8 @@
             this.編集EToolStripMenuItem});
             this.menuStrip1.Location = new System.Drawing.Point(0, 0);
             this.menuStrip1.Name = "menuStrip1";
-            this.menuStrip1.Padding = new System.Windows.Forms.Padding(7, 2, 0, 2);
-            this.menuStrip1.Size = new System.Drawing.Size(1250, 24);
+            this.menuStrip1.Padding = new System.Windows.Forms.Padding(13, 4, 0, 4);
+            this.menuStrip1.Size = new System.Drawing.Size(2321, 44);
             this.menuStrip1.TabIndex = 26;
             this.menuStrip1.Text = "menuStrip1";
             // 
@@ -126,70 +126,70 @@
             this.toolStripSeparator3,
             this.wavファイル出力ToolStripMenuItem});
             this.ファイルFToolStripMenuItem.Name = "ファイルFToolStripMenuItem";
-            this.ファイルFToolStripMenuItem.Size = new System.Drawing.Size(67, 20);
+            this.ファイルFToolStripMenuItem.Size = new System.Drawing.Size(121, 36);
             this.ファイルFToolStripMenuItem.Text = "ファイル(F)";
             // 
             // 新規作成ToolStripMenuItem
             // 
             this.新規作成ToolStripMenuItem.Name = "新規作成ToolStripMenuItem";
-            this.新規作成ToolStripMenuItem.Size = new System.Drawing.Size(184, 22);
+            this.新規作成ToolStripMenuItem.Size = new System.Drawing.Size(336, 38);
             this.新規作成ToolStripMenuItem.Text = "新規作成(N)";
             // 
             // toolStripSeparator1
             // 
             this.toolStripSeparator1.Name = "toolStripSeparator1";
-            this.toolStripSeparator1.Size = new System.Drawing.Size(181, 6);
+            this.toolStripSeparator1.Size = new System.Drawing.Size(333, 6);
             // 
             // 開くOToolStripMenuItem
             // 
             this.開くOToolStripMenuItem.Name = "開くOToolStripMenuItem";
             this.開くOToolStripMenuItem.ShortcutKeys = ((System.Windows.Forms.Keys)((System.Windows.Forms.Keys.Control | System.Windows.Forms.Keys.O)));
-            this.開くOToolStripMenuItem.Size = new System.Drawing.Size(184, 22);
+            this.開くOToolStripMenuItem.Size = new System.Drawing.Size(336, 38);
             this.開くOToolStripMenuItem.Text = "開く(O)";
             this.開くOToolStripMenuItem.Click += new System.EventHandler(this.開くOToolStripMenuItem_Click);
             // 
             // toolStripSeparator2
             // 
             this.toolStripSeparator2.Name = "toolStripSeparator2";
-            this.toolStripSeparator2.Size = new System.Drawing.Size(181, 6);
+            this.toolStripSeparator2.Size = new System.Drawing.Size(333, 6);
             // 
             // 上書き保存SToolStripMenuItem
             // 
             this.上書き保存SToolStripMenuItem.Name = "上書き保存SToolStripMenuItem";
             this.上書き保存SToolStripMenuItem.ShortcutKeys = ((System.Windows.Forms.Keys)((System.Windows.Forms.Keys.Control | System.Windows.Forms.Keys.S)));
-            this.上書き保存SToolStripMenuItem.Size = new System.Drawing.Size(184, 22);
+            this.上書き保存SToolStripMenuItem.Size = new System.Drawing.Size(336, 38);
             this.上書き保存SToolStripMenuItem.Text = "上書き保存(S)";
             // 
             // 名前を付けて保存ToolStripMenuItem
             // 
             this.名前を付けて保存ToolStripMenuItem.Name = "名前を付けて保存ToolStripMenuItem";
-            this.名前を付けて保存ToolStripMenuItem.Size = new System.Drawing.Size(184, 22);
+            this.名前を付けて保存ToolStripMenuItem.Size = new System.Drawing.Size(336, 38);
             this.名前を付けて保存ToolStripMenuItem.Text = "名前を付けて保存(A)";
             // 
             // toolStripSeparator3
             // 
             this.toolStripSeparator3.Name = "toolStripSeparator3";
-            this.toolStripSeparator3.Size = new System.Drawing.Size(181, 6);
+            this.toolStripSeparator3.Size = new System.Drawing.Size(333, 6);
             // 
             // wavファイル出力ToolStripMenuItem
             // 
             this.wavファイル出力ToolStripMenuItem.Name = "wavファイル出力ToolStripMenuItem";
-            this.wavファイル出力ToolStripMenuItem.Size = new System.Drawing.Size(184, 22);
+            this.wavファイル出力ToolStripMenuItem.Size = new System.Drawing.Size(336, 38);
             this.wavファイル出力ToolStripMenuItem.Text = "wavファイル出力(W)";
             this.wavファイル出力ToolStripMenuItem.Click += new System.EventHandler(this.wavファイル出力ToolStripMenuItem_Click);
             // 
             // 編集EToolStripMenuItem
             // 
             this.編集EToolStripMenuItem.Name = "編集EToolStripMenuItem";
-            this.編集EToolStripMenuItem.Size = new System.Drawing.Size(57, 20);
+            this.編集EToolStripMenuItem.Size = new System.Drawing.Size(101, 36);
             this.編集EToolStripMenuItem.Text = "編集(E)";
             // 
             // btnPalyStop
             // 
-            this.btnPalyStop.Location = new System.Drawing.Point(4, 3);
-            this.btnPalyStop.Margin = new System.Windows.Forms.Padding(4, 3, 4, 3);
+            this.btnPalyStop.Location = new System.Drawing.Point(7, 6);
+            this.btnPalyStop.Margin = new System.Windows.Forms.Padding(7, 6, 7, 6);
             this.btnPalyStop.Name = "btnPalyStop";
-            this.btnPalyStop.Size = new System.Drawing.Size(64, 23);
+            this.btnPalyStop.Size = new System.Drawing.Size(119, 46);
             this.btnPalyStop.TabIndex = 27;
             this.btnPalyStop.Text = "再生";
             this.btnPalyStop.UseVisualStyleBackColor = true;
@@ -198,8 +198,8 @@
             // numericUpDown1
             // 
             this.numericUpDown1.Font = new System.Drawing.Font("Meiryo UI", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(128)));
-            this.numericUpDown1.Location = new System.Drawing.Point(75, 4);
-            this.numericUpDown1.Margin = new System.Windows.Forms.Padding(4, 3, 4, 3);
+            this.numericUpDown1.Location = new System.Drawing.Point(139, 8);
+            this.numericUpDown1.Margin = new System.Windows.Forms.Padding(7, 6, 7, 6);
             this.numericUpDown1.Maximum = new decimal(new int[] {
             24,
             0,
@@ -211,7 +211,7 @@
             0,
             -2147483648});
             this.numericUpDown1.Name = "numericUpDown1";
-            this.numericUpDown1.Size = new System.Drawing.Size(62, 23);
+            this.numericUpDown1.Size = new System.Drawing.Size(115, 38);
             this.numericUpDown1.TabIndex = 28;
             this.numericUpDown1.ValueChanged += new System.EventHandler(this.numKey_ValueChanged);
             // 
@@ -225,21 +225,32 @@
             this.pnlPlayer.Controls.Add(this.numericUpDown1);
             this.pnlPlayer.Controls.Add(this.btnPalyStop);
             this.pnlPlayer.Controls.Add(this.trkSpeed);
-            this.pnlPlayer.Location = new System.Drawing.Point(14, 27);
-            this.pnlPlayer.Margin = new System.Windows.Forms.Padding(4, 3, 4, 3);
+            this.pnlPlayer.Location = new System.Drawing.Point(26, 54);
+            this.pnlPlayer.Margin = new System.Windows.Forms.Padding(7, 6, 7, 6);
             this.pnlPlayer.Name = "pnlPlayer";
-            this.pnlPlayer.Size = new System.Drawing.Size(614, 53);
+            this.pnlPlayer.Size = new System.Drawing.Size(1139, 104);
             this.pnlPlayer.TabIndex = 35;
+            // 
+            // lblTempoPercent
+            // 
+            this.lblTempoPercent.AutoSize = true;
+            this.lblTempoPercent.Font = new System.Drawing.Font("Meiryo UI", 11.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(128)));
+            this.lblTempoPercent.Location = new System.Drawing.Point(576, 14);
+            this.lblTempoPercent.Margin = new System.Windows.Forms.Padding(9, 0, 9, 0);
+            this.lblTempoPercent.Name = "lblTempoPercent";
+            this.lblTempoPercent.Size = new System.Drawing.Size(105, 38);
+            this.lblTempoPercent.TabIndex = 30;
+            this.lblTempoPercent.Text = "400%";
             // 
             // trkSpeed
             // 
             this.trkSpeed.LargeChange = 10;
-            this.trkSpeed.Location = new System.Drawing.Point(145, -1);
-            this.trkSpeed.Margin = new System.Windows.Forms.Padding(4, 3, 4, 3);
+            this.trkSpeed.Location = new System.Drawing.Point(269, -2);
+            this.trkSpeed.Margin = new System.Windows.Forms.Padding(7, 6, 7, 6);
             this.trkSpeed.Maximum = 200;
             this.trkSpeed.Minimum = 25;
             this.trkSpeed.Name = "trkSpeed";
-            this.trkSpeed.Size = new System.Drawing.Size(167, 45);
+            this.trkSpeed.Size = new System.Drawing.Size(310, 90);
             this.trkSpeed.TabIndex = 29;
             this.trkSpeed.TickFrequency = 25;
             this.trkSpeed.Value = 100;
@@ -249,11 +260,11 @@
             // 
             this.tabControl1.Controls.Add(this.tabPage2);
             this.tabControl1.Controls.Add(this.tabPage1);
-            this.tabControl1.Location = new System.Drawing.Point(14, 86);
-            this.tabControl1.Margin = new System.Windows.Forms.Padding(4, 3, 4, 3);
+            this.tabControl1.Location = new System.Drawing.Point(26, 172);
+            this.tabControl1.Margin = new System.Windows.Forms.Padding(7, 6, 7, 6);
             this.tabControl1.Name = "tabControl1";
             this.tabControl1.SelectedIndex = 0;
-            this.tabControl1.Size = new System.Drawing.Size(1233, 686);
+            this.tabControl1.Size = new System.Drawing.Size(2290, 1372);
             this.tabControl1.TabIndex = 36;
             // 
             // tabPage2
@@ -261,11 +272,11 @@
             this.tabPage2.BackColor = System.Drawing.SystemColors.Control;
             this.tabPage2.Controls.Add(this.pnlKeyboard);
             this.tabPage2.Font = new System.Drawing.Font("MS UI Gothic", 11.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(128)));
-            this.tabPage2.Location = new System.Drawing.Point(4, 22);
-            this.tabPage2.Margin = new System.Windows.Forms.Padding(4, 3, 4, 3);
+            this.tabPage2.Location = new System.Drawing.Point(8, 39);
+            this.tabPage2.Margin = new System.Windows.Forms.Padding(7, 6, 7, 6);
             this.tabPage2.Name = "tabPage2";
-            this.tabPage2.Padding = new System.Windows.Forms.Padding(4, 3, 4, 3);
-            this.tabPage2.Size = new System.Drawing.Size(1225, 660);
+            this.tabPage2.Padding = new System.Windows.Forms.Padding(7, 6, 7, 6);
+            this.tabPage2.Size = new System.Drawing.Size(2274, 1325);
             this.tabPage2.TabIndex = 1;
             this.tabPage2.Text = "演奏画面";
             // 
@@ -273,10 +284,10 @@
             // 
             this.pnlKeyboard.AutoScroll = true;
             this.pnlKeyboard.Controls.Add(this.picKey);
-            this.pnlKeyboard.Location = new System.Drawing.Point(5, 7);
-            this.pnlKeyboard.Margin = new System.Windows.Forms.Padding(4, 3, 4, 3);
+            this.pnlKeyboard.Location = new System.Drawing.Point(9, 14);
+            this.pnlKeyboard.Margin = new System.Windows.Forms.Padding(7, 6, 7, 6);
             this.pnlKeyboard.Name = "pnlKeyboard";
-            this.pnlKeyboard.Size = new System.Drawing.Size(1193, 647);
+            this.pnlKeyboard.Size = new System.Drawing.Size(2216, 1294);
             this.pnlKeyboard.TabIndex = 0;
             // 
             // picKey
@@ -287,20 +298,20 @@
             this.picKey.BorderStyle = System.Windows.Forms.BorderStyle.Fixed3D;
             this.picKey.InitialImage = null;
             this.picKey.Location = new System.Drawing.Point(0, 0);
-            this.picKey.Margin = new System.Windows.Forms.Padding(4, 3, 4, 3);
+            this.picKey.Margin = new System.Windows.Forms.Padding(7, 6, 7, 6);
             this.picKey.Name = "picKey";
-            this.picKey.Size = new System.Drawing.Size(1188, 643);
+            this.picKey.Size = new System.Drawing.Size(2203, 1282);
             this.picKey.TabIndex = 0;
             this.picKey.TabStop = false;
             // 
             // tabPage1
             // 
             this.tabPage1.BackColor = System.Drawing.SystemColors.Control;
-            this.tabPage1.Location = new System.Drawing.Point(4, 22);
-            this.tabPage1.Margin = new System.Windows.Forms.Padding(4, 3, 4, 3);
+            this.tabPage1.Location = new System.Drawing.Point(8, 39);
+            this.tabPage1.Margin = new System.Windows.Forms.Padding(7, 6, 7, 6);
             this.tabPage1.Name = "tabPage1";
-            this.tabPage1.Padding = new System.Windows.Forms.Padding(4, 3, 4, 3);
-            this.tabPage1.Size = new System.Drawing.Size(1371, 660);
+            this.tabPage1.Padding = new System.Windows.Forms.Padding(7, 6, 7, 6);
+            this.tabPage1.Size = new System.Drawing.Size(2274, 1325);
             this.tabPage1.TabIndex = 0;
             this.tabPage1.Text = "入力画面";
             // 
@@ -308,28 +319,17 @@
             // 
             this.timer1.Tick += new System.EventHandler(this.timer1_Tick);
             // 
-            // lblTempoPercent
-            // 
-            this.lblTempoPercent.AutoSize = true;
-            this.lblTempoPercent.Font = new System.Drawing.Font("Meiryo UI", 11.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(128)));
-            this.lblTempoPercent.Location = new System.Drawing.Point(310, 7);
-            this.lblTempoPercent.Margin = new System.Windows.Forms.Padding(5, 0, 5, 0);
-            this.lblTempoPercent.Name = "lblTempoPercent";
-            this.lblTempoPercent.Size = new System.Drawing.Size(51, 19);
-            this.lblTempoPercent.TabIndex = 30;
-            this.lblTempoPercent.Text = "400%";
-            // 
             // Form1
             // 
-            this.AutoScaleDimensions = new System.Drawing.SizeF(7F, 12F);
+            this.AutoScaleDimensions = new System.Drawing.SizeF(13F, 24F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(1250, 777);
+            this.ClientSize = new System.Drawing.Size(2321, 1554);
             this.Controls.Add(this.tabControl1);
             this.Controls.Add(this.pnlPlayer);
             this.Controls.Add(this.menuStrip1);
             this.DoubleBuffered = true;
             this.MainMenuStrip = this.menuStrip1;
-            this.Margin = new System.Windows.Forms.Padding(4, 3, 4, 3);
+            this.Margin = new System.Windows.Forms.Padding(7, 6, 7, 6);
             this.Name = "Form1";
             this.Text = "Form1";
             this.Load += new System.EventHandler(this.Form1_Load);
