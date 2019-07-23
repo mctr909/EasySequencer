@@ -67,6 +67,9 @@
     <Compile Include="InstList.Designer.cs">
       <DependentUpon>InstList.cs</DependentUpon>
     </Compile>
+    <Compile Include="MIDI\Const.cs" />
+    <Compile Include="MIDI\Meta.cs" />
+    <Compile Include="MIDI\Event.cs" />
     <Compile Include="WaveOut\Channel.cs" />
     <Compile Include="WaveOut\Const.cs" />
     <Compile Include="Player\DoubleBuffer.cs" />

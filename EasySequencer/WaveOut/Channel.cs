@@ -182,7 +182,7 @@ namespace WaveOut {
                 case CTRL_TYPE.RPN_MSB:
                     mRpnMSB = b1;
                     break;
-                case CTRL_TYPE.DATA:
+                case CTRL_TYPE.DATA_MSB:
                     setRpn(b1);
                     setNrpn(b1);
                     break;
