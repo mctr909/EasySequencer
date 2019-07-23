@@ -38,7 +38,7 @@ namespace MIDI {
 
         public class Track {
             public readonly ushort No;
-            public HashSet<Event> Events;
+            public HashSet<Event> Events { get; private set; }
 
             public Track(ushort no) {
                 No = no;
@@ -180,14 +180,14 @@ namespace MIDI {
 
         public Event[] EventList {
             get {
-                HashSet<Event> hash = new HashSet<Event>();
+                var hash = new HashSet<Event>();
                 foreach (var tr in mTracks) {
                     foreach (var ev in tr.Value.Events) {
                         hash.Add(ev);
                     }
                 }
 
-                Event[] evList = new Event[hash.Count];
+                var evList = new Event[hash.Count];
                 hash.CopyTo(evList);
                 Array.Sort(evList, Event.Compare);
 
@@ -201,8 +201,8 @@ namespace MIDI {
         }
 
         public SMF(string filePath) {
-            FileStream fs = new FileStream(filePath, FileMode.Open);
-            BinaryReader br = new BinaryReader(fs);
+            var fs = new FileStream(filePath, FileMode.Open);
+            var br = new BinaryReader(fs);
 
             mPath = filePath;
             mHead = new Header(br);
