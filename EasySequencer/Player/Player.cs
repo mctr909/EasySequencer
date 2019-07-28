@@ -179,11 +179,11 @@ namespace Player {
 
                 if (EVENT_TYPE.META == type) {
                     if (META_TYPE.TEMPO == msg.Meta.Type) {
-                        mBPM = msg.Meta.BPM;
+                        mBPM = msg.Meta.Tempo;
                     }
                     if (META_TYPE.MEASURE == msg.Meta.Type) {
-                        mMeasureNumer = msg.Meta.Data[2];
-                        mMeasureDenomi = (int)System.Math.Pow(2.0, msg.Meta.Data[3]);
+                        mMeasureNumer = msg.Meta.MeasureNumer;
+                        mMeasureDenomi = msg.Meta.MeasureDenomi;
                     }
                 }
 

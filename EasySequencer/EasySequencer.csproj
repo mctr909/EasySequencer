@@ -70,6 +70,8 @@
     <Compile Include="MIDI\Const.cs" />
     <Compile Include="MIDI\Meta.cs" />
     <Compile Include="MIDI\Event.cs" />
+    <Compile Include="MIDI\Track.cs" />
+    <Compile Include="MIDI\Util.cs" />
     <Compile Include="WaveOut\Channel.cs" />
     <Compile Include="WaveOut\Const.cs" />
     <Compile Include="Player\DoubleBuffer.cs" />

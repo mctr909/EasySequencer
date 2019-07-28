@@ -102,6 +102,8 @@
         Gb_MAJOR = 0xFA00,
         Eb_MINOR = 0xFA01,
         Cb_MAJOR = 0xF900,
-        Ab_MINOR = 0xF901
+        Ab_MINOR = 0xF901,
+
+        INVALID  = 0xFFFF
     }
 }

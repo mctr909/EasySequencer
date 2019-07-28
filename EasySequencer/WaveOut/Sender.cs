@@ -115,7 +115,7 @@ namespace WaveOut {
                     var type = msg.Type;
                     if (EVENT_TYPE.META == type) {
                         if (META_TYPE.TEMPO == msg.Meta.Type) {
-                            bpm = msg.Meta.BPM;
+                            bpm = msg.Meta.Tempo;
                         }
                     }
 
