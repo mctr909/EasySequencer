@@ -49,7 +49,7 @@ namespace EasySequencer {
             try {
                 mSMF = new SMF(filePath);
                 mPlayer.SetEventList(mSMF.EventList, mSMF.Ticks);
-                hsbSeek.Maximum = mPlayer.MaxTime;
+                hsbSeek.Maximum = mPlayer.MaxTick;
                 Text = Path.GetFileNameWithoutExtension(filePath);
             }
             catch (Exception ex) {
@@ -91,7 +91,7 @@ namespace EasySequencer {
         private void hsbSeek_MouseLeave(object sender, EventArgs e) {
             if (mIsSeek) {
                 mIsSeek = false;
-                mPlayer.SeekTime = hsbSeek.Value;
+                mPlayer.Seek = hsbSeek.Value;
                 btnPalyStop.Text = "停止";
             }
         }
@@ -107,7 +107,7 @@ namespace EasySequencer {
         private void numKey_ValueChanged(Object sender, EventArgs e) {
             mIsSeek = true;
             mPlayer.Transpose = (int)numericUpDown1.Value;
-            mPlayer.SeekTime = hsbSeek.Value;
+            mPlayer.Seek = hsbSeek.Value;
             mIsSeek = false;
         }
 
@@ -125,17 +125,17 @@ namespace EasySequencer {
         }
 
         private void timer1_Tick(object sender, EventArgs e) {
-            lblPosition.Text = mPlayer.TimeText;
+            lblPosition.Text = mPlayer.PositionText;
             lblTempo.Text = mPlayer.TempoText;
             lblTempoPercent.Text = trkSpeed.Value + "%";
 
             if (!mIsSeek) {
-                if (mPlayer.CurrentTime <= hsbSeek.Maximum) {
-                    hsbSeek.Value = mPlayer.CurrentTime;
+                if (mPlayer.CurrentTick <= hsbSeek.Maximum) {
+                    hsbSeek.Value = mPlayer.CurrentTick;
                 }
                 else {
                     hsbSeek.Value = 0;
-                    mPlayer.SeekTime = hsbSeek.Value;
+                    mPlayer.Seek = hsbSeek.Value;
                 }
             }
         }
