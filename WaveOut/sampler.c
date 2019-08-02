@@ -4,7 +4,8 @@
 #define CHORUS_PHASES       3
 #define DELAY_TAPS          1048576
 
-static const double PI = 3.14159265;
+static const double PI        = 3.14159265;
+static const double PI2       = 6.28318531;
 static const double INV_FACT2 = 5.00000000e-01;
 static const double INV_FACT3 = 1.66666667e-01;
 static const double INV_FACT4 = 4.16666667e-02;
@@ -48,7 +49,7 @@ CHANNEL** createChannels(UInt32 count) {
         memset(&channel[i]->chorus, 0, sizeof(CHORUS));
 
         CHORUS *chorus = &channel[i]->chorus;
-        chorus->lfoK = 2.0 * PI * gDeltaTime;
+        chorus->lfoK = PI2 * gDeltaTime;
         chorus->pPanL = (double*)malloc(sizeof(double) * CHORUS_PHASES);
         chorus->pPanR = (double*)malloc(sizeof(double) * CHORUS_PHASES);
         chorus->pLfoRe = (double*)malloc(sizeof(double) * CHORUS_PHASES);
@@ -57,8 +58,8 @@ CHANNEL** createChannels(UInt32 count) {
         for (SInt32 p = 0; p < CHORUS_PHASES; ++p) {
             chorus->pPanL[p] = cos(PI * p / CHORUS_PHASES);
             chorus->pPanR[p] = sin(PI * p / CHORUS_PHASES);
-            chorus->pLfoRe[p] = cos(2.0 * PI * p / CHORUS_PHASES);
-            chorus->pLfoIm[p] = sin(2.0 * PI * p / CHORUS_PHASES);
+            chorus->pLfoRe[p] = cos(PI2 * p / CHORUS_PHASES);
+            chorus->pLfoIm[p] = sin(PI2 * p / CHORUS_PHASES);
         }
     }
 
@@ -191,8 +192,8 @@ inline void delay(CHANNEL *ch, DELAY *delay, double *waveL, double *waveR) {
     double delayL = ch->param->delayDepth * delay->pTapL[delay->readIndex];
     double delayR = ch->param->delayDepth * delay->pTapR[delay->readIndex];
 
-    *waveL += (0.7 * delayL + 0.3 * delayR);
-    *waveR += (0.7 * delayR + 0.3 * delayL);
+    *waveL += (0.75 * delayL + 0.25 * delayR);
+    *waveR += (0.75 * delayR + 0.25 * delayL);
 
     delay->pTapL[delay->writeIndex] = *waveL;
     delay->pTapR[delay->writeIndex] = *waveR;
@@ -207,7 +208,7 @@ inline void chorus(CHANNEL *ch, DELAY *delay, CHORUS *chorus, double *waveL, dou
     SInt32 indexPre;
 
     for (register ph = 0; ph < CHORUS_PHASES; ++ph) {
-        index = delay->writeIndex - (0.5 - 0.45 * chorus->pLfoRe[ph]) * gSampleRate * 0.05;
+        index = delay->writeIndex - (0.5 - 0.495 * chorus->pLfoRe[ph]) * gSampleRate * 0.2;
         indexCur = (SInt32)index;
         indexPre = indexCur - 1;
         dt = index - indexCur;
@@ -256,15 +257,15 @@ inline void filter(FILTER *param, double input) {
     s -= INV_FACT3;
     c *= w2;
     s *= w2;
-    c += 1.0;
-    s += 1.0;
+    c++;
+    s++;
     s *= w;
 
     double a = s / (param->res * 4.0 + 1.0);
     double m = 1.0 / (a + 1.0);
     double ka0 = -2.0 * c  * m;
-    double ka1 = (1.0 - a) * m;
     double kb0 = (1.0 - c) * m;
+    double ka1 = (1.0 - a) * m;
     double kb1 = kb0 * 0.5;
 
     double output =
@@ -273,7 +274,7 @@ inline void filter(FILTER *param, double input) {
         + kb1 * param->b1
         - ka0 * param->a0
         - ka1 * param->a1
-        ;
+    ;
     param->b1 = param->b0;
     param->b0 = input;
     param->a1 = param->a0;
@@ -286,7 +287,7 @@ inline void filter(FILTER *param, double input) {
         + kb1 * param->b3
         - ka0 * param->a2
         - ka1 * param->a3
-        ;
+    ;
     param->b3 = param->b2;
     param->b2 = input;
     param->a3 = param->a2;
