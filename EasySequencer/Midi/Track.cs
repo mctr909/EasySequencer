@@ -36,7 +36,7 @@ namespace MIDI {
 
         public void Write(MemoryStream ms) {
             var temp = new MemoryStream();
-            Util.WriteUI32(temp, 0);
+            Util.WriteUI32(temp, 0x4D54726B);
             Util.WriteUI32(temp, 0);
 
             uint currentTime = 0;
@@ -46,8 +46,7 @@ namespace MIDI {
                 currentTime = ev.Time;
             }
 
-            temp.Seek(0, SeekOrigin.Begin);
-            Util.WriteUI32(temp, 0x4D54726B);
+            temp.Seek(4, SeekOrigin.Begin);
             Util.WriteUI32(temp, (uint)(temp.Length - 8));
 
             temp.WriteTo(ms);
