@@ -93,7 +93,7 @@ namespace WaveOut {
             VibDepth = 64;
             VibDelay = 64;
 
-            mpChannel->chorusRate = 0.01;
+            mpChannel->chorusRate = 0.2;
             mpChannel->delayTime = 0.2;
 
             mRpnLSB = 0xFF;
@@ -280,7 +280,7 @@ namespace WaveOut {
 
         private void setCho(byte value) {
             Cho = value;
-            mpChannel->chorusDepth = 2.0 * Const.FeedBack[value];
+            mpChannel->chorusDepth = 3.0 * Const.FeedBack[value];
         }
 
         private void setRpn(byte b1) {

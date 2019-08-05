@@ -1,3 +1,4 @@
+#include <math.h>
 #include "sampler.h"
 
 /******************************************************************************/
@@ -192,8 +193,8 @@ inline void delay(CHANNEL *ch, DELAY *delay, double *waveL, double *waveR) {
     double delayL = ch->param->delayDepth * delay->pTapL[delay->readIndex];
     double delayR = ch->param->delayDepth * delay->pTapR[delay->readIndex];
 
-    *waveL += (0.75 * delayL + 0.25 * delayR);
-    *waveR += (0.75 * delayR + 0.25 * delayL);
+    *waveL += (0.9 * delayL + 0.1 * delayR);
+    *waveR += (0.9 * delayR + 0.1 * delayL);
 
     delay->pTapL[delay->writeIndex] = *waveL;
     delay->pTapR[delay->writeIndex] = *waveR;
@@ -208,7 +209,7 @@ inline void chorus(CHANNEL *ch, DELAY *delay, CHORUS *chorus, double *waveL, dou
     SInt32 indexPre;
 
     for (register ph = 0; ph < CHORUS_PHASES; ++ph) {
-        index = delay->writeIndex - (0.5 - 0.495 * chorus->pLfoRe[ph]) * gSampleRate * 0.2;
+        index = delay->writeIndex - (0.5 - 0.4 * chorus->pLfoRe[ph]) * gSampleRate * 0.02;
         indexCur = (SInt32)index;
         indexPre = indexCur - 1;
         dt = index - indexCur;
