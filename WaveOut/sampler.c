@@ -118,19 +118,7 @@ inline void sampler(CHANNEL **chs, SAMPLER *smpl, LPBYTE pDlsBuffer) {
         return;
     }
 
-    if (smpl->onKey) {
-        if (smpl->time < smpl->envAmp.hold) {
-            smpl->amp += (1.0 - smpl->amp) * smpl->envAmp.deltaA;
-        } else {
-            smpl->amp += (smpl->envAmp.levelS - smpl->amp) * smpl->envAmp.deltaD;
-        }
-
-        if (smpl->time < smpl->envEq.hold) {
-            smpl->eq.cut += (smpl->envEq.levelD - smpl->eq.cut) * smpl->envEq.deltaA;
-        } else {
-            smpl->eq.cut += (smpl->envEq.levelS - smpl->eq.cut) * smpl->envEq.deltaD;
-        }
-    } else {
+    if (0 == smpl->keyState) {
         if (chParam->holdDelta < 1.0) {
             smpl->amp -= smpl->amp * chParam->holdDelta;
         } else {
@@ -139,6 +127,22 @@ inline void sampler(CHANNEL **chs, SAMPLER *smpl, LPBYTE pDlsBuffer) {
 
         smpl->eq.cut += (smpl->envEq.levelR - smpl->eq.cut) * smpl->envEq.deltaR;
 
+        if (smpl->amp < 0.001) {
+            smpl->isActive = false;
+        }
+    } else if (1 == smpl->keyState) {
+        if (smpl->time < smpl->envAmp.hold) {
+            smpl->amp += (1.0 - smpl->amp) * smpl->envAmp.deltaA;
+        } else {
+            smpl->amp += (smpl->envAmp.levelS - smpl->amp) * smpl->envAmp.deltaD;
+        }
+        if (smpl->time < smpl->envEq.hold) {
+            smpl->eq.cut += (smpl->envEq.levelD - smpl->eq.cut) * smpl->envEq.deltaA;
+        } else {
+            smpl->eq.cut += (smpl->envEq.levelS - smpl->eq.cut) * smpl->envEq.deltaD;
+        }
+    } else {
+        smpl->amp -= smpl->amp * gDeltaTime * 250;
         if (smpl->amp < 0.001) {
             smpl->isActive = false;
         }
@@ -209,7 +213,7 @@ inline void chorus(CHANNEL *ch, DELAY *delay, CHORUS *chorus, double *waveL, dou
     SInt32 indexPre;
 
     for (register ph = 0; ph < CHORUS_PHASES; ++ph) {
-        index = delay->writeIndex - (0.5 - 0.4 * chorus->pLfoRe[ph]) * gSampleRate * 0.02;
+        index = delay->writeIndex - (0.5 - 0.4 * chorus->pLfoRe[ph]) * gSampleRate * 0.01;
         indexCur = (SInt32)index;
         indexPre = indexCur - 1;
         dt = index - indexCur;

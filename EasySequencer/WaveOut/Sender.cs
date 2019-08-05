@@ -150,25 +150,25 @@ namespace WaveOut {
             });
         }
 
-        private void noteOff(SAMPLER** ppSmpl, Channel ch, byte noteNo) {
+        private void noteOff(SAMPLER** ppSmpl, Channel ch, byte noteNo, byte keyState = 0) {
             for (var i = 0; i < SAMPLER_COUNT; ++i) {
                 if (ppSmpl[i]->channelNo == ch.No && ppSmpl[i]->noteNo == noteNo) {
                     if (!ch.Enable || ch.Hld < 64) {
                         ch.KeyBoard[noteNo] = KEY_STATUS.OFF;
-                    }
-                    else {
+                    } else {
                         ch.KeyBoard[noteNo] = KEY_STATUS.HOLD;
                     }
-                    ppSmpl[i]->onKey = false;
+                    ppSmpl[i]->keyState = keyState;
                 }
             }
         }
 
         private void noteOn(SAMPLER** ppSmpl, Channel ch, byte noteNo, byte velocity) {
-            noteOff(ppSmpl, ch, noteNo);
-
             if (0 == velocity) {
+                noteOff(ppSmpl, ch, noteNo, 0);
                 return;
+            } else {
+                noteOff(ppSmpl, ch, noteNo, 2);
             }
 
             var wave = ch.WaveInfo[noteNo];
@@ -193,8 +193,7 @@ namespace WaveOut {
                 var diffNote = noteNo - wave.unityNote;
                 if (diffNote < 0) {
                     pSmpl->delta = wave.delta / Const.SemiTone[-diffNote];
-                }
-                else {
+                } else {
                     pSmpl->delta = wave.delta * Const.SemiTone[diffNote];
                 }
 
@@ -228,7 +227,7 @@ namespace WaveOut {
                 pSmpl->eq.cutoff = 1.0;
                 pSmpl->eq.resonance = 0.0;
 
-                pSmpl->onKey = true;
+                pSmpl->keyState = 1;
                 pSmpl->isActive = true;
 
                 ch.KeyBoard[noteNo] = KEY_STATUS.ON;

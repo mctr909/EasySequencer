@@ -65,7 +65,7 @@ namespace WaveOut {
     unsafe public struct SAMPLER {
         public uint channelNo;
         public ushort noteNo;
-        public bool onKey;
+        public byte keyState;
         public bool isActive;
 
         public uint pcmAddr;

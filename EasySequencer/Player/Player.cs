@@ -198,9 +198,9 @@ namespace Player {
                     }
 
                     current_mSec = sw.ElapsedMilliseconds;
-                    mCurrentTick += 0.96 * mBPM * Speed * (current_mSec - previous_mSec) / 60.0;
-                    var deltaTime = mCurrentTick - previousTick;
-                    mTick += deltaTime;
+                    var deltaTime = current_mSec - previous_mSec;
+                    mCurrentTick += 0.96 * mBPM * Speed * deltaTime / 60.0;
+                    mTick += mCurrentTick - previousTick;
                     if (3840 / mMeasureDenomi <= mTick) {
                         mTick -= 3840 / mMeasureDenomi;
                         ++mBeat;
@@ -211,6 +211,9 @@ namespace Player {
                     }
                     previous_mSec = current_mSec;
                     previousTick = mCurrentTick;
+                    if (deltaTime < 1) {
+                        Thread.Sleep(1);
+                    }
                 }
 
                 var msg = ev.Message;

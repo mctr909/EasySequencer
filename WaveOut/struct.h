@@ -121,7 +121,7 @@ typedef struct CHANNEL {
 typedef struct SAMPLER {
     UInt32 channelNo;
     UInt16 noteNo;
-    bool onKey;
+    byte keyState;
     bool isActive;
 
     UInt32 pcmAddr;
