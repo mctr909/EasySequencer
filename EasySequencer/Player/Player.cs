@@ -211,9 +211,6 @@ namespace Player {
                     }
                     previous_mSec = current_mSec;
                     previousTick = mCurrentTick;
-                    if (eventTick - mCurrentTick < 50) {
-                        Thread.Sleep(1);
-                    }
                 }
 
                 var msg = ev.Message;
