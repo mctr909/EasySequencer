@@ -22,10 +22,10 @@ namespace WaveOut {
         private static extern void FileOut();
 
         [DllImport("WaveOut.dll", SetLastError = true, CharSet = CharSet.Auto)]
-        private static extern CHANNEL_PARAM** GetWaveOutChannelPtr();
+        private static extern CHANNEL_PARAM** GetWaveOutChannelPtr(uint sampleRate);
 
         [DllImport("WaveOut.dll", SetLastError = true, CharSet = CharSet.Auto)]
-        private static extern CHANNEL_PARAM** GetFileOutChannelPtr();
+        private static extern CHANNEL_PARAM** GetFileOutChannelPtr(uint sampleRate);
 
         [DllImport("WaveOut.dll", SetLastError = true, CharSet = CharSet.Auto)]
         private static extern SAMPLER** GetWaveOutSamplerPtr();
@@ -48,14 +48,14 @@ namespace WaveOut {
         public Sender(string dlsPath) {
             mInstruments = new Instruments(dlsPath, Const.SampleRate);
 
-            var ppChannel = GetWaveOutChannelPtr();
+            var ppChannel = GetWaveOutChannelPtr((uint)Const.SampleRate);
             mppWaveOutSampler = GetWaveOutSamplerPtr();
             Channel = new Channel[CHANNEL_COUNT];
             for (int i = 0; i < CHANNEL_COUNT; ++i) {
                 Channel[i] = new Channel(mInstruments, ppChannel[i], i);
             }
 
-            var ppFileOutChannel = GetFileOutChannelPtr();
+            var ppFileOutChannel = GetFileOutChannelPtr((uint)Const.SampleRate);
             mppFileOutSampler = GetFileOutSamplerPtr();
             mFileOutChannel = new Channel[CHANNEL_COUNT];
             for (int i = 0; i < CHANNEL_COUNT; ++i) {

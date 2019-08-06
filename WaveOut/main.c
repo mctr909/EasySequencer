@@ -39,9 +39,6 @@ RIFF            gRiff;
 FMT_            gFmt;
 
 /******************************************************************************/
-void CALLBACK waveOutProc(HWAVEOUT hwo, UInt32 uMsg);
-
-/******************************************************************************/
 BOOL WINAPI WaveOutOpen(UInt32 sampleRate, UInt32 waveBufferLength) {
     if (NULL != ghWaveOut) {
         WaveOutClose();
@@ -193,9 +190,9 @@ VOID WINAPI FileOut() {
     gFmt.dataSize += sizeof(float) * 2 * gFileBufferLength;
 }
 
-CHANNEL_PARAM** WINAPI GetWaveOutChannelPtr() {
+CHANNEL_PARAM** WINAPI GetWaveOutChannelPtr(UInt32 sampleRate) {
     if (NULL == gppWaveOutChValues) {
-        gppWaveOutChValues = createChannels(CHANNEL_COUNT);
+        gppWaveOutChValues = createChannels(CHANNEL_COUNT, sampleRate);
         gppWaveOutChParams = (CHANNEL_PARAM**)malloc(sizeof(CHANNEL_PARAM*)*CHANNEL_COUNT);
         for (int i = 0; i < CHANNEL_COUNT; ++i) {
             gppWaveOutChParams[i] = gppWaveOutChValues[i]->param;
@@ -204,9 +201,9 @@ CHANNEL_PARAM** WINAPI GetWaveOutChannelPtr() {
     return gppWaveOutChParams;
 }
 
-CHANNEL_PARAM** WINAPI GetFileOutChannelPtr() {
+CHANNEL_PARAM** WINAPI GetFileOutChannelPtr(UInt32 sampleRate) {
     if (NULL == gppFileOutChValues) {
-        gppFileOutChValues = createChannels(CHANNEL_COUNT);
+        gppFileOutChValues = createChannels(CHANNEL_COUNT, sampleRate);
         gppFileOutChParams = (CHANNEL_PARAM**)malloc(sizeof(CHANNEL_PARAM*)*CHANNEL_COUNT);
         for (int i = 0; i < CHANNEL_COUNT; ++i) {
             gppFileOutChParams[i] = gppFileOutChValues[i]->param;
@@ -229,7 +226,7 @@ SAMPLER** WINAPI GetFileOutSamplerPtr() {
     return gppFileOutSamplers;
 }
 
-LPBYTE WINAPI LoadDLS(LPWSTR filePath, UInt32 *size, UInt32 sampleRate) {
+LPBYTE WINAPI LoadDLS(LPWSTR filePath, UInt32 *size) {
     //
     gDoMute = true;
     while (!gIsMuted) {
@@ -265,9 +262,6 @@ LPBYTE WINAPI LoadDLS(LPWSTR filePath, UInt32 *size, UInt32 sampleRate) {
         //
         fclose(fpDLS);
     }
-
-    gSampleRate = sampleRate;
-    gDeltaTime = 1.0 / sampleRate;
 
     //
     gDoMute = false;

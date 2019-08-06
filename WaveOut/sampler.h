@@ -3,11 +3,7 @@
 #include "struct.h"
 
 /******************************************************************************/
-static SInt32 gSampleRate = 44100;
-static double gDeltaTime = 2.26757e-05;
-
-/******************************************************************************/
-extern CHANNEL** createChannels(UInt32 count);
+extern CHANNEL** createChannels(UInt32 count, UInt32 sampleRate);
 extern SAMPLER** createSamplers(UInt32 count);
 
 /******************************************************************************/

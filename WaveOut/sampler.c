@@ -17,13 +17,15 @@ static const double INV_FACT8 = 2.48015873e-05;
 static const double INV_FACT9 = 2.75573192e-06;
 
 /******************************************************************************/
-CHANNEL** createChannels(UInt32 count) {
+CHANNEL** createChannels(UInt32 count, UInt32 sampleRate) {
     CHANNEL **channel = (CHANNEL**)malloc(sizeof(CHANNEL*) * count);
     for (UInt32 i = 0; i < count; ++i) {
         channel[i] = (CHANNEL*)malloc(sizeof(CHANNEL));
         memset(channel[i], 0, sizeof(CHANNEL));
         channel[i]->param = (CHANNEL_PARAM*)malloc(sizeof(CHANNEL_PARAM));
         memset(channel[i]->param, 0, sizeof(CHANNEL_PARAM));
+        channel[i]->sampleRate = sampleRate;
+        channel[i]->deltaTime = 1.0 / sampleRate;
     }
 
     // Filter
@@ -50,7 +52,7 @@ CHANNEL** createChannels(UInt32 count) {
         memset(&channel[i]->chorus, 0, sizeof(CHORUS));
 
         CHORUS *chorus = &channel[i]->chorus;
-        chorus->lfoK = PI2 * gDeltaTime;
+        chorus->lfoK = PI2 * channel[i]->deltaTime;
         chorus->pPanL = (double*)malloc(sizeof(double) * CHORUS_PHASES);
         chorus->pPanR = (double*)malloc(sizeof(double) * CHORUS_PHASES);
         chorus->pLfoRe = (double*)malloc(sizeof(double) * CHORUS_PHASES);
@@ -92,11 +94,11 @@ inline void channel(CHANNEL *ch, double *waveL, double *waveR) {
     chorus(ch, &ch->delay, &ch->chorus, &ch->waveL, &ch->waveR);
 
     //
-    ch->panLeft  += 250 * (ch->param->panLeft   - ch->panLeft)  * gDeltaTime;
-    ch->panRight += 250 * (ch->param->panRight  - ch->panRight) * gDeltaTime;
-    ch->amp      += 250 * (ch->param->amp       - ch->amp)      * gDeltaTime;
-    ch->eq.cut   += 250 * (ch->param->cutoff    - ch->eq.cut)   * gDeltaTime;
-    ch->eq.res   += 250 * (ch->param->resonance - ch->eq.res)   * gDeltaTime;
+    ch->panLeft  += 250 * (ch->param->panLeft   - ch->panLeft)  * ch->deltaTime;
+    ch->panRight += 250 * (ch->param->panRight  - ch->panRight) * ch->deltaTime;
+    ch->amp      += 250 * (ch->param->amp       - ch->amp)      * ch->deltaTime;
+    ch->eq.cut   += 250 * (ch->param->cutoff    - ch->eq.cut)   * ch->deltaTime;
+    ch->eq.res   += 250 * (ch->param->resonance - ch->eq.res)   * ch->deltaTime;
 
     //
     *waveL += ch->waveL;
@@ -117,7 +119,7 @@ inline void sampler(CHANNEL **chs, SAMPLER *smpl, LPBYTE pDlsBuffer) {
     if (NULL == chParam) {
         return;
     }
-
+    
     if (0 == smpl->keyState) {
         if (chParam->holdDelta < 1.0) {
             smpl->amp -= smpl->amp * chParam->holdDelta;
@@ -142,7 +144,7 @@ inline void sampler(CHANNEL **chs, SAMPLER *smpl, LPBYTE pDlsBuffer) {
             smpl->eq.cut += (smpl->envEq.levelS - smpl->eq.cut) * smpl->envEq.deltaD;
         }
     } else {
-        smpl->amp -= smpl->amp * gDeltaTime * 250;
+        smpl->amp -= smpl->amp * chValue->deltaTime * 1000;
         if (smpl->amp < 0.001) {
             smpl->isActive = false;
         }
@@ -171,7 +173,7 @@ inline void sampler(CHANNEL **chs, SAMPLER *smpl, LPBYTE pDlsBuffer) {
 
     //
     smpl->index += smpl->delta * chParam->pitch;
-    smpl->time += gDeltaTime;
+    smpl->time += chValue->deltaTime;
 
     //
     if ((smpl->loop.start + smpl->loop.length) < smpl->index) {
@@ -189,7 +191,7 @@ inline void delay(CHANNEL *ch, DELAY *delay, double *waveL, double *waveR) {
         delay->writeIndex = 0;
     }
 
-    delay->readIndex = delay->writeIndex - (SInt32)(ch->param->delayTime * gSampleRate);
+    delay->readIndex = delay->writeIndex - (SInt32)(ch->param->delayTime * ch->sampleRate);
     if (delay->readIndex < 0) {
         delay->readIndex += DELAY_TAPS;
     }
@@ -213,7 +215,7 @@ inline void chorus(CHANNEL *ch, DELAY *delay, CHORUS *chorus, double *waveL, dou
     SInt32 indexPre;
 
     for (register ph = 0; ph < CHORUS_PHASES; ++ph) {
-        index = delay->writeIndex - (0.5 - 0.4 * chorus->pLfoRe[ph]) * gSampleRate * 0.01;
+        index = delay->writeIndex - (0.5 - 0.4 * chorus->pLfoRe[ph]) * ch->sampleRate * 0.01;
         indexCur = (SInt32)index;
         indexPre = indexCur - 1;
         dt = index - indexCur;

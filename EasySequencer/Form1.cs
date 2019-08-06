@@ -21,7 +21,7 @@ namespace EasySequencer {
         }
 
         private void Form1_Load(object sender, EventArgs e) {
-            mDlsFilePath = "C:\\Users\\user\\Desktop\\EasySequencer\\EasySequencer\\gm.dls";
+            mDlsFilePath = "C:\\Users\\owner\\Desktop\\EasySequencer\\EasySequencer\\gm.dls";
             mMidiSender = new Sender(mDlsFilePath);
             mPlayer = new Player.Player(mMidiSender);
             mKeyboard = new Keyboard(picKey, mMidiSender, mPlayer);

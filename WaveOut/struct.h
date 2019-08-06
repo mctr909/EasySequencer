@@ -111,6 +111,9 @@ typedef struct CHANNEL {
     double panLeft;
     double panRight;
 
+    double deltaTime;
+    UInt32 sampleRate;
+
     FILTER eq;
     DELAY delay;
     CHORUS chorus;

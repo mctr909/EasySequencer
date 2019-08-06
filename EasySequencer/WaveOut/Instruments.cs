@@ -6,14 +6,14 @@ using DLS;
 namespace WaveOut {
     unsafe public class Instruments {
         [DllImport("WaveOut.dll", SetLastError = true, CharSet = CharSet.Auto)]
-        unsafe private static extern IntPtr LoadDLS(IntPtr filePath, out uint size, int sampleRate);
+        unsafe private static extern IntPtr LoadDLS(IntPtr filePath, out uint size);
 
         public Dictionary<INST_ID, WAVE_INFO[]> List;
         public Dictionary<INST_ID, string[]> Names;
 
         public Instruments(string dlsPath, int sampleRate) {
             uint dlsSize = 0;
-            var dlsPtr = LoadDLS(Marshal.StringToHGlobalAuto(dlsPath), out dlsSize, Const.SampleRate);
+            var dlsPtr = LoadDLS(Marshal.StringToHGlobalAuto(dlsPath), out dlsSize);
             var dls = new File(dlsPtr, dlsSize);
             var deltaTime = 1.0 / sampleRate;
 
