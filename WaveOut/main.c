@@ -7,9 +7,8 @@
 #pragma comment (lib, "winmm.lib")
 
 /******************************************************************************/
-#define BUFFER_COUNT        32
+#define BUFFER_COUNT        8
 #define CHANNEL_COUNT       16
-#define SAMPLER_COUNT       128
 
 /******************************************************************************/
 bool            gDoStop = false;
@@ -23,6 +22,8 @@ WAVEHDR         gWaveHdr[BUFFER_COUNT] = { NULL };
 
 LPBYTE          gpDlsBuffer = NULL;
 
+SInt32          gWaveOutSamplers = 48;
+SInt32          gFileOutSamplers = 256;
 SInt32          gWaveBufferLength = 0;
 SInt32          gFileBufferLength = 0;
 
@@ -133,7 +134,7 @@ VOID WINAPI FileOutOpen(LPWSTR filePath, UInt32 bufferLength) {
     gFmt.chunkSize    = 16;
     gFmt.formatId     = 3;
     gFmt.channels     = 2;
-    gFmt.sampleRate   = 44100;
+    gFmt.sampleRate   = gppFileOutChValues[0]->sampleRate;
     gFmt.bitPerSample = 32;
     gFmt.blockAlign   = gFmt.channels * gFmt.bitPerSample >> 3;
     gFmt.bytePerSec   = gFmt.sampleRate * gFmt.blockAlign;
@@ -172,7 +173,7 @@ VOID WINAPI FileOut() {
     pWave = gpFileOutBuffer;
 
     for (t = 0; t < gFileBufferLength; ++t) {
-        for (s = 0; s < SAMPLER_COUNT; ++s) {
+        for (s = 0; s < gFileOutSamplers; ++s) {
             sampler(gppFileOutChValues, gppFileOutSamplers[s], gpDlsBuffer);
         }
 
@@ -212,16 +213,18 @@ CHANNEL_PARAM** WINAPI GetFileOutChannelPtr(UInt32 sampleRate) {
     return gppFileOutChParams;
 }
 
-SAMPLER** WINAPI GetWaveOutSamplerPtr() {
+SAMPLER** WINAPI GetWaveOutSamplerPtr(UInt32 samplers) {
     if (NULL == gppWaveOutSamplers) {
-        gppWaveOutSamplers = createSamplers(SAMPLER_COUNT);
+        gWaveOutSamplers = samplers;
+        gppWaveOutSamplers = createSamplers(samplers);
     }
     return gppWaveOutSamplers;
 }
 
-SAMPLER** WINAPI GetFileOutSamplerPtr() {
+SAMPLER** WINAPI GetFileOutSamplerPtr(UInt32 samplers) {
     if (NULL == gppFileOutSamplers) {
-        gppFileOutSamplers = createSamplers(SAMPLER_COUNT);
+        gFileOutSamplers = samplers;
+        gppFileOutSamplers = createSamplers(samplers);
     }
     return gppFileOutSamplers;
 }
@@ -318,7 +321,7 @@ void CALLBACK waveOutProc(HWAVEOUT hwo, UInt32 uMsg) {
             if (0 == (gWaveHdr[b].dwFlags & WHDR_INQUEUE)) {
                 pWave = (SInt16*)gWaveHdr[b].lpData;
                 for (t = 0; t < gWaveBufferLength; ++t) {
-                    for (s = 0; s < SAMPLER_COUNT; ++s) {
+                    for (s = 0; s < gWaveOutSamplers; ++s) {
                         sampler(gppWaveOutChValues, gppWaveOutSamplers[s], gpDlsBuffer);
                     }
 

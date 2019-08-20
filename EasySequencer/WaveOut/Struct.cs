@@ -1,6 +1,14 @@
 ﻿using System.Runtime.InteropServices;
 
 namespace WaveOut {
+    public enum E_KEY_STATE : byte {
+        WAIT,
+        PURGE,
+        RELEASE,
+        HOLD,
+        PRESS
+    };
+
     [StructLayout(LayoutKind.Sequential, Pack = 4)]
     public struct INST_ID {
         public byte isDrum;
@@ -11,7 +19,7 @@ namespace WaveOut {
 
     [StructLayout(LayoutKind.Sequential, Pack = 4)]
     public struct WAVE_LOOP {
-        public uint start;
+        public uint begin;
         public uint length;
         public bool enable;
         private byte reserved1;
@@ -63,10 +71,9 @@ namespace WaveOut {
 
     [StructLayout(LayoutKind.Sequential, Pack = 4)]
     unsafe public struct SAMPLER {
-        public uint channelNo;
-        public ushort noteNo;
-        public byte keyState;
-        public bool isActive;
+        public ushort channelNo;
+        public byte noteNo;
+        public E_KEY_STATE keyState;
 
         public uint pcmAddr;
         public uint pcmLength;

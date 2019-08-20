@@ -9,7 +9,7 @@ using WaveOut;
 using EasySequencer;
 
 namespace Player {
-    public class Keyboard {
+    public unsafe class Keyboard {
         private PictureBox mCtrl;
         private DoubleBuffer mBuffer;
         private Sender mSender;
@@ -210,27 +210,36 @@ namespace Player {
             var whiteWidth = KeyboardPos[0].Width + 1;
             var g = mBuffer.Graphics;
 
+            /** Keyboad **/
+            for (var s = 0; s < Sender.SAMPLER_COUNT; ++s) {
+                var pSmpl = mSender.ppWaveOutSampler[s];
+                var channel = mPlayer.Channel[pSmpl->channelNo];
+                var y_ch = ChannelHeight * pSmpl->channelNo;
+                var transpose = (int)(channel.Pitch * channel.BendRange / 8192.0 - 0.5);
+                var k = pSmpl->noteNo + transpose;
+                if (k < 0 || 127 < k) {
+                    continue;
+                }
+                int x_oct;
+                Rectangle key;
+                switch (pSmpl->keyState) {
+                    case E_KEY_STATE.PRESS:
+                        x_oct = 7 * whiteWidth * (k / 12 - 1);
+                        key = KeyboardPos[k % 12];
+                        g.FillRectangle(Brushes.Red, key.X + x_oct, key.Y + y_ch, key.Width, key.Height);
+                        break;
+                    case E_KEY_STATE.HOLD:
+                        x_oct = 7 * whiteWidth * (k / 12 - 1);
+                        key = KeyboardPos[k % 12];
+                        g.FillRectangle(Brushes.Blue, key.X + x_oct, key.Y + y_ch, key.Width, key.Height);
+                        break;
+                }
+            }
+
+            /** Knob **/
             for (var ch = 0; ch < mPlayer.Channel.Length; ++ch) {
                 var channel = mPlayer.Channel[ch];
-                var ofsKey = (int)(channel.Pitch * channel.BendRange / 8192.0 - 0.5);
                 var y_ch = ChannelHeight * ch;
-
-                for (var i = 0; i < 127; ++i) {
-                    var k = i + ofsKey;
-                    if (k < 0 || 127 < k) {
-                        continue;
-                    }
-                    if (KEY_STATUS.ON == channel.KeyBoard[i]) {
-                        var x_oct = 7 * whiteWidth * (k / 12 - 1);
-                        var key = KeyboardPos[k % 12];
-                        g.FillRectangle(Brushes.Red, key.X + x_oct, key.Y + y_ch, key.Width, key.Height);
-                    }
-                    if (KEY_STATUS.HOLD == channel.KeyBoard[i]) {
-                        var x_oct = 7 * whiteWidth * (k / 12 - 1);
-                        var key = KeyboardPos[k % 12];
-                        g.FillRectangle(Brushes.Blue, key.X + x_oct, key.Y + y_ch, key.Width, key.Height);
-                    }
-                }
 
                 // Vol
                 g.FillRectangle(

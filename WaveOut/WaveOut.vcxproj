@@ -158,7 +158,6 @@
   <ItemGroup>
     <ClInclude Include="main.h" />
     <ClInclude Include="sampler.h" />
-    <ClInclude Include="struct.h" />
     <ClInclude Include="type.h" />
   </ItemGroup>
   <ItemGroup>

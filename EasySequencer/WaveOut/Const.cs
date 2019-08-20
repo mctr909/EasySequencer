@@ -1,10 +1,4 @@
 ﻿namespace WaveOut {
-    public enum KEY_STATUS : byte {
-        OFF,
-        ON,
-        HOLD
-    };
-
     public class Const {
         public static readonly int SampleRate = 44100;
         public static readonly double DeltaTime = 1.0 / SampleRate;

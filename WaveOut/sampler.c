@@ -1,9 +1,14 @@
 #include <math.h>
+#include <stdlib.h>
 #include "sampler.h"
 
 /******************************************************************************/
-#define CHORUS_PHASES       3
-#define DELAY_TAPS          1048576
+#define CHORUS_PHASES          3
+#define DELAY_TAPS             1048576
+#define ADJUST_CUTOFF          0.98
+#define PURGE_THRESHOLD        0.001
+#define PURGE_SPEED            2500
+#define VALUE_TRANSITION_SPEED 250
 
 static const double PI        = 3.14159265;
 static const double PI2       = 6.28318531;
@@ -94,11 +99,11 @@ inline void channel(CHANNEL *ch, double *waveL, double *waveR) {
     chorus(ch, &ch->delay, &ch->chorus, &ch->waveL, &ch->waveR);
 
     //
-    ch->panLeft  += 250 * (ch->param->panLeft   - ch->panLeft)  * ch->deltaTime;
-    ch->panRight += 250 * (ch->param->panRight  - ch->panRight) * ch->deltaTime;
-    ch->amp      += 250 * (ch->param->amp       - ch->amp)      * ch->deltaTime;
-    ch->eq.cut   += 250 * (ch->param->cutoff    - ch->eq.cut)   * ch->deltaTime;
-    ch->eq.res   += 250 * (ch->param->resonance - ch->eq.res)   * ch->deltaTime;
+    ch->amp      += (ch->param->amp       - ch->amp)      * ch->deltaTime * VALUE_TRANSITION_SPEED;
+    ch->panLeft  += (ch->param->panLeft   - ch->panLeft)  * ch->deltaTime * VALUE_TRANSITION_SPEED;
+    ch->panRight += (ch->param->panRight  - ch->panRight) * ch->deltaTime * VALUE_TRANSITION_SPEED;
+    ch->eq.cut   += (ch->param->cutoff    - ch->eq.cut)   * ch->deltaTime * VALUE_TRANSITION_SPEED;
+    ch->eq.res   += (ch->param->resonance - ch->eq.res)   * ch->deltaTime * VALUE_TRANSITION_SPEED;
 
     //
     *waveL += ch->waveL;
@@ -106,8 +111,8 @@ inline void channel(CHANNEL *ch, double *waveL, double *waveR) {
     ch->wave = 0.0;
 }
 
-inline void sampler(CHANNEL **chs, SAMPLER *smpl, LPBYTE pDlsBuffer) {
-    if (NULL == chs || NULL == smpl || !smpl->isActive) {
+inline void sampler(CHANNEL **chs, SAMPLER *smpl, byte *pDlsBuffer) {
+    if (NULL == chs || NULL == smpl || E_KEY_STATE_WAIT == smpl->keyState) {
         return;
     }
 
@@ -119,38 +124,11 @@ inline void sampler(CHANNEL **chs, SAMPLER *smpl, LPBYTE pDlsBuffer) {
     if (NULL == chParam) {
         return;
     }
-    
-    if (0 == smpl->keyState) {
-        if (chParam->holdDelta < 1.0) {
-            smpl->amp -= smpl->amp * chParam->holdDelta;
-        } else {
-            smpl->amp -= smpl->amp * smpl->envAmp.deltaR;
-        }
 
-        smpl->eq.cut += (smpl->envEq.levelR - smpl->eq.cut) * smpl->envEq.deltaR;
-
-        if (smpl->amp < 0.001) {
-            smpl->isActive = false;
-        }
-    } else if (1 == smpl->keyState) {
-        if (smpl->time < smpl->envAmp.hold) {
-            smpl->amp += (1.0 - smpl->amp) * smpl->envAmp.deltaA;
-        } else {
-            smpl->amp += (smpl->envAmp.levelS - smpl->amp) * smpl->envAmp.deltaD;
-        }
-        if (smpl->time < smpl->envEq.hold) {
-            smpl->eq.cut += (smpl->envEq.levelD - smpl->eq.cut) * smpl->envEq.deltaA;
-        } else {
-            smpl->eq.cut += (smpl->envEq.levelS - smpl->eq.cut) * smpl->envEq.deltaD;
-        }
-    } else {
-        smpl->amp -= smpl->amp * chValue->deltaTime * 1000;
-        if (smpl->amp < 0.001) {
-            smpl->isActive = false;
-        }
-    }
-
-    //
+    /***********************/
+    /**** generate wave ****/
+    /***********************/
+    double wave;
     SInt16 *pcm = (SInt16*)(pDlsBuffer + smpl->pcmAddr);
     SInt32 cur = (SInt32)smpl->index;
     SInt32 pre = cur - 1;
@@ -158,30 +136,64 @@ inline void sampler(CHANNEL **chs, SAMPLER *smpl, LPBYTE pDlsBuffer) {
     if (pre < 0) {
         pre = 0;
     }
-    if (smpl->pcmLength <= cur) {
-        cur = 0;
-        pre = 0;
-        smpl->index = 0.0;
-        if (!smpl->loop.enable) {
-            smpl->isActive = false;
+    wave = (pcm[pre] * (1.0 - dt) + pcm[cur] * dt) * smpl->gain;
+    smpl->index += smpl->delta * chParam->pitch * chValue->deltaTime;
+    if ((smpl->loop.begin + smpl->loop.length) < smpl->index) {
+        if (smpl->loop.enable) {
+            smpl->index -= smpl->loop.length;
+        } else {
+            smpl->index = smpl->loop.begin + smpl->loop.length;
+            smpl->keyState = E_KEY_STATE_WAIT;
         }
     }
 
+    /***************************/
+    /**** generate envelope ****/
+    /***************************/
+    switch (smpl->keyState) {
+    case E_KEY_STATE_PURGE:
+        smpl->amp -= smpl->amp * chValue->deltaTime * PURGE_SPEED;
+        if (smpl->amp < PURGE_THRESHOLD) {
+            smpl->keyState = E_KEY_STATE_WAIT;
+        }
+        break;
+
+    case E_KEY_STATE_RELEASE:
+        smpl->eq.cut += (smpl->envEq.fall - smpl->eq.cut) * smpl->envEq.deltaR;
+        smpl->amp -= smpl->amp * smpl->envAmp.deltaR;
+        if (smpl->amp < PURGE_THRESHOLD) {
+            smpl->keyState = E_KEY_STATE_WAIT;
+        }
+        break;
+
+    case E_KEY_STATE_HOLD:
+        smpl->eq.cut += (smpl->envEq.fall - smpl->eq.cut) * smpl->envEq.deltaR;
+        smpl->amp -= smpl->amp * chParam->holdDelta;
+        if (smpl->amp < PURGE_THRESHOLD) {
+            smpl->keyState = E_KEY_STATE_WAIT;
+        }
+        break;
+
+    case E_KEY_STATE_PRESS:
+        if (smpl->time < smpl->envEq.hold) {
+            smpl->eq.cut += (smpl->envEq.top     - smpl->eq.cut) * smpl->envEq.deltaA;
+        } else {
+            smpl->eq.cut += (smpl->envEq.sustain - smpl->eq.cut) * smpl->envEq.deltaD;
+        }
+        if (smpl->time < smpl->envAmp.hold) {
+            smpl->amp += (1.0                  - smpl->amp) * smpl->envAmp.deltaA;
+        } else {
+            smpl->amp += (smpl->envAmp.sustain - smpl->amp) * smpl->envAmp.deltaD;
+        }
+        break;
+    }
+
     //
-    filter(&smpl->eq, (pcm[cur] * dt + pcm[pre] * (1.0 - dt)) * smpl->gain * smpl->velocity * smpl->amp);
+    filter(&smpl->eq, wave * smpl->velocity * smpl->amp);
     chValue->wave += smpl->eq.a2;
 
     //
-    smpl->index += smpl->delta * chParam->pitch;
     smpl->time += chValue->deltaTime;
-
-    //
-    if ((smpl->loop.start + smpl->loop.length) < smpl->index) {
-        smpl->index -= smpl->loop.length;
-        if (!smpl->loop.enable) {
-            smpl->isActive = false;
-        }
-    }
 }
 
 /******************************************************************************/
@@ -246,28 +258,30 @@ inline void chorus(CHANNEL *ch, DELAY *delay, CHORUS *chorus, double *waveL, dou
 }
 
 inline void filter(FILTER *param, double input) {
-    double w = param->cut * PI * 0.98;
-    double w2 = w * w;
+    /** sin, cosの近似 **/
+    double rad = param->cut * PI * ADJUST_CUTOFF;
+    double rad2 = rad * rad;
     double c = INV_FACT8;
     double s = INV_FACT9;
-    c *= w2;
-    s *= w2;
+    c *= rad2;
+    s *= rad2;
     c -= INV_FACT6;
     s -= INV_FACT7;
-    c *= w2;
-    s *= w2;
+    c *= rad2;
+    s *= rad2;
     c += INV_FACT4;
     s += INV_FACT5;
-    c *= w2;
-    s *= w2;
+    c *= rad2;
+    s *= rad2;
     c -= INV_FACT2;
     s -= INV_FACT3;
-    c *= w2;
-    s *= w2;
+    c *= rad2;
+    s *= rad2;
     c++;
     s++;
-    s *= w;
+    s *= rad;
 
+    /** IIRローパスフィルタ パラメータ設定 **/
     double a = s / (param->res * 4.0 + 1.0);
     double m = 1.0 / (a + 1.0);
     double ka0 = -2.0 * c  * m;
@@ -275,6 +289,7 @@ inline void filter(FILTER *param, double input) {
     double ka1 = (1.0 - a) * m;
     double kb1 = kb0 * 0.5;
 
+    /** フィルタ1段目 **/
     double output =
         kb1 * input
         + kb0 * param->b0
@@ -287,6 +302,7 @@ inline void filter(FILTER *param, double input) {
     param->a1 = param->a0;
     param->a0 = output;
 
+    /** フィルタ2段目 **/
     input = output;
     output =
         kb1 * input

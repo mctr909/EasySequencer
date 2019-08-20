@@ -6,6 +6,7 @@ namespace WaveOut {
     unsafe public class Channel {
         private CHANNEL_PARAM* mpChannel = null;
         private Instruments mInstruments = null;
+        private SAMPLER **mppSampler = null;
         private INST_ID mInstId;
 
         public Dictionary<INST_ID, string[]> InstList { get { return mInstruments.Names; } }
@@ -17,8 +18,6 @@ namespace WaveOut {
         public INST_ID InstId { get { return mInstId; } }
 
         public string InstName { get; private set; }
-
-        public KEY_STATUS[] KeyBoard { get; private set; }
 
         public WAVE_INFO[] WaveInfo { get; private set; }
 
@@ -61,11 +60,11 @@ namespace WaveOut {
         private byte mNrpnLSB;
         private byte mNrpnMSB;
 
-        public Channel(Instruments inst, CHANNEL_PARAM* pChannel, int no) {
+        public Channel(Instruments inst, SAMPLER **ppSampler, CHANNEL_PARAM* pChannel, int no) {
             mInstruments = inst;
+            mppSampler = ppSampler;
             mpChannel = pChannel;
             No = (byte)no;
-            KeyBoard = new KEY_STATUS[128];
             Enable = true;
             AllReset();
         }
@@ -95,6 +94,7 @@ namespace WaveOut {
 
             mpChannel->chorusRate = 0.2;
             mpChannel->delayTime = 0.2;
+            mpChannel->holdDelta = Const.DeltaTime * 1.5;
 
             mRpnLSB = 0xFF;
             mRpnMSB = 0xFF;
@@ -253,14 +253,14 @@ namespace WaveOut {
 
         private void setHld(byte value) {
             if (value < 64) {
-                for (byte k = 0; k < 128; ++k) {
-                    if (KEY_STATUS.HOLD == KeyBoard[k]) {
-                        KeyBoard[k] = KEY_STATUS.OFF;
+                for (var s = 0; s < Sender.SAMPLER_COUNT; ++s) {
+                    var pSmpl = mppSampler[s];
+                    if (E_KEY_STATE.HOLD == pSmpl->keyState) {
+                        pSmpl->keyState = E_KEY_STATE.RELEASE;
                     }
                 }
             }
             Hld = value;
-            mpChannel->holdDelta = (value < 64 ? 1.0 : 1.0 * Const.DeltaTime);
         }
 
         private void setRes(byte value) {

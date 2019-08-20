@@ -28,51 +28,51 @@ namespace WaveOut {
         private static extern CHANNEL_PARAM** GetFileOutChannelPtr(uint sampleRate);
 
         [DllImport("WaveOut.dll", SetLastError = true, CharSet = CharSet.Auto)]
-        private static extern SAMPLER** GetWaveOutSamplerPtr();
+        private static extern SAMPLER** GetWaveOutSamplerPtr(uint samplers);
 
         [DllImport("WaveOut.dll", SetLastError = true, CharSet = CharSet.Auto)]
-        private static extern SAMPLER** GetFileOutSamplerPtr();
+        private static extern SAMPLER** GetFileOutSamplerPtr(uint samplers);
 
-        private const int CHANNEL_COUNT = 16;
-        private const int SAMPLER_COUNT = 128;
+        public const int CHANNEL_COUNT = 16;
+        public const int SAMPLER_COUNT = 256;
 
         private Instruments mInstruments = null;
-        private SAMPLER** mppWaveOutSampler = null;
-        private SAMPLER** mppFileOutSampler = null;
         private Channel[] mFileOutChannel;
 
         public Channel[] Channel { get; private set; }
+        public SAMPLER** ppWaveOutSampler { get; private set; }
+        public SAMPLER** ppFileOutSampler { get; private set; }
         public static bool IsFileOutput { get; private set; }
         public int OutputTime;
 
         public Sender(string dlsPath) {
-            mInstruments = new Instruments(dlsPath, Const.SampleRate);
+            mInstruments = new Instruments(dlsPath);
 
             var ppChannel = GetWaveOutChannelPtr((uint)Const.SampleRate);
-            mppWaveOutSampler = GetWaveOutSamplerPtr();
+            ppWaveOutSampler = GetWaveOutSamplerPtr(SAMPLER_COUNT);
             Channel = new Channel[CHANNEL_COUNT];
             for (int i = 0; i < CHANNEL_COUNT; ++i) {
-                Channel[i] = new Channel(mInstruments, ppChannel[i], i);
+                Channel[i] = new Channel(mInstruments, ppWaveOutSampler, ppChannel[i], i);
             }
 
             var ppFileOutChannel = GetFileOutChannelPtr((uint)Const.SampleRate);
-            mppFileOutSampler = GetFileOutSamplerPtr();
+            ppFileOutSampler = GetFileOutSamplerPtr(SAMPLER_COUNT);
             mFileOutChannel = new Channel[CHANNEL_COUNT];
             for (int i = 0; i < CHANNEL_COUNT; ++i) {
-                mFileOutChannel[i] = new Channel(mInstruments, ppFileOutChannel[i], i);
+                mFileOutChannel[i] = new Channel(mInstruments, ppFileOutSampler, ppFileOutChannel[i], i);
             }
 
-            WaveOutOpen((uint)Const.SampleRate, 96);
+            WaveOutOpen((uint)Const.SampleRate, 256);
         }
 
         public void Send(Message msg) {
             switch (msg.Type) {
             case EVENT_TYPE.NOTE_OFF:
-                noteOff(mppWaveOutSampler, Channel[msg.Channel], msg.V1);
+                noteOff(ppWaveOutSampler, Channel[msg.Channel], msg.V1, E_KEY_STATE.RELEASE);
                 break;
 
             case EVENT_TYPE.NOTE_ON:
-                noteOn(mppWaveOutSampler, Channel[msg.Channel], msg.V1, msg.V2);
+                noteOn(ppWaveOutSampler, Channel[msg.Channel], msg.V1, msg.V2);
                 break;
 
             case EVENT_TYPE.CTRL_CHG:
@@ -121,11 +121,11 @@ namespace WaveOut {
 
                     switch (msg.Type) {
                     case EVENT_TYPE.NOTE_OFF:
-                        noteOff(mppFileOutSampler, mFileOutChannel[msg.Channel], msg.V1);
+                        noteOff(ppFileOutSampler, mFileOutChannel[msg.Channel], msg.V1, E_KEY_STATE.RELEASE);
                         break;
 
                     case EVENT_TYPE.NOTE_ON:
-                        noteOn(mppFileOutSampler, mFileOutChannel[msg.Channel], msg.V1, msg.V2);
+                        noteOn(ppFileOutSampler, mFileOutChannel[msg.Channel], msg.V1, msg.V2);
                         break;
 
                     case EVENT_TYPE.CTRL_CHG:
@@ -150,25 +150,29 @@ namespace WaveOut {
             });
         }
 
-        private void noteOff(SAMPLER** ppSmpl, Channel ch, byte noteNo, byte keyState = 0) {
+        private void noteOff(SAMPLER** ppSmpl, Channel ch, byte noteNo, E_KEY_STATE keyState) {
             for (var i = 0; i < SAMPLER_COUNT; ++i) {
-                if (ppSmpl[i]->channelNo == ch.No && ppSmpl[i]->noteNo == noteNo) {
-                    if (!ch.Enable || ch.Hld < 64) {
-                        ch.KeyBoard[noteNo] = KEY_STATUS.OFF;
+                var pSmpl = ppSmpl[i];
+                if (pSmpl->channelNo == ch.No && pSmpl->noteNo == noteNo) {
+                    if (E_KEY_STATE.PURGE == keyState) {
+                        pSmpl->keyState = E_KEY_STATE.PURGE;
                     } else {
-                        ch.KeyBoard[noteNo] = KEY_STATUS.HOLD;
+                        if (!ch.Enable || ch.Hld < 64) {
+                            pSmpl->keyState = E_KEY_STATE.RELEASE;
+                        } else {
+                            pSmpl->keyState = E_KEY_STATE.HOLD;
+                        }
                     }
-                    ppSmpl[i]->keyState = keyState;
                 }
             }
         }
 
         private void noteOn(SAMPLER** ppSmpl, Channel ch, byte noteNo, byte velocity) {
             if (0 == velocity) {
-                noteOff(ppSmpl, ch, noteNo, 0);
+                noteOff(ppSmpl, ch, noteNo, E_KEY_STATE.RELEASE);
                 return;
             } else {
-                noteOff(ppSmpl, ch, noteNo, 2);
+                noteOff(ppSmpl, ch, noteNo, E_KEY_STATE.PURGE);
             }
 
             var wave = ch.WaveInfo[noteNo];
@@ -178,7 +182,7 @@ namespace WaveOut {
 
             for (var i = 0; i < SAMPLER_COUNT; ++i) {
                 var pSmpl = ppSmpl[i];
-                if (pSmpl->isActive) {
+                if (E_KEY_STATE.WAIT != pSmpl->keyState) {
                     continue;
                 }
 
@@ -227,10 +231,7 @@ namespace WaveOut {
                 pSmpl->eq.cutoff = 1.0;
                 pSmpl->eq.resonance = 0.0;
 
-                pSmpl->keyState = 1;
-                pSmpl->isActive = true;
-
-                ch.KeyBoard[noteNo] = KEY_STATUS.ON;
+                pSmpl->keyState = E_KEY_STATE.PRESS;
 
                 return;
             }

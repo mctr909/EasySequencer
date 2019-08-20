@@ -11,11 +11,10 @@ namespace WaveOut {
         public Dictionary<INST_ID, WAVE_INFO[]> List;
         public Dictionary<INST_ID, string[]> Names;
 
-        public Instruments(string dlsPath, int sampleRate) {
+        public Instruments(string dlsPath) {
             uint dlsSize = 0;
             var dlsPtr = LoadDLS(Marshal.StringToHGlobalAuto(dlsPath), out dlsSize);
             var dls = new File(dlsPtr, dlsSize);
-            var deltaTime = 1.0 / sampleRate;
 
             List = new Dictionary<INST_ID, WAVE_INFO[]>();
             Names = new Dictionary<INST_ID, string[]>();
@@ -148,38 +147,38 @@ namespace WaveOut {
                         waveInfo[noteNo].unityNote = (byte)wave.pSampler->unityNote;
                         waveInfo[noteNo].delta
                             = Math.Pow(2.0, wave.pSampler->fineTune / 1200.0)
-                            * wave.pFormat->sampleRate / sampleRate
+                            * wave.pFormat->sampleRate
                         ;
                         waveInfo[noteNo].gain = wave.pSampler->Gain / 32768.0;
                         if (0 < wave.pSampler->loopCount) {
-                            waveInfo[noteNo].loop.start = wave.pLoops[0].start;
+                            waveInfo[noteNo].loop.begin = wave.pLoops[0].start;
                             waveInfo[noteNo].loop.length = wave.pLoops[0].length;
                             waveInfo[noteNo].loop.enable = true;
                         } else {
-                            waveInfo[noteNo].loop.start = 0;
+                            waveInfo[noteNo].loop.begin = 0;
                             waveInfo[noteNo].loop.length = waveInfo[noteNo].pcmLength;
                             waveInfo[noteNo].loop.enable = false;
                         }
-                    }
-                    else {
+                    } else {
                         waveInfo[noteNo].unityNote = (byte)region.pSampler->unityNote;
                         waveInfo[noteNo].delta
                             = Math.Pow(2.0, region.pSampler->fineTune / 1200.0)
-                            * wave.pFormat->sampleRate / sampleRate
+                            * wave.pFormat->sampleRate
                         ;
                         waveInfo[noteNo].gain = region.pSampler->Gain / 32768.0;
                         if (0 < region.pSampler->loopCount) {
-                            waveInfo[noteNo].loop.start = region.pLoops[0].start;
+                            waveInfo[noteNo].loop.begin = region.pLoops[0].start;
                             waveInfo[noteNo].loop.length = region.pLoops[0].length;
                             waveInfo[noteNo].loop.enable = true;
                         } else if (0 < wave.pSampler->loopCount) {
-                            waveInfo[noteNo].loop.start = wave.pLoops[0].start;
+                            waveInfo[noteNo].loop.begin = wave.pLoops[0].start;
                             waveInfo[noteNo].loop.length = wave.pLoops[0].length;
                             waveInfo[noteNo].loop.enable = true;
                         } else {
-                            waveInfo[noteNo].loop.start = 0;
+                            waveInfo[noteNo].loop.begin = 0;
                             waveInfo[noteNo].loop.length = waveInfo[noteNo].pcmLength;
                             waveInfo[noteNo].loop.enable = false;
+                            waveInfo[noteNo].envAmp.deltaR = Const.DeltaTime * waveInfo[noteNo].delta / waveInfo[noteNo].pcmLength;
                         }
                     }
                 }
