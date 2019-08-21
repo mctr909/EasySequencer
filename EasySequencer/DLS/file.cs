@@ -7,7 +7,7 @@ namespace DLS {
 
         private CK_COLH m_colh;
         private CK_PTBL m_ptbl;
-        private CK_VERS* mp_version = null;
+        private CK_VERS *mp_version = null;
 
         public File(IntPtr dlsPtr, uint dlsSize) {
             Load((byte*)dlsPtr, dlsSize);

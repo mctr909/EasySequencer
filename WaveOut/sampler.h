@@ -2,25 +2,15 @@
 #include "type.h"
 
 /******************************************************************************/
-#pragma pack(8)
-typedef struct DELAY {
-    SInt32 writeIndex;
-    SInt32 readIndex;
-    double *pTapL;
-    double *pTapR;
-} DELAY;
-#pragma
+enum E_KEY_STATE {
+    E_KEY_STATE_WAIT,
+    E_KEY_STATE_PURGE,
+    E_KEY_STATE_RELEASE,
+    E_KEY_STATE_HOLD,
+    E_KEY_STATE_PRESS
+};
 
-#pragma pack(8)
-typedef struct CHORUS {
-    double lfoK;
-    double *pPanL;
-    double *pPanR;
-    double *pLfoRe;
-    double *pLfoIm;
-} CHORUS;
-#pragma
-
+/******************************************************************************/
 #pragma pack(8)
 typedef struct FILTER {
     double cut; //   0
@@ -69,7 +59,6 @@ typedef struct CHANNEL_PARAM {
     double panRight;
     double cutoff;
     double resonance;
-
     double delayDepth;
     double delayTime;
     double chorusDepth;
@@ -79,22 +68,22 @@ typedef struct CHANNEL_PARAM {
 
 #pragma pack(4)
 typedef struct CHANNEL {
-    CHANNEL_PARAM *param;
-
-    double wave;
-    double waveL;
-    double waveR;
-
-    double amp;
-    double panLeft;
-    double panRight;
-
-    double deltaTime;
+    CHANNEL_PARAM *pParam;
+    double *pDelTapL;
+    double *pDelTapR;
+    double *pChoPanL;
+    double *pChoPanR;
+    double *pChoLfoRe;
+    double *pChoLfoIm;
     UInt32 sampleRate;
-
+    SInt32 writeIndex;
+    SInt32 readIndex;
+    double wave;
+    double amp;
+    double panL;
+    double panR;
+    double deltaTime;
     FILTER eq;
-    DELAY delay;
-    CHORUS chorus;
 } CHANNEL;
 #pragma
 
@@ -103,18 +92,14 @@ typedef struct SAMPLER {
     UInt16 channelNo;
     byte   noteNo;
     byte   keyState;
-
-    UInt32 pcmAddr;
-    UInt32 pcmLength;
+    UInt32 buffOfs;
 
     double gain;
     double delta;
-
     double index;
     double time;
-
-    double velocity;
     double amp;
+    double velocity;
 
     WAVE_LOOP loop;
     ENVELOPE envAmp;
@@ -124,23 +109,14 @@ typedef struct SAMPLER {
 #pragma
 
 /******************************************************************************/
-enum E_KEY_STATE {
-    E_KEY_STATE_WAIT,
-    E_KEY_STATE_PURGE,
-    E_KEY_STATE_RELEASE,
-    E_KEY_STATE_HOLD,
-    E_KEY_STATE_PRESS
-};
-
-/******************************************************************************/
 extern CHANNEL** createChannels(UInt32 count, UInt32 sampleRate);
 extern SAMPLER** createSamplers(UInt32 count);
 
 /******************************************************************************/
-extern inline void channel(CHANNEL *ch, double *waveL, double *waveR);
-extern inline void sampler(CHANNEL **chs, SAMPLER *smpl, byte *pDlsBuffer);
+extern inline void channel(CHANNEL *pCh, double *waveL, double *waveR);
+extern inline void sampler(CHANNEL **ppCh, SAMPLER *pSmpl, byte *pDlsBuffer);
 
 /******************************************************************************/
-inline void delay(CHANNEL *ch, DELAY *delay, double *waveL, double *waveR);
-inline void chorus(CHANNEL *ch, DELAY *delay, CHORUS *chorus, double *waveL, double *waveR);
-inline void filter(FILTER *param, double input);
+inline void delay(CHANNEL *pCh, double *waveL, double *waveR);
+inline void chorus(CHANNEL *pCh, double *waveL, double *waveR);
+inline void filter(FILTER *pFilter, double input);

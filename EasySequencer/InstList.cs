@@ -20,8 +20,8 @@ namespace EasySequencer {
             var selectedInst = 0;
 
             foreach (var inst in mChannel.InstList) {
-                var cat = inst.Value[1];
-                var nam = inst.Value[0];
+                var cat = inst.Value.catgory;
+                var nam = inst.Value.name;
                 if (!mInstList.ContainsKey(cat)) {
                     mInstList.Add(cat, new Dictionary<INST_ID, string>());
                     cmbCategory.Items.Add(cat);

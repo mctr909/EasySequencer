@@ -7,8 +7,8 @@ namespace DLS {
         public CK_FMT* pFormat = null;
         public CK_WSMP* pSampler = null;
         public WAVE_LOOP* pLoops = null;
-        public uint pcmAddr = 0;
-        public uint dataSize = 0;
+        public uint buffAddr = 0;
+        public uint buffSize = 0;
 
         public WAVE(byte* ptr, uint size) {
             Load(ptr, size);
@@ -30,8 +30,8 @@ namespace DLS {
                 pFormat = (CK_FMT*)ptr;
                 break;
             case CHUNK_TYPE.DATA:
-                pcmAddr = (uint)((IntPtr)ptr).ToInt64();
-                dataSize = size;
+                buffAddr = (uint)((IntPtr)ptr).ToInt64();
+                buffSize = size;
                 break;
             case CHUNK_TYPE.WSMP: {
                     if (null != pLoops) {

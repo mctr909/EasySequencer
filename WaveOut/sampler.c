@@ -7,7 +7,7 @@
 #define DELAY_TAPS             1048576
 #define ADJUST_CUTOFF          0.98
 #define PURGE_THRESHOLD        0.001
-#define PURGE_SPEED            2500
+#define PURGE_SPEED            250
 #define VALUE_TRANSITION_SPEED 250
 
 static const double PI        = 3.14159265;
@@ -25,50 +25,39 @@ static const double INV_FACT9 = 2.75573192e-06;
 CHANNEL** createChannels(UInt32 count, UInt32 sampleRate) {
     CHANNEL **channel = (CHANNEL**)malloc(sizeof(CHANNEL*) * count);
     for (UInt32 i = 0; i < count; ++i) {
-        channel[i] = (CHANNEL*)malloc(sizeof(CHANNEL));
-        memset(channel[i], 0, sizeof(CHANNEL));
-        channel[i]->param = (CHANNEL_PARAM*)malloc(sizeof(CHANNEL_PARAM));
-        memset(channel[i]->param, 0, sizeof(CHANNEL_PARAM));
-        channel[i]->sampleRate = sampleRate;
-        channel[i]->deltaTime = 1.0 / sampleRate;
-    }
+        CHANNEL *pCh = (CHANNEL*)malloc(sizeof(CHANNEL));
+        memset(pCh, 0, sizeof(CHANNEL));
+        channel[i] = pCh;
 
-    // Filter
-    for (UInt32 i = 0; i < count; ++i) {
-        memset(&channel[i]->eq, 0, sizeof(FILTER));
-    }
+        // CHANNEL_PARAM
+        pCh->pParam = (CHANNEL_PARAM*)malloc(sizeof(CHANNEL_PARAM));
+        memset(pCh->pParam, 0, sizeof(CHANNEL_PARAM));
 
-    // Delay
-    for (UInt32 i = 0; i < count; ++i) {
-        memset(&channel[i]->delay, 0, sizeof(DELAY));
+        pCh->sampleRate = sampleRate;
+        pCh->deltaTime = 1.0 / sampleRate;
 
-        DELAY *delay = &channel[i]->delay;
-        delay->readIndex = 0;
-        delay->writeIndex = 0;
+        // Delay
+        pCh->readIndex = 0;
+        pCh->writeIndex = 0;
+        pCh->pDelTapL = (double*)malloc(sizeof(double) * DELAY_TAPS);
+        pCh->pDelTapR = (double*)malloc(sizeof(double) * DELAY_TAPS);
+        memset(pCh->pDelTapL, 0, sizeof(double) * DELAY_TAPS);
+        memset(pCh->pDelTapR, 0, sizeof(double) * DELAY_TAPS);
 
-        delay->pTapL = (double*)malloc(sizeof(double) * DELAY_TAPS);
-        delay->pTapR = (double*)malloc(sizeof(double) * DELAY_TAPS);
-        memset(delay->pTapL, 0, sizeof(double) * DELAY_TAPS);
-        memset(delay->pTapR, 0, sizeof(double) * DELAY_TAPS);
-    }
-
-    // Chorus
-    for (UInt32 i = 0; i < count; ++i) {
-        memset(&channel[i]->chorus, 0, sizeof(CHORUS));
-
-        CHORUS *chorus = &channel[i]->chorus;
-        chorus->lfoK = PI2 * channel[i]->deltaTime;
-        chorus->pPanL = (double*)malloc(sizeof(double) * CHORUS_PHASES);
-        chorus->pPanR = (double*)malloc(sizeof(double) * CHORUS_PHASES);
-        chorus->pLfoRe = (double*)malloc(sizeof(double) * CHORUS_PHASES);
-        chorus->pLfoIm = (double*)malloc(sizeof(double) * CHORUS_PHASES);
-
+        // Chorus
+        pCh->pChoPanL  = (double*)malloc(sizeof(double) * CHORUS_PHASES);
+        pCh->pChoPanR  = (double*)malloc(sizeof(double) * CHORUS_PHASES);
+        pCh->pChoLfoRe = (double*)malloc(sizeof(double) * CHORUS_PHASES);
+        pCh->pChoLfoIm = (double*)malloc(sizeof(double) * CHORUS_PHASES);
         for (SInt32 p = 0; p < CHORUS_PHASES; ++p) {
-            chorus->pPanL[p] = cos(PI * p / CHORUS_PHASES);
-            chorus->pPanR[p] = sin(PI * p / CHORUS_PHASES);
-            chorus->pLfoRe[p] = cos(PI2 * p / CHORUS_PHASES);
-            chorus->pLfoIm[p] = sin(PI2 * p / CHORUS_PHASES);
+            pCh->pChoPanL[p] = cos(0.5 * PI * p / CHORUS_PHASES);
+            pCh->pChoPanR[p] = sin(0.5 * PI * p / CHORUS_PHASES);
+            pCh->pChoLfoRe[p] = cos(PI2 * p / CHORUS_PHASES);
+            pCh->pChoLfoIm[p] = sin(PI2 * p / CHORUS_PHASES);
         }
+
+        // Filter
+        memset(&pCh->eq, 0, sizeof(FILTER));
     }
 
     return channel;
@@ -85,43 +74,43 @@ SAMPLER** createSamplers(UInt32 count) {
 }
 
 /******************************************************************************/
-inline void channel(CHANNEL *ch, double *waveL, double *waveR) {
+inline void channel(CHANNEL *pCh, double *waveL, double *waveR) {
     //
-    filter(&ch->eq, ch->amp * ch->wave);
-    ch->wave = ch->eq.a2;
+    filter(&pCh->eq, pCh->amp * pCh->wave);
+    pCh->wave = pCh->eq.a2;
 
     //
-    ch->waveL = ch->wave * ch->panLeft;
-    ch->waveR = ch->wave * ch->panRight;
+    double tempL = pCh->wave * pCh->panL;
+    double tempR = pCh->wave * pCh->panR;
 
     //
-    delay(ch, &ch->delay, &ch->waveL, &ch->waveR);
-    chorus(ch, &ch->delay, &ch->chorus, &ch->waveL, &ch->waveR);
+    delay(pCh, &tempL, &tempR);
+    chorus(pCh, &tempL, &tempR);
 
     //
-    ch->amp      += (ch->param->amp       - ch->amp)      * ch->deltaTime * VALUE_TRANSITION_SPEED;
-    ch->panLeft  += (ch->param->panLeft   - ch->panLeft)  * ch->deltaTime * VALUE_TRANSITION_SPEED;
-    ch->panRight += (ch->param->panRight  - ch->panRight) * ch->deltaTime * VALUE_TRANSITION_SPEED;
-    ch->eq.cut   += (ch->param->cutoff    - ch->eq.cut)   * ch->deltaTime * VALUE_TRANSITION_SPEED;
-    ch->eq.res   += (ch->param->resonance - ch->eq.res)   * ch->deltaTime * VALUE_TRANSITION_SPEED;
+    pCh->amp    += (pCh->pParam->amp       - pCh->amp)    * pCh->deltaTime * VALUE_TRANSITION_SPEED;
+    pCh->panL   += (pCh->pParam->panLeft   - pCh->panL)   * pCh->deltaTime * VALUE_TRANSITION_SPEED;
+    pCh->panR   += (pCh->pParam->panRight  - pCh->panR)   * pCh->deltaTime * VALUE_TRANSITION_SPEED;
+    pCh->eq.cut += (pCh->pParam->cutoff    - pCh->eq.cut) * pCh->deltaTime * VALUE_TRANSITION_SPEED;
+    pCh->eq.res += (pCh->pParam->resonance - pCh->eq.res) * pCh->deltaTime * VALUE_TRANSITION_SPEED;
 
     //
-    *waveL += ch->waveL;
-    *waveR += ch->waveR;
-    ch->wave = 0.0;
+    *waveL += tempL;
+    *waveR += tempR;
+    pCh->wave = 0.0;
 }
 
-inline void sampler(CHANNEL **chs, SAMPLER *smpl, byte *pDlsBuffer) {
-    if (NULL == chs || NULL == smpl || E_KEY_STATE_WAIT == smpl->keyState) {
+inline void sampler(CHANNEL **ppCh, SAMPLER *pSmpl, byte *pDlsBuffer) {
+    if (NULL == ppCh || NULL == pSmpl || E_KEY_STATE_WAIT == pSmpl->keyState) {
         return;
     }
 
-    CHANNEL *chValue = chs[smpl->channelNo];
-    if (NULL == chValue) {
+    CHANNEL *pChValue = ppCh[pSmpl->channelNo];
+    if (NULL == pChValue) {
         return;
     }
-    CHANNEL_PARAM *chParam = chValue->param;
-    if (NULL == chParam) {
+    CHANNEL_PARAM *pChParam = pChValue->pParam;
+    if (NULL == pChParam) {
         return;
     }
 
@@ -129,137 +118,137 @@ inline void sampler(CHANNEL **chs, SAMPLER *smpl, byte *pDlsBuffer) {
     /**** generate wave ****/
     /***********************/
     double wave;
-    SInt16 *pcm = (SInt16*)(pDlsBuffer + smpl->pcmAddr);
-    SInt32 cur = (SInt32)smpl->index;
+    SInt16 *pWave = (SInt16*)(pDlsBuffer + pSmpl->buffOfs);
+    SInt32 cur = (SInt32)pSmpl->index;
     SInt32 pre = cur - 1;
-    double dt = smpl->index - cur;
+    double dt = pSmpl->index - cur;
     if (pre < 0) {
         pre = 0;
     }
-    wave = (pcm[pre] * (1.0 - dt) + pcm[cur] * dt) * smpl->gain;
-    smpl->index += smpl->delta * chParam->pitch * chValue->deltaTime;
-    if ((smpl->loop.begin + smpl->loop.length) < smpl->index) {
-        if (smpl->loop.enable) {
-            smpl->index -= smpl->loop.length;
+    wave = (pWave[pre] * (1.0 - dt) + pWave[cur] * dt) * pSmpl->gain;
+    pSmpl->index += pSmpl->delta * pChParam->pitch * pChValue->deltaTime;
+    if ((pSmpl->loop.begin + pSmpl->loop.length) < pSmpl->index) {
+        if (pSmpl->loop.enable) {
+            pSmpl->index -= pSmpl->loop.length;
         } else {
-            smpl->index = smpl->loop.begin + smpl->loop.length;
-            smpl->keyState = E_KEY_STATE_WAIT;
+            pSmpl->index = pSmpl->loop.begin + pSmpl->loop.length;
+            pSmpl->keyState = E_KEY_STATE_WAIT;
         }
     }
 
     /***************************/
     /**** generate envelope ****/
     /***************************/
-    switch (smpl->keyState) {
+    switch (pSmpl->keyState) {
     case E_KEY_STATE_PURGE:
-        smpl->amp -= smpl->amp * chValue->deltaTime * PURGE_SPEED;
-        if (smpl->amp < PURGE_THRESHOLD) {
-            smpl->keyState = E_KEY_STATE_WAIT;
+        pSmpl->amp -= pSmpl->amp * pChValue->deltaTime * PURGE_SPEED;
+        if (pSmpl->amp < PURGE_THRESHOLD) {
+            pSmpl->keyState = E_KEY_STATE_WAIT;
         }
         break;
 
     case E_KEY_STATE_RELEASE:
-        smpl->eq.cut += (smpl->envEq.fall - smpl->eq.cut) * smpl->envEq.deltaR;
-        smpl->amp -= smpl->amp * smpl->envAmp.deltaR;
-        if (smpl->amp < PURGE_THRESHOLD) {
-            smpl->keyState = E_KEY_STATE_WAIT;
+        pSmpl->eq.cut += (pSmpl->envEq.fall - pSmpl->eq.cut) * pSmpl->envEq.deltaR;
+        pSmpl->amp -= pSmpl->amp * pSmpl->envAmp.deltaR;
+        if (pSmpl->amp < PURGE_THRESHOLD) {
+            pSmpl->keyState = E_KEY_STATE_WAIT;
         }
         break;
 
     case E_KEY_STATE_HOLD:
-        smpl->eq.cut += (smpl->envEq.fall - smpl->eq.cut) * smpl->envEq.deltaR;
-        smpl->amp -= smpl->amp * chParam->holdDelta;
-        if (smpl->amp < PURGE_THRESHOLD) {
-            smpl->keyState = E_KEY_STATE_WAIT;
+        pSmpl->eq.cut += (pSmpl->envEq.fall - pSmpl->eq.cut) * pSmpl->envEq.deltaR;
+        pSmpl->amp -= pSmpl->amp * pChParam->holdDelta;
+        if (pSmpl->amp < PURGE_THRESHOLD) {
+            pSmpl->keyState = E_KEY_STATE_WAIT;
         }
         break;
 
     case E_KEY_STATE_PRESS:
-        if (smpl->time < smpl->envEq.hold) {
-            smpl->eq.cut += (smpl->envEq.top     - smpl->eq.cut) * smpl->envEq.deltaA;
+        if (pSmpl->time < pSmpl->envEq.hold) {
+            pSmpl->eq.cut += (pSmpl->envEq.top     - pSmpl->eq.cut) * pSmpl->envEq.deltaA;
         } else {
-            smpl->eq.cut += (smpl->envEq.sustain - smpl->eq.cut) * smpl->envEq.deltaD;
+            pSmpl->eq.cut += (pSmpl->envEq.sustain - pSmpl->eq.cut) * pSmpl->envEq.deltaD;
         }
-        if (smpl->time < smpl->envAmp.hold) {
-            smpl->amp += (1.0                  - smpl->amp) * smpl->envAmp.deltaA;
+        if (pSmpl->time < pSmpl->envAmp.hold) {
+            pSmpl->amp += (1.0                   - pSmpl->amp) * pSmpl->envAmp.deltaA;
         } else {
-            smpl->amp += (smpl->envAmp.sustain - smpl->amp) * smpl->envAmp.deltaD;
+            pSmpl->amp += (pSmpl->envAmp.sustain - pSmpl->amp) * pSmpl->envAmp.deltaD;
         }
         break;
     }
 
     //
-    filter(&smpl->eq, wave * smpl->velocity * smpl->amp);
-    chValue->wave += smpl->eq.a2;
+    filter(&pSmpl->eq, wave * pSmpl->velocity * pSmpl->amp);
+    pChValue->wave += pSmpl->eq.a2;
 
     //
-    smpl->time += chValue->deltaTime;
+    pSmpl->time += pChValue->deltaTime;
 }
 
 /******************************************************************************/
-inline void delay(CHANNEL *ch, DELAY *delay, double *waveL, double *waveR) {
-    ++delay->writeIndex;
-    if (DELAY_TAPS <= delay->writeIndex) {
-        delay->writeIndex = 0;
+inline void delay(CHANNEL *pCh, double *waveL, double *waveR) {
+    pCh->writeIndex++;
+    if (DELAY_TAPS <= pCh->writeIndex) {
+        pCh->writeIndex = 0;
     }
 
-    delay->readIndex = delay->writeIndex - (SInt32)(ch->param->delayTime * ch->sampleRate);
-    if (delay->readIndex < 0) {
-        delay->readIndex += DELAY_TAPS;
+    pCh->readIndex = pCh->writeIndex - (SInt32)(pCh->pParam->delayTime * pCh->sampleRate);
+    if (pCh->readIndex < 0) {
+        pCh->readIndex += DELAY_TAPS;
     }
 
-    double delayL = ch->param->delayDepth * delay->pTapL[delay->readIndex];
-    double delayR = ch->param->delayDepth * delay->pTapR[delay->readIndex];
+    double delayL = pCh->pParam->delayDepth * pCh->pDelTapL[pCh->readIndex];
+    double delayR = pCh->pParam->delayDepth * pCh->pDelTapR[pCh->readIndex];
 
     *waveL += (0.9 * delayL + 0.1 * delayR);
     *waveR += (0.9 * delayR + 0.1 * delayL);
 
-    delay->pTapL[delay->writeIndex] = *waveL;
-    delay->pTapR[delay->writeIndex] = *waveR;
+    pCh->pDelTapL[pCh->writeIndex] = *waveL;
+    pCh->pDelTapR[pCh->writeIndex] = *waveR;
 }
 
-inline void chorus(CHANNEL *ch, DELAY *delay, CHORUS *chorus, double *waveL, double *waveR) {
+inline void chorus(CHANNEL *pCh, double *waveL, double *waveR) {
     double chorusL = 0.0;
     double chorusR = 0.0;
     double index;
     double dt;
-    SInt32 indexCur;
-    SInt32 indexPre;
+    SInt32 cur;
+    SInt32 pre;
 
-    for (register ph = 0; ph < CHORUS_PHASES; ++ph) {
-        index = delay->writeIndex - (0.5 - 0.4 * chorus->pLfoRe[ph]) * ch->sampleRate * 0.01;
-        indexCur = (SInt32)index;
-        indexPre = indexCur - 1;
-        dt = index - indexCur;
+    for (SInt32 ph = 0; ph < CHORUS_PHASES; ++ph) {
+        index = pCh->writeIndex - (0.5 - 0.4 * pCh->pChoLfoRe[ph]) * pCh->sampleRate * 0.01;
+        cur = (SInt32)index;
+        pre = cur - 1;
+        dt = index - cur;
 
-        if (indexCur < 0) {
-            indexCur += DELAY_TAPS;
+        if (cur < 0) {
+            cur += DELAY_TAPS;
         }
-        if (DELAY_TAPS <= indexCur) {
-            indexCur -= DELAY_TAPS;
-        }
-
-        if (indexPre < 0) {
-            indexPre += DELAY_TAPS;
-        }
-        if (DELAY_TAPS <= indexPre) {
-            indexPre -= DELAY_TAPS;
+        if (DELAY_TAPS <= cur) {
+            cur -= DELAY_TAPS;
         }
 
-        chorusL += (delay->pTapL[indexCur] * dt + delay->pTapL[indexPre] * (1.0 - dt)) * chorus->pPanL[ph];
-        chorusR += (delay->pTapR[indexCur] * dt + delay->pTapR[indexPre] * (1.0 - dt)) * chorus->pPanR[ph];
+        if (pre < 0) {
+            pre += DELAY_TAPS;
+        }
+        if (DELAY_TAPS <= pre) {
+            pre -= DELAY_TAPS;
+        }
 
-        chorus->pLfoRe[ph] -= chorus->lfoK * ch->param->chorusRate * chorus->pLfoIm[ph];
-        chorus->pLfoIm[ph] += chorus->lfoK * ch->param->chorusRate * chorus->pLfoRe[ph];
+        chorusL += (pCh->pDelTapL[cur] * dt + pCh->pDelTapL[pre] * (1.0 - dt)) * pCh->pChoPanL[ph];
+        chorusR += (pCh->pDelTapR[cur] * dt + pCh->pDelTapR[pre] * (1.0 - dt)) * pCh->pChoPanR[ph];
+
+        pCh->pChoLfoRe[ph] -= pCh->pChoLfoIm[ph] * PI2 * pCh->pParam->chorusRate * pCh->deltaTime;
+        pCh->pChoLfoIm[ph] += pCh->pChoLfoRe[ph] * PI2 * pCh->pParam->chorusRate * pCh->deltaTime;
     }
 
-    *waveL += chorusL * ch->param->chorusDepth / CHORUS_PHASES;
-    *waveR += chorusR * ch->param->chorusDepth / CHORUS_PHASES;
+    *waveL += chorusL * pCh->pParam->chorusDepth / CHORUS_PHASES;
+    *waveR += chorusR * pCh->pParam->chorusDepth / CHORUS_PHASES;
 }
 
-inline void filter(FILTER *param, double input) {
+inline void filter(FILTER *pFilter, double input) {
     /** sin, cosの近似 **/
-    double rad = param->cut * PI * ADJUST_CUTOFF;
+    double rad = pFilter->cut * PI * ADJUST_CUTOFF;
     double rad2 = rad * rad;
     double c = INV_FACT8;
     double s = INV_FACT9;
@@ -282,7 +271,7 @@ inline void filter(FILTER *param, double input) {
     s *= rad;
 
     /** IIRローパスフィルタ パラメータ設定 **/
-    double a = s / (param->res * 4.0 + 1.0);
+    double a = s / (pFilter->res * 4.0 + 1.0);
     double m = 1.0 / (a + 1.0);
     double ka0 = -2.0 * c  * m;
     double kb0 = (1.0 - c) * m;
@@ -292,27 +281,27 @@ inline void filter(FILTER *param, double input) {
     /** フィルタ1段目 **/
     double output =
         kb1 * input
-        + kb0 * param->b0
-        + kb1 * param->b1
-        - ka0 * param->a0
-        - ka1 * param->a1
+        + kb0 * pFilter->b0
+        + kb1 * pFilter->b1
+        - ka0 * pFilter->a0
+        - ka1 * pFilter->a1
     ;
-    param->b1 = param->b0;
-    param->b0 = input;
-    param->a1 = param->a0;
-    param->a0 = output;
+    pFilter->b1 = pFilter->b0;
+    pFilter->b0 = input;
+    pFilter->a1 = pFilter->a0;
+    pFilter->a0 = output;
 
     /** フィルタ2段目 **/
     input = output;
     output =
         kb1 * input
-        + kb0 * param->b2
-        + kb1 * param->b3
-        - ka0 * param->a2
-        - ka1 * param->a3
+        + kb0 * pFilter->b2
+        + kb1 * pFilter->b3
+        - ka0 * pFilter->a2
+        - ka1 * pFilter->a3
     ;
-    param->b3 = param->b2;
-    param->b2 = input;
-    param->a3 = param->a2;
-    param->a2 = output;
+    pFilter->b3 = pFilter->b2;
+    pFilter->b2 = input;
+    pFilter->a3 = pFilter->a2;
+    pFilter->a2 = output;
 }

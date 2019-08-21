@@ -5,11 +5,10 @@ using MIDI;
 namespace WaveOut {
     unsafe public class Channel {
         private CHANNEL_PARAM* mpChannel = null;
-        private Instruments mInstruments = null;
         private SAMPLER **mppSampler = null;
         private INST_ID mInstId;
 
-        public Dictionary<INST_ID, string[]> InstList { get { return mInstruments.Names; } }
+        public Dictionary<INST_ID, INST_INFO> InstList { get; private set; }
 
         public bool Enable;
 
@@ -60,8 +59,8 @@ namespace WaveOut {
         private byte mNrpnLSB;
         private byte mNrpnMSB;
 
-        public Channel(Instruments inst, SAMPLER **ppSampler, CHANNEL_PARAM* pChannel, int no) {
-            mInstruments = inst;
+        public Channel(Dictionary<INST_ID, INST_INFO> inst, SAMPLER **ppSampler, CHANNEL_PARAM* pChannel, int no) {
+            InstList = inst;
             mppSampler = ppSampler;
             mpChannel = pChannel;
             No = (byte)no;
@@ -197,32 +196,32 @@ namespace WaveOut {
             mInstId.isDrum = (byte)(9 == No ? 0x80 : 0x00);
             mInstId.programNo = value;
 
-            if (!mInstruments.List.ContainsKey(mInstId)) {
+            if (!InstList.ContainsKey(mInstId)) {
                 mInstId.bankMSB = 0;
                 mInstId.bankLSB = 0;
-                if (!mInstruments.List.ContainsKey(mInstId)) {
+                if (!InstList.ContainsKey(mInstId)) {
                     mInstId.programNo = 0;
                 }
             }
 
-            WaveInfo = mInstruments.List[mInstId];
-            InstName = mInstruments.Names[mInstId][0];
+            WaveInfo = InstList[mInstId].waves;
+            InstName = InstList[mInstId].name;
         }
 
         public void ProgramChange(byte value, bool isDrum) {
             mInstId.isDrum = (byte)(isDrum ? 0x80 : 0x00);
             mInstId.programNo = value;
 
-            if (!mInstruments.List.ContainsKey(mInstId)) {
+            if (!InstList.ContainsKey(mInstId)) {
                 mInstId.bankMSB = 0;
                 mInstId.bankLSB = 0;
-                if (!mInstruments.List.ContainsKey(mInstId)) {
+                if (!InstList.ContainsKey(mInstId)) {
                     mInstId.programNo = 0;
                 }
             }
 
-            WaveInfo = mInstruments.List[mInstId];
-            InstName = mInstruments.Names[mInstId][0];
+            WaveInfo = InstList[mInstId].waves;
+            InstName = InstList[mInstId].name;
         }
 
         public void PitchBend(byte lsb, byte msb) {

@@ -196,7 +196,7 @@ CHANNEL_PARAM** WINAPI GetWaveOutChannelPtr(UInt32 sampleRate) {
         gppWaveOutChValues = createChannels(CHANNEL_COUNT, sampleRate);
         gppWaveOutChParams = (CHANNEL_PARAM**)malloc(sizeof(CHANNEL_PARAM*)*CHANNEL_COUNT);
         for (int i = 0; i < CHANNEL_COUNT; ++i) {
-            gppWaveOutChParams[i] = gppWaveOutChValues[i]->param;
+            gppWaveOutChParams[i] = gppWaveOutChValues[i]->pParam;
         }
     }
     return gppWaveOutChParams;
@@ -207,7 +207,7 @@ CHANNEL_PARAM** WINAPI GetFileOutChannelPtr(UInt32 sampleRate) {
         gppFileOutChValues = createChannels(CHANNEL_COUNT, sampleRate);
         gppFileOutChParams = (CHANNEL_PARAM**)malloc(sizeof(CHANNEL_PARAM*)*CHANNEL_COUNT);
         for (int i = 0; i < CHANNEL_COUNT; ++i) {
-            gppFileOutChParams[i] = gppFileOutChValues[i]->param;
+            gppFileOutChParams[i] = gppFileOutChValues[i]->pParam;
         }
     }
     return gppFileOutChParams;

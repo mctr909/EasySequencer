@@ -1,4 +1,6 @@
-﻿using System.Threading;
+﻿using System.Diagnostics;
+using System.Collections.Generic;
+using System.Threading;
 using System.Threading.Tasks;
 
 using MIDI;
@@ -8,12 +10,18 @@ namespace Player {
     unsafe public class Player {
         private Sender mSender;
         private Event[] mEventList;
-        private Task mTask;
+        private System.Windows.Forms.Timer mTimer;
+        private Stopwatch mSw;
+        private Queue<Event> mEventQue;
+        private Event mCurEvent = new Event(0, 0, 0, new Message(EVENT_TYPE.SYS_EX, 0));
 
         private int mTicksPerBeat;
-        private double mBPM;
+        private long mPrevious_mSec;
         private double mCurrentTick;
+        private double mPreviousTick;
         private double mTick;
+        private double mBPM;
+
         private int mBeat;
         private int mMeasure;
         private int mMeasureDenomi;
@@ -113,7 +121,6 @@ namespace Player {
         public Player(Sender sender) {
             mSender = sender;
             mEventList = null;
-            mTask = null;
             mTicksPerBeat = 960;
             mBPM = 120;
             mMeasureDenomi = 4;
@@ -121,6 +128,11 @@ namespace Player {
             IsPlay = false;
             SoloChannel = -1;
             Speed = 1.0;
+            mEventQue = new Queue<Event>();
+            mTimer = new System.Windows.Forms.Timer();
+            mTimer.Tick += new System.EventHandler(MainProc);
+            mTimer.Interval = 1;
+            mTimer.Enabled = true;
         }
 
         public void SetEventList(Event[] eventList, int ticksPerBeat) {
@@ -147,24 +159,28 @@ namespace Player {
             if (null == mEventList) {
                 return;
             }
-
-            IsPlay = true;
+            mPrevious_mSec = 0;
+            mPreviousTick = 0.0;
             mMeasure = 0;
             mBeat = 0;
             mTick = 0.0;
-            mTask = Task.Factory.StartNew(() => MainProc());
+            mEventQue.Clear();
+            foreach (var ev in mEventList) {
+                mEventQue.Enqueue(ev);
+            }
+            mCurEvent = mEventQue.Dequeue();
+            mSw = new Stopwatch();
+            mSw.Start();
+            if (null != mTimer) {
+                mTimer.Dispose();
+            }
+            IsPlay = true;
+            mTimer.Start();
         }
 
         public void Stop() {
-            if (null == mTask) {
-                return;
-            }
-
             IsPlay = false;
-            while (!mTask.IsCompleted) {
-                Task.Delay(100);
-            }
-            mTask = null;
+            mTimer.Stop();
 
             for (byte ch = 0; ch < 16; ++ch) {
                 for (byte noteNo = 0; noteNo < 128; ++noteNo) {
@@ -178,46 +194,37 @@ namespace Player {
             }
         }
 
-        private void MainProc() {
-            long current_mSec = 0;
-            long previous_mSec = 0;
-            double previousTick = 0.0;
+        private void MainProc(object sender, System.EventArgs e) {
+            if (!IsPlay) {
+                return;
+            }
 
-            var sw = new System.Diagnostics.Stopwatch();
-            sw.Start();
+            var current_mSec = mSw.ElapsedMilliseconds;
+            var deltaTime = current_mSec - mPrevious_mSec;
+            mCurrentTick += 0.96 * mBPM * Speed * deltaTime / 60.0;
+            mTick += mCurrentTick - mPreviousTick;
+            if (3840 / mMeasureDenomi <= mTick) {
+                mTick -= 3840 / mMeasureDenomi;
+                ++mBeat;
+                if (mMeasureNumer <= mBeat) {
+                    mBeat -= mMeasureNumer;
+                    ++mMeasure;
+                }
+            }
+            mPrevious_mSec = current_mSec;
+            mPreviousTick = mCurrentTick;
 
-            foreach (var ev in mEventList) {
+            var eventTick = 960 * mCurEvent.Time / mTicksPerBeat;
+            while (eventTick <= mCurrentTick) {
                 if (!IsPlay) {
-                    break;
+                    return;
                 }
 
-                long eventTick = 960 * ev.Time / mTicksPerBeat;
-                while (mCurrentTick < eventTick) {
-                    if (!IsPlay) {
-                        break;
-                    }
-
-                    current_mSec = sw.ElapsedMilliseconds;
-                    var deltaTime = current_mSec - previous_mSec;
-                    mCurrentTick += 0.96 * mBPM * Speed * deltaTime / 60.0;
-                    mTick += mCurrentTick - previousTick;
-                    if (3840 / mMeasureDenomi <= mTick) {
-                        mTick -= 3840 / mMeasureDenomi;
-                        ++mBeat;
-                        if (mMeasureNumer <= mBeat) {
-                            mBeat -= mMeasureNumer;
-                            ++mMeasure;
-                        }
-                    }
-                    previous_mSec = current_mSec;
-                    previousTick = mCurrentTick;
-                    if (deltaTime < 1) {
-                        Thread.Sleep(1);
-                    }
-                }
-
-                var msg = ev.Message;
+                var msg = mCurEvent.Message;
                 var type = msg.Type;
+
+                mCurEvent = mEventQue.Dequeue();
+                eventTick = 960 * mCurEvent.Time / mTicksPerBeat;
 
                 if (EVENT_TYPE.META == type) {
                     if (META_TYPE.TEMPO == msg.Meta.Type) {
@@ -243,17 +250,15 @@ namespace Player {
                     if (0x00 == mSender.Channel[msg.Channel].InstId.isDrum) {
                         if ((msg.V1 + Transpose) < 0 || 127 < (msg.V1 + Transpose)) {
                             continue;
-                        }
-                        else {
+                        } else {
                             msg = new Message(msg.Status, (byte)(msg.V1 + Transpose), msg.V2);
                         }
                     }
                 }
 
+                //
                 mSender.Send(msg);
             }
-
-            IsPlay = false;
         }
     }
 }

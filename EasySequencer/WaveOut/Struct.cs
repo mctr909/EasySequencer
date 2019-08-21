@@ -74,18 +74,14 @@ namespace WaveOut {
         public ushort channelNo;
         public byte noteNo;
         public E_KEY_STATE keyState;
-
-        public uint pcmAddr;
-        public uint pcmLength;
+        public uint buffOfs;
 
         public double gain;
         public double delta;
-
         public double index;
         public double time;
-
-        public double velocity;
         public double amp;
+        public double velocity;
 
         public WAVE_LOOP loop;
         public ENVELOPE envAmp;
@@ -94,12 +90,18 @@ namespace WaveOut {
     };
 
     public struct WAVE_INFO {
-        public uint pcmAddr;
-        public uint pcmLength;
+        public uint buffOfs;
+        public uint samples;
         public double gain;
         public double delta;
         public byte unityNote;
         public WAVE_LOOP loop;
         public ENVELOPE envAmp;
+    }
+
+    public struct INST_INFO {
+        public string name;
+        public string catgory;
+        public WAVE_INFO[] waves;
     }
 }
