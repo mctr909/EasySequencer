@@ -10,10 +10,9 @@ namespace Player {
     unsafe public class Player {
         private Sender mSender;
         private Event[] mEventList;
-        private System.Windows.Forms.Timer mTimer;
         private Stopwatch mSw;
-        private Queue<Event> mEventQue;
-        private Event mCurEvent = new Event(0, 0, 0, new Message(EVENT_TYPE.SYS_EX, 0));
+        private Task mTask;
+        private Event mCurEvent = new Event(0, 0, 0, new Message());
 
         private int mTicksPerBeat;
         private long mPrevious_mSec;
@@ -21,6 +20,7 @@ namespace Player {
         private double mPreviousTick;
         private double mTick;
         private double mBPM;
+        private E_KEY mKey;
 
         private int mBeat;
         private int mMeasure;
@@ -88,8 +88,8 @@ namespace Player {
                 }
                 var msg = ev.Message;
                 var type = msg.Type;
-                if (EVENT_TYPE.META == type) {
-                    if (META_TYPE.MEASURE == msg.Meta.Type) {
+                if (E_EVENT_TYPE.META == type) {
+                    if (E_META_TYPE.MEASURE == msg.Meta.Type) {
                         measureNumer = msg.Meta.MeasureNumer;
                         measureDenomi = msg.Meta.MeasureDenomi;
                     }
@@ -128,11 +128,7 @@ namespace Player {
             IsPlay = false;
             SoloChannel = -1;
             Speed = 1.0;
-            mEventQue = new Queue<Event>();
-            mTimer = new System.Windows.Forms.Timer();
-            mTimer.Tick += new System.EventHandler(MainProc);
-            mTimer.Interval = 1;
-            mTimer.Enabled = true;
+            mTask = new Task(MainProc);
         }
 
         public void SetEventList(Event[] eventList, int ticksPerBeat) {
@@ -141,7 +137,7 @@ namespace Player {
             MaxTick = 0;
 
             foreach (var ev in eventList) {
-                if (EVENT_TYPE.NOTE_OFF == ev.Message.Type || EVENT_TYPE.NOTE_ON == ev.Message.Type) {
+                if (E_EVENT_TYPE.NOTE_OFF == ev.Message.Type || E_EVENT_TYPE.NOTE_ON == ev.Message.Type) {
                     var time = 960 * ev.Time / ticksPerBeat;
                     if (MaxTick < time) {
                         MaxTick = (int)time;
@@ -164,96 +160,91 @@ namespace Player {
             mMeasure = 0;
             mBeat = 0;
             mTick = 0.0;
-            mEventQue.Clear();
-            foreach (var ev in mEventList) {
-                mEventQue.Enqueue(ev);
-            }
-            mCurEvent = mEventQue.Dequeue();
             mSw = new Stopwatch();
             mSw.Start();
-            if (null != mTimer) {
-                mTimer.Dispose();
-            }
             IsPlay = true;
-            mTimer.Start();
+            mTask = new Task(MainProc);
+            mTask.Start();
         }
 
         public void Stop() {
             IsPlay = false;
-            mTimer.Stop();
+            while (!mTask.IsCompleted) {
+                Thread.Sleep(100);
+            }
 
             for (byte ch = 0; ch < 16; ++ch) {
                 for (byte noteNo = 0; noteNo < 128; ++noteNo) {
-                    mSender.Send(new Message(EVENT_TYPE.NOTE_OFF, ch, noteNo));
+                    mSender.Send(Message.NoteOff(ch, noteNo));
                     Task.Delay(10);
                 }
-                {
-                    Message msg = new Message(CTRL_TYPE.ALL_RESET, ch);
-                    mSender.Send(msg);
-                }
+                mSender.Send(new Message(E_CTRL_TYPE.ALL_RESET, ch, 0));
             }
         }
 
-        private void MainProc(object sender, System.EventArgs e) {
-            if (!IsPlay) {
-                return;
-            }
-
-            var current_mSec = mSw.ElapsedMilliseconds;
-            var deltaTime = current_mSec - mPrevious_mSec;
-            mCurrentTick += 0.96 * mBPM * Speed * deltaTime / 60.0;
-            mTick += mCurrentTick - mPreviousTick;
-            if (3840 / mMeasureDenomi <= mTick) {
-                mTick -= 3840 / mMeasureDenomi;
-                ++mBeat;
-                if (mMeasureNumer <= mBeat) {
-                    mBeat -= mMeasureNumer;
-                    ++mMeasure;
-                }
-            }
-            mPrevious_mSec = current_mSec;
-            mPreviousTick = mCurrentTick;
-
-            var eventTick = 960 * mCurEvent.Time / mTicksPerBeat;
-            while (eventTick <= mCurrentTick) {
+        private void MainProc() {
+            foreach (Event ev in mEventList) {
                 if (!IsPlay) {
                     return;
                 }
 
-                var msg = mCurEvent.Message;
+                var msg = ev.Message;
                 var type = msg.Type;
+                var eventTick = 960 * ev.Time / mTicksPerBeat;
 
-                mCurEvent = mEventQue.Dequeue();
-                eventTick = 960 * mCurEvent.Time / mTicksPerBeat;
-
-                if (EVENT_TYPE.META == type) {
-                    if (META_TYPE.TEMPO == msg.Meta.Type) {
-                        mBPM = msg.Meta.Tempo;
+                while (mCurrentTick < eventTick) {
+                    if (!IsPlay) {
+                        return;
                     }
-                    if (META_TYPE.MEASURE == msg.Meta.Type) {
-                        mMeasureNumer = msg.Meta.MeasureNumer;
-                        mMeasureDenomi = msg.Meta.MeasureDenomi;
-                    }
-                }
-
-                if (EVENT_TYPE.NOTE_ON == type && msg.V2 != 0) {
-                    if (0.25 * mTicksPerBeat < (mCurrentTick - eventTick)) {
-                        continue;
-                    }
-
-                    if (!mSender.Channel[msg.Channel].Enable || (0 <= SoloChannel && SoloChannel != msg.Channel)) {
-                        continue;
-                    }
-                }
-
-                if (EVENT_TYPE.NOTE_OFF == type || EVENT_TYPE.NOTE_ON == type) {
-                    if (0x00 == mSender.Channel[msg.Channel].InstId.isDrum) {
-                        if ((msg.V1 + Transpose) < 0 || 127 < (msg.V1 + Transpose)) {
-                            continue;
-                        } else {
-                            msg = new Message(msg.Status, (byte)(msg.V1 + Transpose), msg.V2);
+                    var current_mSec = mSw.ElapsedMilliseconds;
+                    var deltaTime = current_mSec - mPrevious_mSec;
+                    mCurrentTick += 0.96 * mBPM * Speed * deltaTime / 60.0;
+                    mTick += mCurrentTick - mPreviousTick;
+                    if (3840 / mMeasureDenomi <= mTick) {
+                        mTick -= 3840 / mMeasureDenomi;
+                        ++mBeat;
+                        if (mMeasureNumer <= mBeat) {
+                            mBeat -= mMeasureNumer;
+                            ++mMeasure;
                         }
                     }
+                    mPrevious_mSec = current_mSec;
+                    mPreviousTick = mCurrentTick;
+                }
+
+                switch (type) {
+                case E_EVENT_TYPE.NOTE_ON:
+                case E_EVENT_TYPE.NOTE_OFF:
+                    if (msg.Velocity != 0) {
+                        if (0.25 * mTicksPerBeat < (mCurrentTick - eventTick)) {
+                            continue;
+                        }
+                        if (!mSender.Channel[msg.Channel].Enable || (0 <= SoloChannel && SoloChannel != msg.Channel)) {
+                            continue;
+                        }
+                    }
+                    if (0x00 == mSender.Channel[msg.Channel].InstId.isDrum) {
+                        if ((msg.NoteNo + Transpose) < 0 || 127 < (msg.NoteNo + Transpose)) {
+                            continue;
+                        } else {
+                            msg = new Message(msg.Status, (byte)(msg.NoteNo + Transpose), msg.Velocity);
+                        }
+                    }
+                    break;
+                case E_EVENT_TYPE.META:
+                    switch (msg.Meta.Type) {
+                    case E_META_TYPE.TEMPO:
+                        mBPM = msg.Meta.Tempo;
+                        break;
+                    case E_META_TYPE.MEASURE:
+                        mMeasureNumer = msg.Meta.MeasureNumer;
+                        mMeasureDenomi = msg.Meta.MeasureDenomi;
+                        break;
+                    case E_META_TYPE.KEY:
+                        mKey = msg.Meta.Key;
+                        break;
+                    }
+                    break;
                 }
 
                 //

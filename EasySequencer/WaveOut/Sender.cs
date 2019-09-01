@@ -67,29 +67,29 @@ namespace WaveOut {
                 mFileOutChannel[i] = new Channel(mInstList, ppFileOutSampler, ppFileOutChannel[i], i);
             }
 
-            WaveOutOpen((uint)Const.SampleRate, 256);
+            WaveOutOpen((uint)Const.SampleRate, 1024);
         }
 
         public void Send(Message msg) {
             switch (msg.Type) {
-            case EVENT_TYPE.NOTE_OFF:
-                noteOff(ppWaveOutSampler, Channel[msg.Channel], msg.V1, E_KEY_STATE.RELEASE);
+            case E_EVENT_TYPE.NOTE_OFF:
+                noteOff(ppWaveOutSampler, Channel[msg.Channel], msg.NoteNo, E_KEY_STATE.RELEASE);
                 break;
 
-            case EVENT_TYPE.NOTE_ON:
-                noteOn(ppWaveOutSampler, Channel[msg.Channel], msg.V1, msg.V2);
+            case E_EVENT_TYPE.NOTE_ON:
+                noteOn(ppWaveOutSampler, Channel[msg.Channel], msg.NoteNo, msg.Velocity);
                 break;
 
-            case EVENT_TYPE.CTRL_CHG:
-                Channel[msg.Channel].CtrlChange((CTRL_TYPE)msg.V1, msg.V2);
+            case E_EVENT_TYPE.CTRL_CHG:
+                Channel[msg.Channel].CtrlChange(msg.CtrlType, msg.CtrlValue);
                 break;
 
-            case EVENT_TYPE.PRGM_CHG:
-                Channel[msg.Channel].ProgramChange(msg.V1);
+            case E_EVENT_TYPE.PROG_CHG:
+                Channel[msg.Channel].ProgramChange(msg.ProgramNo);
                 break;
 
-            case EVENT_TYPE.PITCH:
-                Channel[msg.Channel].PitchBend(msg.V1, msg.V2);
+            case E_EVENT_TYPE.PITCH:
+                Channel[msg.Channel].PitchBend(msg.Pitch);
                 break;
 
             default:
@@ -118,31 +118,31 @@ namespace WaveOut {
 
                     var msg = ev.Message;
                     var type = msg.Type;
-                    if (EVENT_TYPE.META == type) {
-                        if (META_TYPE.TEMPO == msg.Meta.Type) {
+                    if (E_EVENT_TYPE.META == type) {
+                        if (E_META_TYPE.TEMPO == msg.Meta.Type) {
                             bpm = msg.Meta.Tempo;
                         }
                     }
 
                     switch (msg.Type) {
-                    case EVENT_TYPE.NOTE_OFF:
-                        noteOff(ppFileOutSampler, mFileOutChannel[msg.Channel], msg.V1, E_KEY_STATE.RELEASE);
+                    case E_EVENT_TYPE.NOTE_OFF:
+                        noteOff(ppFileOutSampler, mFileOutChannel[msg.Channel], msg.NoteNo, E_KEY_STATE.RELEASE);
                         break;
 
-                    case EVENT_TYPE.NOTE_ON:
-                        noteOn(ppFileOutSampler, mFileOutChannel[msg.Channel], msg.V1, msg.V2);
+                    case E_EVENT_TYPE.NOTE_ON:
+                        noteOn(ppFileOutSampler, mFileOutChannel[msg.Channel], msg.NoteNo, msg.Velocity);
                         break;
 
-                    case EVENT_TYPE.CTRL_CHG:
-                        mFileOutChannel[msg.Channel].CtrlChange((CTRL_TYPE)msg.V1, msg.V2);
+                    case E_EVENT_TYPE.CTRL_CHG:
+                        mFileOutChannel[msg.Channel].CtrlChange(msg.CtrlType, msg.CtrlValue);
                         break;
 
-                    case EVENT_TYPE.PRGM_CHG:
-                        mFileOutChannel[msg.Channel].ProgramChange(msg.V1);
+                    case E_EVENT_TYPE.PROG_CHG:
+                        mFileOutChannel[msg.Channel].ProgramChange(msg.ProgramNo);
                         break;
 
-                    case EVENT_TYPE.PITCH:
-                        mFileOutChannel[msg.Channel].PitchBend(msg.V1, msg.V2);
+                    case E_EVENT_TYPE.PITCH:
+                        mFileOutChannel[msg.Channel].PitchBend(msg.Pitch);
                         break;
 
                     default:

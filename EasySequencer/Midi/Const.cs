@@ -1,25 +1,25 @@
 ﻿namespace MIDI {
-    public enum FORMAT : ushort {
+    public enum E_FORMAT : ushort {
         FORMAT0 = 0x0000,
         FORMAT1 = 0x0001,
         FORMAT2 = 0x0002,
         INVALID = 0xFFFF
     }
 
-    public enum EVENT_TYPE : byte {
+    public enum E_EVENT_TYPE : byte {
         INVALID  = 0x00,
         NOTE_OFF = 0x80,
         NOTE_ON  = 0x90,
         POLY_KEY = 0xA0,
         CTRL_CHG = 0xB0,
-        PRGM_CHG = 0xC0,
+        PROG_CHG = 0xC0,
         CH_PRESS = 0xD0,
         PITCH    = 0xE0,
         SYS_EX   = 0xF0,
         META     = 0xFF
     }
 
-    public enum CTRL_TYPE : byte {
+    public enum E_CTRL_TYPE : byte {
         BANK_MSB   = 0,
         MODULATION = 1,
         PORTA_TIME = 5,
@@ -44,10 +44,12 @@
         NRPN_MSB   = 99,
         RPN_LSB    = 100,
         RPN_MSB    = 101,
-        ALL_RESET  = 121
+        ALL_RESET  = 121,
+
+        INVALID    = 255
     }
 
-    public enum META_TYPE : byte {
+    public enum E_META_TYPE : byte {
         SEQ_NO    = 0x00,
         TEXT      = 0x01,
         COMPOSER  = 0x02,
@@ -69,7 +71,7 @@
         INVALID   = 0xFF
     }
 
-    public enum KEY : ushort {
+    public enum E_KEY : ushort {
         //
         G_MAJOR  = 0x0100,
         E_MINOR  = 0x0101,

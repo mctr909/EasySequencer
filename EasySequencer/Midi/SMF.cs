@@ -5,11 +5,11 @@ using System.Collections.Generic;
 namespace MIDI {
     public class SMF {
         private struct Header {
-            public readonly FORMAT Format;
+            public readonly E_FORMAT Format;
             public ushort Tracks;
             public readonly ushort Ticks;
 
-            public Header(FORMAT format, ushort tracks, ushort ticks) {
+            public Header(E_FORMAT format, ushort tracks, ushort ticks) {
                 Format = format;
                 Tracks = tracks;
                 Ticks = ticks;
@@ -18,12 +18,12 @@ namespace MIDI {
             public Header(BinaryReader br) {
                 Util.ReadUI32(br);
                 Util.ReadUI32(br);
-                Format = (FORMAT)Util.ReadUI16(br);
+                Format = (E_FORMAT)Util.ReadUI16(br);
                 Tracks = Util.ReadUI16(br);
                 Ticks = Util.ReadUI16(br);
 
-                if (!Enum.IsDefined(typeof(FORMAT), Format)) {
-                    Format = FORMAT.INVALID;
+                if (!Enum.IsDefined(typeof(E_FORMAT), Format)) {
+                    Format = E_FORMAT.INVALID;
                 }
             }
 
@@ -59,7 +59,7 @@ namespace MIDI {
             }
         }
 
-        public SMF(FORMAT format = FORMAT.FORMAT1, ushort ticks = 960) {
+        public SMF(E_FORMAT format = E_FORMAT.FORMAT1, ushort ticks = 960) {
             mHead = new Header(format, 0, ticks);
             mTracks = new Dictionary<int, Track>();
         }

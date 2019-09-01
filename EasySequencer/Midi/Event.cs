@@ -2,10 +2,10 @@
 
 namespace MIDI {
     public struct Event {
-        public readonly uint Time;
-        public readonly ushort Track;
-        public readonly ushort Index;
-        public readonly Message Message;
+        public uint Time { get; private set; }
+        public ushort Track { get; private set; }
+        public ushort Index { get; private set; }
+        public Message Message { get; private set; }
 
         public static readonly Comparison<Event> Compare = new Comparison<Event>((a, b) => {
             var dTime = (long)a.Time - b.Time;

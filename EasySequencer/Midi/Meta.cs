@@ -1,37 +1,38 @@
-﻿using System.IO;
+﻿using System;
+using System.IO;
 
 namespace MIDI {
     public struct Meta {
-        private byte[] mData;
+        private const string ENC = "shift-jis";
 
-        public META_TYPE Type {
-            get { return (META_TYPE)mData[1]; }
-        }
+        public E_META_TYPE Type { get; private set; }
+
+        public byte[] Data { get; private set; }
 
         public double Tempo {
             get {
-                if (META_TYPE.TEMPO == Type) {
-                    return 60000000.0 / ((mData[2] << 16) | (mData[3] << 8) | mData[4]);
+                if (E_META_TYPE.TEMPO == Type) {
+                    return 60000000.0 / ((Data[0] << 16) | (Data[1] << 8) | Data[2]);
                 } else {
                     return 0.0;
                 }
             }
         }
 
-        public KEY Key {
+        public E_KEY Key {
             get {
-                if (META_TYPE.KEY == Type) {
-                    return (KEY)((mData[2] << 8) | mData[3]);
+                if (E_META_TYPE.KEY == Type) {
+                    return (E_KEY)((Data[0] << 8) | Data[1]);
                 } else {
-                    return KEY.INVALID;
+                    return E_KEY.INVALID;
                 }
             }
         }
 
         public int MeasureNumer {
             get {
-                if (META_TYPE.MEASURE == Type) {
-                    return mData[2];
+                if (E_META_TYPE.MEASURE == Type) {
+                    return Data[0];
                 } else {
                     return 0;
                 }
@@ -40,8 +41,8 @@ namespace MIDI {
 
         public int MeasureDenomi {
             get {
-                if (META_TYPE.MEASURE == Type) {
-                    return (int)System.Math.Pow(2.0, mData[3]);
+                if (E_META_TYPE.MEASURE == Type) {
+                    return (int)System.Math.Pow(2.0, Data[1]);
                 } else {
                     return 0;
                 }
@@ -51,52 +52,54 @@ namespace MIDI {
         public string Text {
             get {
                 switch (Type) {
-                    case META_TYPE.TEXT:
-                    case META_TYPE.COMPOSER:
-                    case META_TYPE.SEQ_NAME:
-                    case META_TYPE.INST_NAME:
-                    case META_TYPE.LYRIC:
-                    case META_TYPE.MARKER:
-                    case META_TYPE.PRG_NAME:
-                        return System.Text.Encoding.GetEncoding("shift-jis").GetString(mData, 2, mData.Length - 2);
+                    case E_META_TYPE.TEXT:
+                    case E_META_TYPE.COMPOSER:
+                    case E_META_TYPE.SEQ_NAME:
+                    case E_META_TYPE.INST_NAME:
+                    case E_META_TYPE.LYRIC:
+                    case E_META_TYPE.MARKER:
+                    case E_META_TYPE.PRG_NAME:
+                        return System.Text.Encoding.GetEncoding(ENC).GetString(Data, 0, Data.Length);
                     default:
                         return null;
                 }
             }
         }
 
-        public Meta(params byte[] data) {
-            mData = data;
-        }
-
-        public Meta(META_TYPE type, params byte[] data) {
-            mData = new byte[data.Length + 2];
-            mData[0] = (byte)EVENT_TYPE.META;
-            mData[1] = (byte)type;
-            data.CopyTo(mData, 2);
-        }
-
         public void Write(MemoryStream ms) {
-            ms.WriteByte(mData[0]);
-            ms.WriteByte(mData[1]);
-            Util.WriteDelta(ms, (uint)mData.Length - 2);
-            ms.Write(mData, 2, mData.Length - 2);
+            ms.WriteByte((byte)Type);
+            Util.WriteDelta(ms, (uint)Data.Length);
+            ms.Write(Data, 0, Data.Length);
         }
 
-        //public new string ToString() {
-        //    switch (Type) {
-        //    case META_TYPE.SEQ_NO:
-        //        return string.Format("[{0}]\t{1}", Type, (Data[2] << 8) | Data[3]);
-        //    case META_TYPE.CH_PREFIX:
-        //    case META_TYPE.PORT:
-        //        return string.Format("[{0}]\t{1}", Type, Data[2]);
-        //    case META_TYPE.MEASURE:
-        //        return string.Format("[{0}]\t{1}/{2} ({3}, {4})", Type, Data[2], (int)System.Math.Pow(2.0, Data[3]), Data[4], Data[5]);
-        //    case META_TYPE.META:
-        //        return string.Format("[{0}]\t{1}", Type, System.BitConverter.ToString(Data, 2));
-        //    default:
-        //        return string.Format("[{0}]", Type);
-        //    }
-        //}
+        public Meta(params byte[] data) {
+            Type = (E_META_TYPE)data[0];
+            Data = new byte[data.Length - 1];
+            Array.Copy(data, 1, Data, 0, Data.Length);
+        }
+
+        public Meta(E_META_TYPE type, params byte[] data) {
+            Type = type;
+            Data = data;
+        }
+
+        public Meta(E_META_TYPE type, string text) {
+            switch (type) {
+                case E_META_TYPE.TEXT:
+                case E_META_TYPE.COMPOSER:
+                case E_META_TYPE.SEQ_NAME:
+                case E_META_TYPE.INST_NAME:
+                case E_META_TYPE.LYRIC:
+                case E_META_TYPE.MARKER:
+                case E_META_TYPE.PRG_NAME:
+                    Type = type;
+                    Data = System.Text.Encoding.GetEncoding(ENC).GetBytes(text);
+                    break;
+                default:
+                    Type = E_META_TYPE.INVALID;
+                    Data = null;
+                    break;
+            }
+        }
     }
 }

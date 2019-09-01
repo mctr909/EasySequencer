@@ -7,7 +7,7 @@
 #pragma comment (lib, "winmm.lib")
 
 /******************************************************************************/
-#define BUFFER_COUNT        8
+#define BUFFER_COUNT        4
 #define CHANNEL_COUNT       16
 
 /******************************************************************************/
@@ -22,7 +22,7 @@ WAVEHDR         gWaveHdr[BUFFER_COUNT] = { NULL };
 
 LPBYTE          gpDlsBuffer = NULL;
 
-SInt32          gWaveOutSamplers = 48;
+SInt32          gWaveOutSamplers = 256;
 SInt32          gFileOutSamplers = 256;
 SInt32          gWaveBufferLength = 0;
 SInt32          gFileBufferLength = 0;

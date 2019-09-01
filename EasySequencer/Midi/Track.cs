@@ -30,7 +30,7 @@ namespace MIDI {
                 } else {
                     index = 0;
                 }
-                Events.Add(new Event(time, No, index, ReadMessage(ms, ref currentStatus)));
+                Events.Add(new Event(time, No, index, Message.Load(ms, ref currentStatus)));
             }
         }
 
@@ -52,80 +52,33 @@ namespace MIDI {
             temp.WriteTo(ms);
         }
 
-        private static Message ReadMessage(MemoryStream ms, ref int currentStatus) {
-            EVENT_TYPE type;
-            byte ch;
-
-            var status = ms.ReadByte();
-
-            if (status < 0x80) {
-                // ランニングステータス
-                ms.Seek(-1, SeekOrigin.Current);
-                status = currentStatus;
-            } else {
-                // ステータスの更新
-                currentStatus = status;
-            }
-
-            if (status < 0xF0) {
-                // チャンネルメッセージ
-                type = (EVENT_TYPE)(status & 0xF0);
-                ch = (byte)(status & 0x0F);
-            } else {
-                // システムメッセージ
-                type = (EVENT_TYPE)status;
-                ch = 0xF0;
-            }
-
-            switch (type) {
-                // 2バイトメッセージ
-                case EVENT_TYPE.NOTE_ON:
-                case EVENT_TYPE.NOTE_OFF:
-                case EVENT_TYPE.POLY_KEY:
-                case EVENT_TYPE.CTRL_CHG:
-                case EVENT_TYPE.PITCH:
-                    return new Message(type, ch, (byte)ms.ReadByte(), (byte)ms.ReadByte());
-                // 1バイトメッセージ
-                case EVENT_TYPE.PRGM_CHG:
-                case EVENT_TYPE.CH_PRESS:
-                    return new Message(type, ch, (byte)ms.ReadByte());
-                // システムエクスクルーシブ
-                case EVENT_TYPE.SYS_EX:
-                    return new Message(EVENT_TYPE.SYS_EX, Util.ReadBytes(ms));
-                // メタデータ
-                case EVENT_TYPE.META:
-                    return new Message((META_TYPE)ms.ReadByte(), Util.ReadBytes(ms));
-                default:
-                    return new Message();
-            }
-        }
-
         private static void WriteMessage(MemoryStream ms, Message msg) {
             switch (msg.Type) {
                 // 2バイトメッセージ
-                case EVENT_TYPE.NOTE_ON:
-                case EVENT_TYPE.NOTE_OFF:
-                case EVENT_TYPE.POLY_KEY:
-                case EVENT_TYPE.CTRL_CHG:
-                case EVENT_TYPE.PITCH:
+                case E_EVENT_TYPE.NOTE_ON:
+                case E_EVENT_TYPE.NOTE_OFF:
+                case E_EVENT_TYPE.POLY_KEY:
+                case E_EVENT_TYPE.CTRL_CHG:
+                case E_EVENT_TYPE.PITCH:
                     ms.WriteByte(msg.Status);
-                    ms.WriteByte(msg.V1);
-                    ms.WriteByte(msg.V2);
+                    ms.WriteByte(msg.Data[0]);
+                    ms.WriteByte(msg.Data[1]);
                     return;
                 // 1バイトメッセージ
-                case EVENT_TYPE.PRGM_CHG:
-                case EVENT_TYPE.CH_PRESS:
+                case E_EVENT_TYPE.PROG_CHG:
+                case E_EVENT_TYPE.CH_PRESS:
                     ms.WriteByte(msg.Status);
-                    ms.WriteByte(msg.V1);
+                    ms.WriteByte(msg.Data[0]);
                     return;
                 // システムエクスクルーシブ
-                case EVENT_TYPE.SYS_EX:
+                case E_EVENT_TYPE.SYS_EX:
                     ms.WriteByte(msg.Status);
                     Util.WriteDelta(ms, (uint)(msg.Data.Length - 1));
                     ms.Write(msg.Data, 1, msg.Data.Length - 1);
                     return;
                 // メタデータ
-                case EVENT_TYPE.META:
+                case E_EVENT_TYPE.META:
+                    ms.WriteByte(msg.Status);
                     msg.Meta.Write(ms);
                     return;
                 default:

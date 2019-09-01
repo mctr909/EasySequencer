@@ -109,84 +109,84 @@ namespace WaveOut {
             ProgramChange(0);
         }
 
-        public void CtrlChange(CTRL_TYPE type, byte b1) {
+        public void CtrlChange(E_CTRL_TYPE type, byte b1) {
             switch (type) {
-                case CTRL_TYPE.BANK_MSB:
+                case E_CTRL_TYPE.BANK_MSB:
                     mInstId.bankMSB = b1;
                     break;
-                case CTRL_TYPE.BANK_LSB:
+                case E_CTRL_TYPE.BANK_LSB:
                     mInstId.bankLSB = b1;
                     break;
 
-                case CTRL_TYPE.VOLUME:
+                case E_CTRL_TYPE.VOLUME:
                     setAmp(b1, Exp);
                     break;
-                case CTRL_TYPE.PAN:
+                case E_CTRL_TYPE.PAN:
                     setPan(b1);
                     break;
-                case CTRL_TYPE.EXPRESSION:
+                case E_CTRL_TYPE.EXPRESSION:
                     setAmp(Vol, b1);
                     break;
 
-                case CTRL_TYPE.MODULATION:
+                case E_CTRL_TYPE.MODULATION:
                     Mod = b1;
                     break;
 
-                case CTRL_TYPE.HOLD:
+                case E_CTRL_TYPE.HOLD:
                     setHld(b1);
                     break;
-                case CTRL_TYPE.RELEACE:
+                case E_CTRL_TYPE.RELEACE:
                     Rel = b1;
                     break;
-                case CTRL_TYPE.ATTACK:
+                case E_CTRL_TYPE.ATTACK:
                     Atk = b1;
                     break;
 
-                case CTRL_TYPE.RESONANCE:
+                case E_CTRL_TYPE.RESONANCE:
                     setRes(b1);
                     break;
-                case CTRL_TYPE.CUTOFF:
+                case E_CTRL_TYPE.CUTOFF:
                     setCut(b1);
                     break;
 
-                case CTRL_TYPE.VIB_RATE:
+                case E_CTRL_TYPE.VIB_RATE:
                     VibRate = b1;
                     break;
-                case CTRL_TYPE.VIB_DEPTH:
+                case E_CTRL_TYPE.VIB_DEPTH:
                     VibDepth = b1;
                     break;
-                case CTRL_TYPE.VIB_DELAY:
+                case E_CTRL_TYPE.VIB_DELAY:
                     VibDelay = b1;
                     break;
 
-                case CTRL_TYPE.REVERB:
+                case E_CTRL_TYPE.REVERB:
                     Rev = b1;
                     break;
-                case CTRL_TYPE.CHORUS:
+                case E_CTRL_TYPE.CHORUS:
                     setCho(b1);
                     break;
-                case CTRL_TYPE.DELAY:
+                case E_CTRL_TYPE.DELAY:
                     setDel(b1);
                     break;
 
-                case CTRL_TYPE.NRPN_LSB:
+                case E_CTRL_TYPE.NRPN_LSB:
                     mNrpnLSB = b1;
                     break;
-                case CTRL_TYPE.NRPN_MSB:
+                case E_CTRL_TYPE.NRPN_MSB:
                     mNrpnMSB = b1;
                     break;
-                case CTRL_TYPE.RPN_LSB:
+                case E_CTRL_TYPE.RPN_LSB:
                     mRpnLSB = b1;
                     break;
-                case CTRL_TYPE.RPN_MSB:
+                case E_CTRL_TYPE.RPN_MSB:
                     mRpnMSB = b1;
                     break;
-                case CTRL_TYPE.DATA_MSB:
+                case E_CTRL_TYPE.DATA_MSB:
                     setRpn(b1);
                     setNrpn(b1);
                     break;
 
-                case CTRL_TYPE.ALL_RESET:
+                case E_CTRL_TYPE.ALL_RESET:
                     AllReset();
                     break;
             }
@@ -224,9 +224,8 @@ namespace WaveOut {
             InstName = InstList[mInstId].name;
         }
 
-        public void PitchBend(byte lsb, byte msb) {
-            Pitch = (lsb | (msb << 7)) - 8192;
-
+        public void PitchBend(short pitch) {
+            Pitch = pitch;
             var temp = Pitch * BendRange;
             if (temp < 0) {
                 temp = -temp;

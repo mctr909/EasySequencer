@@ -63,8 +63,8 @@ namespace EasySequencer {
             var list = mInstList[(string)cmbCategory.SelectedItem].ToArray();
             var inst = list[(lstInst.SelectedIndex < list.Count()) ? lstInst.SelectedIndex : list.Count() - 1];
 
-            mChannel.CtrlChange(CTRL_TYPE.BANK_MSB, inst.Key.bankMSB);
-            mChannel.CtrlChange(CTRL_TYPE.BANK_LSB, inst.Key.bankLSB);
+            mChannel.CtrlChange(E_CTRL_TYPE.BANK_MSB, inst.Key.bankMSB);
+            mChannel.CtrlChange(E_CTRL_TYPE.BANK_LSB, inst.Key.bankLSB);
             mChannel.ProgramChange(inst.Key.programNo, inst.Key.isDrum == 0x80);
         }
 
