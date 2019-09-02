@@ -85,7 +85,7 @@ namespace WaveOut {
                 break;
 
             case E_EVENT_TYPE.PROG_CHG:
-                Channel[msg.Channel].ProgramChange(msg.ProgramNo);
+                Channel[msg.Channel].ProgramChange(msg.ProgNo);
                 break;
 
             case E_EVENT_TYPE.PITCH:
@@ -138,7 +138,7 @@ namespace WaveOut {
                         break;
 
                     case E_EVENT_TYPE.PROG_CHG:
-                        mFileOutChannel[msg.Channel].ProgramChange(msg.ProgramNo);
+                        mFileOutChannel[msg.Channel].ProgramChange(msg.ProgNo);
                         break;
 
                     case E_EVENT_TYPE.PITCH:

@@ -5,23 +5,51 @@ namespace MIDI {
         public byte Status { get; private set; }
         public byte[] Data { get; private set; }
 
-        public E_EVENT_TYPE Type { get { return (E_EVENT_TYPE)((Status < 0xF0) ? (Status & 0xF0) : Status); } }
-
-        public E_CTRL_TYPE CtrlType { get { return (E_EVENT_TYPE.CTRL_CHG == Type) ? (E_CTRL_TYPE)Data[0] : E_CTRL_TYPE.INVALID; } }
-
-        public int Channel { get { return (Status < 0xF0) ? (Status & 0x0F) : 0; } }
-
-        public byte NoteNo { get { return (E_EVENT_TYPE.NOTE_OFF == Type || E_EVENT_TYPE.NOTE_ON == Type) ? Data[0] : (byte)0; } }
-
-        public byte Velocity { get { return (E_EVENT_TYPE.NOTE_OFF == Type || E_EVENT_TYPE.NOTE_ON == Type) ? Data[1] : (byte)0; } }
-
-        public byte CtrlValue { get { return (E_EVENT_TYPE.CTRL_CHG == Type) ? Data[1] : (byte)0; } }
-
-        public byte ProgramNo { get { return (E_EVENT_TYPE.PROG_CHG == Type) ? Data[0] : (byte)0; } }
-
-        public short Pitch { get { return (short)((E_EVENT_TYPE.PITCH == Type) ? (((Data[1] << 7) | Data[0]) - 8192) : 0); } }
-
-        public Meta Meta { get { return new Meta(Data); } }
+        public int Channel {
+            get {
+                return (Status < 0xF0) ? (Status & 0x0F) : 0;
+            }
+        }
+        public E_EVENT_TYPE Type {
+            get {
+                return (E_EVENT_TYPE)((Status < 0xF0) ? (Status & 0xF0) : Status);
+            }
+        }
+        public byte NoteNo {
+            get {
+                return (E_EVENT_TYPE.NOTE_OFF == Type || E_EVENT_TYPE.NOTE_ON == Type) ? Data[0] : (byte)0;
+            }
+        }
+        public byte Velocity {
+            get {
+                return (E_EVENT_TYPE.NOTE_OFF == Type || E_EVENT_TYPE.NOTE_ON == Type) ? Data[1] : (byte)0;
+            }
+        }
+        public E_CTRL_TYPE CtrlType {
+            get {
+                return E_EVENT_TYPE.CTRL_CHG == Type ? (E_CTRL_TYPE)Data[0] : E_CTRL_TYPE.INVALID;
+            }
+        }
+        public byte CtrlValue {
+            get {
+                return E_EVENT_TYPE.CTRL_CHG == Type ? Data[1] : (byte)0;
+            }
+        }
+        public byte ProgNo {
+            get {
+                return E_EVENT_TYPE.PROG_CHG == Type ? Data[0] : (byte)0;
+            }
+        }
+        public short Pitch {
+            get {
+                return (short)(E_EVENT_TYPE.PITCH == Type ? (((Data[1] << 7) | Data[0]) - 8192) : 0);
+            }
+        }
+        public Meta Meta {
+            get {
+                return E_EVENT_TYPE.META == Type ? new Meta(Data) : null;
+            }
+        }
 
         public Message(byte status, params byte[] data) {
             Status = status;
