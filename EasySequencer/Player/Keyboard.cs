@@ -383,56 +383,56 @@ namespace Player {
 
             switch (mKnobNo) {
             case 0:
-                mSender.Send(new MIDI.Message(
+                mSender.Send(new Event(
                     E_CTRL_TYPE.VOLUME,
                     (byte)mChannelNo,
                     (byte)mChangeValue
                 ));
                 break;
             case 1:
-                mSender.Send(new MIDI.Message(
+                mSender.Send(new Event(
                     E_CTRL_TYPE.EXPRESSION,
                     (byte)mChannelNo,
                     (byte)mChangeValue
                 ));
                 break;
             case 2:
-                mSender.Send(new MIDI.Message(
+                mSender.Send(new Event(
                     E_CTRL_TYPE.PAN,
                     (byte)mChannelNo,
                     (byte)mChangeValue
                 ));
                 break;
             case 3:
-                mSender.Send(new MIDI.Message(
+                mSender.Send(new Event(
                     E_CTRL_TYPE.REVERB,
                     (byte)mChannelNo,
                     (byte)mChangeValue
                 ));
                 break;
             case 4:
-                mSender.Send(new MIDI.Message(
+                mSender.Send(new Event(
                     E_CTRL_TYPE.CHORUS,
                     (byte)mChannelNo,
                     (byte)mChangeValue
                 ));
                 break;
             case 5:
-                mSender.Send(new MIDI.Message(
+                mSender.Send(new Event(
                     E_CTRL_TYPE.DELAY,
                     (byte)mChannelNo,
                     (byte)mChangeValue
                 ));
                 break;
             case 6:
-                mSender.Send(new MIDI.Message(
+                mSender.Send(new Event(
                     E_CTRL_TYPE.CUTOFF,
                     (byte)mChannelNo,
                     (byte)mChangeValue
                 ));
                 break;
             case 7:
-                mSender.Send(new MIDI.Message(
+                mSender.Send(new Event(
                     E_CTRL_TYPE.RESONANCE,
                     (byte)mChannelNo,
                     (byte)mChangeValue

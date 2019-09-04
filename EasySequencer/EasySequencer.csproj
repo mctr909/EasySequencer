@@ -75,7 +75,6 @@
     <Compile Include="WaveOut\Channel.cs" />
     <Compile Include="WaveOut\Const.cs" />
     <Compile Include="Player\DoubleBuffer.cs" />
-    <Compile Include="MIDI\Message.cs" />
     <Compile Include="Player\Keyboard.cs" />
     <Compile Include="Player\Player.cs" />
     <Compile Include="WaveOut\Sender.cs" />

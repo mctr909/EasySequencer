@@ -70,7 +70,7 @@ namespace WaveOut {
             WaveOutOpen((uint)Const.SampleRate, 1024);
         }
 
-        public void Send(Message msg) {
+        public void Send(Event msg) {
             switch (msg.Type) {
             case E_EVENT_TYPE.NOTE_OFF:
                 noteOff(ppWaveOutSampler, Channel[msg.Channel], msg.NoteNo, E_KEY_STATE.RELEASE);
@@ -116,35 +116,28 @@ namespace WaveOut {
                         OutputTime = (int)curTime;
                     }
 
-                    var msg = ev.Message;
-                    var type = msg.Type;
-                    if (E_EVENT_TYPE.META == type) {
-                        if (E_META_TYPE.TEMPO == msg.Meta.Type) {
-                            bpm = msg.Meta.Tempo;
+                    if (E_EVENT_TYPE.META == ev.Type) {
+                        if (E_META_TYPE.TEMPO == ev.Meta.Type) {
+                            bpm = ev.Meta.Tempo;
                         }
                     }
 
-                    switch (msg.Type) {
+                    switch (ev.Type) {
                     case E_EVENT_TYPE.NOTE_OFF:
-                        noteOff(ppFileOutSampler, mFileOutChannel[msg.Channel], msg.NoteNo, E_KEY_STATE.RELEASE);
+                        noteOff(ppFileOutSampler, mFileOutChannel[ev.Channel], ev.NoteNo, E_KEY_STATE.RELEASE);
                         break;
-
                     case E_EVENT_TYPE.NOTE_ON:
-                        noteOn(ppFileOutSampler, mFileOutChannel[msg.Channel], msg.NoteNo, msg.Velocity);
+                        noteOn(ppFileOutSampler, mFileOutChannel[ev.Channel], ev.NoteNo, ev.Velocity);
                         break;
-
                     case E_EVENT_TYPE.CTRL_CHG:
-                        mFileOutChannel[msg.Channel].CtrlChange(msg.CtrlType, msg.CtrlValue);
+                        mFileOutChannel[ev.Channel].CtrlChange(ev.CtrlType, ev.CtrlValue);
                         break;
-
                     case E_EVENT_TYPE.PROG_CHG:
-                        mFileOutChannel[msg.Channel].ProgramChange(msg.ProgNo);
+                        mFileOutChannel[ev.Channel].ProgramChange(ev.ProgNo);
                         break;
-
                     case E_EVENT_TYPE.PITCH:
-                        mFileOutChannel[msg.Channel].PitchBend(msg.Pitch);
+                        mFileOutChannel[ev.Channel].PitchBend(ev.Pitch);
                         break;
-
                     default:
                         break;
                     }
