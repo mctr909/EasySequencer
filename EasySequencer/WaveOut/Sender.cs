@@ -10,31 +10,24 @@ namespace WaveOut {
     unsafe public class Sender {
         [DllImport("WaveOut.dll", SetLastError = true, CharSet = CharSet.Auto)]
         private static extern IntPtr LoadDLS(IntPtr filePath, out uint size);
-
         [DllImport("WaveOut.dll", SetLastError = true, CharSet = CharSet.Auto)]
         private static extern bool WaveOutOpen(uint sampleRate, uint bufferLength);
-
         [DllImport("WaveOut.dll", SetLastError = true, CharSet = CharSet.Auto)]
         private static extern void WaveOutClose();
-
+        [DllImport("WaveOut.dll", SetLastError = true, CharSet = CharSet.Auto)]
+        private static extern void WriteWaveOutBuffer();
         [DllImport("WaveOut.dll", SetLastError = true, CharSet = CharSet.Auto)]
         private static extern void FileOutOpen(IntPtr filePath, uint bufferLength);
-
         [DllImport("WaveOut.dll", SetLastError = true, CharSet = CharSet.Auto)]
         private static extern void FileOutClose();
-
         [DllImport("WaveOut.dll", SetLastError = true, CharSet = CharSet.Auto)]
         private static extern void FileOut();
-
         [DllImport("WaveOut.dll", SetLastError = true, CharSet = CharSet.Auto)]
         private static extern CHANNEL_PARAM** GetWaveOutChannelPtr(uint sampleRate);
-
         [DllImport("WaveOut.dll", SetLastError = true, CharSet = CharSet.Auto)]
         private static extern CHANNEL_PARAM** GetFileOutChannelPtr(uint sampleRate);
-
         [DllImport("WaveOut.dll", SetLastError = true, CharSet = CharSet.Auto)]
         private static extern SAMPLER** GetWaveOutSamplerPtr(uint samplers);
-
         [DllImport("WaveOut.dll", SetLastError = true, CharSet = CharSet.Auto)]
         private static extern SAMPLER** GetFileOutSamplerPtr(uint samplers);
 
@@ -43,6 +36,7 @@ namespace WaveOut {
 
         private Channel[] mFileOutChannel;
         private Dictionary<INST_ID, INST_INFO> mInstList;
+        private Task mTask;
 
         public Channel[] Channel { get; private set; }
         public SAMPLER** ppWaveOutSampler { get; private set; }
@@ -67,7 +61,10 @@ namespace WaveOut {
                 mFileOutChannel[i] = new Channel(mInstList, ppFileOutSampler, ppFileOutChannel[i], i);
             }
 
-            WaveOutOpen((uint)Const.SampleRate, 1024);
+            WaveOutOpen((uint)Const.SampleRate, 512);
+
+            mTask = new Task(mainLoop, TaskCreationOptions.PreferFairness);
+            mTask.Start();
         }
 
         public void Send(Event msg) {
@@ -415,6 +412,12 @@ namespace WaveOut {
                 instInfo.name = inst.name;
                 instInfo.waves = waveInfo;
                 mInstList.Add(id, instInfo);
+            }
+        }
+
+        private void mainLoop() {
+            while (true) {
+                WriteWaveOutBuffer();
             }
         }
     }

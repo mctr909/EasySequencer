@@ -29,6 +29,7 @@ typedef struct {
 /******************************************************************************/
 __declspec(dllexport) BOOL WINAPI WaveOutOpen(UInt32 sampleRate, UInt32 waveBufferLength);
 __declspec(dllexport) VOID WINAPI WaveOutClose();
+__declspec(dllexport) VOID WINAPI WriteWaveOutBuffer();
 __declspec(dllexport) VOID WINAPI FileOutOpen(LPWSTR filePath, UInt32 bufferLength);
 __declspec(dllexport) VOID WINAPI FileOutClose();
 __declspec(dllexport) VOID WINAPI FileOut();
