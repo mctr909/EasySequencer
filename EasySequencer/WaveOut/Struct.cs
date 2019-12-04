@@ -39,6 +39,10 @@ namespace WaveOut {
         public double b2;  //  56
         public double a3;  //  64
         public double b3;  //  72
+        public double a4;
+        public double b4;
+        public double a5;
+        public double b5;
     };
 
     [StructLayout(LayoutKind.Sequential, Pack = 8)]

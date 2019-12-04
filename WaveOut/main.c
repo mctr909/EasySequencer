@@ -12,9 +12,7 @@
 
 /******************************************************************************/
 bool            gDoStop = false;
-bool            gDoMute = false;
 bool            gIsStopped = true;
-bool            gIsMuted = true;
 
 HWAVEOUT        ghWaveOut = NULL;
 WAVEFORMATEX    gWaveFmt = { 0 };
@@ -264,8 +262,8 @@ SAMPLER** WINAPI GetFileOutSamplerPtr(UInt32 samplers) {
 
 LPBYTE WINAPI LoadDLS(LPWSTR filePath, UInt32 *size) {
     //
-    gDoMute = true;
-    while (!gIsMuted) {
+    gDoStop = true;
+    while (!gIsStopped) {
         Sleep(100);
     }
 
@@ -300,7 +298,7 @@ LPBYTE WINAPI LoadDLS(LPWSTR filePath, UInt32 *size) {
     }
 
     //
-    gDoMute = false;
+    gDoStop = false;
 
     return gpDlsBuffer;
 }
@@ -328,18 +326,6 @@ void CALLBACK waveOutProc(HWAVEOUT hwo, UInt32 uMsg) {
             break;
         }
         gIsStopped = false;
-        //
-        if (gDoMute || NULL == gppWaveOutChParams || NULL == gppWaveOutSamplers || NULL == gpDlsBuffer) {
-            for (SInt32 b = 0; b < BUFFER_COUNT; ++b) {
-                if (0 == (gWaveHdr[b].dwFlags & WHDR_INQUEUE)) {
-                    memset(gWaveHdr[b].lpData, 0, gWaveFmt.nBlockAlign * gWaveBufferLength);
-                    waveOutWrite(ghWaveOut, &gWaveHdr[b], sizeof(WAVEHDR));
-                }
-            }
-            gIsMuted = true;
-            break;
-        }
-        gIsMuted = false;
         //
         if (gWriteWaveBufferCount < 1) {
             waveOutWrite(ghWaveOut, &gWaveHdr[gReadWaveBufferIndex], sizeof(WAVEHDR));

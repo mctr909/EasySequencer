@@ -304,4 +304,18 @@ inline void filter(FILTER *pFilter, double input) {
     pFilter->b2 = input;
     pFilter->a3 = pFilter->a2;
     pFilter->a2 = output;
+
+    /** フィルタ3段目 **/
+    input = output;
+    output =
+        kb1 * input
+        + kb0 * pFilter->b4
+        + kb1 * pFilter->b5
+        - ka0 * pFilter->a4
+        - ka1 * pFilter->a5
+        ;
+    pFilter->b5 = pFilter->b4;
+    pFilter->b4 = input;
+    pFilter->a5 = pFilter->a4;
+    pFilter->a4 = output;
 }

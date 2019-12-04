@@ -13,16 +13,20 @@ enum E_KEY_STATE {
 /******************************************************************************/
 #pragma pack(8)
 typedef struct FILTER {
-    double cut; //   0
-    double res; //   8
-    double a0;  //  16
-    double b0;  //  24
-    double a1;  //  32
-    double b1;  //  40
-    double a2;  //  48
-    double b2;  //  56
-    double a3;  //  64
-    double b3;  //  72
+    double cut;
+    double res;
+    double a0;
+    double b0;
+    double a1;
+    double b1;
+    double a2;
+    double b2;
+    double a3;
+    double b3;
+    double a4;
+    double b4;
+    double a5;
+    double b5;
 } FILTER;
 #pragma
 

@@ -221,6 +221,10 @@ namespace WaveOut {
                 pSmpl->eq.b2 = 0.0;
                 pSmpl->eq.a3 = 0.0;
                 pSmpl->eq.b3 = 0.0;
+                pSmpl->eq.a4 = 0.0;
+                pSmpl->eq.b4 = 0.0;
+                pSmpl->eq.a5 = 0.0;
+                pSmpl->eq.b5 = 0.0;
                 pSmpl->eq.cutoff = 1.0;
                 pSmpl->eq.resonance = 0.0;
 
