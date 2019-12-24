@@ -405,18 +405,18 @@ namespace DLS {
         public CK_INSH Header;
         public LRGN Regions = null;
         public LART Articulations = null;
-        public string Name { get; private set; }
-        public string Category { get; private set; }
+        public string Name { get; private set; } = "";
+        public string Category { get; private set; } = "";
 
         public INS_(IntPtr ptr, uint size) : base(ptr, size) { }
 
         protected override void LoadInfo(IntPtr ptr, string type, uint size) {
             switch (type) {
             case "INAM":
-                Name = Marshal.PtrToStringAuto(ptr).Trim();
+                Name = Marshal.PtrToStringAnsi(ptr).Trim();
                 break;
             case "IKEY":
-                Category = Marshal.PtrToStringAuto(ptr).Trim();
+                Category = Marshal.PtrToStringAnsi(ptr).Trim();
                 break;
             }
         }

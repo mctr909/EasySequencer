@@ -193,7 +193,7 @@ namespace WaveOut {
         }
 
         public void ProgramChange(byte value) {
-            mInstId.isDrum = (byte)(9 == No ? 0x80 : 0x00);
+            mInstId.isDrum = (byte)(9 == No ? 1 : 0);
             mInstId.programNo = value;
 
             if (!InstList.ContainsKey(mInstId)) {
@@ -209,7 +209,7 @@ namespace WaveOut {
         }
 
         public void ProgramChange(byte value, bool isDrum) {
-            mInstId.isDrum = (byte)(isDrum ? 0x80 : 0x00);
+            mInstId.isDrum = (byte)(isDrum ? 1 : 0);
             mInstId.programNo = value;
 
             if (!InstList.ContainsKey(mInstId)) {

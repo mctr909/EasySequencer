@@ -223,8 +223,10 @@ namespace WaveOut {
         private void loadDls(string dlsPath) {
             uint dlsSize = 0;
             var dlsPtr = LoadDLS(Marshal.StringToHGlobalAuto(dlsPath), out dlsSize);
-            var dls = new DLS.DLS(dlsPtr, dlsSize);
-            mInstList = dls.GetInstList();
+            //var dls = new DLS.DLS(dlsPtr, dlsSize);
+            //mInstList = dls.GetInstList();
+            var sf2 = new SF2.SF2(dlsPath, dlsPtr, dlsSize);
+            mInstList = sf2.GetInstList();
         }
 
         private void mainLoop() {
