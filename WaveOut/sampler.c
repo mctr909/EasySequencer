@@ -104,7 +104,6 @@ inline void sampler(CHANNEL **ppCh, SAMPLER *pSmpl, byte *pDlsBuffer) {
     if (NULL == ppCh || NULL == pSmpl || E_KEY_STATE_WAIT == pSmpl->keyState) {
         return;
     }
-
     CHANNEL *pChValue = ppCh[pSmpl->channelNo];
     if (NULL == pChValue) {
         return;
@@ -126,7 +125,7 @@ inline void sampler(CHANNEL **ppCh, SAMPLER *pSmpl, byte *pDlsBuffer) {
         pre = 0;
     }
     wave = (pWave[pre] * (1.0 - dt) + pWave[cur] * dt) * pSmpl->gain;
-    pSmpl->index += pSmpl->delta * pChParam->pitch * pChValue->deltaTime;
+    pSmpl->index += pSmpl->delta * pChParam->pitch;
     if ((pSmpl->loop.begin + pSmpl->loop.length) < pSmpl->index) {
         if (pSmpl->loop.enable) {
             pSmpl->index -= pSmpl->loop.length;
@@ -146,41 +145,28 @@ inline void sampler(CHANNEL **ppCh, SAMPLER *pSmpl, byte *pDlsBuffer) {
             pSmpl->keyState = E_KEY_STATE_WAIT;
         }
         break;
-
     case E_KEY_STATE_RELEASE:
-        pSmpl->eq.cut += (pSmpl->envEq.fall - pSmpl->eq.cut) * pSmpl->envEq.deltaR;
         pSmpl->amp -= pSmpl->amp * pSmpl->envAmp.deltaR;
         if (pSmpl->amp < PURGE_THRESHOLD) {
             pSmpl->keyState = E_KEY_STATE_WAIT;
         }
         break;
-
     case E_KEY_STATE_HOLD:
-        pSmpl->eq.cut += (pSmpl->envEq.fall - pSmpl->eq.cut) * pSmpl->envEq.deltaR;
         pSmpl->amp -= pSmpl->amp * pChParam->holdDelta;
         if (pSmpl->amp < PURGE_THRESHOLD) {
             pSmpl->keyState = E_KEY_STATE_WAIT;
         }
         break;
-
     case E_KEY_STATE_PRESS:
-        if (pSmpl->time < pSmpl->envEq.hold) {
-            pSmpl->eq.cut += (pSmpl->envEq.top     - pSmpl->eq.cut) * pSmpl->envEq.deltaA;
-        } else {
-            pSmpl->eq.cut += (pSmpl->envEq.sustain - pSmpl->eq.cut) * pSmpl->envEq.deltaD;
-        }
         if (pSmpl->time < pSmpl->envAmp.hold) {
-            pSmpl->amp += (1.0                   - pSmpl->amp) * pSmpl->envAmp.deltaA;
+            pSmpl->amp += (1.0 - pSmpl->amp) * pSmpl->envAmp.deltaA;
         } else {
-            pSmpl->amp += (pSmpl->envAmp.sustain - pSmpl->amp) * pSmpl->envAmp.deltaD;
+            pSmpl->amp += (pSmpl->envAmp.levelS - pSmpl->amp) * pSmpl->envAmp.deltaD;
         }
         break;
     }
-
     //
-    filter(&pSmpl->eq, wave * pSmpl->velocity * pSmpl->amp);
-    pChValue->wave += pSmpl->eq.a2;
-
+    pChValue->wave += wave * pSmpl->velocity * pSmpl->amp;
     //
     pSmpl->time += pChValue->deltaTime;
 }

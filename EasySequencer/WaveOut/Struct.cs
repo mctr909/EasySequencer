@@ -47,13 +47,10 @@ namespace WaveOut {
 
     [StructLayout(LayoutKind.Sequential, Pack = 8)]
     public struct ENVELOPE {
-        public double levelA;
-        public double levelD;
-        public double levelS;
-        public double levelR;
         public double deltaA;
         public double deltaD;
         public double deltaR;
+        public double levelS;
         public double hold;
     };
 

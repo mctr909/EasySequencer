@@ -32,13 +32,10 @@ typedef struct FILTER {
 
 #pragma pack(8)
 typedef struct ENVELOPE {
-    double rise;
-    double top;
-    double sustain;
-    double fall;
     double deltaA;
     double deltaD;
     double deltaR;
+    double levelS;
     double hold;
 } ENVELOPE;
 #pragma
