@@ -175,14 +175,7 @@ namespace WaveOut {
                 pSmpl->buffOfs = wave.buffOfs;
 
                 pSmpl->gain = wave.gain;
-
-                var diffNote = noteNo - wave.unityNote;
-                if (diffNote < 0) {
-                    pSmpl->delta = wave.delta / Const.SemiTone[-diffNote];
-                } else {
-                    pSmpl->delta = wave.delta * Const.SemiTone[diffNote];
-                }
-
+                pSmpl->delta = wave.delta;
                 pSmpl->index = 0.0;
                 pSmpl->time = 0.0;
 
@@ -190,32 +183,9 @@ namespace WaveOut {
                 pSmpl->amp = 0.0;
 
                 pSmpl->loop = wave.loop;
-
                 pSmpl->envAmp = wave.envAmp;
 
-                pSmpl->envEq.deltaA = 12000 * Const.DeltaTime;
-                pSmpl->envEq.deltaD = 12000 * Const.DeltaTime;
-                pSmpl->envEq.deltaR = 12000 * Const.DeltaTime;
-                pSmpl->envEq.levelS = 1.0;
-                pSmpl->envEq.hold = 0.0;
-
-                pSmpl->eq.a0 = 0.0;
-                pSmpl->eq.b0 = 0.0;
-                pSmpl->eq.a1 = 0.0;
-                pSmpl->eq.b1 = 0.0;
-                pSmpl->eq.a2 = 0.0;
-                pSmpl->eq.b2 = 0.0;
-                pSmpl->eq.a3 = 0.0;
-                pSmpl->eq.b3 = 0.0;
-                pSmpl->eq.a4 = 0.0;
-                pSmpl->eq.b4 = 0.0;
-                pSmpl->eq.a5 = 0.0;
-                pSmpl->eq.b5 = 0.0;
-                pSmpl->eq.cutoff = 1.0;
-                pSmpl->eq.resonance = 0.0;
-
                 pSmpl->keyState = E_KEY_STATE.PRESS;
-
                 return;
             }
         }
