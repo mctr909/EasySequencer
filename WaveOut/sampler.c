@@ -100,8 +100,8 @@ inline void channel(CHANNEL *pCh, double *waveL, double *waveR) {
     pCh->wave = 0.0;
 }
 
-inline void sampler(CHANNEL **ppCh, SAMPLER *pSmpl, byte *pDlsBuffer) {
-    if (NULL == ppCh || NULL == pSmpl || E_KEY_STATE_WAIT == pSmpl->keyState) {
+inline void sampler(CHANNEL **ppCh, SAMPLER *pSmpl, byte *pWaveBuffer) {
+    if (NULL == ppCh || NULL == pSmpl || E_KEY_STATE_WAIT == pSmpl->state) {
         return;
     }
     CHANNEL *pChValue = ppCh[pSmpl->channelNo];
@@ -117,7 +117,7 @@ inline void sampler(CHANNEL **ppCh, SAMPLER *pSmpl, byte *pDlsBuffer) {
     /**** generate wave ****/
     /***********************/
     double wave;
-    SInt16 *pWave = (SInt16*)(pDlsBuffer + pSmpl->buffOfs);
+    SInt16 *pWave = (SInt16*)(pWaveBuffer + pSmpl->buffOfs);
     SInt32 cur = (SInt32)pSmpl->index;
     SInt32 pre = cur - 1;
     double dt = pSmpl->index - cur;
@@ -131,39 +131,33 @@ inline void sampler(CHANNEL **ppCh, SAMPLER *pSmpl, byte *pDlsBuffer) {
             pSmpl->index -= pSmpl->loop.length;
         } else {
             pSmpl->index = pSmpl->loop.begin + pSmpl->loop.length;
-            pSmpl->keyState = E_KEY_STATE_WAIT;
+            pSmpl->state = E_KEY_STATE_WAIT;
         }
     }
 
     /***************************/
     /**** generate envelope ****/
     /***************************/
-    switch (pSmpl->keyState) {
+    switch (pSmpl->state) {
     case E_KEY_STATE_PURGE:
         pSmpl->amp -= pSmpl->amp * pChValue->deltaTime * PURGE_SPEED;
-        if (pSmpl->amp < PURGE_THRESHOLD) {
-            pSmpl->keyState = E_KEY_STATE_WAIT;
-        }
         break;
     case E_KEY_STATE_RELEASE:
         pSmpl->amp -= pSmpl->amp * pSmpl->envAmp.deltaR;
-        if (pSmpl->amp < PURGE_THRESHOLD) {
-            pSmpl->keyState = E_KEY_STATE_WAIT;
-        }
         break;
     case E_KEY_STATE_HOLD:
         pSmpl->amp -= pSmpl->amp * pChParam->holdDelta;
-        if (pSmpl->amp < PURGE_THRESHOLD) {
-            pSmpl->keyState = E_KEY_STATE_WAIT;
-        }
         break;
     case E_KEY_STATE_PRESS:
-        if (pSmpl->time < pSmpl->envAmp.hold) {
+        if (pSmpl->time <= pSmpl->envAmp.hold) {
             pSmpl->amp += (1.0 - pSmpl->amp) * pSmpl->envAmp.deltaA;
         } else {
             pSmpl->amp += (pSmpl->envAmp.levelS - pSmpl->amp) * pSmpl->envAmp.deltaD;
         }
         break;
+    }
+    if (pSmpl->envAmp.hold < pSmpl->time && pSmpl->amp < PURGE_THRESHOLD) {
+        pSmpl->state = E_KEY_STATE_WAIT;
     }
     //
     pChValue->wave += wave * pSmpl->velocity * pSmpl->amp;

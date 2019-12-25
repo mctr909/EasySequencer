@@ -92,7 +92,7 @@ typedef struct CHANNEL {
 typedef struct SAMPLER {
     UInt16 channelNo;
     byte   noteNo;
-    byte   keyState;
+    byte   state;
     UInt32 buffOfs;
 
     double gain;
@@ -115,7 +115,7 @@ extern SAMPLER** createSamplers(UInt32 count);
 
 /******************************************************************************/
 extern inline void channel(CHANNEL *pCh, double *waveL, double *waveR);
-extern inline void sampler(CHANNEL **ppCh, SAMPLER *pSmpl, byte *pDlsBuffer);
+extern inline void sampler(CHANNEL **ppCh, SAMPLER *pSmpl, byte *pWaveBuffer);
 
 /******************************************************************************/
 inline void delay(CHANNEL *pCh, double *waveL, double *waveR);
