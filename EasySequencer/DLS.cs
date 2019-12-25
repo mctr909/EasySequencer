@@ -336,7 +336,14 @@ namespace DLS {
                             waveInfo[noteNo].loop.enable = false;
                         }
                     }
+                    var diffNote = noteNo - waveInfo[noteNo].unityNote;
+                    if (diffNote < 0) {
+                        waveInfo[noteNo].delta /= Const.SemiTone[-diffNote];
+                    } else {
+                        waveInfo[noteNo].delta *= Const.SemiTone[diffNote];
+                    }
                 }
+
                 var id = new INST_ID();
                 id.isDrum = inst.Header.locale.bankFlags;
                 id.programNo = inst.Header.locale.programNo;
