@@ -207,14 +207,13 @@ namespace DLS {
         }
 
         public Dictionary<INST_ID, INST_INFO> GetInstList() {
-            var envelopeSpeed = 15.0;
             var instList = new Dictionary<INST_ID, INST_INFO>();
             foreach (var inst in Instruments.List) {
                 var envAmp = new ENVELOPE();
                 if (null != inst.Articulations) {
-                    envAmp.deltaA = 1000.0 * envelopeSpeed * Const.DeltaTime; // 1msec
-                    envAmp.deltaD = 1000.0 * envelopeSpeed * Const.DeltaTime; // 1msec
-                    envAmp.deltaR = 1000.0 * envelopeSpeed * Const.DeltaTime; // 1msec
+                    envAmp.deltaA = 1000.0 * Const.EnvelopeSpeed * Const.DeltaTime; // 1msec
+                    envAmp.deltaD = 1000.0 * Const.EnvelopeSpeed * Const.DeltaTime; // 1msec
+                    envAmp.deltaR = 1000.0 * Const.EnvelopeSpeed * Const.DeltaTime; // 1msec
                     envAmp.levelS = 1.0;
                     envAmp.hold = 0.0;
                     var holdTime = 0.0;
@@ -224,14 +223,14 @@ namespace DLS {
                         }
                         switch (conn.destination) {
                         case DST_TYPE.EG1_ATTACK_TIME:
-                            envAmp.deltaA = envelopeSpeed * Const.DeltaTime / ART.GetValue(conn);
+                            envAmp.deltaA = Const.EnvelopeSpeed * Const.DeltaTime / ART.GetValue(conn);
                             holdTime += ART.GetValue(conn);
                             break;
                         case DST_TYPE.EG1_DECAY_TIME:
-                            envAmp.deltaD = envelopeSpeed * Const.DeltaTime / ART.GetValue(conn);
+                            envAmp.deltaD = Const.EnvelopeSpeed * Const.DeltaTime / ART.GetValue(conn);
                             break;
                         case DST_TYPE.EG1_RELEASE_TIME:
-                            envAmp.deltaR = envelopeSpeed * Const.DeltaTime / ART.GetValue(conn);
+                            envAmp.deltaR = Const.EnvelopeSpeed * Const.DeltaTime / ART.GetValue(conn);
                             break;
                         case DST_TYPE.EG1_SUSTAIN_LEVEL:
                             envAmp.levelS = (0.0 == ART.GetValue(conn)) ? 1.0 : (ART.GetValue(conn) * 0.01);
@@ -247,112 +246,116 @@ namespace DLS {
                     }
                 }
 
-                var waveInfo = new WAVE_INFO[128];
-                for (var noteNo = 0; noteNo < waveInfo.Length; ++noteNo) {
-                    RGN_ region = null;
-                    foreach (var rgn in inst.Regions.List) {
-                        if (rgn.Header.key.low <= noteNo && noteNo <= rgn.Header.key.high) {
-                            region = rgn;
-                            break;
-                        }
-                    }
-                    if (null == region) {
-                        waveInfo[noteNo].buffOfs = uint.MaxValue;
-                        continue;
-                    }
-                    if (null != region.Articulations) {
-                        envAmp.deltaA = 1000.0 * envelopeSpeed * Const.DeltaTime; // 1msec
-                        envAmp.deltaD = 1000.0 * envelopeSpeed * Const.DeltaTime; // 1msec
-                        envAmp.deltaR = 1000.0 * envelopeSpeed * Const.DeltaTime; // 1msec
-                        envAmp.levelS = 1.0;
-                        envAmp.hold = 0.0;
-                        var holdTime = 0.0;
-                        foreach (var conn in region.Articulations.Art.List) {
-                            if (SRC_TYPE.NONE != conn.source)
-                                continue;
-                            switch (conn.destination) {
-                            case DST_TYPE.EG1_ATTACK_TIME:
-                                envAmp.deltaA = envelopeSpeed * Const.DeltaTime / ART.GetValue(conn);
-                                holdTime += ART.GetValue(conn);
-                                break;
-                            case DST_TYPE.EG1_DECAY_TIME:
-                                envAmp.deltaD = envelopeSpeed * Const.DeltaTime / ART.GetValue(conn);
-                                break;
-                            case DST_TYPE.EG1_RELEASE_TIME:
-                                envAmp.deltaR = envelopeSpeed * Const.DeltaTime / ART.GetValue(conn);
-                                break;
-                            case DST_TYPE.EG1_SUSTAIN_LEVEL:
-                                envAmp.levelS = (0.0 == ART.GetValue(conn)) ? 1.0 : (ART.GetValue(conn) * 0.01);
-                                break;
-                            case DST_TYPE.EG1_HOLD_TIME:
-                                holdTime += ART.GetValue(conn);
+                var waves = new WAVE_INFO[128, 128];
+                for (var velo = 0; velo < 128; velo++) {
+                    for (var noteNo = 0; noteNo < 128; ++noteNo) {
+                        var wave = new WAVE_INFO();
+                        wave.buffOfs = uint.MaxValue;
+                        RGN_ region = null;
+                        foreach (var rgn in inst.Regions.List) {
+                            if (rgn.Header.key.low <= noteNo && noteNo <= rgn.Header.key.high && 
+                                rgn.Header.velocity.low <= velo && velo <= rgn.Header.velocity.high) {
+                                region = rgn;
                                 break;
                             }
                         }
-                        envAmp.hold += holdTime;
-                        if (envAmp.hold < Const.DeltaTime) {
-                            envAmp.hold = Const.DeltaTime;
+                        if (null == region) {
+                            continue;
                         }
-                    }
-                    waveInfo[noteNo].envAmp = envAmp;
-                    var wave = WavePool.List[(int)region.WaveLink.tableIndex];
-                    waveInfo[noteNo].buffOfs = wave.Addr - (uint)mDlsPtr.ToInt64();
-                    waveInfo[noteNo].samples = wave.Size / wave.Format.blockAlign;
-                    if (region.HasSampler) {
-                        waveInfo[noteNo].unityNote = (byte)region.Sampler.unityNote;
-                        waveInfo[noteNo].delta
-                            = Math.Pow(2.0, region.Sampler.fineTune / 1200.0)
-                            * wave.Format.sampleRate / Const.SampleRate;
-                        ;
-                        waveInfo[noteNo].gain = region.Sampler.Gain / 32768.0;
-                        if (0 < region.Sampler.loopCount) {
-                            waveInfo[noteNo].loop.begin = region.Loops[0].start;
-                            waveInfo[noteNo].loop.length = region.Loops[0].length;
-                            waveInfo[noteNo].loop.enable = true;
-                        } else if (0 < wave.Sampler.loopCount) {
-                            waveInfo[noteNo].loop.begin = wave.Loops[0].start;
-                            waveInfo[noteNo].loop.length = wave.Loops[0].length;
-                            waveInfo[noteNo].loop.enable = true;
+                        if (null != region.Articulations) {
+                            envAmp.deltaA = 1000.0 * Const.EnvelopeSpeed * Const.DeltaTime; // 1msec
+                            envAmp.deltaD = 1000.0 * Const.EnvelopeSpeed * Const.DeltaTime; // 1msec
+                            envAmp.deltaR = 1000.0 * Const.EnvelopeSpeed * Const.DeltaTime; // 1msec
+                            envAmp.levelS = 1.0;
+                            envAmp.hold = 0.0;
+                            var holdTime = 0.0;
+                            foreach (var conn in region.Articulations.Art.List) {
+                                if (SRC_TYPE.NONE != conn.source)
+                                    continue;
+                                switch (conn.destination) {
+                                case DST_TYPE.EG1_ATTACK_TIME:
+                                    envAmp.deltaA = Const.EnvelopeSpeed * Const.DeltaTime / ART.GetValue(conn);
+                                    holdTime += ART.GetValue(conn);
+                                    break;
+                                case DST_TYPE.EG1_DECAY_TIME:
+                                    envAmp.deltaD = Const.EnvelopeSpeed * Const.DeltaTime / ART.GetValue(conn);
+                                    break;
+                                case DST_TYPE.EG1_RELEASE_TIME:
+                                    envAmp.deltaR = Const.EnvelopeSpeed * Const.DeltaTime / ART.GetValue(conn);
+                                    break;
+                                case DST_TYPE.EG1_SUSTAIN_LEVEL:
+                                    envAmp.levelS = (0.0 == ART.GetValue(conn)) ? 1.0 : (ART.GetValue(conn) * 0.01);
+                                    break;
+                                case DST_TYPE.EG1_HOLD_TIME:
+                                    holdTime += ART.GetValue(conn);
+                                    break;
+                                }
+                            }
+                            envAmp.hold += holdTime;
+                            if (envAmp.hold < Const.DeltaTime) {
+                                envAmp.hold = Const.DeltaTime;
+                            }
+                        }
+                        wave.envAmp = envAmp;
+                        var wv = WavePool.List[(int)region.WaveLink.tableIndex];
+                        wave.buffOfs = wv.Addr - (uint)mDlsPtr.ToInt64();
+                        wave.samples = wv.Size / wv.Format.blockAlign;
+                        if (region.HasSampler) {
+                            wave.unityNote = (byte)region.Sampler.unityNote;
+                            wave.delta
+                                = Math.Pow(2.0, region.Sampler.fineTune / 1200.0)
+                                * wv.Format.sampleRate / Const.SampleRate;
+                            ;
+                            wave.gain = region.Sampler.Gain / 32768.0;
+                            if (0 < region.Sampler.loopCount) {
+                                wave.loop.begin = region.Loops[0].start;
+                                wave.loop.length = region.Loops[0].length;
+                                wave.loop.enable = true;
+                            } else if (0 < wv.Sampler.loopCount) {
+                                wave.loop.begin = wv.Loops[0].start;
+                                wave.loop.length = wv.Loops[0].length;
+                                wave.loop.enable = true;
+                            } else {
+                                wave.loop.begin = 0;
+                                wave.loop.length = wave.samples;
+                                wave.loop.enable = false;
+                                wave.envAmp.deltaR = Const.DeltaTime * wave.delta / wave.samples;
+                            }
                         } else {
-                            waveInfo[noteNo].loop.begin = 0;
-                            waveInfo[noteNo].loop.length = waveInfo[noteNo].samples;
-                            waveInfo[noteNo].loop.enable = false;
-                            waveInfo[noteNo].envAmp.deltaR = Const.DeltaTime * waveInfo[noteNo].delta / waveInfo[noteNo].samples;
+                            wave.unityNote = (byte)wv.Sampler.unityNote;
+                            wave.delta
+                                = Math.Pow(2.0, wv.Sampler.fineTune / 1200.0)
+                                * wv.Format.sampleRate / Const.SampleRate;
+                            ;
+                            wave.gain = wv.Sampler.Gain / 32768.0;
+                            if (0 < wv.Sampler.loopCount) {
+                                wave.loop.begin = wv.Loops[0].start;
+                                wave.loop.length = wv.Loops[0].length;
+                                wave.loop.enable = true;
+                            } else {
+                                wave.loop.begin = 0;
+                                wave.loop.length = wave.samples;
+                                wave.loop.enable = false;
+                            }
                         }
-                    } else {
-                        waveInfo[noteNo].unityNote = (byte)wave.Sampler.unityNote;
-                        waveInfo[noteNo].delta
-                            = Math.Pow(2.0, wave.Sampler.fineTune / 1200.0)
-                            * wave.Format.sampleRate / Const.SampleRate;
-                        ;
-                        waveInfo[noteNo].gain = wave.Sampler.Gain / 32768.0;
-                        if (0 < wave.Sampler.loopCount) {
-                            waveInfo[noteNo].loop.begin = wave.Loops[0].start;
-                            waveInfo[noteNo].loop.length = wave.Loops[0].length;
-                            waveInfo[noteNo].loop.enable = true;
+                        var diffNote = noteNo - wave.unityNote;
+                        if (diffNote < 0) {
+                            wave.delta /= Const.SemiTone[-diffNote];
                         } else {
-                            waveInfo[noteNo].loop.begin = 0;
-                            waveInfo[noteNo].loop.length = waveInfo[noteNo].samples;
-                            waveInfo[noteNo].loop.enable = false;
+                            wave.delta *= Const.SemiTone[diffNote];
                         }
-                    }
-                    var diffNote = noteNo - waveInfo[noteNo].unityNote;
-                    if (diffNote < 0) {
-                        waveInfo[noteNo].delta /= Const.SemiTone[-diffNote];
-                    } else {
-                        waveInfo[noteNo].delta *= Const.SemiTone[diffNote];
+                        waves[velo, noteNo] = wave;
                     }
                 }
-
                 var id = new INST_ID();
-                id.isDrum = inst.Header.locale.bankFlags;
+                id.isDrum = (byte)(inst.Header.locale.bankFlags == 0x80 ? 1 : 0);
                 id.programNo = inst.Header.locale.programNo;
                 id.bankMSB = inst.Header.locale.bankMSB;
                 id.bankLSB = inst.Header.locale.bankLSB;
                 var instInfo = new INST_INFO();
                 instInfo.catgory = inst.Category;
                 instInfo.name = inst.Name;
-                instInfo.waves = waveInfo;
+                instInfo.waves = waves;
                 instList.Add(id, instInfo);
             }
             return instList;

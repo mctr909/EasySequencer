@@ -209,8 +209,16 @@ namespace Player {
                 }
 
                 switch (ev.Type) {
-                case E_EVENT_TYPE.NOTE_ON:
                 case E_EVENT_TYPE.NOTE_OFF:
+                    if (0 == mSender.Channel[ev.Channel].InstId.isDrum) {
+                        if ((ev.NoteNo + Transpose) < 0 || 127 < (ev.NoteNo + Transpose)) {
+                            continue;
+                        } else {
+                            ev = new Event(ev.Status, (byte)(ev.NoteNo + Transpose), ev.Velocity);
+                        }
+                    }
+                    break;
+                case E_EVENT_TYPE.NOTE_ON:
                     if (ev.Velocity != 0) {
                         if (0.25 * mTicksPerBeat < (mCurrentTick - eventTick)) {
                             continue;
@@ -219,7 +227,7 @@ namespace Player {
                             continue;
                         }
                     }
-                    if (0x00 == mSender.Channel[ev.Channel].InstId.isDrum) {
+                    if (0 == mSender.Channel[ev.Channel].InstId.isDrum) {
                         if ((ev.NoteNo + Transpose) < 0 || 127 < (ev.NoteNo + Transpose)) {
                             continue;
                         } else {
@@ -242,7 +250,6 @@ namespace Player {
                     }
                     break;
                 }
-
                 //
                 mSender.Send(ev);
             }

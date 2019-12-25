@@ -65,7 +65,7 @@ namespace EasySequencer {
 
             mChannel.CtrlChange(E_CTRL_TYPE.BANK_MSB, inst.Key.bankMSB);
             mChannel.CtrlChange(E_CTRL_TYPE.BANK_LSB, inst.Key.bankLSB);
-            mChannel.ProgramChange(inst.Key.programNo, inst.Key.isDrum == 0x80);
+            mChannel.ProgramChange(inst.Key.programNo, inst.Key.isDrum == 1);
         }
 
         private void btnCommit_Click(object sender, EventArgs e) {

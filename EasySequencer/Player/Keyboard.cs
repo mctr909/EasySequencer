@@ -30,18 +30,18 @@ namespace Player {
         private static readonly int KnobWidth = 40;
 
         private static readonly Rectangle[] KeyboardPos = {
-            new Rectangle( 1, 20, 7, 11),   // C
+            new Rectangle( 1, 21, 7, 10),   // C
             new Rectangle( 6,  0, 5, 21),   // Db
-            new Rectangle( 9, 20, 7, 11),   // D
+            new Rectangle( 9, 21, 7, 10),   // D
             new Rectangle(14,  0, 5, 21),   // Eb
-            new Rectangle(17, 20, 7, 11),   // E
-            new Rectangle(25, 20, 7, 11),   // F
+            new Rectangle(17, 21, 7, 10),   // E
+            new Rectangle(25, 21, 7, 10),   // F
             new Rectangle(30,  0, 5, 21),   // Gb
-            new Rectangle(33, 20, 7, 11),   // G
+            new Rectangle(33, 21, 7, 10),   // G
             new Rectangle(38,  0, 5, 21),   // Ab
-            new Rectangle(41, 20, 7, 11),   // A
+            new Rectangle(41, 21, 7, 10),   // A
             new Rectangle(46,  0, 5, 21),   // Bb
-            new Rectangle(49, 20, 7, 11)    // B
+            new Rectangle(49, 21, 7, 10)    // B
         };
 
         private static readonly Point[] KnobPos = {

@@ -30,18 +30,18 @@
             // 
             // lstInst
             // 
-            this.lstInst.ColumnWidth = 150;
+            this.lstInst.ColumnWidth = 200;
             this.lstInst.Font = new System.Drawing.Font("MS UI Gothic", 10.875F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(128)));
             this.lstInst.FormattingEnabled = true;
             this.lstInst.HorizontalExtent = 1;
             this.lstInst.HorizontalScrollbar = true;
-            this.lstInst.ItemHeight = 14;
-            this.lstInst.Location = new System.Drawing.Point(6, 32);
-            this.lstInst.Margin = new System.Windows.Forms.Padding(2, 2, 2, 2);
+            this.lstInst.ItemHeight = 29;
+            this.lstInst.Location = new System.Drawing.Point(11, 64);
+            this.lstInst.Margin = new System.Windows.Forms.Padding(4);
             this.lstInst.MultiColumn = true;
             this.lstInst.Name = "lstInst";
             this.lstInst.ScrollAlwaysVisible = true;
-            this.lstInst.Size = new System.Drawing.Size(439, 186);
+            this.lstInst.Size = new System.Drawing.Size(1146, 555);
             this.lstInst.TabIndex = 1;
             this.lstInst.SelectedIndexChanged += new System.EventHandler(this.lstInst_SelectedIndexChanged);
             // 
@@ -49,20 +49,20 @@
             // 
             this.cmbCategory.Font = new System.Drawing.Font("MS UI Gothic", 11.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(128)));
             this.cmbCategory.FormattingEnabled = true;
-            this.cmbCategory.Location = new System.Drawing.Point(7, 6);
-            this.cmbCategory.Margin = new System.Windows.Forms.Padding(2, 2, 2, 2);
+            this.cmbCategory.Location = new System.Drawing.Point(13, 12);
+            this.cmbCategory.Margin = new System.Windows.Forms.Padding(4);
             this.cmbCategory.Name = "cmbCategory";
-            this.cmbCategory.Size = new System.Drawing.Size(205, 23);
+            this.cmbCategory.Size = new System.Drawing.Size(377, 38);
             this.cmbCategory.TabIndex = 0;
             this.cmbCategory.SelectedIndexChanged += new System.EventHandler(this.cmbCategory_SelectedIndexChanged);
             // 
             // btnCommit
             // 
             this.btnCommit.Font = new System.Drawing.Font("MS UI Gothic", 10.875F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(128)));
-            this.btnCommit.Location = new System.Drawing.Point(367, 4);
-            this.btnCommit.Margin = new System.Windows.Forms.Padding(2, 2, 2, 2);
+            this.btnCommit.Location = new System.Drawing.Point(1012, 8);
+            this.btnCommit.Margin = new System.Windows.Forms.Padding(4);
             this.btnCommit.Name = "btnCommit";
-            this.btnCommit.Size = new System.Drawing.Size(78, 24);
+            this.btnCommit.Size = new System.Drawing.Size(145, 48);
             this.btnCommit.TabIndex = 2;
             this.btnCommit.Text = "確定";
             this.btnCommit.UseVisualStyleBackColor = true;
@@ -70,14 +70,14 @@
             // 
             // InstList
             // 
-            this.AutoScaleDimensions = new System.Drawing.SizeF(7F, 12F);
+            this.AutoScaleDimensions = new System.Drawing.SizeF(13F, 24F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(451, 225);
+            this.ClientSize = new System.Drawing.Size(1182, 649);
             this.Controls.Add(this.btnCommit);
             this.Controls.Add(this.cmbCategory);
             this.Controls.Add(this.lstInst);
             this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.FixedToolWindow;
-            this.Margin = new System.Windows.Forms.Padding(2, 2, 2, 2);
+            this.Margin = new System.Windows.Forms.Padding(4);
             this.Name = "InstList";
             this.Text = "InstList";
             this.ResumeLayout(false);

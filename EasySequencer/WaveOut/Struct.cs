@@ -103,6 +103,6 @@ namespace WaveOut {
     public struct INST_INFO {
         public string name;
         public string catgory;
-        public WAVE_INFO[] waves;
+        public WAVE_INFO[,] waves;
     }
 }

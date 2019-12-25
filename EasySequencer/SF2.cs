@@ -135,16 +135,12 @@ namespace SF2 {
         public byte velHigh;
         public int instId;
         public double gain;
-        public double panL;
-        public double panR;
-
+        public double pan;
         public void Init() {
             keyHigh = 127;
             velHigh = 127;
             instId = -1;
             gain = 1.0;
-            panL = Math.Cos(Math.PI * 0.25);
-            panR = Math.Sin(Math.PI * 0.25);
         }
     }
 
@@ -159,22 +155,16 @@ namespace SF2 {
         public uint waveBegin;
         public uint waveEnd;
         public double gain;
-        public double panL;
-        public double panR;
+        public double pan;
         public double coarseTune;
         public double fineTune;
         public ENVELOPE env;
-
         public void Init() {
             keyHigh = 127;
             velHigh = 127;
             sampleId = -1;
             rootKey = -1;
             gain = 1.0;
-            panL = Math.Cos(Math.PI * 0.25);
-            panR = Math.Sin(Math.PI * 0.25);
-            coarseTune = 1.0;
-            fineTune = 1.0;
             env.levelS = -1.0;
             env.hold = -1.0;
         }
@@ -187,83 +177,113 @@ namespace SF2 {
         private PDTA mPdta;
         private SDTA mSdta;
 
-        public static readonly double EnvelopeSpeed = 12.0;
-
         public SF2(string path, IntPtr ptr, uint size) : base(ptr, size) {
             mPath = path;
             mSf2Ptr = ptr;
+
+            OutputPresetList();
+            OutputInstList();
+            OutputSampleList();
+
+            var loc = new INST_ID();
+            var ins = GetInstList()[loc];
+            OutputWave(ins, 60, 127);
         }
 
         public Dictionary<INST_ID, INST_INFO> GetInstList() {
             var instList = new Dictionary<INST_ID, INST_INFO>();
             foreach (var preset in mPdta.PresetList) {
-                var waves = new WAVE_INFO[128];
-                for (int noteNo = 0; noteNo < waves.Length; noteNo++) {
-                    var loop = new WAVE_LOOP();
-                    foreach (var range in preset.Value.Item2) {
-                        if (noteNo < range.keyLow || range.keyHigh < noteNo) {
-                            continue;
-                        }
-                        foreach(var inst in mPdta.InstList[range.instId].Item2) {
-                            if (noteNo < inst.keyLow || inst.keyHigh < noteNo) {
+                var waves = new WAVE_INFO[128, 128];
+                for (int velo = 0; velo < 128; velo++) {
+                    for (int noteNo = 0; noteNo < 128; noteNo++) {
+                        var wave = new WAVE_INFO();
+                        wave.buffOfs = uint.MaxValue;
+                        var loop = new WAVE_LOOP();
+                        foreach (var range in preset.Value.Item2) {
+                            if (noteNo < range.keyLow || range.keyHigh < noteNo || velo < range.keyLow || range.velHigh < velo) {
                                 continue;
                             }
-                            var smpl = mPdta.SampleList[inst.sampleId];
-                            var waveBegin = smpl.start + inst.waveBegin;
-                            loop.enable = inst.loopEnable;
-                            if (loop.enable) {
-                                loop.begin = smpl.loopstart - waveBegin;
-                                loop.length = smpl.loopend - smpl.loopstart + 1;
-                            } else {
-                                var waveEnd = smpl.end + inst.waveEnd;
-                                loop.begin = 0;
-                                loop.length = waveEnd - waveBegin + 1;
+                            foreach (var inst in mPdta.InstList[range.instId].Item2) {
+                                if (noteNo < inst.keyLow || inst.keyHigh < noteNo || inst.velHigh < velo || velo < inst.keyLow || inst.velHigh < velo) {
+                                    continue;
+                                }
+                                var smpl = mPdta.SampleList[inst.sampleId];
+                                var waveBegin = smpl.start + inst.waveBegin;
+                                loop.enable = inst.loopEnable;
+                                if (loop.enable) {
+                                    loop.begin = smpl.loopstart - waveBegin;
+                                    loop.length = smpl.loopend - smpl.loopstart + 1;
+                                } else {
+                                    var waveEnd = smpl.end + inst.waveEnd;
+                                    loop.begin = 0;
+                                    loop.length = waveEnd - waveBegin + 1;
+                                }
+                                wave.buffOfs = (uint)(mSdta.pData.ToInt64() - mSf2Ptr.ToInt64() + waveBegin * 2);
+                                wave.gain = inst.gain * range.gain / 32768.0;
+                                if (0 <= inst.rootKey) {
+                                    wave.unityNote = (byte)inst.rootKey;
+                                } else {
+                                    wave.unityNote = smpl.originalKey;
+                                }
+                                wave.delta = inst.fineTune * inst.coarseTune * smpl.sampleRate / Const.SampleRate;
+                                var diffNote = noteNo - wave.unityNote;
+                                if (diffNote < 0) {
+                                    wave.delta /= Const.SemiTone[-diffNote];
+                                } else {
+                                    wave.delta *= Const.SemiTone[diffNote];
+                                }
+                                wave.envAmp = inst.env;
+                                wave.loop = loop;
                             }
-                            waves[noteNo].buffOfs = (uint)(mSdta.pData.ToInt64() - mSf2Ptr.ToInt64() + waveBegin * 2);
-                            waves[noteNo].gain = inst.gain / 32768.0;
-                            if (0 <= inst.rootKey) {
-                                waves[noteNo].unityNote = (byte)inst.rootKey;
-                            } else {
-                                waves[noteNo].unityNote = smpl.originalKey;
-                            }
-                            waves[noteNo].delta = inst.fineTune * inst.coarseTune * smpl.sampleRate / Const.SampleRate;
-                            var diffNote = noteNo - waves[noteNo].unityNote;
-                            if (diffNote < 0) {
-                                waves[noteNo].delta /= Const.SemiTone[-diffNote];
-                            } else {
-                                waves[noteNo].delta *= Const.SemiTone[diffNote];
-                            }
-                            waves[noteNo].envAmp = inst.env;
-                            waves[noteNo].loop = loop;
-                            break;
                         }
+                        waves[velo, noteNo] = wave;
                     }
                 }
                 var instInfo = new INST_INFO();
                 instInfo.name = preset.Value.Item1;
-                instInfo.catgory = "";
+                instInfo.catgory = preset.Key.isDrum == 1 ? "Drum set" : "";
                 instInfo.waves = waves;
                 instList.Add(preset.Key, instInfo);
             }
             return instList;
         }
 
-        public void OutputPresetList() {
+        protected override bool CheckFileType(string fileType, uint fileSize) {
+            return "sfbk" == fileType;
+        }
+
+        protected override void LoadList(IntPtr ptr, string listType, uint listSize) {
+            switch (listType) {
+            case "pdta":
+                mPdta = new PDTA(ptr, listSize);
+                break;
+            case "sdta":
+                mSdta = new SDTA(ptr, listSize);
+                break;
+            default:
+                break;
+            }
+        }
+
+        private void OutputPresetList() {
             var sw = new StreamWriter(Path.GetDirectoryName(mPath) + "\\" + Path.GetFileNameWithoutExtension(mPath) + "_preset.csv");
             foreach (var preset in mPdta.PresetList) {
-                sw.Write("{0},{1},{2}:{3}",
+                sw.Write("{0},{1},\"{2}\n{3}\"",
                     preset.Key.bankMSB,
                     preset.Key.programNo,
                     1 == preset.Key.isDrum ? "Drum" : "Note",
                     preset.Value.Item1
                 );
-                sw.Write(",\"Key\nLow\",\"Key\nHigh\",\"Vel\nLow\",\"Vel\nHigh\",Gain,Pan,Inst");
+                sw.Write(",\"Key\nLow\",\"Key\nHigh\",\"Vel\nLow\",\"Vel\nHigh\"");
+                sw.WriteLine(",Gain,Pan,Inst");
                 foreach (var prgn in preset.Value.Item2) {
-                    sw.Write(",,,{0},{1},{2},{3},{4},{5},{6}:{7}",
+                    sw.Write(",,,{0},{1},{2},{3}",
                         prgn.keyLow, prgn.keyHigh,
-                        prgn.velLow, prgn.velHigh,
+                        prgn.velLow, prgn.velHigh
+                    );
+                    sw.Write(",{0},{1},{2}:{3}",
                         prgn.gain.ToString("0.000"),
-                        (4 * Math.Atan2(prgn.panL, prgn.panR) / Math.PI - 1).ToString("0.000"),
+                        prgn.pan.ToString("0.000"),
                         prgn.instId,
                         mPdta.InstList[prgn.instId].Item1
                     );
@@ -274,7 +294,7 @@ namespace SF2 {
             sw.Dispose();
         }
 
-        public void OutputInstList() {
+        private void OutputInstList() {
             var sw = new StreamWriter(Path.GetDirectoryName(mPath)
                 + "\\" + Path.GetFileNameWithoutExtension(mPath) + "_inst.csv");
             int instNo = 0;
@@ -283,7 +303,7 @@ namespace SF2 {
                 sw.Write(",\"Key\nLow\",\"Key\nHigh\",\"Vel\nLow\",\"Vel\nHigh\"");
                 sw.Write(",Gain,Pan");
                 sw.Write(",RootKey");
-                sw.Write(",\"Tune\nhalf tone\",\"Tune\ncent\"");
+                sw.Write(",\"Tune\nHalf tone\",\"Tune\nCent\"");
                 sw.Write(",A,H,D,S,R");
                 sw.WriteLine(",Sample,Offset,Length,\"Loop\nBegin\",\"Loop\nLength\"");
                 instNo++;
@@ -296,7 +316,7 @@ namespace SF2 {
                     );
                     sw.Write(",{0},{1}",
                         irgn.gain.ToString("0.000"),
-                        (4 * Math.Atan2(irgn.panL, irgn.panR) / Math.PI - 1).ToString("0.000")
+                        irgn.pan.ToString("0.000")
                     );
 
                     if (0 <= irgn.rootKey) {
@@ -304,6 +324,7 @@ namespace SF2 {
                     } else {
                         sw.Write(",--");
                     }
+
                     if (1.0 == irgn.coarseTune) {
                         sw.Write(",0");
                     } else {
@@ -315,11 +336,11 @@ namespace SF2 {
                         sw.Write(",{0}", 1200.0 / Math.Log(2.0, irgn.fineTune));
                     }
 
-                    sw.Write(",{0}", (EnvelopeSpeed * Const.DeltaTime / irgn.env.deltaA).ToString("0.000"));
+                    sw.Write(",{0}", (Const.EnvelopeSpeed * Const.DeltaTime / irgn.env.deltaA).ToString("0.000"));
                     sw.Write(",{0}", irgn.env.hold.ToString("0.000"));
-                    sw.Write(",{0}", (EnvelopeSpeed * Const.DeltaTime / irgn.env.deltaD).ToString("0.000"));
+                    sw.Write(",{0}", (Const.EnvelopeSpeed * Const.DeltaTime / irgn.env.deltaD).ToString("0.000"));
                     sw.Write(",{0}", irgn.env.levelS.ToString("0.000"));
-                    sw.Write(",{0}", (EnvelopeSpeed * Const.DeltaTime / irgn.env.deltaR).ToString("0.000"));
+                    sw.Write(",{0}", (Const.EnvelopeSpeed * Const.DeltaTime / irgn.env.deltaR).ToString("0.000"));
 
                     var waveBegin = smpl.start + irgn.waveBegin;
                     var waveEnd = smpl.end + irgn.waveEnd;
@@ -349,7 +370,7 @@ namespace SF2 {
             sw.Dispose();
         }
 
-        public void OutputSampleList() {
+        private void OutputSampleList() {
             var sw = new StreamWriter(Path.GetDirectoryName(mPath)
                 + "\\" + Path.GetFileNameWithoutExtension(mPath) + "_sample.csv");
             int no = 0;
@@ -369,12 +390,12 @@ namespace SF2 {
             sw.Dispose();
         }
 
-        public void OutputWave(INST_INFO info, byte noteNo) {
+        private void OutputWave(INST_INFO info, byte noteNo, byte velocity) {
             var sw = new StreamWriter(Path.GetDirectoryName(mPath)
                 + "\\" + Path.GetFileNameWithoutExtension(mPath)
                 + "_wave.csv");
 
-            var wav = info.waves[noteNo];
+            var wav = info.waves[velocity, noteNo];
             var ptr = mSf2Ptr + (int)wav.buffOfs;
             var idx = 0.0;
             var loopCount = 0;
@@ -407,23 +428,6 @@ namespace SF2 {
             }
             sw.Close();
             sw.Dispose();
-        }
-
-        protected override bool CheckFileType(string fileType, uint fileSize) {
-            return "sfbk" == fileType;
-        }
-
-        protected override void LoadList(IntPtr ptr, string listType, uint listSize) {
-            switch (listType) {
-            case "pdta":
-                mPdta = new PDTA(ptr, listSize);
-                break;
-            case "sdta":
-                mSdta = new SDTA(ptr, listSize);
-                break;
-            default:
-                break;
-            }
         }
     }
 
@@ -481,8 +485,7 @@ namespace SF2 {
                             range.gain = Math.Pow(10.0, -gen.genAmount / 200.0);
                             break;
                         case E_OPER.PAN:
-                            range.panL = Math.Cos(Math.PI * (0.25 - gen.genAmount / 2000.0));
-                            range.panR = Math.Sin(Math.PI * (0.25 - gen.genAmount / 2000.0));
+                            range.pan = gen.genAmount / 500.0;
                             break;
                         case E_OPER.INSTRUMENT:
                             range.instId = gen.genAmount;
@@ -499,8 +502,10 @@ namespace SF2 {
                 id.isDrum = (byte)(0 < (preset.bank & 0x80) ? 1 : 0);
                 id.bankMSB = (byte)(preset.bank & 0x7F);
                 id.programNo = (byte)preset.presetno;
-                PresetList.Add(id, new Tuple<string, PRESET_RANGE[]>(
-                    Encoding.ASCII.GetString(preset.name).Replace("\0", "").TrimEnd(), list.ToArray()));
+                if (!PresetList.ContainsKey(id)) {
+                    PresetList.Add(id, new Tuple<string, PRESET_RANGE[]>(
+                        Encoding.ASCII.GetString(preset.name).Replace("\0", "").TrimEnd(), list.ToArray()));
+                }
             }
             mPHDR.Clear();
             mPBAG.Clear();
@@ -545,8 +550,7 @@ namespace SF2 {
                             range.gain = Math.Pow(10.0, -gen.genAmount / 200.0);
                             break;
                         case E_OPER.PAN:
-                            range.panL = Math.Cos(Math.PI * (0.25 - gen.genAmount / 2000.0));
-                            range.panR = Math.Sin(Math.PI * (0.25 - gen.genAmount / 2000.0));
+                            range.pan = gen.genAmount / 500.0;
                             break;
                         case E_OPER.COARSE_TUNE:
                             range.coarseTune = Math.Pow(2.0, gen.genAmount / 120.0);
@@ -576,21 +580,21 @@ namespace SF2 {
                             range.waveEnd |= (uint)((ushort)gen.genAmount << 16);
                             break;
                         case E_OPER.ENV_VOL_ATTACK:
-                            range.env.deltaA = SF2.EnvelopeSpeed * Const.DeltaTime
+                            range.env.deltaA = Const.EnvelopeSpeed * Const.DeltaTime
                                 / Math.Pow(2.0, gen.genAmount / 1200.0);
                             break;
                         case E_OPER.ENV_VOL_HOLD:
                             range.env.hold = Math.Pow(2.0, gen.genAmount / 1200.0);
                             break;
                         case E_OPER.ENV_VOL_DECAY:
-                            range.env.deltaD = SF2.EnvelopeSpeed * Const.DeltaTime
+                            range.env.deltaD = Const.EnvelopeSpeed * Const.DeltaTime
                                 / Math.Pow(2.0, gen.genAmount / 1200.0);
                             break;
                         case E_OPER.ENV_VOL_SUSTAIN:
                             range.env.levelS = Math.Pow(10.0, -gen.genAmount / 200.0);
                             break;
                         case E_OPER.ENV_VOL_RELEASE:
-                            range.env.deltaR = SF2.EnvelopeSpeed * Const.DeltaTime
+                            range.env.deltaR = Const.EnvelopeSpeed * Const.DeltaTime
                                 / Math.Pow(2.0, gen.genAmount / 1200.0);
                             break;
                         default:
@@ -604,10 +608,10 @@ namespace SF2 {
                         if (range.rootKey < 0) {
                             range.rootKey = global.rootKey;
                         }
-                        if (range.coarseTune == 1.0) {
+                        if (range.coarseTune == 0.0) {
                             range.coarseTune = global.coarseTune;
                         }
-                        if (range.fineTune == 1.0) {
+                        if (range.fineTune == 0.0) {
                             range.fineTune = global.fineTune;
                         }
                         if (range.env.deltaA <= 0.0) {
@@ -625,23 +629,30 @@ namespace SF2 {
                         if (range.env.levelS < 0.0) {
                             range.env.levelS = global.env.levelS;
                         }
+
                         // set default value
+                        if (range.coarseTune == 0.0) {
+                            range.coarseTune = 1.0;
+                        }
+                        if (range.fineTune == 0.0) {
+                            range.fineTune = 1.0;
+                        }
                         if (range.env.deltaA <= 0.0) {
-                            range.env.deltaA = 1000 * SF2.EnvelopeSpeed * Const.DeltaTime;
+                            range.env.deltaA = 1000 * Const.EnvelopeSpeed * Const.DeltaTime;
                         }
                         if (range.env.deltaD <= 0.0) {
-                            range.env.deltaD = 1000 * SF2.EnvelopeSpeed * Const.DeltaTime;
+                            range.env.deltaD = 1000 * Const.EnvelopeSpeed * Const.DeltaTime;
                         }
                         if (range.env.deltaR <= 0.0) {
-                            range.env.deltaR = 1000 * SF2.EnvelopeSpeed * Const.DeltaTime;
+                            range.env.deltaR = 1000 * Const.EnvelopeSpeed * Const.DeltaTime;
                         }
                         if (range.env.hold < 0.0) {
                             range.env.hold = 0.0;
                         }
                         if (range.env.levelS < 0.0) {
-                            range.env.levelS = 0.0;
+                            range.env.levelS = 1.0;
                         }
-                        range.env.hold += SF2.EnvelopeSpeed * Const.DeltaTime / range.env.deltaA;
+                        range.env.hold += Const.EnvelopeSpeed * Const.DeltaTime / range.env.deltaA;
                         //
                         list.Add(range);
                     }

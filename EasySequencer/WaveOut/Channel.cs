@@ -18,7 +18,7 @@ namespace WaveOut {
 
         public string InstName { get; private set; }
 
-        public WAVE_INFO[] WaveInfo { get; private set; }
+        public WAVE_INFO[,] WaveInfo { get; private set; }
 
         public byte Vol { get; private set; }
 
@@ -201,6 +201,9 @@ namespace WaveOut {
                 mInstId.bankLSB = 0;
                 if (!InstList.ContainsKey(mInstId)) {
                     mInstId.programNo = 0;
+                    if (!InstList.ContainsKey(mInstId)) {
+                        mInstId.isDrum = (byte)(mInstId.isDrum == 0 ? 1 : 0);
+                    }
                 }
             }
 
