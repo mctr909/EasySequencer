@@ -181,68 +181,58 @@ namespace SF2 {
             mPath = path;
             mSf2Ptr = ptr;
 
-            OutputPresetList();
-            OutputInstList();
-            OutputSampleList();
-
-            var loc = new INST_ID();
-            var ins = GetInstList()[loc];
-            OutputWave(ins, 60, 127);
+            //OutputPresetList();
+            //OutputInstList();
+            //OutputSampleList();
+            //var loc = new INST_ID();
+            //var ins = GetInstList()[loc];
+            //OutputWave(ins, 60, 127);
         }
 
         public Dictionary<INST_ID, INST_INFO> GetInstList() {
             var instList = new Dictionary<INST_ID, INST_INFO>();
             foreach (var preset in mPdta.PresetList) {
-                var waves = new WAVE_INFO[128, 128];
-                for (int velo = 0; velo < 128; velo++) {
-                    for (int noteNo = 0; noteNo < 128; noteNo++) {
-                        var wave = new WAVE_INFO();
-                        wave.buffOfs = uint.MaxValue;
-                        var loop = new WAVE_LOOP();
-                        foreach (var range in preset.Value.Item2) {
-                            if (noteNo < range.keyLow || range.keyHigh < noteNo || velo < range.keyLow || range.velHigh < velo) {
-                                continue;
-                            }
-                            foreach (var inst in mPdta.InstList[range.instId].Item2) {
-                                if (noteNo < inst.keyLow || inst.keyHigh < noteNo || inst.velHigh < velo || velo < inst.keyLow || inst.velHigh < velo) {
-                                    continue;
-                                }
-                                var smpl = mPdta.SampleList[inst.sampleId];
-                                var waveBegin = smpl.start + inst.waveBegin;
-                                loop.enable = inst.loopEnable;
-                                if (loop.enable) {
-                                    loop.begin = smpl.loopstart - waveBegin;
-                                    loop.length = smpl.loopend - smpl.loopstart + 1;
-                                } else {
-                                    var waveEnd = smpl.end + inst.waveEnd;
-                                    loop.begin = 0;
-                                    loop.length = waveEnd - waveBegin + 1;
-                                }
-                                wave.buffOfs = (uint)(mSdta.pData.ToInt64() - mSf2Ptr.ToInt64() + waveBegin * 2);
-                                wave.gain = inst.gain * range.gain / 32768.0;
-                                if (0 <= inst.rootKey) {
-                                    wave.unityNote = (byte)inst.rootKey;
-                                } else {
-                                    wave.unityNote = smpl.originalKey;
-                                }
-                                wave.delta = inst.fineTune * inst.coarseTune * smpl.sampleRate / Const.SampleRate;
-                                var diffNote = noteNo - wave.unityNote;
-                                if (diffNote < 0) {
-                                    wave.delta /= Const.SemiTone[-diffNote];
-                                } else {
-                                    wave.delta *= Const.SemiTone[diffNote];
-                                }
-                                wave.envAmp = inst.env;
-                                wave.loop = loop;
-                            }
-                        }
-                        waves[velo, noteNo] = wave;
-                    }
-                }
                 var instInfo = new INST_INFO();
                 instInfo.name = preset.Value.Item1;
-                instInfo.catgory = preset.Key.isDrum == 1 ? "Drum set" : "";
-                instInfo.waves = waves;
+                instInfo.catgory = "";
+                instInfo.waveList = new List<WAVE_INFO>();
+                foreach (var range in preset.Value.Item2) {
+                    foreach (var inst in mPdta.InstList[range.instId].Item2) {
+                        var smpl = mPdta.SampleList[inst.sampleId];
+                        var waveBegin = smpl.start + inst.waveBegin;
+                        var loop = new WAVE_LOOP();
+                        loop.enable = inst.loopEnable;
+                        if (loop.enable) {
+                            loop.begin = smpl.loopstart - waveBegin;
+                            loop.length = smpl.loopend - smpl.loopstart + 1;
+                        } else {
+                            var waveEnd = smpl.end + inst.waveEnd;
+                            loop.begin = 0;
+                            loop.length = waveEnd - waveBegin + 1;
+                        }
+                        var waveInfo = new WAVE_INFO();
+                        waveInfo.dataOfs = (uint)(mSdta.pData.ToInt64() - mSf2Ptr.ToInt64() + waveBegin * 2);
+                        waveInfo.gain = inst.gain * range.gain / 32768.0;
+                        if (0 <= inst.rootKey) {
+                            waveInfo.unityNote = (byte)inst.rootKey;
+                        } else {
+                            waveInfo.unityNote = smpl.originalKey;
+                        }
+                        waveInfo.delta = inst.fineTune * inst.coarseTune * smpl.sampleRate / Const.SampleRate;
+                        waveInfo.env = inst.env;
+                        waveInfo.loop = loop;
+
+                        waveInfo.presetKeyLow = range.keyLow;
+                        waveInfo.presetKeyHigh = range.keyHigh;
+                        waveInfo.presetVelLow = range.velLow;
+                        waveInfo.presetVelHigh = range.velHigh;
+                        waveInfo.instKeyLow = inst.keyLow;
+                        waveInfo.instKeyHigh = inst.keyHigh;
+                        waveInfo.instVelLow = inst.velLow;
+                        waveInfo.instVelHigh = inst.velHigh;
+                        instInfo.waveList.Add(waveInfo);
+                    }
+                }
                 instList.Add(preset.Key, instInfo);
             }
             return instList;
@@ -395,37 +385,40 @@ namespace SF2 {
                 + "\\" + Path.GetFileNameWithoutExtension(mPath)
                 + "_wave.csv");
 
-            var wav = info.waves[velocity, noteNo];
-            var ptr = mSf2Ptr + (int)wav.buffOfs;
-            var idx = 0.0;
-            var loopCount = 0;
-            var sampleCount = 0;
-            while (sampleCount < Const.SampleRate) {
-                var cur = (int)idx;
-                var pre = cur - 1;
-                if (pre < 0) {
-                    pre = 0;
-                }
-                var dt = idx - cur;
+            //foreach (var i in info.waveMap[velocity, noteNo]) {
+            //    var wav = info.waveList[i];
+            //    var ptr = mSf2Ptr + (int)wav.buffOfs;
+            //    var idx = 0.0;
+            //    var loopCount = 0;
+            //    var sampleCount = 0;
+            //    while (sampleCount < Const.SampleRate) {
+            //        var cur = (int)idx;
+            //        var pre = cur - 1;
+            //        if (pre < 0) {
+            //            pre = 0;
+            //        }
+            //        var dt = idx - cur;
 
-                var output
-                    = Marshal.PtrToStructure<short>(ptr + cur * 2) * dt
-                    + Marshal.PtrToStructure<short>(ptr + pre * 2) * (1.0 - dt);
-                output *= wav.gain;
+            //        var output
+            //            = Marshal.PtrToStructure<short>(ptr + cur * 2) * dt
+            //            + Marshal.PtrToStructure<short>(ptr + pre * 2) * (1.0 - dt);
+            //        output *= wav.gain;
 
-                sw.WriteLine(output.ToString("0.000") + "," + loopCount);
-                sampleCount++;
+            //        sw.WriteLine(output.ToString("0.000") + "," + loopCount);
+            //        sampleCount++;
 
-                idx += wav.delta;
-                if (wav.loop.begin + wav.loop.length <= idx) {
-                    if (wav.loop.enable) {
-                        idx -= wav.loop.length;
-                        loopCount++;
-                    } else {
-                        break;
-                    }
-                }
-            }
+            //        idx += wav.delta;
+            //        if (wav.loop.begin + wav.loop.length <= idx) {
+            //            if (wav.loop.enable) {
+            //                idx -= wav.loop.length;
+            //                loopCount++;
+            //            } else {
+            //                break;
+            //            }
+            //        }
+            //    }
+            //    break;
+            //}
             sw.Close();
             sw.Dispose();
         }
