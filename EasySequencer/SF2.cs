@@ -194,8 +194,12 @@ namespace SF2 {
             foreach (var preset in mPdta.PresetList) {
                 var instInfo = new INST_INFO();
                 instInfo.name = preset.Value.Item1;
-                instInfo.catgory = "";
                 instInfo.waveList = new List<WAVE_INFO>();
+                if (1 == preset.Key.isDrum) {
+                    instInfo.catgory = "Drum set";
+                } else {
+                    instInfo.catgory = "";
+                }
                 foreach (var range in preset.Value.Item2) {
                     foreach (var inst in mPdta.InstList[range.instId].Item2) {
                         var smpl = mPdta.SampleList[inst.sampleId];

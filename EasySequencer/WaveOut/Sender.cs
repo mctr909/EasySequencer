@@ -49,7 +49,7 @@ namespace WaveOut {
             var dlsPtr = LoadDLS(Marshal.StringToHGlobalAuto(dlsPath), out fileSize);
             var dls = new DLS.DLS(dlsPtr, fileSize);
             mInstList = dls.GetInstList();
-            //var sf2 = new SF2.SF2(dlsPath, dlsPtr, dlsSize);
+            //var sf2 = new SF2.SF2(dlsPath, dlsPtr, fileSize);
             //mInstList = sf2.GetInstList();
 
             var ppChannel = GetWaveOutChannelPtr((uint)Const.SampleRate);
@@ -170,6 +170,13 @@ namespace WaveOut {
                     || velocity < wave.instVelLow || wave.instVelHigh < velocity) {
                     continue;
                 }
+                double pitch;
+                var diffNote = noteNo - wave.unityNote;
+                if (diffNote < 0) {
+                    pitch = 1.0 / Const.SemiTone[-diffNote];
+                } else {
+                    pitch = Const.SemiTone[diffNote];
+                }
                 for (var j = 0; j < SAMPLER_COUNT; ++j) {
                     var pSmpl = ppSmpl[j];
                     if (E_KEY_STATE.WAIT != pSmpl->keyState) {
@@ -179,7 +186,7 @@ namespace WaveOut {
                     pSmpl->noteNo = noteNo;
                     pSmpl->dataOfs = wave.dataOfs;
                     pSmpl->gain = wave.gain;
-                    pSmpl->delta = wave.delta;
+                    pSmpl->delta = wave.delta * pitch;
                     pSmpl->index = 0.0;
                     pSmpl->time = 0.0;
                     pSmpl->velocity = velocity / 127.0;
@@ -187,8 +194,9 @@ namespace WaveOut {
                     pSmpl->loop = wave.loop;
                     pSmpl->envAmp = wave.env;
                     pSmpl->keyState = E_KEY_STATE.PRESS;
-                    continue;
+                    break;
                 }
+                break;
             }
         }
 
