@@ -1,4 +1,5 @@
 ﻿using System.Runtime.InteropServices;
+using System.Collections.Generic;
 
 namespace WaveOut {
     public enum E_KEY_STATE : byte {
@@ -75,7 +76,7 @@ namespace WaveOut {
         public ushort channelNo;
         public byte noteNo;
         public E_KEY_STATE keyState;
-        public uint buffOfs;
+        public uint dataOfs;
 
         public double gain;
         public double delta;
@@ -91,18 +92,25 @@ namespace WaveOut {
     };
 
     public struct WAVE_INFO {
-        public uint buffOfs;
-        public uint samples;
+        public byte presetKeyLow;
+        public byte presetKeyHigh;
+        public byte presetVelLow;
+        public byte presetVelHigh;
+        public byte instKeyLow;
+        public byte instKeyHigh;
+        public byte instVelLow;
+        public byte instVelHigh;
+        public uint dataOfs;
         public double gain;
         public double delta;
         public byte unityNote;
         public WAVE_LOOP loop;
-        public ENVELOPE envAmp;
+        public ENVELOPE env;
     }
 
     public struct INST_INFO {
         public string name;
         public string catgory;
-        public WAVE_INFO[,] waves;
+        public List<WAVE_INFO> waveList;
     }
 }

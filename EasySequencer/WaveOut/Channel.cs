@@ -18,7 +18,7 @@ namespace WaveOut {
 
         public string InstName { get; private set; }
 
-        public WAVE_INFO[,] WaveInfo { get; private set; }
+        public List<WAVE_INFO> WaveList { get; private set; }
 
         public byte Vol { get; private set; }
 
@@ -195,7 +195,6 @@ namespace WaveOut {
         public void ProgramChange(byte value) {
             mInstId.isDrum = (byte)(9 == No ? 1 : 0);
             mInstId.programNo = value;
-
             if (!InstList.ContainsKey(mInstId)) {
                 mInstId.bankMSB = 0;
                 mInstId.bankLSB = 0;
@@ -206,15 +205,14 @@ namespace WaveOut {
                     }
                 }
             }
-
-            WaveInfo = InstList[mInstId].waves;
-            InstName = InstList[mInstId].name;
+            var inst = InstList[mInstId];
+            WaveList = inst.waveList;
+            InstName = inst.name;
         }
 
         public void ProgramChange(byte value, bool isDrum) {
             mInstId.isDrum = (byte)(isDrum ? 1 : 0);
             mInstId.programNo = value;
-
             if (!InstList.ContainsKey(mInstId)) {
                 mInstId.bankMSB = 0;
                 mInstId.bankLSB = 0;
@@ -222,9 +220,9 @@ namespace WaveOut {
                     mInstId.programNo = 0;
                 }
             }
-
-            WaveInfo = InstList[mInstId].waves;
-            InstName = InstList[mInstId].name;
+            var inst = InstList[mInstId];
+            WaveList = inst.waveList;
+            InstName = inst.name;
         }
 
         public void PitchBend(short pitch) {

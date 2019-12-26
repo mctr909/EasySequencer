@@ -45,7 +45,12 @@ namespace WaveOut {
         public int OutputTime;
 
         public Sender(string dlsPath) {
-            loadDls(dlsPath);
+            uint fileSize = 0;
+            var dlsPtr = LoadDLS(Marshal.StringToHGlobalAuto(dlsPath), out fileSize);
+            var dls = new DLS.DLS(dlsPtr, fileSize);
+            mInstList = dls.GetInstList();
+            //var sf2 = new SF2.SF2(dlsPath, dlsPtr, dlsSize);
+            //mInstList = sf2.GetInstList();
 
             var ppChannel = GetWaveOutChannelPtr((uint)Const.SampleRate);
             ppWaveOutSampler = GetWaveOutSamplerPtr(SAMPLER_COUNT);
@@ -158,45 +163,33 @@ namespace WaveOut {
             } else {
                 noteOff(ppSmpl, ch, noteNo, E_KEY_STATE.PURGE);
             }
-
-            var wave = ch.WaveInfo[velocity, noteNo];
-            if (uint.MaxValue == wave.buffOfs) {
-                return;
-            }
-
-            for (var i = 0; i < SAMPLER_COUNT; ++i) {
-                var pSmpl = ppSmpl[i];
-                if (E_KEY_STATE.WAIT != pSmpl->keyState) {
+            foreach (var wave in ch.WaveList) {
+                if (noteNo < wave.presetKeyLow || wave.presetKeyHigh < noteNo
+                    || velocity < wave.presetVelLow || wave.presetVelHigh < velocity
+                    || noteNo < wave.instKeyLow || wave.instKeyHigh < noteNo
+                    || velocity < wave.instVelLow || wave.instVelHigh < velocity) {
                     continue;
                 }
-
-                pSmpl->channelNo = ch.No;
-                pSmpl->noteNo = noteNo;
-                pSmpl->buffOfs = wave.buffOfs;
-
-                pSmpl->gain = wave.gain;
-                pSmpl->delta = wave.delta;
-                pSmpl->index = 0.0;
-                pSmpl->time = 0.0;
-
-                pSmpl->velocity = velocity / 127.0;
-                pSmpl->amp = 0.0;
-
-                pSmpl->loop = wave.loop;
-                pSmpl->envAmp = wave.envAmp;
-
-                pSmpl->keyState = E_KEY_STATE.PRESS;
-                return;
+                for (var j = 0; j < SAMPLER_COUNT; ++j) {
+                    var pSmpl = ppSmpl[j];
+                    if (E_KEY_STATE.WAIT != pSmpl->keyState) {
+                        continue;
+                    }
+                    pSmpl->channelNo = ch.No;
+                    pSmpl->noteNo = noteNo;
+                    pSmpl->dataOfs = wave.dataOfs;
+                    pSmpl->gain = wave.gain;
+                    pSmpl->delta = wave.delta;
+                    pSmpl->index = 0.0;
+                    pSmpl->time = 0.0;
+                    pSmpl->velocity = velocity / 127.0;
+                    pSmpl->amp = 0.0;
+                    pSmpl->loop = wave.loop;
+                    pSmpl->envAmp = wave.env;
+                    pSmpl->keyState = E_KEY_STATE.PRESS;
+                    continue;
+                }
             }
-        }
-
-        private void loadDls(string dlsPath) {
-            uint dlsSize = 0;
-            var dlsPtr = LoadDLS(Marshal.StringToHGlobalAuto(dlsPath), out dlsSize);
-            var dls = new DLS.DLS(dlsPtr, dlsSize);
-            mInstList = dls.GetInstList();
-            //var sf2 = new SF2.SF2(dlsPath, dlsPtr, dlsSize);
-            //mInstList = sf2.GetInstList();
         }
 
         private void mainLoop() {
