@@ -15,18 +15,14 @@ enum E_KEY_STATE {
 typedef struct FILTER {
     double cut;
     double res;
-    double a0;
-    double b0;
-    double a1;
-    double b1;
-    double a2;
-    double b2;
-    double a3;
-    double b3;
-    double a4;
-    double b4;
-    double a5;
-    double b5;
+    double a00;
+    double b00;
+    double a01;
+    double b01;
+    double a10;
+    double b10;
+    double a11;
+    double b11;
 } FILTER;
 #pragma
 
@@ -60,26 +56,26 @@ typedef struct CHANNEL_PARAM {
     double panRight;
     double cutoff;
     double resonance;
-    double delayDepth;
+    double delaySend;
     double delayTime;
-    double chorusDepth;
+    double chorusSend;
     double chorusRate;
 } CHANNEL_PARAM;
 #pragma
 
-#pragma pack(4)
+#pragma pack(8)
 typedef struct CHANNEL {
     CHANNEL_PARAM *pParam;
+    double *pWave;
     double *pDelTapL;
     double *pDelTapR;
-    double *pChoPanL;
-    double *pChoPanR;
-    double *pChoLfoRe;
-    double *pChoLfoIm;
+    double choLfo[3];
+    double choPanL[3];
+    double choPanR[3];
+    UInt32 buffLen;
     UInt32 sampleRate;
     SInt32 writeIndex;
     SInt32 readIndex;
-    double wave;
     double amp;
     double panL;
     double panR;
@@ -110,11 +106,11 @@ typedef struct SAMPLER {
 #pragma
 
 /******************************************************************************/
-extern CHANNEL** createChannels(UInt32 count, UInt32 sampleRate);
+extern CHANNEL** createChannels(UInt32 count, UInt32 sampleRate, UInt32 buffLen);
 extern SAMPLER** createSamplers(UInt32 count);
 
 /******************************************************************************/
-extern inline void channel(CHANNEL *pCh, double *waveL, double *waveR);
+extern inline void channel(CHANNEL *pCh, SInt16 *waveBuff);
 extern inline void sampler(CHANNEL **ppCh, SAMPLER *pSmpl, byte *pWaveBuffer);
 
 /******************************************************************************/
