@@ -1,7 +1,7 @@
 #include "filter.h"
 
 /******************************************************************************/
-#define ADJUST_CUTOFF 0.98
+#define ADJUST_CUTOFF 0.975
 
 #define PI        3.14159265
 #define INV_FACT2 5.00000000e-01

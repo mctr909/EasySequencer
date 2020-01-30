@@ -92,7 +92,7 @@ namespace WaveOut {
             VibDelay = 64;
 
             mpChannel->chorusRate = 0.5;
-            mpChannel->chorusDepth = 0.01;
+            mpChannel->chorusDepth = 0.005;
             mpChannel->delayTime = 0.2;
             mpChannel->delayCross = 0.375;
             mpChannel->holdDelta = Const.DeltaTime * 1.5;
