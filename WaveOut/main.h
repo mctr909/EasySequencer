@@ -1,6 +1,7 @@
 #pragma once
 #include <windows.h>
 #include "sampler.h"
+#include "channel.h"
 
 /******************************************************************************/
 #pragma pack(4)

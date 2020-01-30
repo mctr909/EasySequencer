@@ -1,5 +1,6 @@
 ﻿#include "main.h"
 #include "sampler.h"
+#include "channel.h"
 #include <stdio.h>
 #include <math.h>
 #include <mmsystem.h>
