@@ -95,7 +95,7 @@ namespace WaveOut {
             mpChannel->chorusDepth = 0.005;
             mpChannel->delayTime = 0.2;
             mpChannel->delayCross = 0.375;
-            mpChannel->holdDelta = Const.DeltaTime * 1.5;
+            mpChannel->holdDelta = Const.DeltaTime;
 
             mRpnLSB = 0xFF;
             mRpnMSB = 0xFF;

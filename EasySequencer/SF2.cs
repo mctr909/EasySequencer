@@ -208,11 +208,11 @@ namespace SF2 {
                         loop.enable = inst.loopEnable;
                         if (loop.enable) {
                             loop.begin = smpl.loopstart - waveBegin;
-                            loop.length = smpl.loopend - smpl.loopstart + 1;
+                            loop.length = smpl.loopend - smpl.loopstart;
                         } else {
                             var waveEnd = smpl.end + inst.waveEnd;
                             loop.begin = 0;
-                            loop.length = waveEnd - waveBegin + 1;
+                            loop.length = waveEnd - waveBegin;
                         }
                         var waveInfo = new WAVE_INFO();
                         waveInfo.dataOfs = (uint)(mSdta.pData.ToInt64() - mSf2Ptr.ToInt64() + waveBegin * 2);

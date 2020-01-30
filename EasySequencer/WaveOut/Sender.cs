@@ -52,6 +52,8 @@ namespace WaveOut {
             var dlsPtr = LoadDLS(Marshal.StringToHGlobalAuto(dlsPath), out fileSize);
             var dls = new DLS.DLS(dlsPtr, fileSize);
             mInstList = dls.GetInstList();
+            //var sf2 = new SF2.SF2(dlsPath, dlsPtr, fileSize);
+            //mInstList = sf2.GetInstList();
 
             var ppChannel = GetWaveOutChannelPtr((uint)Const.SampleRate);
             ppWaveOutSampler = GetWaveOutSamplerPtr(SAMPLER_COUNT);
