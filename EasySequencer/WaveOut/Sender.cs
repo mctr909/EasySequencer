@@ -4,7 +4,6 @@ using System.Runtime.InteropServices;
 using System.Threading.Tasks;
 
 using MIDI;
-using DLS;
 
 namespace WaveOut {
     unsafe public class Sender {
@@ -36,7 +35,11 @@ namespace WaveOut {
 
         private Channel[] mFileOutChannel;
         private Dictionary<INST_ID, INST_INFO> mInstList;
-        private Task mTask;
+        private static Task mTask = new Task(()=> {
+            while(true) {
+                WriteWaveOutBuffer();
+            }
+        });
 
         public Channel[] Channel { get; private set; }
         public SAMPLER** ppWaveOutSampler { get; private set; }
@@ -49,8 +52,6 @@ namespace WaveOut {
             var dlsPtr = LoadDLS(Marshal.StringToHGlobalAuto(dlsPath), out fileSize);
             var dls = new DLS.DLS(dlsPtr, fileSize);
             mInstList = dls.GetInstList();
-            //var sf2 = new SF2.SF2(dlsPath, dlsPtr, fileSize);
-            //mInstList = sf2.GetInstList();
 
             var ppChannel = GetWaveOutChannelPtr((uint)Const.SampleRate);
             ppWaveOutSampler = GetWaveOutSamplerPtr(SAMPLER_COUNT);
@@ -66,9 +67,7 @@ namespace WaveOut {
                 mFileOutChannel[i] = new Channel(mInstList, ppFileOutSampler, ppFileOutChannel[i], i);
             }
 
-            WaveOutOpen((uint)Const.SampleRate, 512);
-
-            mTask = new Task(mainLoop, TaskCreationOptions.PreferFairness);
+            WaveOutOpen((uint)Const.SampleRate, 256);
             mTask.Start();
         }
 
@@ -191,18 +190,13 @@ namespace WaveOut {
                     pSmpl->time = 0.0;
                     pSmpl->velocity = velocity / 127.0;
                     pSmpl->amp = 0.0;
+                    pSmpl->filter.cutoff = 1.0;
                     pSmpl->loop = wave.loop;
                     pSmpl->envAmp = wave.env;
                     pSmpl->keyState = E_KEY_STATE.PRESS;
                     break;
                 }
                 break;
-            }
-        }
-
-        private void mainLoop() {
-            while (true) {
-                WriteWaveOutBuffer();
             }
         }
     }

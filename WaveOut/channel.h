@@ -14,8 +14,10 @@ typedef struct CHANNEL_PARAM {
     double resonance;
     double delaySend;
     double delayTime;
+    double delayCross;
     double chorusSend;
     double chorusRate;
+    double chorusDepth;
 } CHANNEL_PARAM;
 #pragma
 

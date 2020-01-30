@@ -2,7 +2,7 @@
     public class Const {
         public static readonly int SampleRate = 44100;
         public static readonly double DeltaTime = 1.0 / SampleRate;
-        public static readonly double EnvelopeSpeed = 20.0;
+        public static readonly double EnvelopeSpeed = 24.0;
 
         public static readonly double[] Level = new double[] {
             0.007874, 0.008180, 0.008498, 0.008828, 0.009171, 0.009528, 0.009898, 0.010283,

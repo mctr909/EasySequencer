@@ -51,7 +51,10 @@ namespace WaveOut {
         public double deltaA;
         public double deltaD;
         public double deltaR;
+        public double levelR;
+        public double levelT;
         public double levelS;
+        public double levelF;
         public double hold;
     };
 
@@ -64,11 +67,12 @@ namespace WaveOut {
         public double panRight;
         public double cutoff;
         public double resonance;
-
-        public double delayDepth;
+        public double delaySend;
         public double delayTime;
-        public double chorusDepth;
+        public double delayCross;
+        public double chorusSend;
         public double chorusRate;
+        public double chorusDepth;
     }
 
     [StructLayout(LayoutKind.Sequential, Pack = 4)]
@@ -88,7 +92,7 @@ namespace WaveOut {
         public WAVE_LOOP loop;
         public ENVELOPE envAmp;
         public ENVELOPE envEq;
-        public FILTER eq;
+        public FILTER filter;
     };
 
     public struct WAVE_INFO {

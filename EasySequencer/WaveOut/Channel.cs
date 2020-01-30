@@ -91,8 +91,10 @@ namespace WaveOut {
             VibDepth = 64;
             VibDelay = 64;
 
-            mpChannel->chorusRate = 0.2;
+            mpChannel->chorusRate = 0.5;
+            mpChannel->chorusDepth = 0.01;
             mpChannel->delayTime = 0.2;
+            mpChannel->delayCross = 0.375;
             mpChannel->holdDelta = Const.DeltaTime * 1.5;
 
             mRpnLSB = 0xFF;
@@ -274,12 +276,12 @@ namespace WaveOut {
 
         private void setDel(byte value) {
             Del = value;
-            mpChannel->delayDepth = 0.8 * Const.FeedBack[value];
+            mpChannel->delaySend = 0.8 * Const.FeedBack[value];
         }
 
         private void setCho(byte value) {
             Cho = value;
-            mpChannel->chorusDepth = 3.0 * Const.FeedBack[value];
+            mpChannel->chorusSend = 3.0 * Const.FeedBack[value];
         }
 
         private void setRpn(byte b1) {

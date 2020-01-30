@@ -153,6 +153,7 @@
       <EnableEnhancedInstructionSet>AdvancedVectorExtensions2</EnableEnhancedInstructionSet>
       <FloatingPointModel>Fast</FloatingPointModel>
       <FloatingPointExceptions>false</FloatingPointExceptions>
+      <AssemblerOutput>AssemblyAndSourceCode</AssemblerOutput>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -162,11 +163,15 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClInclude Include="channel.h" />
+    <ClInclude Include="filter.h" />
     <ClInclude Include="main.h" />
     <ClInclude Include="sampler.h" />
     <ClInclude Include="type.h" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="channel.c" />
+    <ClCompile Include="filter.c" />
     <ClCompile Include="main.c" />
     <ClCompile Include="sampler.c" />
   </ItemGroup>

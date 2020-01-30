@@ -18,6 +18,7 @@ typedef struct ENVELOPE {
     double deltaA;
     double deltaD;
     double deltaR;
+    double levelR;
     double levelT;
     double levelS;
     double levelF;
