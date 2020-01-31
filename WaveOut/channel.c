@@ -14,61 +14,68 @@
 #define INV_SQRT3 0.577350269
 
 /******************************************************************************/
-CHANNEL** createChannels(UInt32 count, UInt32 sampleRate, UInt32 buffLen) {
-    CHANNEL **channel = (CHANNEL**)malloc(sizeof(CHANNEL*) * count);
-    for (UInt32 i = 0; i < count; ++i) {
-        CHANNEL *pCh = (CHANNEL*)malloc(sizeof(CHANNEL));
-        memset(pCh, 0, sizeof(CHANNEL));
-        channel[i] = pCh;
+inline void effect(CHANNEL *pCh, double *waveL, double *waveR);
 
-        pCh->buffLen = buffLen;
-        pCh->pWave = (double*)malloc(sizeof(double) * buffLen);
-        memset(pCh->pWave, 0, sizeof(double) * buffLen);
+/******************************************************************************/
+CHANNEL* createChannel(UInt32 sampleRate, UInt32 buffLen) {
+    CHANNEL *pCh = (CHANNEL*)malloc(sizeof(CHANNEL));
+    memset(pCh, 0, sizeof(CHANNEL));
 
-        // CHANNEL_PARAM
-        pCh->pParam = (CHANNEL_PARAM*)malloc(sizeof(CHANNEL_PARAM));
-        memset(pCh->pParam, 0, sizeof(CHANNEL_PARAM));
+    pCh->buffLen = buffLen;
+    pCh->pWave = (double*)malloc(sizeof(double) * buffLen);
+    memset(pCh->pWave, 0, sizeof(double) * buffLen);
 
-        pCh->sampleRate = sampleRate;
-        pCh->deltaTime = 1.0 / sampleRate;
+    pCh->sampleRate = sampleRate;
+    pCh->deltaTime = 1.0 / sampleRate;
 
-        // Delay
-        pCh->readIndex = 0;
-        pCh->writeIndex = 0;
-        pCh->pDelTapL = (double*)malloc(sizeof(double) * DELAY_TAPS);
-        pCh->pDelTapR = (double*)malloc(sizeof(double) * DELAY_TAPS);
-        memset(pCh->pDelTapL, 0, sizeof(double) * DELAY_TAPS);
-        memset(pCh->pDelTapR, 0, sizeof(double) * DELAY_TAPS);
+    // パラメータ
+    pCh->pParam = (CHANNEL_PARAM*)malloc(sizeof(CHANNEL_PARAM));
+    memset(pCh->pParam, 0, sizeof(CHANNEL_PARAM));
 
-        // Chorus
-        pCh->choLfo[0] = 1.0;
-        pCh->choLfo[1] = -0.5;
-        pCh->choLfo[2] = -0.5;
-        for (SInt32 p = 0; p < CHORUS_PHASES; ++p) {
-            pCh->choPanL[p] = cos(0.5 * PI * p / CHORUS_PHASES);
-            pCh->choPanR[p] = sin(0.5 * PI * p / CHORUS_PHASES);
-        }
+    // ディレイ
+    pCh->writeIndex = 0;
+    pCh->pDelTapL = (double*)malloc(sizeof(double) * DELAY_TAPS);
+    pCh->pDelTapR = (double*)malloc(sizeof(double) * DELAY_TAPS);
+    memset(pCh->pDelTapL, 0, sizeof(double) * DELAY_TAPS);
+    memset(pCh->pDelTapR, 0, sizeof(double) * DELAY_TAPS);
 
-        // Filter
-        memset(&pCh->filter, 0, sizeof(FILTER));
+    // コーラス
+    pCh->choLfo[0] = 1.0;
+    pCh->choLfo[1] = -0.5;
+    pCh->choLfo[2] = -0.5;
+    for (SInt32 p = 0; p < CHORUS_PHASES; ++p) {
+        pCh->choPanL[p] = cos(0.5 * PI * p / CHORUS_PHASES);
+        pCh->choPanR[p] = sin(0.5 * PI * p / CHORUS_PHASES);
     }
 
-    return channel;
+    // フィルター
+    memset(&pCh->filter, 0, sizeof(FILTER));
+
+    return pCh;
+}
+
+void releaseChannel(CHANNEL *pCh) {
+    free(pCh->pDelTapL);
+    free(pCh->pDelTapR);
+    pCh->pDelTapL = NULL;
+    pCh->pDelTapR = NULL;
+    free(pCh->pParam);
+    pCh->pParam = NULL;
+    free(pCh->pWave);
+    pCh->pWave = NULL;
+    free(pCh);
+    pCh = NULL;
 }
 
 inline void channel(CHANNEL *pCh, SInt16 *outBuff) {
     double *inputBuff = pCh->pWave;
     double *inputBuffTerm = inputBuff + pCh->buffLen;
     for (; inputBuff < inputBuffTerm; inputBuff++, outBuff += 2) {
-        // filter
         filter(&pCh->filter, *inputBuff * pCh->amp);
-        // pan
         double tempL = pCh->filter.a10 * pCh->panL;
         double tempR = pCh->filter.a10 * pCh->panR;
-        // effect
-        delay(pCh, &tempL, &tempR);
-        chorus(pCh, &tempL, &tempR);
-        // output
+        effect(pCh, &tempL, &tempR);
+        // 出力
         tempL = tempL * 32767 + *outBuff;
         tempR = tempR * 32767 + *(outBuff + 1);
         if (32767 < tempL) tempL = 32767;
@@ -77,7 +84,7 @@ inline void channel(CHANNEL *pCh, SInt16 *outBuff) {
         if (tempR < -32767) tempR = -32767;
         *outBuff = (SInt16)tempL;
         *(outBuff + 1) = (SInt16)tempR;
-        // next step
+        // パラメータの更新
         double transitionDelta = pCh->deltaTime * VALUE_TRANSITION_SPEED;
         pCh->amp        += (pCh->pParam->amp       - pCh->amp)        * transitionDelta;
         pCh->panL       += (pCh->pParam->panLeft   - pCh->panL)       * transitionDelta;
@@ -89,44 +96,33 @@ inline void channel(CHANNEL *pCh, SInt16 *outBuff) {
 }
 
 /******************************************************************************/
-inline void delay(CHANNEL *pCh, double *waveL, double *waveR) {
+inline void effect(CHANNEL *pCh, double *waveL, double *waveR) {
+    CHANNEL_PARAM *pParam = pCh->pParam;
+    double *pTapL = pCh->pDelTapL;
+    double *pTapR = pCh->pDelTapR;
     pCh->writeIndex++;
     if (DELAY_TAPS <= pCh->writeIndex) {
         pCh->writeIndex = 0;
     }
-
-    pCh->readIndex = pCh->writeIndex - (SInt32)(pCh->pParam->delayTime * pCh->sampleRate);
-    if (pCh->readIndex < 0) {
-        pCh->readIndex += DELAY_TAPS;
+    SInt32 readIndex = pCh->writeIndex - (SInt32)(pParam->delayTime * pCh->sampleRate);
+    if (readIndex < 0) {
+        readIndex += DELAY_TAPS;
     }
-
-    double delayL = pCh->pParam->delaySend * pCh->pDelTapL[pCh->readIndex];
-    double delayR = pCh->pParam->delaySend * pCh->pDelTapR[pCh->readIndex];
-
-    *waveL += (delayL * (1.0 - pCh->pParam->delayCross) + delayR * pCh->pParam->delayCross);
-    *waveR += (delayR * (1.0 - pCh->pParam->delayCross) + delayL * pCh->pParam->delayCross);
-
-    pCh->pDelTapL[pCh->writeIndex] = *waveL;
-    pCh->pDelTapR[pCh->writeIndex] = *waveR;
-}
-
-inline void chorus(CHANNEL *pCh, double *waveL, double *waveR) {
-    double pos;
-    double dt;
-    SInt32 cur;
-    SInt32 pre;
+    // ディレイ出力
+    double delayL = pParam->delaySend * pTapL[readIndex];
+    double delayR = pParam->delaySend * pTapR[readIndex];
+    *waveL += (delayL * (1.0 - pParam->delayCross) + delayR * pParam->delayCross);
+    *waveR += (delayR * (1.0 - pParam->delayCross) + delayL * pParam->delayCross);
+    pTapL[pCh->writeIndex] = *waveL;
+    pTapR[pCh->writeIndex] = *waveR;
+    // 各相のコーラスをミックス
     double chorusL = 0.0;
     double chorusR = 0.0;
-
-    CHANNEL_PARAM *pParam = pCh->pParam;
-    double *pTapL = pCh->pDelTapL;
-    double *pTapR = pCh->pDelTapR;
-
     for (SInt32 ph = 0; ph < CHORUS_PHASES; ++ph) {
-        pos = pCh->writeIndex - (0.5 - 0.49 * pCh->choLfo[ph]) * pCh->sampleRate * pParam->chorusDepth;
-        cur = (SInt32)pos;
-        pre = cur - 1;
-        dt = pos - cur;
+        double pos = pCh->writeIndex - (0.505 + 0.495 * pCh->choLfo[ph]) * pCh->sampleRate * pParam->chorusDepth;
+        SInt32 cur = (SInt32)pos;
+        SInt32 pre = cur - 1;
+        double dt = pos - cur;
         if (cur < 0) {
             cur += DELAY_TAPS;
         }
@@ -139,15 +135,15 @@ inline void chorus(CHANNEL *pCh, double *waveL, double *waveR) {
         if (DELAY_TAPS <= pre) {
             pre -= DELAY_TAPS;
         }
-        chorusL += (pTapL[cur] * dt + pTapL[pre] * (1.0 - dt)) * pCh->choPanL[ph];
-        chorusR += (pTapR[cur] * dt + pTapR[pre] * (1.0 - dt)) * pCh->choPanR[ph];
+        chorusL += (pTapL[pre] * (1.0 - dt) + pTapL[cur] * dt) * pCh->choPanL[ph];
+        chorusR += (pTapR[pre] * (1.0 - dt) + pTapR[cur] * dt) * pCh->choPanR[ph];
     }
-
+    // LFO更新
     double lfoDelta = PI2 * INV_SQRT3 * pParam->chorusRate * pCh->deltaTime;
     pCh->choLfo[0] += (pCh->choLfo[1] - pCh->choLfo[2]) * lfoDelta;
     pCh->choLfo[1] += (pCh->choLfo[2] - pCh->choLfo[0]) * lfoDelta;
     pCh->choLfo[2] += (pCh->choLfo[0] - pCh->choLfo[1]) * lfoDelta;
-
+    // コーラス出力
     *waveL += chorusL * pParam->chorusSend / CHORUS_PHASES;
     *waveR += chorusR * pParam->chorusSend / CHORUS_PHASES;
 }

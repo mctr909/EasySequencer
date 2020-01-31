@@ -13,7 +13,7 @@ enum E_KEY_STATE {
 };
 
 /******************************************************************************/
-#pragma pack(8)
+#pragma pack(push, 8)
 typedef struct ENVELOPE {
     double deltaA;
     double deltaD;
@@ -22,11 +22,11 @@ typedef struct ENVELOPE {
     double levelT;
     double levelS;
     double levelF;
-    double hold;
+    double holdTime;
 } ENVELOPE;
-#pragma
+#pragma pack(pop)
 
-#pragma pack(4)
+#pragma pack(push, 4)
 typedef struct WAVE_LOOP {
     UInt32 begin;
     UInt32 length;
@@ -35,9 +35,9 @@ typedef struct WAVE_LOOP {
     byte reserved1;
     byte reserved2;
 } WAVE_LOOP;
-#pragma
+#pragma pack(pop)
 
-#pragma pack(4)
+#pragma pack(push, 4)
 typedef struct SAMPLER {
     UInt16 channelNo;
     byte   noteNo;
@@ -56,9 +56,9 @@ typedef struct SAMPLER {
     ENVELOPE envEq;
     FILTER filter;
 } SAMPLER;
-#pragma
+#pragma pack(pop)
 
 /******************************************************************************/
-extern SAMPLER** createSamplers(UInt32 count);
-
+extern SAMPLER* createSampler();
+extern void releaseSampler(SAMPLER *pSmpl);
 extern inline void sampler(CHANNEL **ppCh, SAMPLER *pSmpl, byte *pWaveBuffer);

@@ -1,7 +1,7 @@
 #pragma once
 
 /******************************************************************************/
-#pragma pack(8)
+#pragma pack(push, 8)
 typedef struct FILTER {
     double cut;
     double res;
@@ -14,7 +14,7 @@ typedef struct FILTER {
     double a11;
     double b11;
 } FILTER;
-#pragma
+#pragma pack(pop)
 
 /******************************************************************************/
 extern inline void filter(FILTER *pFilter, double input);
