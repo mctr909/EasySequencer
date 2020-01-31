@@ -44,11 +44,11 @@ namespace WaveOut {
         private Channel[] mFileOutChannel;
         private Dictionary<INST_ID, INST_INFO> mInstList;
 
-        private static Task mTask = new Task(()=> {
+        private static Task mTask = new Task(() => {
             while (true) {
-                while (WriteWaveOutBuffer()) { }
-                Thread.Sleep(300);
+                WriteWaveOutBuffer();
             }
+
         });
 
         public Channel[] Channel { get; private set; }
