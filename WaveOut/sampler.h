@@ -22,7 +22,7 @@ typedef struct ENVELOPE {
     double levelT;
     double levelS;
     double levelF;
-    double holdTime;
+    double hold;
 } ENVELOPE;
 #pragma pack(pop)
 
@@ -59,6 +59,6 @@ typedef struct SAMPLER {
 #pragma pack(pop)
 
 /******************************************************************************/
-extern SAMPLER* createSampler();
-extern void releaseSampler(SAMPLER *pSmpl);
+extern SAMPLER** createSamplers(UInt32 count);
+
 extern inline void sampler(CHANNEL **ppCh, SAMPLER *pSmpl, byte *pWaveBuffer);

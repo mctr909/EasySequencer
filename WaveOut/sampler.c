@@ -8,22 +8,17 @@
 #define PURGE_SPEED     250
 
 /******************************************************************************/
-SAMPLER* createSampler() {
-    SAMPLER *pSmpl = (SAMPLER*)malloc(sizeof(SAMPLER));
-    memset(pSmpl, 0, sizeof(SAMPLER));
-    return pSmpl;
-}
+SAMPLER** createSamplers(UInt32 count) {
+    SAMPLER** samplers = (SAMPLER**)malloc(sizeof(SAMPLER*) * count);
+    for (UInt32 i = 0; i < count; ++i) {
+        samplers[i] = (SAMPLER*)malloc(sizeof(SAMPLER));
+        memset(samplers[i], 0, sizeof(SAMPLER));
+    }
 
-void releaseSampler(SAMPLER *pSmpl) {
-    free(pSmpl);
-    pSmpl = NULL;
+    return samplers;
 }
 
 inline void sampler(CHANNEL **ppCh, SAMPLER *pSmpl, byte *pWaveBuffer) {
-    if (E_KEY_STATE_WAIT == pSmpl->state) {
-        return;
-    }
-
     CHANNEL *pChValue = ppCh[pSmpl->channelNo];
     CHANNEL_PARAM *pChParam = pChValue->pParam;
     WAVE_LOOP *pLoop = &pSmpl->loop;
@@ -36,15 +31,15 @@ inline void sampler(CHANNEL **ppCh, SAMPLER *pSmpl, byte *pWaveBuffer) {
     double *pOutBuffTerm = pOutBuff + pChValue->buffLen;
 
     for (; pOutBuff < pOutBuffTerm; pOutBuff++) {
-        /******************/
-        /**** 波形出力 ****/
-        /******************/
+        /***********************/
+        /**** generate wave ****/
+        /***********************/
         SInt32 pos = (SInt32)pSmpl->index;
         double dt = pSmpl->index - pos;
         double wave = (pWave[pos - 1] * (1.0 - dt) + pWave[pos] * dt) * pSmpl->gain;
-        // フィルター
+        //
         filter(pFilter, wave);
-        // 読込位置更新
+        //
         pSmpl->index += pSmpl->delta * pChParam->pitch;
         if ((pLoop->begin + pLoop->length) < pSmpl->index) {
             if (pLoop->enable) {
@@ -55,9 +50,9 @@ inline void sampler(CHANNEL **ppCh, SAMPLER *pSmpl, byte *pWaveBuffer) {
                 return;
             }
         }
-        /**********************/
-        /**** エンベロープ ****/
-        /**********************/
+        /***************************/
+        /**** generate envelope ****/
+        /***************************/
         switch (pSmpl->state) {
         case E_KEY_STATE_PURGE:
             pSmpl->amp -= pSmpl->amp * pChValue->deltaTime * PURGE_SPEED;
@@ -72,25 +67,25 @@ inline void sampler(CHANNEL **ppCh, SAMPLER *pSmpl, byte *pWaveBuffer) {
             pFilter->cut += (pEnvEq->levelF - pFilter->cut) * pEnvEq->deltaR;
             break;
         case E_KEY_STATE_PRESS:
-            if (pSmpl->time <= pEnvAmp->holdTime) {
+            if (pSmpl->time <= pEnvAmp->hold) {
                 pSmpl->amp += (1.0 - pSmpl->amp) * pEnvAmp->deltaA;
             } else {
                 pSmpl->amp += (pEnvAmp->levelS - pSmpl->amp) * pEnvAmp->deltaD;
             }
-            if (pSmpl->time <= pEnvEq->holdTime) {
+            if (pSmpl->time <= pEnvEq->hold) {
                 pFilter->cut += (pEnvEq->levelT - pFilter->cut) * pEnvEq->deltaA;
             } else {
                 pFilter->cut += (pEnvEq->levelS - pFilter->cut) * pEnvEq->deltaD;
             }
             break;
         }
-        if (pEnvAmp->holdTime < pSmpl->time && pSmpl->amp < PURGE_THRESHOLD) {
+        if (pEnvAmp->hold < pSmpl->time && pSmpl->amp < PURGE_THRESHOLD) {
             pSmpl->state = E_KEY_STATE_WAIT;
             return;
         }
-        // 出力
+        // output
         *pOutBuff += pFilter->a10 * pSmpl->velocity * pSmpl->amp;
-        // 時間更新
+        //
         pSmpl->time += pChValue->deltaTime;
     }
 }
