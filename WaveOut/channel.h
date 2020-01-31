@@ -21,7 +21,7 @@ typedef struct CHANNEL_PARAM {
 } CHANNEL_PARAM;
 #pragma pack(pop)
 
-#pragma pack(push, 8)
+#pragma pack(push, 4)
 typedef struct CHANNEL {
     CHANNEL_PARAM *pParam;
     double *pWave;
@@ -33,7 +33,6 @@ typedef struct CHANNEL {
     UInt32 buffLen;
     UInt32 sampleRate;
     SInt32 writeIndex;
-    SInt32 readIndex;
     double amp;
     double panL;
     double panR;
@@ -45,7 +44,3 @@ typedef struct CHANNEL {
 /******************************************************************************/
 extern CHANNEL** createChannels(UInt32 count, UInt32 sampleRate, UInt32 buffLen);
 extern inline void channel(CHANNEL *pCh, SInt16 *waveBuff);
-
-/******************************************************************************/
-inline void delay(CHANNEL *pCh, double *waveL, double *waveR);
-inline void chorus(CHANNEL *pCh, double *waveL, double *waveR);

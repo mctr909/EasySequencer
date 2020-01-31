@@ -46,7 +46,7 @@ inline void sampler(CHANNEL **ppCh, SAMPLER *pSmpl, byte *pWaveBuffer) {
                 pSmpl->index -= pLoop->length;
             } else {
                 pSmpl->index = pLoop->begin + pLoop->length;
-                pSmpl->state = E_KEY_STATE_WAIT;
+                pSmpl->state = E_KEY_STATE_STANDBY;
                 return;
             }
         }
@@ -80,7 +80,7 @@ inline void sampler(CHANNEL **ppCh, SAMPLER *pSmpl, byte *pWaveBuffer) {
             break;
         }
         if (pEnvAmp->hold < pSmpl->time && pSmpl->amp < PURGE_THRESHOLD) {
-            pSmpl->state = E_KEY_STATE_WAIT;
+            pSmpl->state = E_KEY_STATE_STANDBY;
             return;
         }
         // output

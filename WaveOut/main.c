@@ -12,6 +12,30 @@
 #define CHANNEL_COUNT       16
 
 /******************************************************************************/
+#pragma pack(push, 4)
+typedef struct {
+    UInt32 riff;
+    UInt32 fileSize;
+    UInt32 dataId;
+} RIFF;
+#pragma pack(pop)
+
+#pragma pack(push, 4)
+typedef struct {
+    UInt32 chunkId;
+    UInt32 chunkSize;
+    UInt16 formatId;
+    UInt16 channels;
+    UInt32 sampleRate;
+    UInt32 bytePerSec;
+    UInt16 blockAlign;
+    UInt16 bitPerSample;
+    UInt32 dataId;
+    UInt32 dataSize;
+} FMT_;
+#pragma pack(pop)
+
+/******************************************************************************/
 bool            gDoStop = false;
 bool            gIsStopped = true;
 
@@ -42,6 +66,9 @@ SInt16          *gpFileOutBuffer = NULL;
 FILE            *gfpFileOut = NULL;
 RIFF            gRiff;
 FMT_            gFmt;
+
+/******************************************************************************/
+void CALLBACK waveOutProc(HWAVEOUT hwo, UInt32 uMsg);
 
 /******************************************************************************/
 BOOL WINAPI WaveOutOpen(UInt32 sampleRate, UInt32 waveBufferLength) {
@@ -124,7 +151,7 @@ bool WINAPI WriteWaveOutBuffer() {
     SInt16* outBuff = (SInt16*)gWaveHdr[gWriteWaveBufferIndex].lpData;
     memset(outBuff, 0, sizeof(SInt16)*gWaveBufferLength * 2);
     for (SInt32 s = 0; s < gWaveOutSamplers; ++s) {
-        if (E_KEY_STATE_WAIT == gppWaveOutSamplers[s]->state) {
+        if (E_KEY_STATE_STANDBY == gppWaveOutSamplers[s]->state) {
             continue;
         }
         sampler(gppWaveOutChValues, gppWaveOutSamplers[s], gpDlsBuffer);
@@ -194,7 +221,7 @@ VOID WINAPI FileOutClose() {
 VOID WINAPI FileOut() {
     memset(gpFileOutBuffer, 0, sizeof(SInt16) * 2 * gFileBufferLength);
     for (SInt32 s = 0; s < gFileOutSamplers; ++s) {
-        if (E_KEY_STATE_WAIT == gppFileOutSamplers[s]->state) {
+        if (E_KEY_STATE_STANDBY == gppFileOutSamplers[s]->state) {
             continue;
         }
         sampler(gppFileOutChValues, gppFileOutSamplers[s], gpDlsBuffer);

@@ -5,7 +5,7 @@
 
 /******************************************************************************/
 enum E_KEY_STATE {
-    E_KEY_STATE_WAIT,
+    E_KEY_STATE_STANDBY,
     E_KEY_STATE_PURGE,
     E_KEY_STATE_RELEASE,
     E_KEY_STATE_HOLD,
