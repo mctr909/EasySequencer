@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Runtime.InteropServices;
+using System.Threading;
 using System.Threading.Tasks;
 
 using MIDI;
@@ -14,13 +15,17 @@ namespace WaveOut {
         [DllImport("WaveOut.dll", SetLastError = true, CharSet = CharSet.Auto)]
         private static extern void WaveOutClose();
         [DllImport("WaveOut.dll", SetLastError = true, CharSet = CharSet.Auto)]
-        private static extern void WriteWaveOutBuffer();
+        private static extern bool WriteWaveOutBuffer();
         [DllImport("WaveOut.dll", SetLastError = true, CharSet = CharSet.Auto)]
         private static extern void FileOutOpen(IntPtr filePath, uint bufferLength);
         [DllImport("WaveOut.dll", SetLastError = true, CharSet = CharSet.Auto)]
         private static extern void FileOutClose();
         [DllImport("WaveOut.dll", SetLastError = true, CharSet = CharSet.Auto)]
         private static extern void FileOut();
+        [DllImport("WaveOut.dll", SetLastError = true, CharSet = CharSet.Auto)]
+        private static extern int* GetActiveCountPtr();
+        [DllImport("WaveOut.dll", SetLastError = true, CharSet = CharSet.Auto)]
+        private static extern int* GetWriteCountPtr();
         [DllImport("WaveOut.dll", SetLastError = true, CharSet = CharSet.Auto)]
         private static extern CHANNEL_PARAM** GetWaveOutChannelPtr(uint sampleRate);
         [DllImport("WaveOut.dll", SetLastError = true, CharSet = CharSet.Auto)]
@@ -33,11 +38,16 @@ namespace WaveOut {
         public const int CHANNEL_COUNT = 16;
         public const int SAMPLER_COUNT = 128;
 
+        public static int* ActiveCountPtr = GetActiveCountPtr();
+        public static int* WriteCountPtr = GetWriteCountPtr();
+
         private Channel[] mFileOutChannel;
         private Dictionary<INST_ID, INST_INFO> mInstList;
+
         private static Task mTask = new Task(()=> {
-            while(true) {
-                WriteWaveOutBuffer();
+            while (true) {
+                while (WriteWaveOutBuffer()) { }
+                Thread.Sleep(300);
             }
         });
 
