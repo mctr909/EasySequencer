@@ -108,7 +108,7 @@ namespace EasySequencer {
 
         private void numKey_ValueChanged(Object sender, EventArgs e) {
             mIsSeek = true;
-            mPlayer.Transpose = (int)numericUpDown1.Value;
+            mPlayer.Transpose = (int)numKey.Value;
             mPlayer.Seek = hsbSeek.Value;
             mIsSeek = false;
         }
@@ -122,8 +122,27 @@ namespace EasySequencer {
             tabControl1.Height = Height - tabControl1.Location.Y - 48;
             pnlKeyboard.Width = tabControl1.Width - 16;
             pnlKeyboard.Height = tabControl1.Height - 38;
-            hsbSeek.Width = lblPosition.Right;
-            pnlPlayer.Width = lblPosition.Right + 8;
+
+            btnPalyStop.Top = 2;
+            btnPalyStop.Left = 2;
+            numKey.Top = 2;
+            numKey.Left = btnPalyStop.Right + 4;
+            lblPosition.Top = 0;
+            lblPosition.Left = numKey.Right + 4;
+            trkSpeed.Top = 0;
+            trkSpeed.Left = lblPosition.Right;
+            lblTempo.Width = 260;
+            lblTempo.Top = 0;
+            lblTempo.Left = trkSpeed.Right;
+            lblTempoPercent.Width = 100;
+            lblTempoPercent.Top = 3;
+            lblTempoPercent.Left = lblTempo.Right;
+            hsbSeek.Width = lblTempoPercent.Right - btnPalyStop.Left + 1;
+            hsbSeek.Height = 21;
+            hsbSeek.Top = numKey.Bottom + 2;
+            hsbSeek.Left = 0;
+            pnlPlayer.Width = hsbSeek.Width + 2;
+
         }
 
         private void timer1_Tick(object sender, EventArgs e) {

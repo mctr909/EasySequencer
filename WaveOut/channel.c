@@ -58,7 +58,7 @@ CHANNEL** createChannels(UInt32 count, UInt32 sampleRate, UInt32 buffLen) {
     return channel;
 }
 
-inline void channel(CHANNEL *pCh, SInt16 *outBuff) {
+inline void channel(CHANNEL *pCh, float *outBuff) {
     double *inputBuff = pCh->pWave;
     double *inputBuffTerm = inputBuff + pCh->buffLen;
     for (; inputBuff < inputBuffTerm; inputBuff++, outBuff += 2) {
@@ -70,14 +70,15 @@ inline void channel(CHANNEL *pCh, SInt16 *outBuff) {
         // effect
         effect(pCh, &tempL, &tempR);
         // output
-        tempL = tempL * 32767 + *outBuff;
-        tempR = tempR * 32767 + *(outBuff + 1);
-        if (32767 < tempL) tempL = 32767;
-        if (tempL < -32767) tempL = -32767;
-        if (32767 < tempR) tempR = 32767;
-        if (tempR < -32767) tempR = -32767;
-        *outBuff = (SInt16)tempL;
-        *(outBuff + 1) = (SInt16)tempR;
+        tempL += *(outBuff + 0);
+        tempR += *(outBuff + 1);
+        if (1.0 < tempL) tempL = 1.0;
+        if (tempL < -1.0) tempL = -1.0;
+        if (1.0 < tempR) tempR = 1.0;
+        if (tempR < -1.0) tempR = -1.0;
+        *(outBuff + 0) = (float)tempL;
+        *(outBuff + 1) = (float)tempR;
+
         // next step
         double transitionDelta = pCh->deltaTime * VALUE_TRANSITION_SPEED;
         pCh->amp        += (pCh->pParam->amp       - pCh->amp)        * transitionDelta;

@@ -9,7 +9,7 @@ using MIDI;
 namespace WaveOut {
     unsafe public class Sender {
         [DllImport("WaveOut.dll", SetLastError = true, CharSet = CharSet.Auto)]
-        private static extern IntPtr LoadDLS(IntPtr filePath, out uint size);
+        private static extern IntPtr LoadFile(IntPtr filePath, out uint size);
         [DllImport("WaveOut.dll", SetLastError = true, CharSet = CharSet.Auto)]
         private static extern bool WaveOutOpen(uint sampleRate, uint bufferLength);
         [DllImport("WaveOut.dll", SetLastError = true, CharSet = CharSet.Auto)]
@@ -25,8 +25,6 @@ namespace WaveOut {
         [DllImport("WaveOut.dll", SetLastError = true, CharSet = CharSet.Auto)]
         private static extern int* GetActiveCountPtr();
         [DllImport("WaveOut.dll", SetLastError = true, CharSet = CharSet.Auto)]
-        private static extern int* GetWriteCountPtr();
-        [DllImport("WaveOut.dll", SetLastError = true, CharSet = CharSet.Auto)]
         private static extern CHANNEL_PARAM** GetWaveOutChannelPtr(uint sampleRate);
         [DllImport("WaveOut.dll", SetLastError = true, CharSet = CharSet.Auto)]
         private static extern CHANNEL_PARAM** GetFileOutChannelPtr(uint sampleRate);
@@ -39,16 +37,12 @@ namespace WaveOut {
         public const int SAMPLER_COUNT = 128;
 
         public static int* ActiveCountPtr = GetActiveCountPtr();
-        public static int* WriteCountPtr = GetWriteCountPtr();
 
         private Channel[] mFileOutChannel;
         private Dictionary<INST_ID, INST_INFO> mInstList;
 
         private static Task mTask = new Task(() => {
-            while (true) {
-                WriteWaveOutBuffer();
-            }
-
+            while (WriteWaveOutBuffer()) {}
         });
 
         public Channel[] Channel { get; private set; }
@@ -59,7 +53,7 @@ namespace WaveOut {
 
         public Sender(string dlsPath) {
             uint fileSize = 0;
-            var dlsPtr = LoadDLS(Marshal.StringToHGlobalAuto(dlsPath), out fileSize);
+            var dlsPtr = LoadFile(Marshal.StringToHGlobalAuto(dlsPath), out fileSize);
             var dls = new DLS.DLS(dlsPtr, fileSize);
             mInstList = dls.GetInstList();
             //var sf2 = new SF2.SF2(dlsPath, dlsPtr, fileSize);
@@ -79,7 +73,7 @@ namespace WaveOut {
                 mFileOutChannel[i] = new Channel(mInstList, ppFileOutSampler, ppFileOutChannel[i], i);
             }
 
-            WaveOutOpen((uint)Const.SampleRate, 256);
+            WaveOutOpen((uint)Const.SampleRate, 512);
             mTask.Start();
         }
 
@@ -203,6 +197,7 @@ namespace WaveOut {
                     pSmpl->velocity = velocity / 127.0;
                     pSmpl->amp = 0.0;
                     pSmpl->filter.cutoff = 1.0;
+                    pSmpl->filter.resonance = 0.0;
                     pSmpl->loop = wave.loop;
                     pSmpl->envAmp = wave.env;
                     pSmpl->keyState = E_KEY_STATE.PRESS;

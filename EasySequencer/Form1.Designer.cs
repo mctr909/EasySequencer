@@ -45,7 +45,7 @@
             this.wavファイル出力ToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.編集EToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.btnPalyStop = new System.Windows.Forms.Button();
-            this.numericUpDown1 = new System.Windows.Forms.NumericUpDown();
+            this.numKey = new System.Windows.Forms.NumericUpDown();
             this.pnlPlayer = new System.Windows.Forms.Panel();
             this.lblTempoPercent = new System.Windows.Forms.Label();
             this.trkSpeed = new System.Windows.Forms.TrackBar();
@@ -57,7 +57,7 @@
             this.saveFileDialog1 = new System.Windows.Forms.SaveFileDialog();
             this.timer1 = new System.Windows.Forms.Timer(this.components);
             this.menuStrip1.SuspendLayout();
-            ((System.ComponentModel.ISupportInitialize)(this.numericUpDown1)).BeginInit();
+            ((System.ComponentModel.ISupportInitialize)(this.numKey)).BeginInit();
             this.pnlPlayer.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.trkSpeed)).BeginInit();
             this.tabControl1.SuspendLayout();
@@ -70,7 +70,7 @@
             // 
             this.lblPosition.AutoSize = true;
             this.lblPosition.Font = new System.Drawing.Font("Meiryo UI", 13.875F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(128)));
-            this.lblPosition.Location = new System.Drawing.Point(860, 5);
+            this.lblPosition.Location = new System.Drawing.Point(259, 5);
             this.lblPosition.Margin = new System.Windows.Forms.Padding(9, 0, 9, 0);
             this.lblPosition.Name = "lblPosition";
             this.lblPosition.Size = new System.Drawing.Size(259, 47);
@@ -81,7 +81,7 @@
             // 
             this.lblTempo.AutoSize = true;
             this.lblTempo.Font = new System.Drawing.Font("Meiryo UI", 13.875F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(128)));
-            this.lblTempo.Location = new System.Drawing.Point(699, 5);
+            this.lblTempo.Location = new System.Drawing.Point(840, 5);
             this.lblTempo.Margin = new System.Windows.Forms.Padding(9, 0, 9, 0);
             this.lblTempo.Name = "lblTempo";
             this.lblTempo.Size = new System.Drawing.Size(148, 47);
@@ -92,7 +92,7 @@
             // 
             this.hsbSeek.Location = new System.Drawing.Point(6, 56);
             this.hsbSeek.Name = "hsbSeek";
-            this.hsbSeek.Size = new System.Drawing.Size(1120, 20);
+            this.hsbSeek.Size = new System.Drawing.Size(1086, 46);
             this.hsbSeek.TabIndex = 8;
             this.hsbSeek.Scroll += new System.Windows.Forms.ScrollEventHandler(this.hsbSeek_Scroll);
             this.hsbSeek.MouseLeave += new System.EventHandler(this.hsbSeek_MouseLeave);
@@ -195,25 +195,25 @@
             this.btnPalyStop.UseVisualStyleBackColor = true;
             this.btnPalyStop.Click += new System.EventHandler(this.btnPalyStop_Click);
             // 
-            // numericUpDown1
+            // numKey
             // 
-            this.numericUpDown1.Font = new System.Drawing.Font("Meiryo UI", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(128)));
-            this.numericUpDown1.Location = new System.Drawing.Point(139, 8);
-            this.numericUpDown1.Margin = new System.Windows.Forms.Padding(7, 6, 7, 6);
-            this.numericUpDown1.Maximum = new decimal(new int[] {
+            this.numKey.Font = new System.Drawing.Font("Meiryo UI", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(128)));
+            this.numKey.Location = new System.Drawing.Point(139, 8);
+            this.numKey.Margin = new System.Windows.Forms.Padding(7, 6, 7, 6);
+            this.numKey.Maximum = new decimal(new int[] {
             24,
             0,
             0,
             0});
-            this.numericUpDown1.Minimum = new decimal(new int[] {
+            this.numKey.Minimum = new decimal(new int[] {
             24,
             0,
             0,
             -2147483648});
-            this.numericUpDown1.Name = "numericUpDown1";
-            this.numericUpDown1.Size = new System.Drawing.Size(115, 38);
-            this.numericUpDown1.TabIndex = 28;
-            this.numericUpDown1.ValueChanged += new System.EventHandler(this.numKey_ValueChanged);
+            this.numKey.Name = "numKey";
+            this.numKey.Size = new System.Drawing.Size(115, 38);
+            this.numKey.TabIndex = 28;
+            this.numKey.ValueChanged += new System.EventHandler(this.numKey_ValueChanged);
             // 
             // pnlPlayer
             // 
@@ -222,20 +222,20 @@
             this.pnlPlayer.Controls.Add(this.lblPosition);
             this.pnlPlayer.Controls.Add(this.lblTempo);
             this.pnlPlayer.Controls.Add(this.hsbSeek);
-            this.pnlPlayer.Controls.Add(this.numericUpDown1);
+            this.pnlPlayer.Controls.Add(this.numKey);
             this.pnlPlayer.Controls.Add(this.btnPalyStop);
             this.pnlPlayer.Controls.Add(this.trkSpeed);
             this.pnlPlayer.Location = new System.Drawing.Point(26, 54);
             this.pnlPlayer.Margin = new System.Windows.Forms.Padding(7, 6, 7, 6);
             this.pnlPlayer.Name = "pnlPlayer";
-            this.pnlPlayer.Size = new System.Drawing.Size(1139, 104);
+            this.pnlPlayer.Size = new System.Drawing.Size(1107, 104);
             this.pnlPlayer.TabIndex = 35;
             // 
             // lblTempoPercent
             // 
             this.lblTempoPercent.AutoSize = true;
             this.lblTempoPercent.Font = new System.Drawing.Font("Meiryo UI", 11.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(128)));
-            this.lblTempoPercent.Location = new System.Drawing.Point(576, 14);
+            this.lblTempoPercent.Location = new System.Drawing.Point(987, 12);
             this.lblTempoPercent.Margin = new System.Windows.Forms.Padding(9, 0, 9, 0);
             this.lblTempoPercent.Name = "lblTempoPercent";
             this.lblTempoPercent.Size = new System.Drawing.Size(105, 38);
@@ -245,7 +245,7 @@
             // trkSpeed
             // 
             this.trkSpeed.LargeChange = 10;
-            this.trkSpeed.Location = new System.Drawing.Point(269, -2);
+            this.trkSpeed.Location = new System.Drawing.Point(514, 5);
             this.trkSpeed.Margin = new System.Windows.Forms.Padding(7, 6, 7, 6);
             this.trkSpeed.Maximum = 200;
             this.trkSpeed.Minimum = 25;
@@ -336,7 +336,7 @@
             this.SizeChanged += new System.EventHandler(this.Form1_SizeChanged);
             this.menuStrip1.ResumeLayout(false);
             this.menuStrip1.PerformLayout();
-            ((System.ComponentModel.ISupportInitialize)(this.numericUpDown1)).EndInit();
+            ((System.ComponentModel.ISupportInitialize)(this.numKey)).EndInit();
             this.pnlPlayer.ResumeLayout(false);
             this.pnlPlayer.PerformLayout();
             ((System.ComponentModel.ISupportInitialize)(this.trkSpeed)).EndInit();
@@ -364,7 +364,7 @@
 		private System.Windows.Forms.ToolStripMenuItem 名前を付けて保存ToolStripMenuItem;
 		private System.Windows.Forms.ToolStripMenuItem 編集EToolStripMenuItem;
 		private System.Windows.Forms.Button btnPalyStop;
-		private System.Windows.Forms.NumericUpDown numericUpDown1;
+		private System.Windows.Forms.NumericUpDown numKey;
 		private System.Windows.Forms.Panel pnlPlayer;
 		private System.Windows.Forms.TabControl tabControl1;
 		private System.Windows.Forms.TabPage tabPage1;

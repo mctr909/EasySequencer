@@ -43,4 +43,4 @@ typedef struct CHANNEL {
 
 /******************************************************************************/
 extern CHANNEL** createChannels(UInt32 count, UInt32 sampleRate, UInt32 buffLen);
-extern inline void channel(CHANNEL *pCh, SInt16 *waveBuff);
+extern inline void channel(CHANNEL *pCh, float *waveBuff);

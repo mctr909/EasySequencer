@@ -11,9 +11,8 @@ __declspec(dllexport) VOID WINAPI FileOutOpen(LPWSTR filePath, UInt32 bufferLeng
 __declspec(dllexport) VOID WINAPI FileOutClose();
 __declspec(dllexport) VOID WINAPI FileOut();
 __declspec(dllexport) SInt32* WINAPI GetActiveCountPtr();
-__declspec(dllexport) SInt32* WINAPI GetWriteCountPtr();
 __declspec(dllexport) CHANNEL_PARAM** WINAPI GetWaveOutChannelPtr(UInt32 sampleRate);
 __declspec(dllexport) CHANNEL_PARAM** WINAPI GetFileOutChannelPtr(UInt32 sampleRate);
 __declspec(dllexport) SAMPLER** WINAPI GetWaveOutSamplerPtr(UInt32 samplers);
 __declspec(dllexport) SAMPLER** WINAPI GetFileOutSamplerPtr(UInt32 samplers);
-__declspec(dllexport) LPBYTE WINAPI LoadDLS(LPWSTR filePath, UInt32 *size);
+__declspec(dllexport) LPBYTE WINAPI LoadFile(LPWSTR filePath, UInt32 *size);
