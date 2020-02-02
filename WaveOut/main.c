@@ -8,7 +8,7 @@
 #pragma comment (lib, "winmm.lib")
 
 /******************************************************************************/
-#define BUFFER_COUNT        48
+#define BUFFER_COUNT        32
 #define CHANNEL_COUNT       16
 
 /******************************************************************************/
@@ -328,7 +328,7 @@ void CALLBACK waveOutProc(HWAVEOUT hwo, UInt32 uMsg) {
         }
         gIsStopped = false;
         //
-        if (gWriteWaveBufferCount < 2) {
+        if (gWriteWaveBufferCount < 1) {
             waveOutWrite(ghWaveOut, &gWaveHdr[gReadWaveBufferIndex], sizeof(WAVEHDR));
             return;
         }

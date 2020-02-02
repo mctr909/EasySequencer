@@ -142,7 +142,6 @@ namespace EasySequencer {
             hsbSeek.Top = numKey.Bottom + 2;
             hsbSeek.Left = 0;
             pnlPlayer.Width = hsbSeek.Width + 2;
-
         }
 
         private void timer1_Tick(object sender, EventArgs e) {

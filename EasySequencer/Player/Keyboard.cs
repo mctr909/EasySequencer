@@ -106,14 +106,17 @@ namespace Player {
 
         public Keyboard(PictureBox picKey, Sender sender, Player player) {
             mCtrl = picKey;
-            mBuffer = new DoubleBuffer(mCtrl, (Image)mCtrl.BackgroundImage.Clone());
-            mSender = sender;
-            mPlayer = player;
+            mCtrl.Width = EasySequencer.Properties.Resources.keyboard.Width + 2;
+            mCtrl.Height = EasySequencer.Properties.Resources.keyboard.Height + 2;
 
             mCtrl.DoubleClick += new EventHandler(picKeyboard_DoubleClick);
             mCtrl.MouseDown += new MouseEventHandler(picKeyboard_MouseDown);
             mCtrl.MouseMove += new MouseEventHandler(picKeyboard_MouseMove);
             mCtrl.MouseUp += new MouseEventHandler(picKeyboard_MouseUp);
+
+            mBuffer = new DoubleBuffer(mCtrl, (Image)mCtrl.BackgroundImage.Clone());
+            mSender = sender;
+            mPlayer = player;
 
             Task.Run(() => {
                 while (true) {

@@ -78,7 +78,6 @@ inline void channel(CHANNEL *pCh, float *outBuff) {
         if (tempR < -1.0) tempR = -1.0;
         *(outBuff + 0) = (float)tempL;
         *(outBuff + 1) = (float)tempR;
-
         // next step
         double transitionDelta = pCh->deltaTime * VALUE_TRANSITION_SPEED;
         pCh->amp        += (pCh->pParam->amp       - pCh->amp)        * transitionDelta;
