@@ -8,9 +8,9 @@
 #pragma comment (lib, "winmm.lib")
 
 /******************************************************************************/
-#define BUFFER_COUNT   32
+#define BUFFER_COUNT  12
 #define SAMPLER_COUNT 128
-#define CHANNEL_COUNT  16
+#define CHANNEL_COUNT 16
 
 /******************************************************************************/
 #pragma pack(push, 4)

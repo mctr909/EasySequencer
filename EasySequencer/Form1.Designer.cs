@@ -47,6 +47,7 @@
             this.btnPalyStop = new System.Windows.Forms.Button();
             this.numKey = new System.Windows.Forms.NumericUpDown();
             this.pnlPlayer = new System.Windows.Forms.Panel();
+            this.picActive = new System.Windows.Forms.PictureBox();
             this.lblTempoPercent = new System.Windows.Forms.Label();
             this.trkSpeed = new System.Windows.Forms.TrackBar();
             this.tabControl1 = new System.Windows.Forms.TabControl();
@@ -56,16 +57,15 @@
             this.tabPage1 = new System.Windows.Forms.TabPage();
             this.saveFileDialog1 = new System.Windows.Forms.SaveFileDialog();
             this.timer1 = new System.Windows.Forms.Timer(this.components);
-            this.picActive = new System.Windows.Forms.PictureBox();
             this.menuStrip1.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.numKey)).BeginInit();
             this.pnlPlayer.SuspendLayout();
+            ((System.ComponentModel.ISupportInitialize)(this.picActive)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.trkSpeed)).BeginInit();
             this.tabControl1.SuspendLayout();
             this.tabPage2.SuspendLayout();
             this.pnlKeyboard.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.picKey)).BeginInit();
-            ((System.ComponentModel.ISupportInitialize)(this.picActive)).BeginInit();
             this.SuspendLayout();
             // 
             // lblPosition
@@ -112,7 +112,7 @@
             this.menuStrip1.Location = new System.Drawing.Point(0, 0);
             this.menuStrip1.Name = "menuStrip1";
             this.menuStrip1.Padding = new System.Windows.Forms.Padding(13, 4, 0, 4);
-            this.menuStrip1.Size = new System.Drawing.Size(2321, 44);
+            this.menuStrip1.Size = new System.Drawing.Size(2744, 44);
             this.menuStrip1.TabIndex = 26;
             this.menuStrip1.Text = "menuStrip1";
             // 
@@ -234,6 +234,15 @@
             this.pnlPlayer.Size = new System.Drawing.Size(1326, 104);
             this.pnlPlayer.TabIndex = 35;
             // 
+            // picActive
+            // 
+            this.picActive.BorderStyle = System.Windows.Forms.BorderStyle.Fixed3D;
+            this.picActive.Location = new System.Drawing.Point(1194, 14);
+            this.picActive.Name = "picActive";
+            this.picActive.Size = new System.Drawing.Size(100, 32);
+            this.picActive.TabIndex = 31;
+            this.picActive.TabStop = false;
+            // 
             // lblTempoPercent
             // 
             this.lblTempoPercent.AutoSize = true;
@@ -322,20 +331,11 @@
             // 
             this.timer1.Tick += new System.EventHandler(this.timer1_Tick);
             // 
-            // picActive
-            // 
-            this.picActive.BorderStyle = System.Windows.Forms.BorderStyle.Fixed3D;
-            this.picActive.Location = new System.Drawing.Point(1194, 14);
-            this.picActive.Name = "picActive";
-            this.picActive.Size = new System.Drawing.Size(100, 32);
-            this.picActive.TabIndex = 31;
-            this.picActive.TabStop = false;
-            // 
             // Form1
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(13F, 24F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(2321, 1554);
+            this.ClientSize = new System.Drawing.Size(2744, 1554);
             this.Controls.Add(this.tabControl1);
             this.Controls.Add(this.pnlPlayer);
             this.Controls.Add(this.menuStrip1);
@@ -351,12 +351,12 @@
             ((System.ComponentModel.ISupportInitialize)(this.numKey)).EndInit();
             this.pnlPlayer.ResumeLayout(false);
             this.pnlPlayer.PerformLayout();
+            ((System.ComponentModel.ISupportInitialize)(this.picActive)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.trkSpeed)).EndInit();
             this.tabControl1.ResumeLayout(false);
             this.tabPage2.ResumeLayout(false);
             this.pnlKeyboard.ResumeLayout(false);
             ((System.ComponentModel.ISupportInitialize)(this.picKey)).EndInit();
-            ((System.ComponentModel.ISupportInitialize)(this.picActive)).EndInit();
             this.ResumeLayout(false);
             this.PerformLayout();
 

@@ -34,7 +34,7 @@ namespace WaveOut {
         private static extern SAMPLER** GetFileOutSamplerPtr();
 
         public const int CHANNEL_COUNT = 16;
-        public const int SAMPLER_COUNT = 128;
+        public const int SAMPLER_COUNT = 64;
 
         public static int* ActiveCountPtr = GetActiveCountPtr();
 
