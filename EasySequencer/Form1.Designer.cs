@@ -56,6 +56,7 @@
             this.tabPage1 = new System.Windows.Forms.TabPage();
             this.saveFileDialog1 = new System.Windows.Forms.SaveFileDialog();
             this.timer1 = new System.Windows.Forms.Timer(this.components);
+            this.picActive = new System.Windows.Forms.PictureBox();
             this.menuStrip1.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.numKey)).BeginInit();
             this.pnlPlayer.SuspendLayout();
@@ -64,6 +65,7 @@
             this.tabPage2.SuspendLayout();
             this.pnlKeyboard.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.picKey)).BeginInit();
+            ((System.ComponentModel.ISupportInitialize)(this.picActive)).BeginInit();
             this.SuspendLayout();
             // 
             // lblPosition
@@ -81,7 +83,7 @@
             // 
             this.lblTempo.AutoSize = true;
             this.lblTempo.Font = new System.Drawing.Font("Meiryo UI", 13.875F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(128)));
-            this.lblTempo.Location = new System.Drawing.Point(840, 5);
+            this.lblTempo.Location = new System.Drawing.Point(930, 5);
             this.lblTempo.Margin = new System.Windows.Forms.Padding(9, 0, 9, 0);
             this.lblTempo.Name = "lblTempo";
             this.lblTempo.Size = new System.Drawing.Size(148, 47);
@@ -92,7 +94,7 @@
             // 
             this.hsbSeek.Location = new System.Drawing.Point(6, 56);
             this.hsbSeek.Name = "hsbSeek";
-            this.hsbSeek.Size = new System.Drawing.Size(1086, 46);
+            this.hsbSeek.Size = new System.Drawing.Size(1318, 46);
             this.hsbSeek.TabIndex = 8;
             this.hsbSeek.Scroll += new System.Windows.Forms.ScrollEventHandler(this.hsbSeek_Scroll);
             this.hsbSeek.MouseLeave += new System.EventHandler(this.hsbSeek_MouseLeave);
@@ -218,6 +220,7 @@
             // pnlPlayer
             // 
             this.pnlPlayer.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
+            this.pnlPlayer.Controls.Add(this.picActive);
             this.pnlPlayer.Controls.Add(this.lblTempoPercent);
             this.pnlPlayer.Controls.Add(this.lblPosition);
             this.pnlPlayer.Controls.Add(this.lblTempo);
@@ -228,14 +231,14 @@
             this.pnlPlayer.Location = new System.Drawing.Point(26, 54);
             this.pnlPlayer.Margin = new System.Windows.Forms.Padding(7, 6, 7, 6);
             this.pnlPlayer.Name = "pnlPlayer";
-            this.pnlPlayer.Size = new System.Drawing.Size(1107, 104);
+            this.pnlPlayer.Size = new System.Drawing.Size(1326, 104);
             this.pnlPlayer.TabIndex = 35;
             // 
             // lblTempoPercent
             // 
             this.lblTempoPercent.AutoSize = true;
             this.lblTempoPercent.Font = new System.Drawing.Font("Meiryo UI", 11.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(128)));
-            this.lblTempoPercent.Location = new System.Drawing.Point(987, 12);
+            this.lblTempoPercent.Location = new System.Drawing.Point(1077, 12);
             this.lblTempoPercent.Margin = new System.Windows.Forms.Padding(9, 0, 9, 0);
             this.lblTempoPercent.Name = "lblTempoPercent";
             this.lblTempoPercent.Size = new System.Drawing.Size(105, 38);
@@ -250,7 +253,7 @@
             this.trkSpeed.Maximum = 200;
             this.trkSpeed.Minimum = 25;
             this.trkSpeed.Name = "trkSpeed";
-            this.trkSpeed.Size = new System.Drawing.Size(310, 90);
+            this.trkSpeed.Size = new System.Drawing.Size(400, 90);
             this.trkSpeed.TabIndex = 29;
             this.trkSpeed.TickFrequency = 25;
             this.trkSpeed.Value = 100;
@@ -319,6 +322,15 @@
             // 
             this.timer1.Tick += new System.EventHandler(this.timer1_Tick);
             // 
+            // picActive
+            // 
+            this.picActive.BorderStyle = System.Windows.Forms.BorderStyle.Fixed3D;
+            this.picActive.Location = new System.Drawing.Point(1194, 14);
+            this.picActive.Name = "picActive";
+            this.picActive.Size = new System.Drawing.Size(100, 32);
+            this.picActive.TabIndex = 31;
+            this.picActive.TabStop = false;
+            // 
             // Form1
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(13F, 24F);
@@ -344,6 +356,7 @@
             this.tabPage2.ResumeLayout(false);
             this.pnlKeyboard.ResumeLayout(false);
             ((System.ComponentModel.ISupportInitialize)(this.picKey)).EndInit();
+            ((System.ComponentModel.ISupportInitialize)(this.picActive)).EndInit();
             this.ResumeLayout(false);
             this.PerformLayout();
 
@@ -378,6 +391,7 @@
 		private System.Windows.Forms.SaveFileDialog saveFileDialog1;
 		private System.Windows.Forms.Timer timer1;
         private System.Windows.Forms.Label lblTempoPercent;
+        private System.Windows.Forms.PictureBox picActive;
     }
 }
 

@@ -343,7 +343,9 @@ DWORD WINAPI writeWaveOutBuffer(LPVOID *param) {
                 continue;
             }
             sampler(gppWaveOutChValues, gppWaveOutSamplers[s], gpFileData);
-            gActiveCount++;
+            if (E_KEY_STATE_PURGE != gppWaveOutSamplers[s]->state) {
+                gActiveCount++;
+            }
         }
         #pragma loop(hint_parallel(CHANNEL_COUNT))
         for (SInt32 c = 0; c < CHANNEL_COUNT; ++c) {

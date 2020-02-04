@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Windows.Forms;
 using System.IO;
-
+using System.Drawing;
 using Player;
 using MIDI;
 using WaveOut;
@@ -12,7 +12,8 @@ namespace EasySequencer {
         private Sender mMidiSender;
         private Player.Player mPlayer;
         private Keyboard mKeyboard;
-
+        private Bitmap mBmpActive;
+        private Graphics mGActive;
         private string mDlsFilePath;
         private bool mIsSeek = false;
 
@@ -30,7 +31,10 @@ namespace EasySequencer {
 
             setSize();
 
-            timer1.Interval = 20;
+            mBmpActive = new Bitmap(picActive.Width, picActive.Height);
+            mGActive = Graphics.FromImage(mBmpActive);
+
+            timer1.Interval = 33;
             timer1.Enabled = true;
             timer1.Start();
         }
@@ -129,6 +133,7 @@ namespace EasySequencer {
             numKey.Left = btnPalyStop.Right + 4;
             lblPosition.Top = 0;
             lblPosition.Left = numKey.Right + 4;
+            trkSpeed.Width = 200;
             trkSpeed.Top = 0;
             trkSpeed.Left = lblPosition.Right;
             lblTempo.Width = 260;
@@ -137,17 +142,24 @@ namespace EasySequencer {
             lblTempoPercent.Width = 100;
             lblTempoPercent.Top = 3;
             lblTempoPercent.Left = lblTempo.Right;
-            hsbSeek.Width = lblTempoPercent.Right - btnPalyStop.Left + 1;
+            picActive.Width = 150;
+            picActive.Height = 24;
+            picActive.Top = 2;
+            picActive.Left = lblTempoPercent.Right;
+            hsbSeek.Width = picActive.Right - btnPalyStop.Left + 1;
             hsbSeek.Height = 21;
             hsbSeek.Top = numKey.Bottom + 2;
             hsbSeek.Left = 0;
-            pnlPlayer.Width = hsbSeek.Width + 2;
+            pnlPlayer.Width = hsbSeek.Width + 4;
         }
 
         private void timer1_Tick(object sender, EventArgs e) {
             lblPosition.Text = mPlayer.PositionText;
             lblTempo.Text = mPlayer.TempoText;
             lblTempoPercent.Text = trkSpeed.Value + "%";
+            mGActive.Clear(Color.Transparent);
+            mGActive.FillRectangle(Brushes.LightGreen, 0, 0, *Sender.ActiveCountPtr * mBmpActive.Width / 128.0f, mBmpActive.Height);
+            picActive.Image = mBmpActive;
 
             if (!mIsSeek) {
                 if (mPlayer.CurrentTick <= hsbSeek.Maximum) {

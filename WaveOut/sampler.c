@@ -4,8 +4,8 @@
 #include "filter.h"
 
 /******************************************************************************/
-#define PURGE_THRESHOLD 0.001
-#define PURGE_SPEED     250
+#define PURGE_THRESHOLD 0.0005
+#define PURGE_SPEED     500
 
 /******************************************************************************/
 SAMPLER** createSamplers(UInt32 count) {
