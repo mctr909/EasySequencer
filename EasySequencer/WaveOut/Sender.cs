@@ -11,13 +11,13 @@ namespace WaveOut {
         [DllImport("WaveOut.dll", SetLastError = true, CharSet = CharSet.Auto)]
         private static extern IntPtr LoadFile(IntPtr filePath, out uint size);
         [DllImport("WaveOut.dll", SetLastError = true, CharSet = CharSet.Auto)]
-        private static extern bool WaveOutOpen(uint sampleRate, uint bufferLength);
+        private static extern void SystemValues(uint sampleRate, uint bufferLength);
+        [DllImport("WaveOut.dll", SetLastError = true, CharSet = CharSet.Auto)]
+        private static extern bool WaveOutOpen();
         [DllImport("WaveOut.dll", SetLastError = true, CharSet = CharSet.Auto)]
         private static extern void WaveOutClose();
         [DllImport("WaveOut.dll", SetLastError = true, CharSet = CharSet.Auto)]
-        private static extern bool WriteWaveOutBuffer();
-        [DllImport("WaveOut.dll", SetLastError = true, CharSet = CharSet.Auto)]
-        private static extern void FileOutOpen(IntPtr filePath, uint bufferLength);
+        private static extern void FileOutOpen(IntPtr filePath);
         [DllImport("WaveOut.dll", SetLastError = true, CharSet = CharSet.Auto)]
         private static extern void FileOutClose();
         [DllImport("WaveOut.dll", SetLastError = true, CharSet = CharSet.Auto)]
@@ -25,13 +25,13 @@ namespace WaveOut {
         [DllImport("WaveOut.dll", SetLastError = true, CharSet = CharSet.Auto)]
         private static extern int* GetActiveCountPtr();
         [DllImport("WaveOut.dll", SetLastError = true, CharSet = CharSet.Auto)]
-        private static extern CHANNEL_PARAM** GetWaveOutChannelPtr(uint sampleRate);
+        private static extern CHANNEL_PARAM** GetWaveOutChannelPtr();
         [DllImport("WaveOut.dll", SetLastError = true, CharSet = CharSet.Auto)]
-        private static extern CHANNEL_PARAM** GetFileOutChannelPtr(uint sampleRate);
+        private static extern CHANNEL_PARAM** GetFileOutChannelPtr();
         [DllImport("WaveOut.dll", SetLastError = true, CharSet = CharSet.Auto)]
-        private static extern SAMPLER** GetWaveOutSamplerPtr(uint samplers);
+        private static extern SAMPLER** GetWaveOutSamplerPtr();
         [DllImport("WaveOut.dll", SetLastError = true, CharSet = CharSet.Auto)]
-        private static extern SAMPLER** GetFileOutSamplerPtr(uint samplers);
+        private static extern SAMPLER** GetFileOutSamplerPtr();
 
         public const int CHANNEL_COUNT = 16;
         public const int SAMPLER_COUNT = 128;
@@ -40,10 +40,6 @@ namespace WaveOut {
 
         private Channel[] mFileOutChannel;
         private Dictionary<INST_ID, INST_INFO> mInstList;
-
-        private static Task mTask = new Task(() => {
-            while (WriteWaveOutBuffer()) {}
-        });
 
         public Channel[] Channel { get; private set; }
         public SAMPLER** ppWaveOutSampler { get; private set; }
@@ -59,22 +55,23 @@ namespace WaveOut {
             //var sf2 = new SF2.SF2(dlsPath, dlsPtr, fileSize);
             //mInstList = sf2.GetInstList();
 
-            var ppChannel = GetWaveOutChannelPtr((uint)Const.SampleRate);
-            ppWaveOutSampler = GetWaveOutSamplerPtr(SAMPLER_COUNT);
+            SystemValues((uint)Const.SampleRate, 512);
+
+            var ppChannel = GetWaveOutChannelPtr();
+            ppWaveOutSampler = GetWaveOutSamplerPtr();
             Channel = new Channel[CHANNEL_COUNT];
             for (int i = 0; i < CHANNEL_COUNT; ++i) {
                 Channel[i] = new Channel(mInstList, ppWaveOutSampler, ppChannel[i], i);
             }
 
-            var ppFileOutChannel = GetFileOutChannelPtr((uint)Const.SampleRate);
-            ppFileOutSampler = GetFileOutSamplerPtr(SAMPLER_COUNT);
+            var ppFileOutChannel = GetFileOutChannelPtr();
+            ppFileOutSampler = GetFileOutSamplerPtr();
             mFileOutChannel = new Channel[CHANNEL_COUNT];
             for (int i = 0; i < CHANNEL_COUNT; ++i) {
                 mFileOutChannel[i] = new Channel(mInstList, ppFileOutSampler, ppFileOutChannel[i], i);
             }
 
-            WaveOutOpen((uint)Const.SampleRate, 512);
-            mTask.Start();
+            WaveOutOpen();
         }
 
         public void Send(Event msg) {
@@ -101,11 +98,11 @@ namespace WaveOut {
 
         public void FileOut(string filePath, Event[] events, int ticks) {
             Task.Factory.StartNew(() => {
-                double delta_sec = Const.DeltaTime * 256;
+                double delta_sec = Const.DeltaTime * 512;
                 double curTime = 0.0;
                 double bpm = 120.0;
                 IsFileOutput = true;
-                FileOutOpen(Marshal.StringToHGlobalAuto(filePath), 256);
+                FileOutOpen(Marshal.StringToHGlobalAuto(filePath));
                 OutputTime = 0;
                 foreach (var ev in events) {
                     var eventTime = (double)ev.Time / ticks;

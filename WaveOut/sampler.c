@@ -20,6 +20,7 @@ SAMPLER** createSamplers(UInt32 count) {
 
 inline void sampler(CHANNEL **ppCh, SAMPLER *pSmpl, byte *pWaveBuffer) {
     CHANNEL *pChValue = ppCh[pSmpl->channelNo];
+    SYSTEM_VALUE *pSystemValue = pChValue->pSystemValue;
     CHANNEL_PARAM *pChParam = pChValue->pParam;
     WAVE_LOOP *pLoop = &pSmpl->loop;
     ENVELOPE *pEnvAmp = &pSmpl->envAmp;
@@ -28,7 +29,7 @@ inline void sampler(CHANNEL **ppCh, SAMPLER *pSmpl, byte *pWaveBuffer) {
 
     SInt16 *pWave = (SInt16*)(pWaveBuffer + pSmpl->waveOfs);
     double *pOutBuff = pChValue->pWave;
-    double *pOutBuffTerm = pOutBuff + pChValue->buffLen;
+    double *pOutBuffTerm = pOutBuff + pSystemValue->bufferLength;
 
     for (; pOutBuff < pOutBuffTerm; pOutBuff++) {
         /***********************/
@@ -55,7 +56,7 @@ inline void sampler(CHANNEL **ppCh, SAMPLER *pSmpl, byte *pWaveBuffer) {
         /***************************/
         switch (pSmpl->state) {
         case E_KEY_STATE_PURGE:
-            pSmpl->amp -= pSmpl->amp * pChValue->deltaTime * PURGE_SPEED;
+            pSmpl->amp -= pSmpl->amp * pSystemValue->deltaTime * PURGE_SPEED;
             pFilter->cut += (pEnvEq->levelF - pFilter->cut) * pEnvEq->deltaR;
             break;
         case E_KEY_STATE_RELEASE:
@@ -86,6 +87,6 @@ inline void sampler(CHANNEL **ppCh, SAMPLER *pSmpl, byte *pWaveBuffer) {
         // output
         *pOutBuff += pFilter->a10 * pSmpl->velocity * pSmpl->amp;
         //
-        pSmpl->time += pChValue->deltaTime;
+        pSmpl->time += pSystemValue->deltaTime;
     }
 }

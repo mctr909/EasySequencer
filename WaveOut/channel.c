@@ -17,23 +17,20 @@
 inline void effect(CHANNEL *pCh, double *waveL, double *waveR);
 
 /******************************************************************************/
-CHANNEL** createChannels(UInt32 count, UInt32 sampleRate, UInt32 buffLen) {
+CHANNEL** createChannels(UInt32 count, SYSTEM_VALUE *pSys) {
     CHANNEL **channel = (CHANNEL**)malloc(sizeof(CHANNEL*) * count);
     for (UInt32 i = 0; i < count; ++i) {
         CHANNEL *pCh = (CHANNEL*)malloc(sizeof(CHANNEL));
         memset(pCh, 0, sizeof(CHANNEL));
         channel[i] = pCh;
 
-        pCh->buffLen = buffLen;
-        pCh->pWave = (double*)malloc(sizeof(double) * buffLen);
-        memset(pCh->pWave, 0, sizeof(double) * buffLen);
+        pCh->pSystemValue = pSys;
+        pCh->pWave = (double*)malloc(sizeof(double) * pCh->pSystemValue->bufferLength);
+        memset(pCh->pWave, 0, sizeof(double) * pCh->pSystemValue->bufferLength);
 
         // CHANNEL_PARAM
         pCh->pParam = (CHANNEL_PARAM*)malloc(sizeof(CHANNEL_PARAM));
         memset(pCh->pParam, 0, sizeof(CHANNEL_PARAM));
-
-        pCh->sampleRate = sampleRate;
-        pCh->deltaTime = 1.0 / sampleRate;
 
         // Delay
         pCh->writeIndex = 0;
@@ -60,7 +57,7 @@ CHANNEL** createChannels(UInt32 count, UInt32 sampleRate, UInt32 buffLen) {
 
 inline void channel(CHANNEL *pCh, float *outBuff) {
     double *inputBuff = pCh->pWave;
-    double *inputBuffTerm = inputBuff + pCh->buffLen;
+    double *inputBuffTerm = inputBuff + pCh->pSystemValue->bufferLength;
     for (; inputBuff < inputBuffTerm; inputBuff++, outBuff += 2) {
         // filter
         filter(&pCh->filter, *inputBuff * pCh->amp);
@@ -79,7 +76,7 @@ inline void channel(CHANNEL *pCh, float *outBuff) {
         *(outBuff + 0) = (float)tempL;
         *(outBuff + 1) = (float)tempR;
         // next step
-        double transitionDelta = pCh->deltaTime * VALUE_TRANSITION_SPEED;
+        double transitionDelta = pCh->pSystemValue->deltaTime * VALUE_TRANSITION_SPEED;
         pCh->amp        += (pCh->pParam->amp       - pCh->amp)        * transitionDelta;
         pCh->panL       += (pCh->pParam->panLeft   - pCh->panL)       * transitionDelta;
         pCh->panR       += (pCh->pParam->panRight  - pCh->panR)       * transitionDelta;
@@ -98,7 +95,7 @@ inline void effect(CHANNEL *pCh, double *waveL, double *waveR) {
     if (DELAY_TAPS <= pCh->writeIndex) {
         pCh->writeIndex = 0;
     }
-    SInt32 readIndex = pCh->writeIndex - (SInt32)(pParam->delayTime * pCh->sampleRate);
+    SInt32 readIndex = pCh->writeIndex - (SInt32)(pParam->delayTime * pCh->pSystemValue->sampleRate);
     if (readIndex < 0) {
         readIndex += DELAY_TAPS;
     }
@@ -113,7 +110,7 @@ inline void effect(CHANNEL *pCh, double *waveL, double *waveR) {
     double chorusL = 0.0;
     double chorusR = 0.0;
     for (SInt32 ph = 0; ph < CHORUS_PHASES; ++ph) {
-        double pos = pCh->writeIndex - (0.505 + 0.495 * pCh->choLfo[ph]) * pCh->sampleRate * pParam->chorusDepth;
+        double pos = pCh->writeIndex - (0.505 + 0.495 * pCh->choLfo[ph]) * pCh->pSystemValue->sampleRate * pParam->chorusDepth;
         SInt32 cur = (SInt32)pos;
         SInt32 pre = cur - 1;
         double dt = pos - cur;
@@ -133,7 +130,7 @@ inline void effect(CHANNEL *pCh, double *waveL, double *waveR) {
         chorusR += (pTapR[pre] * (1.0 - dt) + pTapR[cur] * dt) * pCh->choPanR[ph];
     }
     /*** update lfo ***/
-    double lfoDelta = PI2 * INV_SQRT3 * pParam->chorusRate * pCh->deltaTime;
+    double lfoDelta = PI2 * INV_SQRT3 * pParam->chorusRate * pCh->pSystemValue->deltaTime;
     pCh->choLfo[0] += (pCh->choLfo[1] - pCh->choLfo[2]) * lfoDelta;
     pCh->choLfo[1] += (pCh->choLfo[2] - pCh->choLfo[0]) * lfoDelta;
     pCh->choLfo[2] += (pCh->choLfo[0] - pCh->choLfo[1]) * lfoDelta;
