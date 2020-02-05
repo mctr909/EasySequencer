@@ -44,15 +44,17 @@ typedef struct SAMPLER {
     byte   state;
     UInt32 waveOfs;
 
+    double velocity;
     double gain;
     double delta;
     double index;
     double time;
-    double amp;
-    double velocity;
+    double egAmp;
+    double egPitch;
 
     WAVE_LOOP loop;
     ENVELOPE envAmp;
+    ENVELOPE envPitch;
     ENVELOPE envEq;
     FILTER filter;
 } SAMPLER;

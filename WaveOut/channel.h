@@ -5,8 +5,8 @@
 /******************************************************************************/
 #pragma pack(push, 4)
 typedef struct {
-    UInt32 sampleRate;
     UInt32 bufferLength;
+    UInt32 sampleRate;
     double deltaTime;
 } SYSTEM_VALUE;
 #pragma pack(pop)

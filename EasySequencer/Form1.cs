@@ -34,7 +34,7 @@ namespace EasySequencer {
             mBmpActive = new Bitmap(picActive.Width, picActive.Height);
             mGActive = Graphics.FromImage(mBmpActive);
 
-            timer1.Interval = 33;
+            timer1.Interval = 16;
             timer1.Enabled = true;
             timer1.Start();
         }

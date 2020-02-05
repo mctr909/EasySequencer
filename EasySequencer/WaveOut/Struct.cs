@@ -82,15 +82,17 @@ namespace WaveOut {
         public E_KEY_STATE keyState;
         public uint dataOfs;
 
+        public double velocity;
         public double gain;
         public double delta;
         public double index;
         public double time;
-        public double amp;
-        public double velocity;
+        public double egAmp;
+        public double egPitch;
 
         public WAVE_LOOP loop;
         public ENVELOPE envAmp;
+        public ENVELOPE envPitch;
         public ENVELOPE envEq;
         public FILTER filter;
     };

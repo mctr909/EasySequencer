@@ -24,6 +24,7 @@ inline void sampler(CHANNEL **ppCh, SAMPLER *pSmpl, byte *pWaveBuffer) {
     CHANNEL_PARAM *pChParam = pChValue->pParam;
     WAVE_LOOP *pLoop = &pSmpl->loop;
     ENVELOPE *pEnvAmp = &pSmpl->envAmp;
+    ENVELOPE *pEnvPitch = &pSmpl->envPitch;
     ENVELOPE *pEnvEq = &pSmpl->envEq;
     FILTER *pFilter = &pSmpl->filter;
 
@@ -41,7 +42,7 @@ inline void sampler(CHANNEL **ppCh, SAMPLER *pSmpl, byte *pWaveBuffer) {
         //
         filter(pFilter, wave);
         //
-        pSmpl->index += pSmpl->delta * pChParam->pitch;
+        pSmpl->index += pSmpl->delta * pSmpl->egPitch * pChParam->pitch;
         if ((pLoop->begin + pLoop->length) < pSmpl->index) {
             if (pLoop->enable) {
                 pSmpl->index -= pLoop->length;
@@ -56,22 +57,30 @@ inline void sampler(CHANNEL **ppCh, SAMPLER *pSmpl, byte *pWaveBuffer) {
         /***************************/
         switch (pSmpl->state) {
         case E_KEY_STATE_PURGE:
-            pSmpl->amp -= pSmpl->amp * pSystemValue->deltaTime * PURGE_SPEED;
+            pSmpl->egAmp -= pSmpl->egAmp * pSystemValue->deltaTime * PURGE_SPEED;
+            pSmpl->egPitch += (1.0 - pSmpl->egPitch) * pEnvPitch->deltaD;
             pFilter->cut += (pEnvEq->levelF - pFilter->cut) * pEnvEq->deltaR;
             break;
         case E_KEY_STATE_RELEASE:
-            pSmpl->amp -= pSmpl->amp * pEnvAmp->deltaR;
+            pSmpl->egAmp -= pSmpl->egAmp * pEnvAmp->deltaR;
+            pSmpl->egPitch += (1.0 - pSmpl->egPitch) * pEnvPitch->deltaD;
             pFilter->cut += (pEnvEq->levelF - pFilter->cut) * pEnvEq->deltaR;
             break;
         case E_KEY_STATE_HOLD:
-            pSmpl->amp -= pSmpl->amp * pChParam->holdDelta;
+            pSmpl->egAmp -= pSmpl->egAmp * pChParam->holdDelta;
+            pSmpl->egPitch += (1.0 - pSmpl->egPitch) * pEnvPitch->deltaD;
             pFilter->cut += (pEnvEq->levelF - pFilter->cut) * pEnvEq->deltaR;
             break;
         case E_KEY_STATE_PRESS:
             if (pSmpl->time <= pEnvAmp->hold) {
-                pSmpl->amp += (1.0 - pSmpl->amp) * pEnvAmp->deltaA;
+                pSmpl->egAmp += (1.0 - pSmpl->egAmp) * pEnvAmp->deltaA;
             } else {
-                pSmpl->amp += (pEnvAmp->levelS - pSmpl->amp) * pEnvAmp->deltaD;
+                pSmpl->egAmp += (pEnvAmp->levelS - pSmpl->egAmp) * pEnvAmp->deltaD;
+            }
+            if (pSmpl->time <= pEnvPitch->hold) {
+                pSmpl->egPitch += (pEnvPitch->levelT - pSmpl->egPitch) * pEnvPitch->deltaA;
+            } else {
+                pSmpl->egPitch += (1.0 - pSmpl->egPitch) * pEnvPitch->deltaD;
             }
             if (pSmpl->time <= pEnvEq->hold) {
                 pFilter->cut += (pEnvEq->levelT - pFilter->cut) * pEnvEq->deltaA;
@@ -80,12 +89,12 @@ inline void sampler(CHANNEL **ppCh, SAMPLER *pSmpl, byte *pWaveBuffer) {
             }
             break;
         }
-        if (pEnvAmp->hold < pSmpl->time && pSmpl->amp < PURGE_THRESHOLD) {
+        if (pEnvAmp->hold < pSmpl->time && pSmpl->egAmp < PURGE_THRESHOLD) {
             pSmpl->state = E_KEY_STATE_STANDBY;
             return;
         }
         // output
-        *pOutBuff += pFilter->a10 * pSmpl->velocity * pSmpl->amp;
+        *pOutBuff += pFilter->a10 * pSmpl->velocity * pSmpl->egAmp;
         //
         pSmpl->time += pSystemValue->deltaTime;
     }

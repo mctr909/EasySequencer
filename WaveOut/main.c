@@ -8,7 +8,7 @@
 #pragma comment (lib, "winmm.lib")
 
 /******************************************************************************/
-#define BUFFER_COUNT  12
+#define BUFFER_COUNT  10
 #define SAMPLER_COUNT 128
 #define CHANNEL_COUNT 16
 
@@ -57,9 +57,9 @@ LPBYTE          gpFileData = NULL;
 
 CHANNEL         **gppWaveOutChValues = NULL;
 CHANNEL_PARAM   **gppWaveOutChParams = NULL;
+SAMPLER         **gppWaveOutSamplers = NULL;
 CHANNEL         **gppFileOutChValues = NULL;
 CHANNEL_PARAM   **gppFileOutChParams = NULL;
-SAMPLER         **gppWaveOutSamplers = NULL;
 SAMPLER         **gppFileOutSamplers = NULL;
 
 float           *gpFileOutBuffer = NULL;
@@ -343,10 +343,9 @@ DWORD WINAPI writeWaveOutBuffer(LPVOID *param) {
                 continue;
             }
             sampler(gppWaveOutChValues, gppWaveOutSamplers[s], gpFileData);
-            if (E_KEY_STATE_PURGE != gppWaveOutSamplers[s]->state) {
-                gActiveCount++;
-            }
+            gActiveCount++;
         }
+
         #pragma loop(hint_parallel(CHANNEL_COUNT))
         for (SInt32 c = 0; c < CHANNEL_COUNT; ++c) {
             channel(gppWaveOutChValues[c], outBuff);

@@ -192,7 +192,8 @@ namespace WaveOut {
                     pSmpl->index = 0.0;
                     pSmpl->time = 0.0;
                     pSmpl->velocity = velocity / 127.0;
-                    pSmpl->amp = 0.0;
+                    pSmpl->egAmp = 0.0;
+                    pSmpl->egPitch = 1.0;
                     pSmpl->filter.cutoff = 1.0;
                     pSmpl->filter.resonance = 0.0;
                     pSmpl->loop = wave.loop;
