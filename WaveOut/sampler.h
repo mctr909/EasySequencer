@@ -15,13 +15,13 @@ enum E_KEY_STATE {
 /******************************************************************************/
 #pragma pack(push, 8)
 typedef struct ENVELOPE {
-    double deltaA;
-    double deltaD;
-    double deltaR;
-    double levelR;
-    double levelT;
-    double levelS;
-    double levelF;
+    double attack;
+    double decay;
+    double release;
+    double rise;
+    double top;
+    double sustain;
+    double fall;
     double hold;
 } ENVELOPE;
 #pragma pack(pop)

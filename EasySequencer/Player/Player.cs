@@ -206,6 +206,7 @@ namespace Player {
                     }
                     mPrevious_mSec = current_mSec;
                     mPreviousTick = mCurrentTick;
+                    Thread.Sleep(1);
                 }
 
                 switch (ev.Type) {

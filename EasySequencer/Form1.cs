@@ -133,7 +133,7 @@ namespace EasySequencer {
             numKey.Left = btnPalyStop.Right + 4;
             lblPosition.Top = 0;
             lblPosition.Left = numKey.Right + 4;
-            trkSpeed.Width = 200;
+            trkSpeed.Width = 150;
             trkSpeed.Top = 0;
             trkSpeed.Left = lblPosition.Right;
             lblTempo.Width = 260;
