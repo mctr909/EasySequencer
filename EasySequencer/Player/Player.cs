@@ -11,7 +11,6 @@ namespace Player {
         private Event[] mEventList;
         private Stopwatch mSw;
         private Task mTask;
-        private Event mCurEvent = new Event();
 
         private int mTicksPerBeat;
         private long mPrevious_mSec;

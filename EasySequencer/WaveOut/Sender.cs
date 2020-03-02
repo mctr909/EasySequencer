@@ -166,10 +166,7 @@ namespace WaveOut {
                 noteOff(ppSmpl, ch, noteNo, E_KEY_STATE.PURGE);
             }
             foreach (var wave in ch.WaveList) {
-                if (noteNo < wave.presetKeyLow || wave.presetKeyHigh < noteNo
-                    || velocity < wave.presetVelLow || wave.presetVelHigh < velocity
-                    || noteNo < wave.instKeyLow || wave.instKeyHigh < noteNo
-                    || velocity < wave.instVelLow || wave.instVelHigh < velocity) {
+                if (noteNo < wave.keyLo || wave.keyHi < noteNo || velocity < wave.velLo || wave.velHi < velocity) {
                     continue;
                 }
                 double pitch;
@@ -188,6 +185,7 @@ namespace WaveOut {
                     pSmpl->noteNo = noteNo;
                     pSmpl->dataOfs = wave.dataOfs;
                     pSmpl->gain = wave.gain;
+                    pSmpl->pan = (wave.pan + 1.0) * 0.5;
                     pSmpl->delta = wave.delta * pitch;
                     pSmpl->index = 0.0;
                     pSmpl->time = 0.0;

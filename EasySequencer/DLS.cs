@@ -339,14 +339,10 @@ namespace DLS {
                         }
                     }
 
-                    waveInfo.presetKeyLow = (byte)region.Header.key.low;
-                    waveInfo.presetKeyHigh = (byte)region.Header.key.high;
-                    waveInfo.presetVelLow = (byte)region.Header.velocity.low;
-                    waveInfo.presetVelHigh = (byte)region.Header.velocity.high;
-                    waveInfo.instKeyLow = 0;
-                    waveInfo.instKeyHigh = 127;
-                    waveInfo.instVelLow = 0;
-                    waveInfo.instVelHigh = 127;
+                    waveInfo.keyLo = (byte)region.Header.key.low;
+                    waveInfo.keyHi = (byte)region.Header.key.high;
+                    waveInfo.velLo = (byte)region.Header.velocity.low;
+                    waveInfo.velHi = (byte)region.Header.velocity.high;
                     instInfo.waveList.Add(waveInfo);
                 }
                 var id = new INST_ID();

@@ -46,6 +46,7 @@ typedef struct SAMPLER {
 
     double velocity;
     double gain;
+    double pan;
     double delta;
     double index;
     double time;

@@ -222,14 +222,10 @@ namespace SF2 {
                 foreach (var pv in preset.Value.Item2) {
                     foreach (var iv in mPdta.InstList[pv.instId].Item2) {
                         var waveInfo = new WAVE_INFO();
-                        waveInfo.presetKeyLow = pv.keyLo;
-                        waveInfo.presetKeyHigh = pv.keyHi;
-                        waveInfo.presetVelLow = pv.velLo;
-                        waveInfo.presetVelHigh = pv.velHi;
-                        waveInfo.instKeyLow = iv.keyLo;
-                        waveInfo.instKeyHigh = iv.keyHi;
-                        waveInfo.instVelLow = iv.velLo;
-                        waveInfo.instVelHigh = iv.velHi;
+                        waveInfo.keyLo = Math.Max(pv.keyLo, iv.keyLo);
+                        waveInfo.keyHi = Math.Min(pv.keyHi, iv.keyHi);
+                        waveInfo.velLo = Math.Max(pv.velLo, iv.velLo);
+                        waveInfo.velHi = Math.Min(pv.velHi, iv.velHi);
                         //
                         var smpl = mPdta.SHDR[iv.sampleId];
                         var waveBegin = smpl.start + iv.waveBegin;
@@ -254,15 +250,15 @@ namespace SF2 {
                         }
                         //
                         waveInfo.gain = pv.gain * iv.gain / 32768.0;
-                        waveInfo.delta = pv.fineTune * pv.coarseTune
-                            * iv.fineTune * iv.coarseTune * smpl.sampleRate / Const.SampleRate;
-                        //waveInfo.pan = pv.pan + iv.pan;
-                        //if (waveInfo.pan < -1.0) {
-                        //    waveInfo.pan = -1.0;
-                        //}
-                        //if (1.0 < waveInfo.pan) {
-                        //    waveInfo.pan = 1.0;
-                        //}
+                        waveInfo.delta = pv.fineTune * pv.coarseTune * iv.fineTune * iv.coarseTune
+                            * smpl.sampleRate / Const.SampleRate;
+                        waveInfo.pan = pv.pan + iv.pan;
+                        if (waveInfo.pan < -1.0) {
+                            waveInfo.pan = -1.0;
+                        }
+                        if (1.0 < waveInfo.pan) {
+                            waveInfo.pan = 1.0;
+                        }
                         waveInfo.env = iv.env;
                         instInfo.waveList.Add(waveInfo);
                     }

@@ -84,6 +84,7 @@ namespace WaveOut {
 
         public double velocity;
         public double gain;
+        public double pan;
         public double delta;
         public double index;
         public double time;
@@ -98,17 +99,14 @@ namespace WaveOut {
     };
 
     public struct WAVE_INFO {
-        public byte presetKeyLow;
-        public byte presetKeyHigh;
-        public byte presetVelLow;
-        public byte presetVelHigh;
-        public byte instKeyLow;
-        public byte instKeyHigh;
-        public byte instVelLow;
-        public byte instVelHigh;
+        public byte keyLo;
+        public byte keyHi;
+        public byte velLo;
+        public byte velHi;
         public uint dataOfs;
         public double gain;
         public double delta;
+        public double pan;
         public byte unityNote;
         public WAVE_LOOP loop;
         public ENVELOPE env;
