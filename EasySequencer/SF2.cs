@@ -213,7 +213,7 @@ namespace SF2 {
             foreach (var preset in mPdta.PresetList) {
                 var instInfo = new INST_INFO();
                 instInfo.name = preset.Value.Item1;
-                instInfo.waveList = new List<WAVE_INFO>();
+                instInfo.regions = new List<REGION>();
                 if (1 == preset.Key.isDrum) {
                     instInfo.catgory = "Drum set";
                 } else {
@@ -221,46 +221,39 @@ namespace SF2 {
                 }
                 foreach (var pv in preset.Value.Item2) {
                     foreach (var iv in mPdta.InstList[pv.instId].Item2) {
-                        var waveInfo = new WAVE_INFO();
-                        waveInfo.keyLo = Math.Max(pv.keyLo, iv.keyLo);
-                        waveInfo.keyHi = Math.Min(pv.keyHi, iv.keyHi);
-                        waveInfo.velLo = Math.Max(pv.velLo, iv.velLo);
-                        waveInfo.velHi = Math.Min(pv.velHi, iv.velHi);
+                        var region = new REGION();
+                        region.keyLo = Math.Max(pv.keyLo, iv.keyLo);
+                        region.keyHi = Math.Min(pv.keyHi, iv.keyHi);
+                        region.velLo = Math.Max(pv.velLo, iv.velLo);
+                        region.velHi = Math.Min(pv.velHi, iv.velHi);
                         //
                         var smpl = mPdta.SHDR[iv.sampleId];
                         var waveBegin = smpl.start + iv.waveBegin;
-                        waveInfo.dataOfs = (uint)(mSdta.pData.ToInt64() - mSf2Ptr.ToInt64() + waveBegin * 2);
+                        region.waveInfo.waveOfs = (uint)(mSdta.pData.ToInt64() - mSf2Ptr.ToInt64() + waveBegin * 2);
                         //
-                        waveInfo.loop.enable = iv.loopEnable;
-                        if (waveInfo.loop.enable) {
-                            waveInfo.loop.begin = smpl.loopstart - waveBegin;
-                            waveInfo.loop.length = smpl.loopend - smpl.loopstart;
+                        region.waveInfo.loopEnable = iv.loopEnable;
+                        if (region.waveInfo.loopEnable) {
+                            region.waveInfo.loopBegin = smpl.loopstart - waveBegin;
+                            region.waveInfo.loopLength = smpl.loopend - smpl.loopstart;
                         } else {
                             var waveEnd = smpl.end + iv.waveEnd;
-                            waveInfo.loop.begin = 0;
-                            waveInfo.loop.length = waveEnd - waveBegin;
+                            region.waveInfo.loopBegin = 0;
+                            region.waveInfo.loopLength = waveEnd - waveBegin;
                         }
                         //
                         if (0 <= iv.rootKey) {
-                            waveInfo.unityNote = (byte)iv.rootKey;
+                            region.waveInfo.unityNote = (byte)iv.rootKey;
                         } else if (0 <= pv.rootKey) {
-                            waveInfo.unityNote = (byte)pv.rootKey;
+                            region.waveInfo.unityNote = (byte)pv.rootKey;
                         } else {
-                            waveInfo.unityNote = smpl.originalKey;
+                            region.waveInfo.unityNote = smpl.originalKey;
                         }
                         //
-                        waveInfo.gain = pv.gain * iv.gain / 32768.0;
-                        waveInfo.delta = pv.fineTune * pv.coarseTune * iv.fineTune * iv.coarseTune
+                        region.waveInfo.gain = pv.gain * iv.gain / 32768.0;
+                        region.waveInfo.delta = pv.fineTune * pv.coarseTune * iv.fineTune * iv.coarseTune
                             * smpl.sampleRate / Const.SampleRate;
-                        waveInfo.pan = pv.pan + iv.pan;
-                        if (waveInfo.pan < -1.0) {
-                            waveInfo.pan = -1.0;
-                        }
-                        if (1.0 < waveInfo.pan) {
-                            waveInfo.pan = 1.0;
-                        }
-                        waveInfo.env = iv.env;
-                        instInfo.waveList.Add(waveInfo);
+                        region.env = iv.env;
+                        instInfo.regions.Add(region);
                     }
                 }
                 retInst.Add(preset.Key, instInfo);

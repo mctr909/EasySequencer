@@ -1,5 +1,5 @@
-﻿using System.Runtime.InteropServices;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
+using System.Runtime.InteropServices;
 
 namespace WaveOut {
     public enum E_KEY_STATE : byte {
@@ -18,32 +18,18 @@ namespace WaveOut {
         public byte bankLSB;
     };
 
-    [StructLayout(LayoutKind.Sequential, Pack = 4)]
-    public struct WAVE_LOOP {
-        public uint begin;
-        public uint length;
-        public bool enable;
-        private byte reserved1;
-        private byte reserved2;
-        private byte reserved3;
-    }
-
     [StructLayout(LayoutKind.Sequential, Pack = 8)]
     public struct FILTER {
-        public double cutoff;
-        public double resonance;
-        public double a0;  //  16
-        public double b0;  //  24
-        public double a1;  //  32
-        public double b1;  //  40
-        public double a2;  //  48
-        public double b2;  //  56
-        public double a3;  //  64
-        public double b3;  //  72
-        public double a4;
-        public double b4;
-        public double a5;
-        public double b5;
+        public double cut;
+        public double res;
+        public double a00;  //  16
+        public double b00;  //  24
+        public double a01;  //  32
+        public double b01;  //  40
+        public double a10;  //  48
+        public double b10;  //  56
+        public double a11;  //  64
+        public double b11;  //  72
     };
 
     [StructLayout(LayoutKind.Sequential, Pack = 8)]
@@ -76,45 +62,42 @@ namespace WaveOut {
     }
 
     [StructLayout(LayoutKind.Sequential, Pack = 4)]
+    public struct WAVE_INFO {
+        public uint    waveOfs;
+        public uint    loopBegin;
+        public uint    loopLength;
+        public bool    loopEnable;
+        public byte    unityNote;
+        private ushort reserved;
+        public double  gain;
+        public double  delta;
+    }
+
+    [StructLayout(LayoutKind.Sequential, Pack = 4)]
     unsafe public struct SAMPLER {
-        public ushort channelNo;
-        public byte noteNo;
-        public E_KEY_STATE keyState;
-        public uint dataOfs;
-
-        public double velocity;
-        public double gain;
-        public double pan;
-        public double delta;
-        public double index;
-        public double time;
-        public double egAmp;
-        public double egPitch;
-
-        public WAVE_LOOP loop;
-        public ENVELOPE envAmp;
-        public ENVELOPE envPitch;
-        public ENVELOPE envEq;
-        public FILTER filter;
+        public ushort      channelNum;
+        public byte        noteNum;
+        public E_KEY_STATE state;
+        public double      velocity;
+        public double      index;
+        public double      time;
+        public double      egAmp;
+        public ENVELOPE    envAmp;
+        public WAVE_INFO   waveInfo;
     };
 
-    public struct WAVE_INFO {
+    public struct REGION {
         public byte keyLo;
         public byte keyHi;
         public byte velLo;
         public byte velHi;
-        public uint dataOfs;
-        public double gain;
-        public double delta;
-        public double pan;
-        public byte unityNote;
-        public WAVE_LOOP loop;
+        public WAVE_INFO waveInfo;
         public ENVELOPE env;
     }
 
     public struct INST_INFO {
         public string name;
         public string catgory;
-        public List<WAVE_INFO> waveList;
+        public List<REGION> regions;
     }
 }

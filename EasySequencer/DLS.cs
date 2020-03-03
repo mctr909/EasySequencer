@@ -211,7 +211,7 @@ namespace DLS {
             foreach (var inst in Instruments.List) {
                 var instInfo = new INST_INFO();
                 instInfo.name = inst.Name;
-                instInfo.waveList = new List<WAVE_INFO>();
+                instInfo.regions = new List<REGION>();
                 if (string.IsNullOrWhiteSpace(inst.Category) && 0 < (inst.Header.locale.bankFlags & 0x80)) {
                     instInfo.catgory = "Percussive";
                 } else {
@@ -255,10 +255,10 @@ namespace DLS {
                 }
                 #endregion
 
-                foreach (var region in inst.Regions.List) {
-                    var waveInfo = new WAVE_INFO();
-                    if (null == region.Articulations) {
-                        waveInfo.env = instEnv;
+                foreach (var rgn in inst.Regions.List) {
+                    var region = new REGION();
+                    if (null == rgn.Articulations) {
+                        region.env = instEnv;
                     } else {
                         #region regionEnv
                         var regionEnv = new ENVELOPE();
@@ -267,7 +267,7 @@ namespace DLS {
                         regionEnv.deltaR = 1000.0 * Const.EnvelopeSpeed * Const.DeltaTime; // 1msec
                         regionEnv.levelS = 1.0;
                         regionEnv.hold = 0.0;
-                        foreach (var conn in region.Articulations.Art.List) {
+                        foreach (var conn in rgn.Articulations.Art.List) {
                             if (SRC_TYPE.NONE != conn.source) {
                                 continue;
                             }
@@ -294,56 +294,56 @@ namespace DLS {
                             regionEnv.hold = Const.DeltaTime;
                         }
                         #endregion
-                        waveInfo.env = regionEnv;
+                        region.env = regionEnv;
                     }
 
-                    var wave = WavePool.List[(int)region.WaveLink.tableIndex];
+                    var wave = WavePool.List[(int)rgn.WaveLink.tableIndex];
                     var samples = wave.Size / wave.Format.blockAlign;
-                    waveInfo.dataOfs = wave.Addr - (uint)mDlsPtr.ToInt64();
-                    if (region.HasSampler) {
-                        waveInfo.gain = region.Sampler.Gain / 32768.0;
-                        waveInfo.unityNote = (byte)region.Sampler.unityNote;
-                        waveInfo.delta
-                            = Math.Pow(2.0, region.Sampler.fineTune / 1200.0)
+                    region.waveInfo.waveOfs = wave.Addr - (uint)mDlsPtr.ToInt64();
+                    if (rgn.HasSampler) {
+                        region.waveInfo.gain = rgn.Sampler.Gain / 32768.0;
+                        region.waveInfo.unityNote = (byte)rgn.Sampler.unityNote;
+                        region.waveInfo.delta
+                            = Math.Pow(2.0, rgn.Sampler.fineTune / 1200.0)
                             * wave.Format.sampleRate / Const.SampleRate;
                         ;
-                        if (region.HasLoop) {
-                            waveInfo.loop.begin = region.Loops[0].start;
-                            waveInfo.loop.length = region.Loops[0].length;
-                            waveInfo.loop.enable = true;
+                        if (rgn.HasLoop) {
+                            region.waveInfo.loopBegin = rgn.Loops[0].start;
+                            region.waveInfo.loopLength = rgn.Loops[0].length;
+                            region.waveInfo.loopEnable = true;
                         } else if (wave.HasLoop) {
-                            waveInfo.loop.begin = wave.Loops[0].start;
-                            waveInfo.loop.length = wave.Loops[0].length;
-                            waveInfo.loop.enable = true;
+                            region.waveInfo.loopBegin = wave.Loops[0].start;
+                            region.waveInfo.loopLength = wave.Loops[0].length;
+                            region.waveInfo.loopEnable = true;
                         } else {
-                            waveInfo.loop.begin = 0;
-                            waveInfo.loop.length = samples;
-                            waveInfo.loop.enable = false;
-                            waveInfo.env.deltaR = Const.DeltaTime * waveInfo.delta / samples;
+                            region.waveInfo.loopBegin = 0;
+                            region.waveInfo.loopLength = samples;
+                            region.waveInfo.loopEnable = false;
+                            region.env.deltaR = Const.DeltaTime * region.waveInfo.delta / samples;
                         }
                     } else {
-                        waveInfo.gain = wave.Sampler.Gain / 32768.0;
-                        waveInfo.unityNote = (byte)wave.Sampler.unityNote;
-                        waveInfo.delta
+                        region.waveInfo.gain = wave.Sampler.Gain / 32768.0;
+                        region.waveInfo.unityNote = (byte)wave.Sampler.unityNote;
+                        region.waveInfo.delta
                             = Math.Pow(2.0, wave.Sampler.fineTune / 1200.0)
                             * wave.Format.sampleRate / Const.SampleRate;
                         ;
                         if (wave.HasLoop) {
-                            waveInfo.loop.begin = wave.Loops[0].start;
-                            waveInfo.loop.length = wave.Loops[0].length;
-                            waveInfo.loop.enable = true;
+                            region.waveInfo.loopBegin = wave.Loops[0].start;
+                            region.waveInfo.loopLength = wave.Loops[0].length;
+                            region.waveInfo.loopEnable = true;
                         } else {
-                            waveInfo.loop.begin = 0;
-                            waveInfo.loop.length = samples;
-                            waveInfo.loop.enable = false;
+                            region.waveInfo.loopBegin = 0;
+                            region.waveInfo.loopLength = samples;
+                            region.waveInfo.loopEnable = false;
                         }
                     }
 
-                    waveInfo.keyLo = (byte)region.Header.key.low;
-                    waveInfo.keyHi = (byte)region.Header.key.high;
-                    waveInfo.velLo = (byte)region.Header.velocity.low;
-                    waveInfo.velHi = (byte)region.Header.velocity.high;
-                    instInfo.waveList.Add(waveInfo);
+                    region.keyLo = (byte)rgn.Header.key.low;
+                    region.keyHi = (byte)rgn.Header.key.high;
+                    region.velLo = (byte)rgn.Header.velocity.low;
+                    region.velHi = (byte)rgn.Header.velocity.high;
+                    instInfo.regions.Add(region);
                 }
                 var id = new INST_ID();
                 id.isDrum = (byte)(inst.Header.locale.bankFlags == 0x80 ? 1 : 0);

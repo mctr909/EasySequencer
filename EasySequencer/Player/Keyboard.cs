@@ -216,16 +216,16 @@ namespace Player {
             /** Keyboad **/
             for (var s = 0; s < Sender.SAMPLER_COUNT; ++s) {
                 var pSmpl = mSender.ppWaveOutSampler[s];
-                var channel = mPlayer.Channel[pSmpl->channelNo];
-                var y_ch = ChannelHeight * pSmpl->channelNo;
+                var channel = mPlayer.Channel[pSmpl->channelNum];
+                var y_ch = ChannelHeight * pSmpl->channelNum;
                 var transpose = (int)(channel.Pitch * channel.BendRange / 8192.0 - 0.5);
-                var k = pSmpl->noteNo + transpose;
+                var k = pSmpl->noteNum + transpose;
                 if (k < 0 || 127 < k) {
                     continue;
                 }
                 int x_oct;
                 Rectangle key;
-                switch (pSmpl->keyState) {
+                switch (pSmpl->state) {
                     case E_KEY_STATE.PRESS:
                         x_oct = 7 * whiteWidth * (k / 12 - 1);
                         key = KeyboardPos[k % 12];

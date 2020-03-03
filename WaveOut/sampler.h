@@ -1,6 +1,5 @@
 #pragma once
 #include "type.h"
-#include "filter.h"
 #include "channel.h"
 
 /******************************************************************************/
@@ -27,37 +26,29 @@ typedef struct ENVELOPE {
 #pragma pack(pop)
 
 #pragma pack(push, 4)
-typedef struct WAVE_LOOP {
-    UInt32 begin;
-    UInt32 length;
-    bool enable;
-    byte type;
-    byte reserved1;
-    byte reserved2;
-} WAVE_LOOP;
+typedef struct WAVE_INFO {
+    UInt32 waveOfs;
+    UInt32 loopBegin;
+    UInt32 loopLength;
+    bool   loopEnable;
+    byte   unityNote;
+    UInt16 reserved;
+    double gain;
+    double delta;
+} WAVE_INFO;
 #pragma pack(pop)
 
 #pragma pack(push, 4)
 typedef struct SAMPLER {
-    UInt16 channelNo;
-    byte   noteNo;
-    byte   state;
-    UInt32 waveOfs;
-
-    double velocity;
-    double gain;
-    double pan;
-    double delta;
-    double index;
-    double time;
-    double egAmp;
-    double egPitch;
-
-    WAVE_LOOP loop;
-    ENVELOPE envAmp;
-    ENVELOPE envPitch;
-    ENVELOPE envEq;
-    FILTER filter;
+    UInt16    channelNum;
+    byte      noteNum;
+    byte      state;
+    double    velocity;
+    double    index;
+    double    time;
+    double    egAmp;
+    ENVELOPE  envAmp;
+    WAVE_INFO waveInfo;
 } SAMPLER;
 #pragma pack(pop)
 

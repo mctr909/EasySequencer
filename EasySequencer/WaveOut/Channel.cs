@@ -18,7 +18,7 @@ namespace WaveOut {
 
         public string InstName { get; private set; }
 
-        public List<WAVE_INFO> WaveList { get; private set; }
+        public List<REGION> Regions { get; private set; }
 
         public byte Vol { get; private set; }
 
@@ -208,7 +208,7 @@ namespace WaveOut {
                 }
             }
             var inst = InstList[mInstId];
-            WaveList = inst.waveList;
+            Regions = inst.regions;
             InstName = inst.name;
         }
 
@@ -223,7 +223,7 @@ namespace WaveOut {
                 }
             }
             var inst = InstList[mInstId];
-            WaveList = inst.waveList;
+            Regions = inst.regions;
             InstName = inst.name;
         }
 
@@ -256,8 +256,8 @@ namespace WaveOut {
             if (value < 64) {
                 for (var s = 0; s < Sender.SAMPLER_COUNT; ++s) {
                     var pSmpl = mppSampler[s];
-                    if (E_KEY_STATE.HOLD == pSmpl->keyState) {
-                        pSmpl->keyState = E_KEY_STATE.RELEASE;
+                    if (E_KEY_STATE.HOLD == pSmpl->state) {
+                        pSmpl->state = E_KEY_STATE.RELEASE;
                     }
                 }
             }

@@ -144,14 +144,14 @@ namespace WaveOut {
         private void noteOff(SAMPLER** ppSmpl, Channel ch, byte noteNo, E_KEY_STATE keyState) {
             for (var i = 0; i < SAMPLER_COUNT; ++i) {
                 var pSmpl = ppSmpl[i];
-                if (pSmpl->channelNo == ch.No && pSmpl->noteNo == noteNo) {
+                if (pSmpl->channelNum == ch.No && pSmpl->noteNum == noteNo) {
                     if (E_KEY_STATE.PURGE == keyState) {
-                        pSmpl->keyState = E_KEY_STATE.PURGE;
+                        pSmpl->state = E_KEY_STATE.PURGE;
                     } else {
                         if (!ch.Enable || ch.Hld < 64) {
-                            pSmpl->keyState = E_KEY_STATE.RELEASE;
+                            pSmpl->state = E_KEY_STATE.RELEASE;
                         } else {
-                            pSmpl->keyState = E_KEY_STATE.HOLD;
+                            pSmpl->state = E_KEY_STATE.HOLD;
                         }
                     }
                 }
@@ -165,12 +165,12 @@ namespace WaveOut {
             } else {
                 noteOff(ppSmpl, ch, noteNo, E_KEY_STATE.PURGE);
             }
-            foreach (var wave in ch.WaveList) {
-                if (noteNo < wave.keyLo || wave.keyHi < noteNo || velocity < wave.velLo || wave.velHi < velocity) {
+            foreach (var region in ch.Regions) {
+                if (noteNo < region.keyLo || region.keyHi < noteNo || velocity < region.velLo || region.velHi < velocity) {
                     continue;
                 }
                 double pitch;
-                var diffNote = noteNo - wave.unityNote;
+                var diffNote = noteNo - region.waveInfo.unityNote;
                 if (diffNote < 0) {
                     pitch = 1.0 / Const.SemiTone[-diffNote];
                 } else {
@@ -178,25 +178,19 @@ namespace WaveOut {
                 }
                 for (var j = 0; j < SAMPLER_COUNT; ++j) {
                     var pSmpl = ppSmpl[j];
-                    if (E_KEY_STATE.WAIT != pSmpl->keyState) {
+                    if (E_KEY_STATE.WAIT != pSmpl->state) {
                         continue;
                     }
-                    pSmpl->channelNo = ch.No;
-                    pSmpl->noteNo = noteNo;
-                    pSmpl->dataOfs = wave.dataOfs;
-                    pSmpl->gain = wave.gain;
-                    pSmpl->pan = (wave.pan + 1.0) * 0.5;
-                    pSmpl->delta = wave.delta * pitch;
+                    pSmpl->channelNum = ch.No;
+                    pSmpl->noteNum = noteNo;
+                    pSmpl->waveInfo = region.waveInfo;
+                    pSmpl->waveInfo.delta = region.waveInfo.delta * pitch;
                     pSmpl->index = 0.0;
                     pSmpl->time = 0.0;
                     pSmpl->velocity = velocity / 127.0;
                     pSmpl->egAmp = 0.0;
-                    pSmpl->egPitch = 1.0;
-                    pSmpl->filter.cutoff = 1.0;
-                    pSmpl->filter.resonance = 0.0;
-                    pSmpl->loop = wave.loop;
-                    pSmpl->envAmp = wave.env;
-                    pSmpl->keyState = E_KEY_STATE.PRESS;
+                    pSmpl->envAmp = region.env;
+                    pSmpl->state = E_KEY_STATE.PRESS;
                     break;
                 }
                 break;
