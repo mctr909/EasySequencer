@@ -1,6 +1,6 @@
 #pragma once
 #include "type.h"
-#include "channel.h"
+#include "filter.h"
 
 /******************************************************************************/
 enum E_KEY_STATE {
@@ -12,6 +12,50 @@ enum E_KEY_STATE {
 };
 
 /******************************************************************************/
+#pragma pack(push, 4)
+typedef struct {
+    uint bufferLength;
+    uint sampleRate;
+    double deltaTime;
+} SYSTEM_VALUE;
+#pragma pack(pop)
+
+#pragma pack(push, 8)
+typedef struct CHANNEL_PARAM {
+    double amp;
+    double pitch;
+    double holdDelta;
+    double panLeft;
+    double panRight;
+    double cutoff;
+    double resonance;
+    double delaySend;
+    double delayTime;
+    double delayCross;
+    double chorusSend;
+    double chorusRate;
+    double chorusDepth;
+} CHANNEL_PARAM;
+#pragma pack(pop)
+
+#pragma pack(push, 4)
+typedef struct CHANNEL {
+    CHANNEL_PARAM *pParam;
+    SYSTEM_VALUE *pSystemValue;
+    int writeIndex;
+    double *pWave;
+    double *pDelTapL;
+    double *pDelTapR;
+    double choLfo[3];
+    double choPanL[3];
+    double choPanR[3];
+    double amp;
+    double panL;
+    double panR;
+    FILTER filter;
+} CHANNEL;
+#pragma pack(pop)
+
 #pragma pack(push, 8)
 typedef struct ENVELOPE {
     double attack;
@@ -27,12 +71,12 @@ typedef struct ENVELOPE {
 
 #pragma pack(push, 4)
 typedef struct WAVE_INFO {
-    UInt32 waveOfs;
-    UInt32 loopBegin;
-    UInt32 loopLength;
-    bool   loopEnable;
-    byte   unityNote;
-    UInt16 reserved;
+    uint waveOfs;
+    uint loopBegin;
+    uint loopLength;
+    bool loopEnable;
+    byte unityNote;
+    ushort reserved;
     double gain;
     double delta;
 } WAVE_INFO;
@@ -40,7 +84,7 @@ typedef struct WAVE_INFO {
 
 #pragma pack(push, 4)
 typedef struct SAMPLER {
-    UInt16    channelNum;
+    ushort    channelNum;
     byte      noteNum;
     byte      state;
     double    velocity;
@@ -53,6 +97,7 @@ typedef struct SAMPLER {
 #pragma pack(pop)
 
 /******************************************************************************/
-extern SAMPLER** createSamplers(UInt32 count);
-
+extern SAMPLER** createSamplers(uint count);
+extern CHANNEL** createChannels(uint count, SYSTEM_VALUE *pSys);
 extern inline void sampler(CHANNEL **ppCh, SAMPLER *pSmpl, byte *pWaveBuffer);
+extern inline void channel(CHANNEL *pCh, float *waveBuff);

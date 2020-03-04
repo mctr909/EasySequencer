@@ -78,7 +78,7 @@
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <LinkIncremental>true</LinkIncremental>
-    <OutDir>..\EasySequencer\bin\Debug</OutDir>
+    <OutDir>..\EasySequencer\bin\Debug\</OutDir>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <LinkIncremental>false</LinkIncremental>
@@ -87,7 +87,7 @@
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <LinkIncremental>false</LinkIncremental>
-    <OutDir>..\EasySequencer\bin\Release</OutDir>
+    <OutDir>..\EasySequencer\bin\Release\</OutDir>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
@@ -163,14 +163,12 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClInclude Include="channel.h" />
     <ClInclude Include="filter.h" />
     <ClInclude Include="main.h" />
     <ClInclude Include="sampler.h" />
     <ClInclude Include="type.h" />
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="channel.c" />
     <ClCompile Include="filter.c" />
     <ClCompile Include="main.c" />
     <ClCompile Include="sampler.c" />

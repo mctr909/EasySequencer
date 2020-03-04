@@ -8,42 +8,39 @@ using MIDI;
 
 namespace WaveOut {
     unsafe public class Sender {
-        [DllImport("WaveOut.dll", SetLastError = true, CharSet = CharSet.Auto)]
+        [DllImport("WaveOut.dll")]
         private static extern IntPtr LoadFile(IntPtr filePath, out uint size);
-        [DllImport("WaveOut.dll", SetLastError = true, CharSet = CharSet.Auto)]
+        [DllImport("WaveOut.dll")]
         private static extern void SystemValues(uint sampleRate, uint bufferLength);
-        [DllImport("WaveOut.dll", SetLastError = true, CharSet = CharSet.Auto)]
-        private static extern bool WaveOutOpen();
-        [DllImport("WaveOut.dll", SetLastError = true, CharSet = CharSet.Auto)]
-        private static extern void WaveOutClose();
-        [DllImport("WaveOut.dll", SetLastError = true, CharSet = CharSet.Auto)]
-        private static extern void FileOutOpen(IntPtr filePath);
-        [DllImport("WaveOut.dll", SetLastError = true, CharSet = CharSet.Auto)]
-        private static extern void FileOutClose();
-        [DllImport("WaveOut.dll", SetLastError = true, CharSet = CharSet.Auto)]
-        private static extern void FileOut();
-        [DllImport("WaveOut.dll", SetLastError = true, CharSet = CharSet.Auto)]
+        [DllImport("WaveOut.dll")]
         private static extern int* GetActiveCountPtr();
-        [DllImport("WaveOut.dll", SetLastError = true, CharSet = CharSet.Auto)]
+        [DllImport("WaveOut.dll")]
+        private static extern bool WaveOutOpen();
+        [DllImport("WaveOut.dll")]
+        private static extern void WaveOutClose();
+        [DllImport("WaveOut.dll")]
+        private static extern void FileOutOpen(IntPtr filePath);
+        [DllImport("WaveOut.dll")]
+        private static extern void FileOutClose();
+        [DllImport("WaveOut.dll")]
+        private static extern void FileOut();
+        [DllImport("WaveOut.dll")]
         private static extern CHANNEL_PARAM** GetWaveOutChannelPtr();
-        [DllImport("WaveOut.dll", SetLastError = true, CharSet = CharSet.Auto)]
+        [DllImport("WaveOut.dll")]
         private static extern CHANNEL_PARAM** GetFileOutChannelPtr();
-        [DllImport("WaveOut.dll", SetLastError = true, CharSet = CharSet.Auto)]
+        [DllImport("WaveOut.dll")]
         private static extern SAMPLER** GetWaveOutSamplerPtr();
-        [DllImport("WaveOut.dll", SetLastError = true, CharSet = CharSet.Auto)]
+        [DllImport("WaveOut.dll")]
         private static extern SAMPLER** GetFileOutSamplerPtr();
 
         public const int CHANNEL_COUNT = 16;
         public const int SAMPLER_COUNT = 64;
 
         public static int* ActiveCountPtr = GetActiveCountPtr();
-
-        private Channel[] mFileOutChannel;
         private Dictionary<INST_ID, INST_INFO> mInstList;
 
         public Channel[] Channel { get; private set; }
         public SAMPLER** ppWaveOutSampler { get; private set; }
-        public SAMPLER** ppFileOutSampler { get; private set; }
         public static bool IsFileOutput { get; private set; }
         public int OutputTime;
 
@@ -56,21 +53,14 @@ namespace WaveOut {
             //mInstList = sf2.GetInstList();
 
             SystemValues((uint)Const.SampleRate, 512);
-
+            //
             var ppChannel = GetWaveOutChannelPtr();
             ppWaveOutSampler = GetWaveOutSamplerPtr();
             Channel = new Channel[CHANNEL_COUNT];
             for (int i = 0; i < CHANNEL_COUNT; ++i) {
                 Channel[i] = new Channel(mInstList, ppWaveOutSampler, ppChannel[i], i);
             }
-
-            var ppFileOutChannel = GetFileOutChannelPtr();
-            ppFileOutSampler = GetFileOutSamplerPtr();
-            mFileOutChannel = new Channel[CHANNEL_COUNT];
-            for (int i = 0; i < CHANNEL_COUNT; ++i) {
-                mFileOutChannel[i] = new Channel(mInstList, ppFileOutSampler, ppFileOutChannel[i], i);
-            }
-
+            //
             WaveOutOpen();
         }
 
@@ -103,6 +93,12 @@ namespace WaveOut {
                 double bpm = 120.0;
                 IsFileOutput = true;
                 FileOutOpen(Marshal.StringToHGlobalAuto(filePath));
+                var ppFileOutChannel = GetFileOutChannelPtr();
+                var ppFileOutSampler = GetFileOutSamplerPtr();
+                var fileOutChannel = new Channel[CHANNEL_COUNT];
+                for (int i = 0; i < CHANNEL_COUNT; ++i) {
+                    fileOutChannel[i] = new Channel(mInstList, ppFileOutSampler, ppFileOutChannel[i], i);
+                }
                 OutputTime = 0;
                 foreach (var ev in events) {
                     var eventTime = (double)ev.Time / ticks;
@@ -118,19 +114,19 @@ namespace WaveOut {
                     }
                     switch (ev.Type) {
                     case E_EVENT_TYPE.NOTE_OFF:
-                        noteOff(ppFileOutSampler, mFileOutChannel[ev.Channel], ev.NoteNo, E_KEY_STATE.RELEASE);
+                        noteOff(ppFileOutSampler, fileOutChannel[ev.Channel], ev.NoteNo, E_KEY_STATE.RELEASE);
                         break;
                     case E_EVENT_TYPE.NOTE_ON:
-                        noteOn(ppFileOutSampler, mFileOutChannel[ev.Channel], ev.NoteNo, ev.Velocity);
+                        noteOn(ppFileOutSampler, fileOutChannel[ev.Channel], ev.NoteNo, ev.Velocity);
                         break;
                     case E_EVENT_TYPE.CTRL_CHG:
-                        mFileOutChannel[ev.Channel].CtrlChange(ev.CtrlType, ev.CtrlValue);
+                        fileOutChannel[ev.Channel].CtrlChange(ev.CtrlType, ev.CtrlValue);
                         break;
                     case E_EVENT_TYPE.PROG_CHG:
-                        mFileOutChannel[ev.Channel].ProgramChange(ev.ProgNo);
+                        fileOutChannel[ev.Channel].ProgramChange(ev.ProgNo);
                         break;
                     case E_EVENT_TYPE.PITCH:
-                        mFileOutChannel[ev.Channel].PitchBend(ev.Pitch);
+                        fileOutChannel[ev.Channel].PitchBend(ev.Pitch);
                         break;
                     default:
                         break;
@@ -184,7 +180,7 @@ namespace WaveOut {
                     pSmpl->channelNum = ch.No;
                     pSmpl->noteNum = noteNo;
                     pSmpl->waveInfo = region.waveInfo;
-                    pSmpl->waveInfo.delta = region.waveInfo.delta * pitch;
+                    pSmpl->waveInfo.delta *= pitch;
                     pSmpl->index = 0.0;
                     pSmpl->time = 0.0;
                     pSmpl->velocity = velocity / 127.0;
