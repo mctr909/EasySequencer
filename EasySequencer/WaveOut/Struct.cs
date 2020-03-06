@@ -3,7 +3,7 @@ using System.Runtime.InteropServices;
 
 namespace WaveOut {
     public enum E_KEY_STATE : byte {
-        WAIT,
+        STANDBY,
         PURGE,
         RELEASE,
         HOLD,
@@ -44,8 +44,20 @@ namespace WaveOut {
         public double hold;
     };
 
+    [StructLayout(LayoutKind.Sequential, Pack = 4)]
+    public struct WAVE_INFO {
+        public uint waveOfs;
+        public uint loopBegin;
+        public uint loopLength;
+        public bool loopEnable;
+        public byte unityNote;
+        private ushort reserved;
+        public double gain;
+        public double delta;
+    }
+
     [StructLayout(LayoutKind.Sequential, Pack = 8)]
-    unsafe public struct CHANNEL_PARAM {
+    unsafe public struct CHANNEL {
         public double amp;
         public double pitch;
         public double holdDelta;
@@ -59,18 +71,6 @@ namespace WaveOut {
         public double chorusSend;
         public double chorusRate;
         public double chorusDepth;
-    }
-
-    [StructLayout(LayoutKind.Sequential, Pack = 4)]
-    public struct WAVE_INFO {
-        public uint    waveOfs;
-        public uint    loopBegin;
-        public uint    loopLength;
-        public bool    loopEnable;
-        public byte    unityNote;
-        private ushort reserved;
-        public double  gain;
-        public double  delta;
     }
 
     [StructLayout(LayoutKind.Sequential, Pack = 4)]

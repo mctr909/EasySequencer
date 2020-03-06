@@ -4,8 +4,8 @@ using MIDI;
 
 namespace WaveOut {
     unsafe public class Channel {
-        private CHANNEL_PARAM* mpChannel = null;
-        private SAMPLER **mppSampler = null;
+        private CHANNEL* mpChannel = null;
+        private SAMPLER** mppSampler = null;
         private INST_ID mInstId;
 
         public Dictionary<INST_ID, INST_INFO> InstList { get; private set; }
@@ -59,7 +59,7 @@ namespace WaveOut {
         private byte mNrpnLSB;
         private byte mNrpnMSB;
 
-        public Channel(Dictionary<INST_ID, INST_INFO> inst, SAMPLER **ppSampler, CHANNEL_PARAM* pChannel, int no) {
+        public Channel(Dictionary<INST_ID, INST_INFO> inst, SAMPLER** ppSampler, CHANNEL* pChannel, int no) {
             InstList = inst;
             mppSampler = ppSampler;
             mpChannel = pChannel;
@@ -109,6 +109,65 @@ namespace WaveOut {
             mInstId.bankMSB = 0;
             mInstId.bankLSB = 0;
             ProgramChange(0);
+        }
+
+        public void NoteOff(byte noteNo, E_KEY_STATE keyState) {
+            for (var i = 0; i < Sender.SAMPLER_COUNT; ++i) {
+                var pSmpl = mppSampler[i];
+                if (pSmpl->state == E_KEY_STATE.STANDBY) {
+                    continue;
+                }
+                if (pSmpl->channelNum == No && pSmpl->noteNum == noteNo) {
+                    if (E_KEY_STATE.PURGE == keyState) {
+                        pSmpl->state = E_KEY_STATE.PURGE;
+                    } else {
+                        if (!Enable || Hld < 64) {
+                            pSmpl->state = E_KEY_STATE.RELEASE;
+                        } else {
+                            pSmpl->state = E_KEY_STATE.HOLD;
+                        }
+                    }
+                }
+            }
+        }
+
+        public void NoteOn(byte noteNo, byte velocity) {
+            if (0 == velocity) {
+                NoteOff(noteNo, E_KEY_STATE.RELEASE);
+                return;
+            } else {
+                NoteOff(noteNo, E_KEY_STATE.PURGE);
+            }
+            foreach (var region in Regions) {
+                if (noteNo < region.keyLo || region.keyHi < noteNo || velocity < region.velLo || region.velHi < velocity) {
+                    continue;
+                }
+                double pitch;
+                var diffNote = noteNo - region.waveInfo.unityNote;
+                if (diffNote < 0) {
+                    pitch = 1.0 / Const.SemiTone[-diffNote];
+                } else {
+                    pitch = Const.SemiTone[diffNote];
+                }
+                for (var j = 0; j < Sender.SAMPLER_COUNT; ++j) {
+                    var pSmpl = mppSampler[j];
+                    if (E_KEY_STATE.STANDBY != pSmpl->state) {
+                        continue;
+                    }
+                    pSmpl->channelNum = No;
+                    pSmpl->noteNum = noteNo;
+                    pSmpl->waveInfo = region.waveInfo;
+                    pSmpl->waveInfo.delta = region.waveInfo.delta * pitch;
+                    pSmpl->index = 0.0;
+                    pSmpl->time = 0.0;
+                    pSmpl->velocity = velocity / 127.0;
+                    pSmpl->egAmp = 0.0;
+                    pSmpl->envAmp = region.env;
+                    pSmpl->state = E_KEY_STATE.PRESS;
+                    break;
+                }
+                break;
+            }
         }
 
         public void CtrlChange(E_CTRL_TYPE type, byte b1) {

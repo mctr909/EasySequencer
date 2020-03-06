@@ -1,76 +1,86 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Runtime.InteropServices;
-using System.Threading;
 using System.Threading.Tasks;
+using System.Runtime.InteropServices;
 
 using MIDI;
 
 namespace WaveOut {
     unsafe public class Sender {
-        [DllImport("WaveOut.dll")]
-        private static extern IntPtr LoadFile(IntPtr filePath, out uint size);
-        [DllImport("WaveOut.dll")]
-        private static extern void SystemValues(uint sampleRate, uint bufferLength);
-        [DllImport("WaveOut.dll")]
-        private static extern int* GetActiveCountPtr();
-        [DllImport("WaveOut.dll")]
-        private static extern bool WaveOutOpen();
-        [DllImport("WaveOut.dll")]
-        private static extern void WaveOutClose();
-        [DllImport("WaveOut.dll")]
-        private static extern void FileOutOpen(IntPtr filePath);
-        [DllImport("WaveOut.dll")]
-        private static extern void FileOutClose();
-        [DllImport("WaveOut.dll")]
-        private static extern void FileOut();
-        [DllImport("WaveOut.dll")]
-        private static extern CHANNEL_PARAM** GetWaveOutChannelPtr();
-        [DllImport("WaveOut.dll")]
-        private static extern CHANNEL_PARAM** GetFileOutChannelPtr();
-        [DllImport("WaveOut.dll")]
-        private static extern SAMPLER** GetWaveOutSamplerPtr();
-        [DllImport("WaveOut.dll")]
+        [DllImport("FileOut.dll")]
+        private static extern CHANNEL** GetFileOutChannelPtr();
+        [DllImport("FileOut.dll")]
         private static extern SAMPLER** GetFileOutSamplerPtr();
+        [DllImport("FileOut.dll")]
+        private static extern void FileOutOpen(IntPtr filePath, IntPtr pWaveTable, uint sampleRate, uint bitRate);
+        [DllImport("FileOut.dll")]
+        private static extern void FileOutClose();
+        [DllImport("FileOut.dll")]
+        private static extern void FileOut();
 
-        public const int CHANNEL_COUNT = 16;
-        public const int SAMPLER_COUNT = 64;
+        [DllImport("WaveOut.dll")]
+        private static extern int* waveout_GetActiveSamplersPtr();
+        [DllImport("WaveOut.dll")]
+        private static extern CHANNEL** waveout_GetChannelPtr();
+        [DllImport("WaveOut.dll")]
+        private static extern SAMPLER** waveout_GetSamplerPtr();
+        [DllImport("WaveOut.dll")]
+        private static extern IntPtr waveout_LoadWaveTable(IntPtr filePath, out uint size);
+        [DllImport("WaveOut.dll")]
+        private static extern void waveout_SystemValues(
+            int sampleRate,
+            int bits,
+            int bufferLength,
+            int bufferCount,
+            int channelCount,
+            int samplerCount
+        );
+        [DllImport("WaveOut.dll")]
+        private static extern bool waveout_Open();
+        [DllImport("WaveOut.dll")]
+        private static extern void waveout_Close();
+        [DllImport("WaveOut.dll")]
+        private static extern void waveout_Dispose();
 
-        public static int* ActiveCountPtr = GetActiveCountPtr();
-        private Dictionary<INST_ID, INST_INFO> mInstList;
+        public static int CHANNEL_COUNT = 16;
+        public static int SAMPLER_COUNT = 64;
+        public static int* ActiveCountPtr = waveout_GetActiveSamplersPtr();
+        public static bool IsFileOutput { get; private set; }
+        public static int OutputTime;
 
         public Channel[] Channel { get; private set; }
         public SAMPLER** ppWaveOutSampler { get; private set; }
-        public static bool IsFileOutput { get; private set; }
-        public int OutputTime;
+
+        private Dictionary<INST_ID, INST_INFO> mInstList;
+        private IntPtr mpWaveTable;
 
         public Sender(string dlsPath) {
             uint fileSize = 0;
-            var dlsPtr = LoadFile(Marshal.StringToHGlobalAuto(dlsPath), out fileSize);
-            var dls = new DLS.DLS(dlsPtr, fileSize);
+            mpWaveTable = waveout_LoadWaveTable(Marshal.StringToHGlobalAuto(dlsPath), out fileSize);
+            var dls = new DLS.DLS(mpWaveTable, fileSize);
             mInstList = dls.GetInstList();
             //var sf2 = new SF2.SF2(dlsPath, dlsPtr, fileSize);
             //mInstList = sf2.GetInstList();
-
-            SystemValues((uint)Const.SampleRate, 512);
             //
-            var ppChannel = GetWaveOutChannelPtr();
-            ppWaveOutSampler = GetWaveOutSamplerPtr();
+            waveout_SystemValues(Const.SampleRate, 32, 512, 16, CHANNEL_COUNT, SAMPLER_COUNT);
+            //
+            var ppChannel = waveout_GetChannelPtr();
+            ppWaveOutSampler = waveout_GetSamplerPtr();
             Channel = new Channel[CHANNEL_COUNT];
             for (int i = 0; i < CHANNEL_COUNT; ++i) {
                 Channel[i] = new Channel(mInstList, ppWaveOutSampler, ppChannel[i], i);
             }
             //
-            WaveOutOpen();
+            waveout_Open();
         }
 
         public void Send(Event msg) {
             switch (msg.Type) {
             case E_EVENT_TYPE.NOTE_OFF:
-                noteOff(ppWaveOutSampler, Channel[msg.Channel], msg.NoteNo, E_KEY_STATE.RELEASE);
+                Channel[msg.Channel].NoteOff(msg.NoteNo, E_KEY_STATE.RELEASE);
                 break;
             case E_EVENT_TYPE.NOTE_ON:
-                noteOn(ppWaveOutSampler, Channel[msg.Channel], msg.NoteNo, msg.Velocity);
+                Channel[msg.Channel].NoteOn(msg.NoteNo, msg.Velocity);
                 break;
             case E_EVENT_TYPE.CTRL_CHG:
                 Channel[msg.Channel].CtrlChange(msg.CtrlType, msg.CtrlValue);
@@ -87,19 +97,21 @@ namespace WaveOut {
         }
 
         public void FileOut(string filePath, Event[] events, int ticks) {
+            IsFileOutput = true;
+
+            FileOutOpen(Marshal.StringToHGlobalAuto(filePath), mpWaveTable, 44100, 16);
+            var ppFileOutSampler = GetFileOutSamplerPtr();
+            var ppFileOutChannel = GetFileOutChannelPtr();
+            var fileOutChannel = new Channel[CHANNEL_COUNT];
+            for (int i = 0; i < CHANNEL_COUNT; ++i) {
+                fileOutChannel[i] = new Channel(mInstList, ppFileOutSampler, ppFileOutChannel[i], i);
+            }
+
+            double delta_sec = Const.DeltaTime * 512;
+            double curTime = 0.0;
+            double bpm = 120.0;
+
             Task.Factory.StartNew(() => {
-                double delta_sec = Const.DeltaTime * 512;
-                double curTime = 0.0;
-                double bpm = 120.0;
-                IsFileOutput = true;
-                FileOutOpen(Marshal.StringToHGlobalAuto(filePath));
-                var ppFileOutChannel = GetFileOutChannelPtr();
-                var ppFileOutSampler = GetFileOutSamplerPtr();
-                var fileOutChannel = new Channel[CHANNEL_COUNT];
-                for (int i = 0; i < CHANNEL_COUNT; ++i) {
-                    fileOutChannel[i] = new Channel(mInstList, ppFileOutSampler, ppFileOutChannel[i], i);
-                }
-                OutputTime = 0;
                 foreach (var ev in events) {
                     var eventTime = (double)ev.Time / ticks;
                     while (curTime < eventTime) {
@@ -114,10 +126,10 @@ namespace WaveOut {
                     }
                     switch (ev.Type) {
                     case E_EVENT_TYPE.NOTE_OFF:
-                        noteOff(ppFileOutSampler, fileOutChannel[ev.Channel], ev.NoteNo, E_KEY_STATE.RELEASE);
+                        fileOutChannel[ev.Channel].NoteOff(ev.NoteNo, E_KEY_STATE.RELEASE);
                         break;
                     case E_EVENT_TYPE.NOTE_ON:
-                        noteOn(ppFileOutSampler, fileOutChannel[ev.Channel], ev.NoteNo, ev.Velocity);
+                        fileOutChannel[ev.Channel].NoteOn(ev.NoteNo, ev.Velocity);
                         break;
                     case E_EVENT_TYPE.CTRL_CHG:
                         fileOutChannel[ev.Channel].CtrlChange(ev.CtrlType, ev.CtrlValue);
@@ -135,62 +147,6 @@ namespace WaveOut {
                 FileOutClose();
                 IsFileOutput = false;
             });
-        }
-
-        private void noteOff(SAMPLER** ppSmpl, Channel ch, byte noteNo, E_KEY_STATE keyState) {
-            for (var i = 0; i < SAMPLER_COUNT; ++i) {
-                var pSmpl = ppSmpl[i];
-                if (pSmpl->channelNum == ch.No && pSmpl->noteNum == noteNo) {
-                    if (E_KEY_STATE.PURGE == keyState) {
-                        pSmpl->state = E_KEY_STATE.PURGE;
-                    } else {
-                        if (!ch.Enable || ch.Hld < 64) {
-                            pSmpl->state = E_KEY_STATE.RELEASE;
-                        } else {
-                            pSmpl->state = E_KEY_STATE.HOLD;
-                        }
-                    }
-                }
-            }
-        }
-
-        private void noteOn(SAMPLER** ppSmpl, Channel ch, byte noteNo, byte velocity) {
-            if (0 == velocity) {
-                noteOff(ppSmpl, ch, noteNo, E_KEY_STATE.RELEASE);
-                return;
-            } else {
-                noteOff(ppSmpl, ch, noteNo, E_KEY_STATE.PURGE);
-            }
-            foreach (var region in ch.Regions) {
-                if (noteNo < region.keyLo || region.keyHi < noteNo || velocity < region.velLo || region.velHi < velocity) {
-                    continue;
-                }
-                double pitch;
-                var diffNote = noteNo - region.waveInfo.unityNote;
-                if (diffNote < 0) {
-                    pitch = 1.0 / Const.SemiTone[-diffNote];
-                } else {
-                    pitch = Const.SemiTone[diffNote];
-                }
-                for (var j = 0; j < SAMPLER_COUNT; ++j) {
-                    var pSmpl = ppSmpl[j];
-                    if (E_KEY_STATE.WAIT != pSmpl->state) {
-                        continue;
-                    }
-                    pSmpl->channelNum = ch.No;
-                    pSmpl->noteNum = noteNo;
-                    pSmpl->waveInfo = region.waveInfo;
-                    pSmpl->waveInfo.delta *= pitch;
-                    pSmpl->index = 0.0;
-                    pSmpl->time = 0.0;
-                    pSmpl->velocity = velocity / 127.0;
-                    pSmpl->egAmp = 0.0;
-                    pSmpl->envAmp = region.env;
-                    pSmpl->state = E_KEY_STATE.PRESS;
-                    break;
-                }
-                break;
-            }
         }
     }
 }
