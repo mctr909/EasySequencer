@@ -1,5 +1,5 @@
 ﻿#pragma once
-typedef unsigned char  bool;
+typedef unsigned char  Bool;
 typedef unsigned char  byte;
 typedef signed   char  sbyte;
 typedef unsigned short ushort;
@@ -12,8 +12,8 @@ typedef struct {
 } int24;
 #pragma pack(pop)
 
-#define true  ((bool)1)
-#define false ((bool)0)
+#define true  ((Bool)1)
+#define false ((Bool)0)
 
 extern inline void setInt24(int24 *output, double value) {
     int tmp = (int)(value * 0x7FFFFFFF);

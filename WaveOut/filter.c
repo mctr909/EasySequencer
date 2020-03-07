@@ -14,7 +14,7 @@
 #define INV_FACT9 2.75573192e-06
 
 /******************************************************************************/
-inline void filter(FILTER *pFilter, double input) {
+inline void filter_lpf(FILTER *pFilter, double input) {
     /** sin, cos‚Ì‹ßŽ— **/
     double rad = pFilter->cut * PI * ADJUST_CUTOFF;
     double rad2 = rad * rad;

@@ -35,7 +35,7 @@ typedef struct WAVE_INFO {
     uint waveOfs;
     uint loopBegin;
     uint loopLength;
-    bool loopEnable;
+    Bool loopEnable;
     byte originNote;
     ushort reserved;
     double gain;
@@ -109,11 +109,17 @@ typedef struct CHANNEL_VALUE {
 #pragma pack(pop)
 
 /******************************************************************************/
-__declspec(dllexport) SAMPLER** createSamplers(uint count);
-__declspec(dllexport) CHANNEL_VALUE** createChannels(SYSTEM_VALUE *pSys);
-__declspec(dllexport) void disposeSamplers(SAMPLER** ppSmpl, uint count);
-__declspec(dllexport) void disposeChannels(CHANNEL_VALUE**ppCh);
-__declspec(dllexport) inline void sampler(CHANNEL_VALUE **ppCh, SAMPLER *pSmpl, byte *pWaveBuffer);
-__declspec(dllexport) inline void channel32(CHANNEL_VALUE *pCh, float *waveBuff);
-__declspec(dllexport) inline void channel24(CHANNEL_VALUE *pCh, int24 *waveBuff);
-__declspec(dllexport) inline void channel16(CHANNEL_VALUE *pCh, short *waveBuff);
+#ifdef __cplusplus
+extern "C" {
+#endif
+    __declspec(dllexport) SAMPLER** createSamplers(uint count);
+    __declspec(dllexport) CHANNEL_VALUE** createChannels(SYSTEM_VALUE *pSys);
+    __declspec(dllexport) void disposeSamplers(SAMPLER** ppSmpl, uint count);
+    __declspec(dllexport) void disposeChannels(CHANNEL_VALUE**ppCh);
+    __declspec(dllexport) inline void sampler(CHANNEL_VALUE **ppCh, SAMPLER *pSmpl, byte *pWaveBuffer);
+    __declspec(dllexport) inline void channel32(CHANNEL_VALUE *pCh, float *waveBuff);
+    __declspec(dllexport) inline void channel24(CHANNEL_VALUE *pCh, int24 *waveBuff);
+    __declspec(dllexport) inline void channel16(CHANNEL_VALUE *pCh, short *waveBuff);
+#ifdef __cplusplus
+}
+#endif

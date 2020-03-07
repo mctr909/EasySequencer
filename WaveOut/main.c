@@ -10,8 +10,8 @@
 DWORD            gThreadId;
 CRITICAL_SECTION csBufferInfo;
 
-volatile bool   gDoStop = true;
-volatile bool   gIsStopped = true;
+volatile Bool   gDoStop = true;
+volatile Bool   gIsStopped = true;
 volatile int    gWriteCount = 0;
 volatile int    gWriteIndex = -1;
 volatile int    gReadIndex = -1;
@@ -29,23 +29,22 @@ SAMPLER         **gppSamplers = NULL;
 
 /******************************************************************************/
 void CALLBACK waveOutProc(HWAVEOUT hwo, uint uMsg);
-DWORD WINAPI writeWaveOutBuffer(LPVOID *param);
+DWORD writeWaveOutBuffer(LPVOID *param);
 
 /******************************************************************************/
-int* WINAPI waveout_GetActiveSamplersPtr() {
+int* waveout_GetActiveSamplersPtr() {
     return &gActiveCount;
 }
 
-CHANNEL** WINAPI waveout_GetChannelPtr() {
+CHANNEL** waveout_GetChannelPtr() {
     return gppChParams;
 }
 
-SAMPLER** WINAPI waveout_GetSamplerPtr() {
+SAMPLER** waveout_GetSamplerPtr() {
     return gppSamplers;
 }
 
-/******************************************************************************/
-LPBYTE WINAPI waveout_LoadWaveTable(LPWSTR filePath, uint *size) {
+LPBYTE waveout_LoadWaveTable(LPWSTR filePath, uint *size) {
     if (NULL == size) {
         return NULL;
     }
@@ -78,7 +77,7 @@ LPBYTE WINAPI waveout_LoadWaveTable(LPWSTR filePath, uint *size) {
     return gpWaveTable;
 }
 
-VOID WINAPI waveout_SystemValues(
+void waveout_SystemValues(
     int sampleRate,
     int bits,
     int bufferLength,
@@ -106,7 +105,7 @@ VOID WINAPI waveout_SystemValues(
     gppSamplers = createSamplers(gSysValue.samplerCount);
 }
 
-BOOL WINAPI waveout_Open() {
+Bool waveout_Open() {
     if (NULL != ghWaveOut) {
         waveout_Close();
     }
@@ -148,7 +147,7 @@ BOOL WINAPI waveout_Open() {
     return true;
 }
 
-VOID WINAPI waveout_Close() {
+void waveout_Close() {
     if (NULL == ghWaveOut) {
         return;
     }
@@ -166,7 +165,7 @@ VOID WINAPI waveout_Close() {
     ghWaveOut = NULL;
 }
 
-VOID WINAPI waveout_Dispose() {
+void waveout_Dispose() {
     if (NULL != ghWaveOut) {
         waveout_Close();
     }
@@ -213,7 +212,7 @@ void CALLBACK waveOutProc(HWAVEOUT hwo, uint uMsg) {
     }
 }
 
-DWORD WINAPI writeWaveOutBuffer(LPVOID *param) {
+DWORD writeWaveOutBuffer(LPVOID *param) {
     while (true) {
         if (NULL == gppWaveHdr[0]->lpData) {
             continue;

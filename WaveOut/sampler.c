@@ -162,7 +162,7 @@ inline void channel32(CHANNEL_VALUE *pCh, float *outBuff) {
     double *inputBuffTerm = inputBuff + pCh->pSystemValue->bufferLength;
     for (; inputBuff < inputBuffTerm; inputBuff++, outBuff += 2) {
         // filter
-        filter(&pCh->filter, *inputBuff * pCh->amp);
+        filter_lpf(&pCh->filter, *inputBuff * pCh->amp);
         // pan
         double tempL = pCh->filter.a10 * pCh->panL;
         double tempR = pCh->filter.a10 * pCh->panR;
@@ -186,7 +186,7 @@ inline void channel24(CHANNEL_VALUE *pCh, int24 *outBuff) {
     double *inputBuffTerm = inputBuff + pCh->pSystemValue->bufferLength;
     for (; inputBuff < inputBuffTerm; inputBuff++, outBuff += 2) {
         // filter
-        filter(&pCh->filter, *inputBuff * pCh->amp);
+        filter_lpf(&pCh->filter, *inputBuff * pCh->amp);
         // pan
         double tempL = pCh->filter.a10 * pCh->panL;
         double tempR = pCh->filter.a10 * pCh->panR;
@@ -210,7 +210,7 @@ inline void channel16(CHANNEL_VALUE *pCh, short *outBuff) {
     double *inputBuffTerm = inputBuff + pCh->pSystemValue->bufferLength;
     for (; inputBuff < inputBuffTerm; inputBuff++, outBuff += 2) {
         // filter
-        filter(&pCh->filter, *inputBuff * pCh->amp);
+        filter_lpf(&pCh->filter, *inputBuff * pCh->amp);
         // pan
         double tempL = pCh->filter.a10 * pCh->panL;
         double tempR = pCh->filter.a10 * pCh->panR;
