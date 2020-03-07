@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Runtime.InteropServices;
 
 namespace WaveOut {
@@ -44,16 +45,40 @@ namespace WaveOut {
         public double hold;
     };
 
-    [StructLayout(LayoutKind.Sequential, Pack = 4)]
+    [StructLayout(LayoutKind.Sequential, Pack = 8)]
     public struct WAVE_INFO {
         public uint waveOfs;
         public uint loopBegin;
         public uint loopLength;
         public bool loopEnable;
         public byte unityNote;
-        private ushort reserved;
+        public ushort reserved;
         public double gain;
         public double delta;
+    }
+
+    [StructLayout(LayoutKind.Sequential, Pack = 1)]
+    public struct CHANNEL_PARAM {
+        public bool Enable;
+        public INST_ID InstId;
+        public IntPtr Name;
+        public byte Vol;
+        public byte Exp;
+        public byte Pan;
+        public byte Rev;
+        public byte Del;
+        public byte Cho;
+        public byte Mod;
+        public byte Hld;
+        public byte Fc;
+        public byte Fq;
+        public byte Atk;
+        public byte Rel;
+        public byte VibRate;
+        public byte VibDepth;
+        public byte VibDelay;
+        public byte BendRange;
+        public int Pitch;
     }
 
     [StructLayout(LayoutKind.Sequential, Pack = 8)]
@@ -86,13 +111,29 @@ namespace WaveOut {
         public WAVE_INFO   waveInfo;
     };
 
-    public struct REGION {
+    [StructLayout(LayoutKind.Sequential, Pack = 4)]
+    unsafe public struct REGION {
         public byte keyLo;
         public byte keyHi;
         public byte velLo;
         public byte velHi;
         public WAVE_INFO waveInfo;
         public ENVELOPE env;
+    }
+
+    [StructLayout(LayoutKind.Sequential, Pack = 4)]
+    unsafe public struct INST_LIST {
+        public int instCount;
+        public INST_REC** ppInst;
+    }
+
+    [StructLayout(LayoutKind.Sequential, Pack = 4)]
+    unsafe public struct INST_REC {
+        public INST_ID id;
+        public int regionCount;
+        public byte* pName;
+        public byte* pCategory;
+        public REGION **ppRegions;
     }
 
     public struct INST_INFO {
