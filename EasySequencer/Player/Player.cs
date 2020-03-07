@@ -3,7 +3,6 @@ using System.Threading;
 using System.Threading.Tasks;
 
 using MIDI;
-using WaveOut;
 
 namespace Player {
     unsafe public class Player {
@@ -25,7 +24,7 @@ namespace Player {
         private int mMeasureDenomi;
         private int mMeasureNumer;
 
-        public Channel[] Channel {
+        public CHANNEL_PARAM** Channel {
             get { return mSender.Channel; }
         }
 
@@ -210,7 +209,7 @@ namespace Player {
 
                 switch (ev.Type) {
                 case E_EVENT_TYPE.NOTE_OFF:
-                    if (0 == mSender.Channel[ev.Channel].InstId.isDrum) {
+                    if (0 == mSender.Channel[ev.Channel]->InstId.isDrum) {
                         if ((ev.NoteNo + Transpose) < 0 || 127 < (ev.NoteNo + Transpose)) {
                             continue;
                         } else {
@@ -223,11 +222,11 @@ namespace Player {
                         if (0.25 * mTicksPerBeat < (mCurrentTick - eventTick)) {
                             continue;
                         }
-                        if (!mSender.Channel[ev.Channel].Enable || (0 <= SoloChannel && SoloChannel != ev.Channel)) {
+                        if (!mSender.Channel[ev.Channel]->Enable || (0 <= SoloChannel && SoloChannel != ev.Channel)) {
                             continue;
                         }
                     }
-                    if (0 == mSender.Channel[ev.Channel].InstId.isDrum) {
+                    if (0 == mSender.Channel[ev.Channel]->InstId.isDrum) {
                         if ((ev.NoteNo + Transpose) < 0 || 127 < (ev.NoteNo + Transpose)) {
                             continue;
                         } else {

@@ -240,25 +240,16 @@ DWORD writeWaveOutBuffer(LPVOID *param) {
         switch (gSysValue.bits) {
         case 16:
             for (int c = 0; c < gSysValue.channelCount; ++c) {
-                if (E_CH_STATE_STANDBY == gppChValues[c]->state) {
-                    continue;
-                }
                 channel16(gppChValues[c], (short*)outBuff);
             }
             break;
         case 24:
             for (int c = 0; c < gSysValue.channelCount; ++c) {
-                if (E_CH_STATE_STANDBY == gppChValues[c]->state) {
-                    continue;
-                }
                 channel24(gppChValues[c], (int24*)outBuff);
             }
             break;
         case 32:
             for (int c = 0; c < gSysValue.channelCount; ++c) {
-                if (E_CH_STATE_STANDBY == gppChValues[c]->state) {
-                    continue;
-                }
                 channel32(gppChValues[c], (float*)outBuff);
             }
             break;

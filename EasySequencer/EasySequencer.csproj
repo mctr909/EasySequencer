@@ -13,7 +13,7 @@
     <AutoGenerateBindingRedirects>true</AutoGenerateBindingRedirects>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
-    <PlatformTarget>AnyCPU</PlatformTarget>
+    <PlatformTarget>x64</PlatformTarget>
     <DebugSymbols>true</DebugSymbols>
     <DebugType>full</DebugType>
     <Optimize>false</Optimize>
@@ -69,14 +69,12 @@
     <Compile Include="MIDI\Track.cs" />
     <Compile Include="MIDI\Util.cs" />
     <Compile Include="SF2.cs" />
-    <Compile Include="WaveOut\Channel.cs" />
-    <Compile Include="WaveOut\Const.cs" />
     <Compile Include="Player\DoubleBuffer.cs" />
     <Compile Include="Player\Keyboard.cs" />
     <Compile Include="Player\Player.cs" />
-    <Compile Include="WaveOut\Sender.cs" />
+    <Compile Include="Player\Sender.cs" />
     <Compile Include="MIDI\SMF.cs" />
-    <Compile Include="WaveOut\Struct.cs" />
+    <Compile Include="Player\Struct.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="StatusWindow.cs">

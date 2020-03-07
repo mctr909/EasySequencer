@@ -72,9 +72,9 @@ namespace MIDI {
         }
 
         public Meta(byte[] data) {
-            Type = (E_META_TYPE)data[0];
-            mData = new byte[data.Length - 1];
-            Array.Copy(data, 1, mData, 0, mData.Length);
+            Type = (E_META_TYPE)data[1];
+            mData = new byte[data.Length - 2];
+            Array.Copy(data, 2, mData, 0, mData.Length);
         }
 
         public Meta(E_META_TYPE type, params byte[] data) {

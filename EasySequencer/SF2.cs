@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Runtime.InteropServices;
 using System.IO;
 using System.Text;
-using WaveOut;
+using Player;
 
 namespace SF2 {
     #region enum
@@ -208,57 +208,69 @@ namespace SF2 {
             mSf2Ptr = ptr;
         }
 
-        public Dictionary<INST_ID, INST_INFO> GetInstList() {
-            var retInst = new Dictionary<INST_ID, INST_INFO>();
+        unsafe public void GetInstList(INST_LIST* list) {
+            list->instCount = 0;
+            list->ppInst = (INST_REC**)Marshal.AllocHGlobal(sizeof(INST_REC*) * mPdta.PresetList.Count);
             foreach (var preset in mPdta.PresetList) {
-                var instInfo = new INST_INFO();
-                instInfo.name = preset.Value.Item1;
-                instInfo.regions = new List<REGION>();
-                if (1 == preset.Key.isDrum) {
-                    instInfo.catgory = "Drum set";
-                } else {
-                    instInfo.catgory = "";
-                }
+                list->ppInst[list->instCount] = (INST_REC*)Marshal.AllocHGlobal(Marshal.SizeOf<INST_REC>());
+                var pInst = list->ppInst[list->instCount];
+                list->instCount++;
+                //
+                pInst->id.isDrum = (byte)(preset.Key.isDrum == 0x80 ? 1 : 0);
+                pInst->id.programNo = preset.Key.programNo;
+                pInst->id.bankMSB = preset.Key.bankMSB;
+                pInst->id.bankLSB = preset.Key.bankLSB;
+                pInst->pName = (byte*)Marshal.StringToHGlobalAuto(preset.Value.Item1);
+                pInst->regionCount = 0;
                 foreach (var pv in preset.Value.Item2) {
                     foreach (var iv in mPdta.InstList[pv.instId].Item2) {
-                        var region = new REGION();
-                        region.keyLo = Math.Max(pv.keyLo, iv.keyLo);
-                        region.keyHi = Math.Min(pv.keyHi, iv.keyHi);
-                        region.velLo = Math.Max(pv.velLo, iv.velLo);
-                        region.velHi = Math.Min(pv.velHi, iv.velHi);
+                        pInst->regionCount++;
+                    }
+                }
+                pInst->ppRegions = (REGION**)Marshal.AllocHGlobal(sizeof(REGION*) * pInst->regionCount);
+                //
+                var ppRegions = pInst->ppRegions;
+                var rgnIdx = 0;
+                foreach (var pv in preset.Value.Item2) {
+                    foreach (var iv in mPdta.InstList[pv.instId].Item2) {
+                        ppRegions[rgnIdx] = (REGION*)Marshal.AllocHGlobal(Marshal.SizeOf<REGION>());
+                        var pRegion = ppRegions[rgnIdx];
+                        rgnIdx++;
+                        //
+                        pRegion->keyLo = Math.Max(pv.keyLo, iv.keyLo);
+                        pRegion->keyHi = Math.Min(pv.keyHi, iv.keyHi);
+                        pRegion->velLo = Math.Max(pv.velLo, iv.velLo);
+                        pRegion->velHi = Math.Min(pv.velHi, iv.velHi);
                         //
                         var smpl = mPdta.SHDR[iv.sampleId];
                         var waveBegin = smpl.start + iv.waveBegin;
-                        region.waveInfo.waveOfs = (uint)(mSdta.pData.ToInt64() - mSf2Ptr.ToInt64() + waveBegin * 2);
+                        pRegion->waveInfo.waveOfs = (uint)(mSdta.pData.ToInt64() - mSf2Ptr.ToInt64() + waveBegin * 2);
                         //
-                        region.waveInfo.loopEnable = iv.loopEnable;
-                        if (region.waveInfo.loopEnable) {
-                            region.waveInfo.loopBegin = smpl.loopstart - waveBegin;
-                            region.waveInfo.loopLength = smpl.loopend - smpl.loopstart;
+                        pRegion->waveInfo.loopEnable = iv.loopEnable;
+                        if (pRegion->waveInfo.loopEnable) {
+                            pRegion->waveInfo.loopBegin = smpl.loopstart - waveBegin;
+                            pRegion->waveInfo.loopLength = smpl.loopend - smpl.loopstart;
                         } else {
                             var waveEnd = smpl.end + iv.waveEnd;
-                            region.waveInfo.loopBegin = 0;
-                            region.waveInfo.loopLength = waveEnd - waveBegin;
+                            pRegion->waveInfo.loopBegin = 0;
+                            pRegion->waveInfo.loopLength = waveEnd - waveBegin;
                         }
                         //
                         if (0 <= iv.rootKey) {
-                            region.waveInfo.unityNote = (byte)iv.rootKey;
+                            pRegion->waveInfo.unityNote = (byte)iv.rootKey;
                         } else if (0 <= pv.rootKey) {
-                            region.waveInfo.unityNote = (byte)pv.rootKey;
+                            pRegion->waveInfo.unityNote = (byte)pv.rootKey;
                         } else {
-                            region.waveInfo.unityNote = smpl.originalKey;
+                            pRegion->waveInfo.unityNote = smpl.originalKey;
                         }
                         //
-                        region.waveInfo.gain = pv.gain * iv.gain / 32768.0;
-                        region.waveInfo.delta = pv.fineTune * pv.coarseTune * iv.fineTune * iv.coarseTune
-                            * smpl.sampleRate / Const.SampleRate;
-                        region.env = iv.env;
-                        instInfo.regions.Add(region);
+                        pRegion->waveInfo.gain = pv.gain * iv.gain / 32768.0;
+                        pRegion->waveInfo.delta = pv.fineTune * pv.coarseTune * iv.fineTune * iv.coarseTune
+                            * smpl.sampleRate / Sender.SampleRate;
+                        pRegion->env = iv.env;
                     }
                 }
-                retInst.Add(preset.Key, instInfo);
             }
-            return retInst;
         }
 
         protected override bool CheckFileType(string fileType, uint fileSize) {
@@ -319,11 +331,11 @@ namespace SF2 {
                         sw.Write(",{0}", 1200.0 / Math.Log(2.0, prgn.fineTune));
                     }
 
-                    sw.Write(",{0}", (Const.EnvelopeSpeed * Const.DeltaTime / prgn.env.deltaA).ToString("0.000"));
+                    sw.Write(",{0}", (Sender.EnvelopeSpeed * Sender.DeltaTime / prgn.env.deltaA).ToString("0.000"));
                     sw.Write(",{0}", prgn.env.hold.ToString("0.000"));
-                    sw.Write(",{0}", (Const.EnvelopeSpeed * Const.DeltaTime / prgn.env.deltaD).ToString("0.000"));
+                    sw.Write(",{0}", (Sender.EnvelopeSpeed * Sender.DeltaTime / prgn.env.deltaD).ToString("0.000"));
                     sw.Write(",{0}", prgn.env.levelS.ToString("0.000"));
-                    sw.Write(",{0}", (Const.EnvelopeSpeed * Const.DeltaTime / prgn.env.deltaR).ToString("0.000"));
+                    sw.Write(",{0}", (Sender.EnvelopeSpeed * Sender.DeltaTime / prgn.env.deltaR).ToString("0.000"));
 
                     sw.Write(",{0}:{1}",
                         prgn.instId,
@@ -379,11 +391,11 @@ namespace SF2 {
                         sw.Write(",{0}", 1200.0 / Math.Log(2.0, irgn.fineTune));
                     }
 
-                    sw.Write(",{0}", (Const.EnvelopeSpeed * Const.DeltaTime / irgn.env.deltaA).ToString("0.000"));
+                    sw.Write(",{0}", (Sender.EnvelopeSpeed * Sender.DeltaTime / irgn.env.deltaA).ToString("0.000"));
                     sw.Write(",{0}", irgn.env.hold.ToString("0.000"));
-                    sw.Write(",{0}", (Const.EnvelopeSpeed * Const.DeltaTime / irgn.env.deltaD).ToString("0.000"));
+                    sw.Write(",{0}", (Sender.EnvelopeSpeed * Sender.DeltaTime / irgn.env.deltaD).ToString("0.000"));
                     sw.Write(",{0}", irgn.env.levelS.ToString("0.000"));
-                    sw.Write(",{0}", (Const.EnvelopeSpeed * Const.DeltaTime / irgn.env.deltaR).ToString("0.000"));
+                    sw.Write(",{0}", (Sender.EnvelopeSpeed * Sender.DeltaTime / irgn.env.deltaR).ToString("0.000"));
 
                     var waveBegin = smpl.start + irgn.waveBegin;
                     var waveEnd = smpl.end + irgn.waveEnd;
@@ -509,21 +521,21 @@ namespace SF2 {
                             break;
 
                         case E_OPER.ENV_VOL__ATTACK:
-                            pv.env.deltaA = Const.EnvelopeSpeed * Const.DeltaTime
+                            pv.env.deltaA = Sender.EnvelopeSpeed * Sender.DeltaTime
                                 / Math.Pow(2.0, gen.genAmount / 1200.0);
                             break;
                         case E_OPER.ENV_VOL__HOLD:
                             pv.env.hold = Math.Pow(2.0, gen.genAmount / 1200.0);
                             break;
                         case E_OPER.ENV_VOL__DECAY:
-                            pv.env.deltaD = Const.EnvelopeSpeed * Const.DeltaTime
+                            pv.env.deltaD = Sender.EnvelopeSpeed * Sender.DeltaTime
                                 / Math.Pow(2.0, gen.genAmount / 1200.0);
                             break;
                         case E_OPER.ENV_VOL__SUSTAIN:
                             pv.env.levelS = Math.Pow(10.0, -(ushort)gen.genAmount / 200.0);
                             break;
                         case E_OPER.ENV_VOL__RELEASE:
-                            pv.env.deltaR = Const.EnvelopeSpeed * Const.DeltaTime
+                            pv.env.deltaR = Sender.EnvelopeSpeed * Sender.DeltaTime
                                 / Math.Pow(2.0, gen.genAmount / 1200.0);
                             break;
 
@@ -567,13 +579,13 @@ namespace SF2 {
                             pv.fineTune = 1.0;
                         }
                         if (pv.env.deltaA <= 0.0) {
-                            pv.env.deltaA = 1000 * Const.EnvelopeSpeed * Const.DeltaTime;
+                            pv.env.deltaA = 1000 * Sender.EnvelopeSpeed * Sender.DeltaTime;
                         }
                         if (pv.env.deltaD <= 0.0) {
-                            pv.env.deltaD = 1000 * Const.EnvelopeSpeed * Const.DeltaTime;
+                            pv.env.deltaD = 1000 * Sender.EnvelopeSpeed * Sender.DeltaTime;
                         }
                         if (pv.env.deltaR <= 0.0) {
-                            pv.env.deltaR = 1000 * Const.EnvelopeSpeed * Const.DeltaTime;
+                            pv.env.deltaR = 1000 * Sender.EnvelopeSpeed * Sender.DeltaTime;
                         }
                         if (pv.env.hold < 0.0) {
                             pv.env.hold = 0.0;
@@ -581,7 +593,7 @@ namespace SF2 {
                         if (pv.env.levelS < 0.0) {
                             pv.env.levelS = 1.0;
                         }
-                        pv.env.hold += Const.EnvelopeSpeed * Const.DeltaTime / pv.env.deltaA;
+                        pv.env.hold += Sender.EnvelopeSpeed * Sender.DeltaTime / pv.env.deltaA;
                         //
                         list.Add(pv);
                     }
@@ -676,21 +688,21 @@ namespace SF2 {
                             break;
 
                         case E_OPER.ENV_VOL__ATTACK:
-                            iv.env.deltaA = Const.EnvelopeSpeed * Const.DeltaTime
+                            iv.env.deltaA = Sender.EnvelopeSpeed * Sender.DeltaTime
                                 / Math.Pow(2.0, gen.genAmount / 1200.0);
                             break;
                         case E_OPER.ENV_VOL__HOLD:
                             iv.env.hold = Math.Pow(2.0, gen.genAmount / 1200.0);
                             break;
                         case E_OPER.ENV_VOL__DECAY:
-                            iv.env.deltaD = Const.EnvelopeSpeed * Const.DeltaTime
+                            iv.env.deltaD = Sender.EnvelopeSpeed * Sender.DeltaTime
                                 / Math.Pow(2.0, gen.genAmount / 1200.0);
                             break;
                         case E_OPER.ENV_VOL__SUSTAIN:
                             iv.env.levelS = Math.Pow(10.0, -(ushort)gen.genAmount / 200.0);
                             break;
                         case E_OPER.ENV_VOL__RELEASE:
-                            iv.env.deltaR = Const.EnvelopeSpeed * Const.DeltaTime
+                            iv.env.deltaR = Sender.EnvelopeSpeed * Sender.DeltaTime
                                 / Math.Pow(2.0, gen.genAmount / 1200.0);
                             break;
                         default:
@@ -733,13 +745,13 @@ namespace SF2 {
                             iv.fineTune = 1.0;
                         }
                         if (iv.env.deltaA <= 0.0) {
-                            iv.env.deltaA = 1000 * Const.EnvelopeSpeed * Const.DeltaTime;
+                            iv.env.deltaA = 1000 * Sender.EnvelopeSpeed * Sender.DeltaTime;
                         }
                         if (iv.env.deltaD <= 0.0) {
-                            iv.env.deltaD = 1000 * Const.EnvelopeSpeed * Const.DeltaTime;
+                            iv.env.deltaD = 1000 * Sender.EnvelopeSpeed * Sender.DeltaTime;
                         }
                         if (iv.env.deltaR <= 0.0) {
-                            iv.env.deltaR = 1000 * Const.EnvelopeSpeed * Const.DeltaTime;
+                            iv.env.deltaR = 1000 * Sender.EnvelopeSpeed * Sender.DeltaTime;
                         }
                         if (iv.env.hold < 0.0) {
                             iv.env.hold = 0.0;
@@ -747,7 +759,7 @@ namespace SF2 {
                         if (iv.env.levelS < 0.0) {
                             iv.env.levelS = 1.0;
                         }
-                        iv.env.hold += Const.EnvelopeSpeed * Const.DeltaTime / iv.env.deltaA;
+                        iv.env.hold += Sender.EnvelopeSpeed * Sender.DeltaTime / iv.env.deltaA;
                         //
                         list.Add(iv);
                     }

@@ -36,7 +36,7 @@ namespace MIDI {
             uint currentTime = 0;
             foreach (var ev in Events) {
                 Util.WriteDelta(temp, ev.Time - currentTime);
-                WriteMessage(temp, ev);
+                ev.WriteMessage(temp);
                 currentTime = ev.Time;
             }
 
@@ -83,28 +83,28 @@ namespace MIDI {
                     uint endTime = 0;
                     switch (curEv.Type) {
                     case E_EVENT_TYPE.NOTE_ON:
-                        if (checkEv.Data[0] != curEv.Data[0]) {
+                        if (checkEv.NoteNo != curEv.NoteNo) {
                             break;
                         }
                         beginTime = curTime;
                         for (int j = i; j < Events.Count; ++j) {
                             var nxEv = Events[j];
                             var nxTime = nxEv.Time;
-                            if (E_EVENT_TYPE.NOTE_OFF == nxEv.Type && curEv.Data[0] == nxEv.Data[0]) {
+                            if (E_EVENT_TYPE.NOTE_OFF == nxEv.Type && curEv.NoteNo == nxEv.NoteNo) {
                                 endTime = nxTime;
                                 break;
                             }
                         }
                         break;
                     case E_EVENT_TYPE.NOTE_OFF:
-                        if (checkEv.Data[0] != curEv.Data[0]) {
+                        if (checkEv.NoteNo != curEv.NoteNo) {
                             break;
                         }
                         endTime = curTime;
                         for (int j = i; 0 <= j; --j) {
                             var bkEv = Events[j];
                             var bkTime = Events[j].Time;
-                            if (E_EVENT_TYPE.NOTE_ON == bkEv.Type && curEv.Data[0] == bkEv.Data[0]) {
+                            if (E_EVENT_TYPE.NOTE_ON == bkEv.Type && curEv.NoteNo == bkEv.NoteNo) {
                                 beginTime = bkTime;
                                 break;
                             }
@@ -136,13 +136,13 @@ namespace MIDI {
                 if (beginTime <= checkTime && checkTime <= endTime) {
                     switch (checkEv.Type) {
                     case E_EVENT_TYPE.NOTE_ON:
-                        if (checkEv.Data[0] < lowNote || highNote < checkEv.Data[0]) {
+                        if (checkEv.NoteNo < lowNote || highNote < checkEv.NoteNo) {
                             break;
                         }
                         for (int j = i; j < Events.Count; ++j) {
                             var nxEv = Events[j];
                             var nxTime = nxEv.Time;
-                            if (E_EVENT_TYPE.NOTE_OFF == nxEv.Type && checkEv.Data[0] == nxEv.Data[0]) {
+                            if (E_EVENT_TYPE.NOTE_OFF == nxEv.Type && checkEv.NoteNo == nxEv.NoteNo) {
                                 if (beginTime <= nxTime && nxTime <= endTime) {
                                     isTarget = true;
                                     break;
@@ -151,13 +151,13 @@ namespace MIDI {
                         }
                         break;
                     case E_EVENT_TYPE.NOTE_OFF:
-                        if (checkEv.Data[0] < lowNote || highNote < checkEv.Data[0]) {
+                        if (checkEv.NoteNo < lowNote || highNote < checkEv.NoteNo) {
                             break;
                         }
                         for (int j = i; 0 <= j; --j) {
                             var bkEv = Events[j];
                             var bkTime = bkEv.Time;
-                            if (E_EVENT_TYPE.NOTE_ON == bkEv.Type && checkEv.Data[0] == bkEv.Data[0]) {
+                            if (E_EVENT_TYPE.NOTE_ON == bkEv.Type && checkEv.NoteNo == bkEv.NoteNo) {
                                 if (beginTime <= bkTime && bkTime <= endTime) {
                                     isTarget = true;
                                     break;
@@ -181,38 +181,6 @@ namespace MIDI {
             return targetList;
         }
 
-        private void WriteMessage(MemoryStream ms, Event msg) {
-            switch (msg.Type) {
-                // 2バイトメッセージ
-                case E_EVENT_TYPE.NOTE_ON:
-                case E_EVENT_TYPE.NOTE_OFF:
-                case E_EVENT_TYPE.POLY_KEY:
-                case E_EVENT_TYPE.CTRL_CHG:
-                case E_EVENT_TYPE.PITCH:
-                    ms.WriteByte(msg.Status);
-                    ms.WriteByte(msg.Data[0]);
-                    ms.WriteByte(msg.Data[1]);
-                    return;
-                // 1バイトメッセージ
-                case E_EVENT_TYPE.PROG_CHG:
-                case E_EVENT_TYPE.CH_PRESS:
-                    ms.WriteByte(msg.Status);
-                    ms.WriteByte(msg.Data[0]);
-                    return;
-                // システムエクスクルーシブ
-                case E_EVENT_TYPE.SYS_EX:
-                    ms.WriteByte(msg.Status);
-                    Util.WriteDelta(ms, (uint)(msg.Data.Length - 1));
-                    ms.Write(msg.Data, 1, msg.Data.Length - 1);
-                    return;
-                // メタデータ
-                case E_EVENT_TYPE.META:
-                    ms.WriteByte(msg.Status);
-                    msg.Meta.Write(ms);
-                    return;
-                default:
-                    return;
-            }
-        }
+
     }
 }

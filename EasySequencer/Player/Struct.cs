@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Runtime.InteropServices;
 
-namespace WaveOut {
+namespace Player {
     public enum E_KEY_STATE : byte {
         STANDBY,
         PURGE,

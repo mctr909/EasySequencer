@@ -2,41 +2,44 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Windows.Forms;
+using System.Runtime.InteropServices;
 
 using MIDI;
-using WaveOut;
+using Player;
 
 namespace EasySequencer {
-    public partial class InstList : Form {
-        private Channel mChannel;
+    unsafe public partial class InstList : Form {
+        private Sender mSender;
+        private int mChNum;
         private Dictionary<string , Dictionary<INST_ID, string>> mInstList;
 
-        public InstList(Channel channel) {
+        public InstList(Sender sender, int chNum) {
             InitializeComponent();
             mInstList = new Dictionary<string, Dictionary<INST_ID, string>>();
-            mChannel = channel;
+            mSender = sender;
+            mChNum = chNum;
 
             var selectedCategory = "";
             var selectedInst = 0;
 
-            foreach (var inst in mChannel.InstList) {
-                var cat = inst.Value.catgory;
-                var nam = inst.Value.name;
+            for (int i = 0; i < mSender.InstList->instCount; i++) {
+                var pInst = mSender.InstList->ppInst[i];
+                var nam = Marshal.PtrToStringAuto((IntPtr)pInst->pName);
+                var cat = Marshal.PtrToStringAuto((IntPtr)pInst->pCategory);
                 if (!mInstList.ContainsKey(cat)) {
                     mInstList.Add(cat, new Dictionary<INST_ID, string>());
                     cmbCategory.Items.Add(cat);
                 }
-
-                mInstList[cat].Add(inst.Key, nam);
-                if (mChannel.InstId.isDrum == inst.Key.isDrum
-                    && mChannel.InstId.programNo == inst.Key.programNo
-                    && mChannel.InstId.bankMSB == inst.Key.bankMSB
-                    && mChannel.InstId.bankLSB == inst.Key.bankLSB) {
+                mInstList[cat].Add(pInst->id, nam);
+                if (mSender.Channel[mChNum]->InstId.isDrum == pInst->id.isDrum &&
+                    mSender.Channel[mChNum]->InstId.programNo == pInst->id.programNo &&
+                    mSender.Channel[mChNum]->InstId.bankMSB == pInst->id.bankMSB &&
+                    mSender.Channel[mChNum]->InstId.bankLSB == pInst->id.bankLSB
+                ) {
                     selectedCategory = cat;
                     selectedInst = mInstList[cat].Count - 1;
                 }
             }
-
             cmbCategory.SelectedItem = selectedCategory;
             lstInst.Items.Clear();
             foreach (var inst in mInstList[selectedCategory]) {
@@ -63,9 +66,10 @@ namespace EasySequencer {
             var list = mInstList[(string)cmbCategory.SelectedItem].ToArray();
             var inst = list[(lstInst.SelectedIndex < list.Count()) ? lstInst.SelectedIndex : list.Count() - 1];
 
-            mChannel.CtrlChange(E_CTRL_TYPE.BANK_MSB, inst.Key.bankMSB);
-            mChannel.CtrlChange(E_CTRL_TYPE.BANK_LSB, inst.Key.bankLSB);
-            mChannel.ProgramChange(inst.Key.programNo, inst.Key.isDrum == 1);
+            mSender.Channel[mChNum]->InstId.isDrum = inst.Key.isDrum;
+            mSender.Send(new Event(E_CTRL_TYPE.BANK_MSB, (byte)mChNum, inst.Key.bankMSB));
+            mSender.Send(new Event(E_CTRL_TYPE.BANK_LSB, (byte)mChNum, inst.Key.bankLSB));
+            mSender.Send(new Event(E_EVENT_TYPE.PROG_CHG, (byte)mChNum, inst.Key.programNo));
         }
 
         private void btnCommit_Click(object sender, EventArgs e) {

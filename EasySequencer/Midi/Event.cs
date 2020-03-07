@@ -4,80 +4,69 @@ using System.IO;
 namespace MIDI {
     public struct Event {
         public uint Time { get; private set; }
-        public byte Status { get; private set; }
         public byte[] Data { get; private set; }
 
+        public byte Status {
+            get { return Data[0]; }
+        }
         public int Channel {
-            get {
-                return (Status < 0xF0) ? (Status & 0x0F) : 0;
-            }
+            get { return (Status < 0xF0) ? (Status & 0x0F) : 0; }
         }
         public E_EVENT_TYPE Type {
-            get {
-                return (E_EVENT_TYPE)((Status < 0xF0) ? (Status & 0xF0) : Status);
-            }
+            get { return (E_EVENT_TYPE)((Status < 0xF0) ? (Status & 0xF0) : Status); }
         }
+
         public byte NoteNo {
-            get {
-                return (E_EVENT_TYPE.NOTE_OFF == Type || E_EVENT_TYPE.NOTE_ON == Type) ? Data[0] : (byte)0;
-            }
+            get { return (E_EVENT_TYPE.NOTE_OFF == Type || E_EVENT_TYPE.NOTE_ON == Type) ? Data[1] : (byte)0; }
         }
         public byte Velocity {
-            get {
-                return (E_EVENT_TYPE.NOTE_OFF == Type || E_EVENT_TYPE.NOTE_ON == Type) ? Data[1] : (byte)0;
-            }
+            get { return (E_EVENT_TYPE.NOTE_OFF == Type || E_EVENT_TYPE.NOTE_ON == Type) ? Data[2] : (byte)0; }
         }
+
         public E_CTRL_TYPE CtrlType {
-            get {
-                return E_EVENT_TYPE.CTRL_CHG == Type ? (E_CTRL_TYPE)Data[0] : E_CTRL_TYPE.INVALID;
-            }
+            get { return E_EVENT_TYPE.CTRL_CHG == Type ? (E_CTRL_TYPE)Data[1] : E_CTRL_TYPE.INVALID; }
         }
         public byte CtrlValue {
-            get {
-                return E_EVENT_TYPE.CTRL_CHG == Type ? Data[1] : (byte)0;
-            }
+            get { return E_EVENT_TYPE.CTRL_CHG == Type ? Data[2] : (byte)0; }
         }
+
         public byte ProgNo {
-            get {
-                return E_EVENT_TYPE.PROG_CHG == Type ? Data[0] : (byte)0;
-            }
+            get { return E_EVENT_TYPE.PROG_CHG == Type ? Data[1] : (byte)0; }
         }
+
         public short Pitch {
-            get {
-                return (short)(E_EVENT_TYPE.PITCH == Type ? (((Data[1] << 7) | Data[0]) - 8192) : 0);
-            }
+            get { return (short)(E_EVENT_TYPE.PITCH == Type ? (((Data[2] << 7) | Data[1]) - 8192) : 0); }
         }
+
         public Meta Meta {
-            get {
-                return E_EVENT_TYPE.META == Type ? new Meta(Data) : null;
-            }
+            get { return E_EVENT_TYPE.META == Type ? new Meta(Data) : null; }
         }
 
         public Event(byte status, params byte[] data) {
             Time = 0;
-            Status = status;
-            Data = new byte[data.Length];
-            data.CopyTo(Data, 0);
+            Data = new byte[data.Length + 1];
+            Data[0] = status;
+            data.CopyTo(Data, 1);
         }
 
         public Event(MemoryStream ms, uint time, ref byte currentStatus) {
             Time = time;
-            Status = (byte)ms.ReadByte();
+            var status = (byte)ms.ReadByte();
 
-            if (Status < 0x80) {
+            if (status < 0x80) {
                 ms.Seek(-1, SeekOrigin.Current);
-                Status = currentStatus;
+                status = currentStatus;
             } else {
-                currentStatus = Status;
+                currentStatus = status;
             }
 
             E_EVENT_TYPE type;
             byte ch;
-            if (Status < 0xF0) {
-                type = (E_EVENT_TYPE)(Status & 0xF0);
-                ch = (byte)(Status & 0x0F);
+            if (status < 0xF0) {
+                type = (E_EVENT_TYPE)(status & 0xF0);
+                ch = (byte)(status & 0x0F);
             } else {
-                type = (E_EVENT_TYPE)Status;
+                type = (E_EVENT_TYPE)status;
                 ch = 0;
             }
 
@@ -87,53 +76,94 @@ namespace MIDI {
             case E_EVENT_TYPE.POLY_KEY:
             case E_EVENT_TYPE.CTRL_CHG:
             case E_EVENT_TYPE.PITCH:
-                Data = new byte[2];
-                Data[0] = (byte)ms.ReadByte();
-                Data[1] = (byte)ms.ReadByte();
+                Data = new byte[] {
+                    status,
+                    (byte)ms.ReadByte(),
+                    (byte)ms.ReadByte()
+                };
                 break;
             case E_EVENT_TYPE.PROG_CHG:
             case E_EVENT_TYPE.CH_PRESS:
-                Data = new byte[1];
-                Data[0] = (byte)ms.ReadByte();
+                Data = new byte[] {
+                    status,
+                    (byte)ms.ReadByte()
+                };
                 break;
             case E_EVENT_TYPE.SYS_EX:
-                Data = Util.ReadBytes(ms);
+                var sysEx = Util.ReadBytes(ms);
+                Data = new byte[sysEx.Length + 1];
+                Data[0] = status;
+                sysEx.CopyTo(Data, 1);
                 break;
             case E_EVENT_TYPE.META:
                 var metaType = (byte)ms.ReadByte();
                 var metaData = Util.ReadBytes(ms);
-                Data = new byte[metaData.Length + 1];
-                Data[0] = metaType;
-                metaData.CopyTo(Data, 1);
+                Data = new byte[metaData.Length + 2];
+                Data[0] = status;
+                Data[1] = metaType;
+                metaData.CopyTo(Data, 2);
                 break;
             default:
-                Status = (byte)E_EVENT_TYPE.INVALID;
-                Data = null;
+                Data = new byte[] { 0 };
                 break;
             }
         }
 
         public Event(E_EVENT_TYPE type, byte channel, params byte[] data) {
             Time = 0;
-            Status = (byte)((byte)type | channel);
-            Data = new byte[data.Length];
-            data.CopyTo(Data, 0);
+            Data = new byte[data.Length + 1];
+            Data[0] = (byte)((byte)type | channel);
+            data.CopyTo(Data, 1);
         }
 
         public Event(E_CTRL_TYPE type, byte channel, params byte[] data) {
             Time = 0;
-            Status = (byte)((byte)E_EVENT_TYPE.CTRL_CHG | channel);
-            Data = new byte[data.Length + 1];
-            Data[0] = (byte)type;
-            data.CopyTo(Data, 1);
+            Data = new byte[data.Length + 2];
+            Data[0] = (byte)((byte)E_EVENT_TYPE.CTRL_CHG | channel);
+            Data[1] = (byte)type;
+            data.CopyTo(Data, 2);
         }
 
         public Event(E_META_TYPE type, params byte[] data) {
             Time = 0;
-            Status = (byte)E_EVENT_TYPE.META;
-            Data = new byte[data.Length + 1];
-            Data[0] = (byte)type;
-            data.CopyTo(Data, 1);
+            Data = new byte[data.Length + 2];
+            Data[0] = (byte)E_EVENT_TYPE.META;
+            Data[1] = (byte)type;
+            data.CopyTo(Data, 2);
+        }
+
+        public void WriteMessage(MemoryStream ms) {
+            switch (Type) {
+            // 2バイトメッセージ
+            case E_EVENT_TYPE.NOTE_ON:
+            case E_EVENT_TYPE.NOTE_OFF:
+            case E_EVENT_TYPE.POLY_KEY:
+            case E_EVENT_TYPE.CTRL_CHG:
+            case E_EVENT_TYPE.PITCH:
+                ms.WriteByte(Data[0]);
+                ms.WriteByte(Data[1]);
+                ms.WriteByte(Data[2]);
+                return;
+            // 1バイトメッセージ
+            case E_EVENT_TYPE.PROG_CHG:
+            case E_EVENT_TYPE.CH_PRESS:
+                ms.WriteByte(Data[0]);
+                ms.WriteByte(Data[1]);
+                return;
+            // システムエクスクルーシブ
+            case E_EVENT_TYPE.SYS_EX:
+                ms.WriteByte(Data[0]);
+                Util.WriteDelta(ms, (uint)(Data.Length - 2));
+                ms.Write(Data, 2, Data.Length - 2);
+                return;
+            // メタデータ
+            case E_EVENT_TYPE.META:
+                ms.WriteByte(Status);
+                Meta.Write(ms);
+                return;
+            default:
+                return;
+            }
         }
 
         public static Event NoteOn(byte channel, byte noteNo, byte velocity) {

@@ -4,7 +4,7 @@ using System.Runtime.InteropServices;
 
 using MIDI;
 
-namespace WaveOut {
+namespace Player {
     unsafe public class Sender {
         [DllImport("MidiSender.dll")]
         private static extern CHANNEL** wavfileout_GetChannelPtr();
@@ -19,7 +19,7 @@ namespace WaveOut {
         [DllImport("MidiSender.dll")]
         private static extern CHANNEL_PARAM** midi_GetChannelParamPtr();
         [DllImport("MidiSender.dll")]
-        private static extern void midi_CreateChannels(INST_LIST* list, SAMPLER** ppSmpl, CHANNEL** ppCh);
+        private static extern void midi_CreateChannels(INST_LIST* list, SAMPLER** ppSmpl, CHANNEL** ppCh, int samplerCount);
         [DllImport("MidiSender.dll")]
         private static extern void midi_Send(byte *pMsg);
 
@@ -76,22 +76,18 @@ namespace WaveOut {
             //sf2.GetInstList(mInstList);
 
             //
-            waveout_SystemValues(SampleRate, 32, 512, 16, CHANNEL_COUNT, SAMPLER_COUNT);
+            waveout_SystemValues(SampleRate, 32, 256, 32, CHANNEL_COUNT, SAMPLER_COUNT);
             mppChannels = waveout_GetChannelPtr();
             ppWaveOutSampler = waveout_GetSamplerPtr();
-            midi_CreateChannels(InstList, ppWaveOutSampler, mppChannels);
+            midi_CreateChannels(InstList, ppWaveOutSampler, mppChannels, SAMPLER_COUNT);
             Channel = midi_GetChannelParamPtr();
             waveout_Open();
         }
 
         public void Send(Event msg) {
-            var pMsg = (byte*)Marshal.AllocHGlobal(msg.Data.Length + 1);
-            pMsg[0] = msg.Status;
-            for (int i = 0; i < msg.Data.Length; i++) {
-                pMsg[i + 1] = msg.Data[i];
+            fixed (byte* ptr = &msg.Data[0]) {
+                midi_Send(ptr);
             }
-            midi_Send(pMsg);
-            Marshal.FreeHGlobal((IntPtr)pMsg);
         }
 
         public void FileOut(string filePath, Event[] events, int ticks) {

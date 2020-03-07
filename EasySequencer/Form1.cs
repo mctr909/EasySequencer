@@ -4,7 +4,6 @@ using System.IO;
 using System.Drawing;
 using Player;
 using MIDI;
-using WaveOut;
 
 namespace EasySequencer {
     unsafe public partial class Form1 : Form {
@@ -37,6 +36,9 @@ namespace EasySequencer {
             timer1.Interval = 16;
             timer1.Enabled = true;
             timer1.Start();
+
+            Width = 150;
+            Height = 100;
         }
 
         private void 開くOToolStripMenuItem_Click(object sender, EventArgs e) {
@@ -64,7 +66,7 @@ namespace EasySequencer {
         }
 
         private void wavファイル出力ToolStripMenuItem_Click(Object sender, EventArgs e) {
-            if(null == mSMF || null == mMidiSender || Sender.IsFileOutput) {
+            if (null == mSMF || null == mMidiSender || Sender.IsFileOutput) {
                 return;
             }
 
@@ -76,11 +78,11 @@ namespace EasySequencer {
             var fm = new StatusWindow();
             var ev = mSMF.EventList;
             fm.TimeMax = (int)(ev[ev.Length - 1].Time / mSMF.Ticks);
-            fixed (int* p = &mMidiSender.OutputTime) {
+            fixed (int* p = &Sender.OutputTime) {
                 fm.Time = p;
             }
             mMidiSender.FileOut(filePath, ev, mSMF.Ticks);
-            fm.Show();
+            //fm.Show();
         }
 
         private void btnPalyStop_Click(object sender, EventArgs e) {
@@ -158,7 +160,7 @@ namespace EasySequencer {
             lblTempo.Text = mPlayer.TempoText;
             lblTempoPercent.Text = trkSpeed.Value + "%";
             mGActive.Clear(Color.Transparent);
-            mGActive.FillRectangle(Brushes.LightGreen, 0, 0, *Sender.ActiveCountPtr * mBmpActive.Width / 128.0f, mBmpActive.Height);
+            mGActive.FillRectangle(Brushes.LightGreen, 0, 0, (float)*Sender.ActiveCountPtr * mBmpActive.Width / Sender.SAMPLER_COUNT, mBmpActive.Height);
             picActive.Image = mBmpActive;
 
             if (!mIsSeek) {
