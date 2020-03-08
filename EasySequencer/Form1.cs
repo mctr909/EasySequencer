@@ -82,7 +82,7 @@ namespace EasySequencer {
                 fm.Time = p;
             }
             mMidiSender.FileOut(filePath, ev, mSMF.Ticks);
-            //fm.Show();
+            fm.Show();
         }
 
         private void btnPalyStop_Click(object sender, EventArgs e) {

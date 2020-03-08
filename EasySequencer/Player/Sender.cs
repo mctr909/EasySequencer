@@ -76,7 +76,7 @@ namespace Player {
             //sf2.GetInstList(mInstList);
 
             //
-            waveout_SystemValues(SampleRate, 32, 256, 32, CHANNEL_COUNT, SAMPLER_COUNT);
+            waveout_SystemValues(SampleRate, 32, 1024, 8, CHANNEL_COUNT, SAMPLER_COUNT);
             mppChannels = waveout_GetChannelPtr();
             ppWaveOutSampler = waveout_GetSamplerPtr();
             midi_CreateChannels(InstList, ppWaveOutSampler, mppChannels, SAMPLER_COUNT);
@@ -96,50 +96,46 @@ namespace Player {
             wavfileout_Open(Marshal.StringToHGlobalAuto(filePath), mpWaveTable, 44100, 16);
             var ppFileOutSampler = wavfileout_GetSamplerPtr();
             var ppFileOutChannel = wavfileout_GetChannelPtr();
-            //var fileOutChannel = new Channel[CHANNEL_COUNT];
-            //for (int i = 0; i < CHANNEL_COUNT; ++i) {
-            //    fileOutChannel[i] = new Channel(*mpInstList, ppFileOutSampler, ppFileOutChannel[i], i);
-            //}
 
             double delta_sec = Sender.DeltaTime * 512;
             double curTime = 0.0;
             double bpm = 120.0;
 
             Task.Factory.StartNew(() => {
-                //foreach (var ev in events) {
-                //    var eventTime = (double)ev.Time / ticks;
-                //    while (curTime < eventTime) {
-                //        wavfileout_Write();
-                //        curTime += bpm * delta_sec / 60.0;
-                //        OutputTime = (int)curTime;
-                //    }
-                //    if (E_EVENT_TYPE.META == ev.Type) {
-                //        if (E_META_TYPE.TEMPO == ev.Meta.Type) {
-                //            bpm = ev.Meta.Tempo;
-                //        }
-                //    }
-                //    switch (ev.Type) {
-                //    case E_EVENT_TYPE.NOTE_OFF:
-                //        fileOutChannel[ev.Channel].NoteOff(ev.NoteNo, E_KEY_STATE.RELEASE);
-                //        break;
-                //    case E_EVENT_TYPE.NOTE_ON:
-                //        fileOutChannel[ev.Channel].NoteOn(ev.NoteNo, ev.Velocity);
-                //        break;
-                //    case E_EVENT_TYPE.CTRL_CHG:
-                //        fileOutChannel[ev.Channel].CtrlChange(ev.CtrlType, ev.CtrlValue);
-                //        break;
-                //    case E_EVENT_TYPE.PROG_CHG:
-                //        fileOutChannel[ev.Channel].ProgramChange(ev.ProgNo);
-                //        break;
-                //    case E_EVENT_TYPE.PITCH:
-                //        fileOutChannel[ev.Channel].PitchBend(ev.Pitch);
-                //        break;
-                //    default:
-                //        break;
-                //    }
-                //}
-                //wavfileout_Close();
-                //IsFileOutput = false;
+                foreach (var ev in events) {
+                    var eventTime = (double)ev.Time / ticks;
+                    while (curTime < eventTime) {
+                        wavfileout_Write();
+                        curTime += bpm * delta_sec / 60.0;
+                        OutputTime = (int)curTime;
+                    }
+                    if (E_EVENT_TYPE.META == ev.Type) {
+                        if (E_META_TYPE.TEMPO == ev.Meta.Type) {
+                            bpm = ev.Meta.Tempo;
+                        }
+                    }
+                    //switch (ev.Type) {
+                    //case E_EVENT_TYPE.NOTE_OFF:
+                    //    fileOutChannel[ev.Channel].NoteOff(ev.NoteNo, E_KEY_STATE.RELEASE);
+                    //    break;
+                    //case E_EVENT_TYPE.NOTE_ON:
+                    //    fileOutChannel[ev.Channel].NoteOn(ev.NoteNo, ev.Velocity);
+                    //    break;
+                    //case E_EVENT_TYPE.CTRL_CHG:
+                    //    fileOutChannel[ev.Channel].CtrlChange(ev.CtrlType, ev.CtrlValue);
+                    //    break;
+                    //case E_EVENT_TYPE.PROG_CHG:
+                    //    fileOutChannel[ev.Channel].ProgramChange(ev.ProgNo);
+                    //    break;
+                    //case E_EVENT_TYPE.PITCH:
+                    //    fileOutChannel[ev.Channel].PitchBend(ev.Pitch);
+                    //    break;
+                    //default:
+                    //    break;
+                    //}
+                }
+                wavfileout_Close();
+                IsFileOutput = false;
             });
         }
     }
