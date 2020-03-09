@@ -9,7 +9,7 @@ using MIDI;
 using EasySequencer;
 
 namespace Player {
-    public unsafe class Keyboard {
+    public class Keyboard {
         private PictureBox mCtrl;
         private DoubleBuffer mBuffer;
         private Sender mSender;
@@ -28,6 +28,9 @@ namespace Player {
         private static readonly int ChannelHeight = 40;
         private static readonly int KnobRadius = 14;
         private static readonly int KnobWidth = 40;
+
+        private static readonly Rectangle MuteButton = new Rectangle(925, 4, 13, 18);
+        private static readonly Rectangle InstName = new Rectangle(944, 4, 238, 38);
 
         private static readonly Rectangle[] KeyboardPos = {
             new Rectangle( 1, 21, 7, 10),   // C
@@ -101,9 +104,6 @@ namespace Player {
             new PointF( 0.693f,  0.720f), new PointF( 0.664f,  0.747f), new PointF( 0.634f,  0.773f), new PointF( 0.603f,  0.797f)
         };
 
-        private static readonly Rectangle MuteButton = new Rectangle(925, 4, 13, 18);
-        private static readonly Rectangle InstName = new Rectangle(944, 4, 238, 38);
-
         public Keyboard(PictureBox picKey, Sender sender, Player player) {
             mCtrl = picKey;
             mCtrl.Width = EasySequencer.Properties.Resources.keyboard.Width + 2;
@@ -127,7 +127,7 @@ namespace Player {
             });
         }
 
-        private void picKeyboard_DoubleClick(Object sender, EventArgs e) {
+        private void picKeyboard_DoubleClick(object sender, EventArgs e) {
             mMouseDownPos = mCtrl.PointToClient(Cursor.Position);
             var channel = mMouseDownPos.Y / ChannelHeight;
             if (InstName.X <= mMouseDownPos.X && channel < 16) {
@@ -136,40 +136,40 @@ namespace Player {
             }
         }
 
-        private void picKeyboard_MouseDown(Object sender, MouseEventArgs e) {
+        private void picKeyboard_MouseDown(object sender, MouseEventArgs e) {
             mMouseDownPos = mCtrl.PointToClient(Cursor.Position);
             var knobX = (mMouseDownPos.X - KnobValPos[0].X + KnobWidth / 4) / KnobWidth;
             var knobY = mMouseDownPos.Y / ChannelHeight;
 
             if (0 <= knobY && knobY <= 15) {
                 mChannelNo = knobY;
-                if (MuteButton.X <= mMouseDownPos.X && mMouseDownPos.X < MuteButton.X + MuteButton.Width) {
-                    if (e.Button == MouseButtons.Right) {
-                        if (mPlayer.Channel[knobY]->Enable) {
-                            for (int i = 0; i < 16; ++i) {
-                                if (knobY == i) {
-                                    mPlayer.Channel[i]->Enable = false;
-                                }
-                                else {
-                                    mPlayer.Channel[i]->Enable = true;
-                                }
-                            }
-                        }
-                        else {
-                            for (int i = 0; i < 16; ++i) {
-                                if (knobY == i) {
-                                    mPlayer.Channel[i]->Enable = true;
-                                }
-                                else {
-                                    mPlayer.Channel[i]->Enable = false;
-                                }
-                            }
-                        }
-                    }
-                    else {
-                        mPlayer.Channel[knobY]->Enable = !mPlayer.Channel[knobY]->Enable;
-                    }
-                }
+                //if (MuteButton.X <= mMouseDownPos.X && mMouseDownPos.X < MuteButton.X + MuteButton.Width) {
+                //    if (e.Button == MouseButtons.Right) {
+                //        if (mPlayer.Channel[knobY]->Enable) {
+                //            for (int i = 0; i < 16; ++i) {
+                //                if (knobY == i) {
+                //                    mPlayer.Channel[i]->Enable = false;
+                //                }
+                //                else {
+                //                    mPlayer.Channel[i]->Enable = true;
+                //                }
+                //            }
+                //        }
+                //        else {
+                //            for (int i = 0; i < 16; ++i) {
+                //                if (knobY == i) {
+                //                    mPlayer.Channel[i]->Enable = true;
+                //                }
+                //                else {
+                //                    mPlayer.Channel[i]->Enable = false;
+                //                }
+                //            }
+                //        }
+                //    }
+                //    else {
+                //        mPlayer.Channel[knobY]->Enable = !mPlayer.Channel[knobY]->Enable;
+                //    }
+                //}
                 if (0 <= knobX && knobX <= 7) {
                     mKnobNo = knobX;
                     mIsDrag = true;
@@ -177,11 +177,11 @@ namespace Player {
             }
         }
 
-        private void picKeyboard_MouseUp(Object sender, MouseEventArgs e) {
+        private void picKeyboard_MouseUp(object sender, MouseEventArgs e) {
             mIsDrag = false;
         }
 
-        private void picKeyboard_MouseMove(Object sender, MouseEventArgs e) {
+        private void picKeyboard_MouseMove(object sender, MouseEventArgs e) {
             if (mIsDrag) {
                 var pos = mCtrl.PointToClient(Cursor.Position);
                 var knobCenter = KnobPos[mKnobNo];
@@ -212,20 +212,19 @@ namespace Player {
         private void draw() {
             var whiteWidth = KeyboardPos[0].Width + 1;
             var g = mBuffer.Graphics;
-
             /** Keyboad **/
             for (var s = 0; s < Sender.SAMPLER_COUNT; ++s) {
-                var pSmpl = mSender.ppWaveOutSampler[s];
-                var channel = mPlayer.Channel[pSmpl->channelNum];
-                var y_ch = ChannelHeight * pSmpl->channelNum;
-                var transpose = (int)(channel->Pitch * channel->BendRange / 8192.0 - 0.5);
-                var k = pSmpl->noteNum + transpose;
+                var smpl = mSender.Sampler(s);
+                var channel = mPlayer.Channel(smpl.channelNum);
+                var y_ch = ChannelHeight * smpl.channelNum;
+                var transpose = (int)(channel.Pitch * channel.BendRange / 8192.0 - 0.5);
+                var k = smpl.noteNum + transpose;
                 if (k < 0 || 127 < k) {
                     continue;
                 }
                 int x_oct;
                 Rectangle key;
-                switch (pSmpl->state) {
+                switch (smpl.state) {
                 case E_KEY_STATE.PRESS:
                     x_oct = 7 * whiteWidth * (k / 12 - 1);
                     key = KeyboardPos[k % 12];
@@ -238,46 +237,42 @@ namespace Player {
                     break;
                 }
             }
-
             /** Knob **/
             for (var ch = 0; ch < 16; ++ch) {
-                var channel = mPlayer.Channel[ch];
+                var channel = mPlayer.Channel(ch);
                 var y_ch = ChannelHeight * ch;
-
                 // Vol
                 g.FillRectangle(
                     Brushes.White,
-                    (int)(KnobRadius * Knob[channel->Vol].X) + KnobPos[0].X,
-                    (int)(KnobRadius * Knob[channel->Vol].Y) + KnobPos[0].Y + y_ch,
+                    (int)(KnobRadius * Knob[channel.Vol].X) + KnobPos[0].X,
+                    (int)(KnobRadius * Knob[channel.Vol].Y) + KnobPos[0].Y + y_ch,
                     3, 3
                 );
                 g.DrawString(
-                    channel->Vol.ToString("000"),
+                    channel.Vol.ToString("000"),
                     mKnobFont, Brushes.LightGray,
                     KnobValPos[0].X, KnobValPos[0].Y + y_ch
                 );
-
                 // Exp
                 g.FillRectangle(
                     Brushes.White,
-                    (int)(KnobRadius * Knob[channel->Exp].X) + KnobPos[1].X,
-                    (int)(KnobRadius * Knob[channel->Exp].Y) + KnobPos[1].Y + y_ch,
+                    (int)(KnobRadius * Knob[channel.Exp].X) + KnobPos[1].X,
+                    (int)(KnobRadius * Knob[channel.Exp].Y) + KnobPos[1].Y + y_ch,
                     3, 3
                 );
                 g.DrawString(
-                    channel->Exp.ToString("000"),
+                    channel.Exp.ToString("000"),
                     mKnobFont, Brushes.LightGray,
                     KnobValPos[1].X, KnobValPos[1].Y + y_ch
                 );
-
                 // Pan
                 g.FillRectangle(
                     Brushes.White,
-                    (int)(KnobRadius * Knob[channel->Pan].X) + KnobPos[2].X,
-                    (int)(KnobRadius * Knob[channel->Pan].Y) + KnobPos[2].Y + y_ch,
+                    (int)(KnobRadius * Knob[channel.Pan].X) + KnobPos[2].X,
+                    (int)(KnobRadius * Knob[channel.Pan].Y) + KnobPos[2].Y + y_ch,
                     3, 3
                 );
-                var pan = channel->Pan - 64;
+                var pan = channel.Pan - 64;
                 if (0 == pan) {
                     g.DrawString(
                         " C ",
@@ -297,81 +292,73 @@ namespace Player {
                         KnobValPos[2].X, KnobValPos[2].Y + y_ch
                     );
                 }
-
                 // Rev
                 g.FillRectangle(
                     Brushes.White,
-                    (int)(KnobRadius * Knob[channel->Rev].X) + KnobPos[3].X,
-                    (int)(KnobRadius * Knob[channel->Rev].Y) + KnobPos[3].Y + y_ch,
+                    (int)(KnobRadius * Knob[channel.Rev].X) + KnobPos[3].X,
+                    (int)(KnobRadius * Knob[channel.Rev].Y) + KnobPos[3].Y + y_ch,
                     3, 3
                 );
                 g.DrawString(
-                    channel->Rev.ToString("000"),
+                    channel.Rev.ToString("000"),
                     mKnobFont, Brushes.LightGray,
                     KnobValPos[3].X, KnobValPos[3].Y + y_ch
                 );
-
                 // Cho
                 g.FillRectangle(
                     Brushes.White,
-                    (int)(KnobRadius * Knob[channel->Cho].X) + KnobPos[4].X,
-                    (int)(KnobRadius * Knob[channel->Cho].Y) + KnobPos[4].Y + y_ch,
+                    (int)(KnobRadius * Knob[channel.Cho].X) + KnobPos[4].X,
+                    (int)(KnobRadius * Knob[channel.Cho].Y) + KnobPos[4].Y + y_ch,
                     3, 3
                 );
                 g.DrawString(
-                    channel->Cho.ToString("000"),
+                    channel.Cho.ToString("000"),
                     mKnobFont, Brushes.LightGray,
                     KnobValPos[4].X, KnobValPos[4].Y + y_ch
                 );
-
                 // Del
                 g.FillRectangle(
                     Brushes.White,
-                    (int)(KnobRadius * Knob[channel->Del].X) + KnobPos[5].X,
-                    (int)(KnobRadius * Knob[channel->Del].Y) + KnobPos[5].Y + y_ch,
+                    (int)(KnobRadius * Knob[channel.Del].X) + KnobPos[5].X,
+                    (int)(KnobRadius * Knob[channel.Del].Y) + KnobPos[5].Y + y_ch,
                     3, 3
                 );
                 g.DrawString(
-                    channel->Del.ToString("000"),
+                    channel.Del.ToString("000"),
                     mKnobFont, Brushes.LightGray,
                     KnobValPos[5].X, KnobValPos[5].Y + y_ch
                 );
-
                 // Fc
                 g.FillRectangle(
                     Brushes.White,
-                    (int)(KnobRadius * Knob[channel->Fc].X) + KnobPos[6].X,
-                    (int)(KnobRadius * Knob[channel->Fc].Y) + KnobPos[6].Y + y_ch,
+                    (int)(KnobRadius * Knob[channel.Fc].X) + KnobPos[6].X,
+                    (int)(KnobRadius * Knob[channel.Fc].Y) + KnobPos[6].Y + y_ch,
                     3, 3
                 );
                 g.DrawString(
-                    channel->Fc.ToString("000"),
+                    channel.Fc.ToString("000"),
                     mKnobFont, Brushes.LightGray,
                     KnobValPos[6].X, KnobValPos[6].Y + y_ch
                 );
-
                 // Fq
                 g.FillRectangle(
                     Brushes.White,
-                    (int)(KnobRadius * Knob[channel->Fq].X) + KnobPos[7].X,
-                    (int)(KnobRadius * Knob[channel->Fq].Y) + KnobPos[7].Y + y_ch,
+                    (int)(KnobRadius * Knob[channel.Fq].X) + KnobPos[7].X,
+                    (int)(KnobRadius * Knob[channel.Fq].Y) + KnobPos[7].Y + y_ch,
                     3, 3
                 );
                 g.DrawString(
-                    channel->Fq.ToString("000"),
+                    channel.Fq.ToString("000"),
                     mKnobFont, Brushes.LightGray,
                     KnobValPos[7].X, KnobValPos[7].Y + y_ch
                 );
-
                 // Mute Button
-                if (!channel->Enable) {
+                if (!channel.Enable) {
                     g.FillRectangle(Brushes.Red, MuteButton.X, MuteButton.Y + y_ch, MuteButton.Width, MuteButton.Height);
                 }
-
                 // InstName
-                g.DrawString(Marshal.PtrToStringAuto(channel->Name), mInstFont, Brushes.Black, InstName.X, InstName.Y + y_ch);
+                g.DrawString(Marshal.PtrToStringAuto(channel.Name), mInstFont, Brushes.Black, InstName.X, InstName.Y + y_ch);
             }
-
             mBuffer.Render();
         }
 

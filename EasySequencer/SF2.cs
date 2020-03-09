@@ -220,7 +220,7 @@ namespace SF2 {
                 pInst->id.programNo = preset.Key.programNo;
                 pInst->id.bankMSB = preset.Key.bankMSB;
                 pInst->id.bankLSB = preset.Key.bankLSB;
-                pInst->pName = (byte*)Marshal.StringToHGlobalAuto(preset.Value.Item1);
+                pInst->pName = Marshal.StringToHGlobalAuto(preset.Value.Item1);
                 pInst->regionCount = 0;
                 foreach (var pv in preset.Value.Item2) {
                     foreach (var iv in mPdta.InstList[pv.instId].Item2) {

@@ -5,7 +5,7 @@ using System.Threading.Tasks;
 using MIDI;
 
 namespace Player {
-    unsafe public class Player {
+    public class Player {
         private Sender mSender;
         private Event[] mEventList;
         private Stopwatch mSw;
@@ -24,8 +24,8 @@ namespace Player {
         private int mMeasureDenomi;
         private int mMeasureNumer;
 
-        public CHANNEL_PARAM** Channel {
-            get { return mSender.Channel; }
+        public CHANNEL_PARAM Channel(int num) {
+            return mSender.Channel(num);
         }
 
         public int SoloChannel { get; set; }
@@ -207,9 +207,10 @@ namespace Player {
                     Thread.Sleep(1);
                 }
 
+                var chParam = mSender.Channel(ev.Channel);
                 switch (ev.Type) {
                 case E_EVENT_TYPE.NOTE_OFF:
-                    if (0 == mSender.Channel[ev.Channel]->InstId.isDrum) {
+                    if (0 == chParam.InstId.isDrum) {
                         if ((ev.NoteNo + Transpose) < 0 || 127 < (ev.NoteNo + Transpose)) {
                             continue;
                         } else {
@@ -222,11 +223,11 @@ namespace Player {
                         if (0.25 * mTicksPerBeat < (mCurrentTick - eventTick)) {
                             continue;
                         }
-                        if (!mSender.Channel[ev.Channel]->Enable || (0 <= SoloChannel && SoloChannel != ev.Channel)) {
+                        if (!chParam.Enable || (0 <= SoloChannel && SoloChannel != ev.Channel)) {
                             continue;
                         }
                     }
-                    if (0 == mSender.Channel[ev.Channel]->InstId.isDrum) {
+                    if (0 == chParam.InstId.isDrum) {
                         if ((ev.NoteNo + Transpose) < 0 || 127 < (ev.NoteNo + Transpose)) {
                             continue;
                         } else {

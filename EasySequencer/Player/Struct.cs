@@ -68,7 +68,7 @@ namespace Player {
     }
 
     [StructLayout(LayoutKind.Sequential, Pack = 8)]
-    unsafe public struct CHANNEL {
+    public struct CHANNEL {
         public double amp;
         public double pitch;
         public double holdDelta;
@@ -85,7 +85,7 @@ namespace Player {
     }
 
     [StructLayout(LayoutKind.Sequential, Pack = 4)]
-    unsafe public struct SAMPLER {
+    public struct SAMPLER {
         public ushort      channelNum;
         public byte        noteNum;
         public E_KEY_STATE state;
@@ -98,7 +98,7 @@ namespace Player {
     };
 
     [StructLayout(LayoutKind.Sequential, Pack = 4)]
-    unsafe public struct REGION {
+    public struct REGION {
         public byte keyLo;
         public byte keyHi;
         public byte velLo;
@@ -117,8 +117,8 @@ namespace Player {
     unsafe public struct INST_REC {
         public INST_ID id;
         public int regionCount;
-        public byte* pName;
-        public byte* pCategory;
+        public IntPtr pName;
+        public IntPtr pCategory;
         public REGION **ppRegions;
     }
 

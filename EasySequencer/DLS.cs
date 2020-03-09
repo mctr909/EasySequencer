@@ -219,8 +219,8 @@ namespace DLS {
                 pInst->id.bankMSB = inst.Header.locale.bankMSB;
                 pInst->id.bankLSB = inst.Header.locale.bankLSB;
                 pInst->regionCount = inst.Regions.List.Count;
-                pInst->pName = (byte*)Marshal.StringToHGlobalAuto(inst.Name);
-                pInst->pCategory = (byte*)Marshal.StringToHGlobalAuto(inst.Category);
+                pInst->pName = Marshal.StringToHGlobalAuto(inst.Name);
+                pInst->pCategory = Marshal.StringToHGlobalAuto(inst.Category);
                 pInst->ppRegions = (REGION**)Marshal.AllocHGlobal(sizeof(REGION*) * inst.Regions.List.Count);
 
                 #region instEnv
