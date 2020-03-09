@@ -2,11 +2,12 @@
 using System.Windows.Forms;
 using System.IO;
 using System.Drawing;
+
 using Player;
 using MIDI;
 
 namespace EasySequencer {
-    unsafe public partial class Form1 : Form {
+    public partial class Form1 : Form {
         private SMF mSMF;
         private Sender mMidiSender;
         private Player.Player mPlayer;
@@ -75,14 +76,7 @@ namespace EasySequencer {
             saveFileDialog1.ShowDialog();
             var filePath = saveFileDialog1.FileName;
 
-            var fm = new StatusWindow();
-            var ev = mSMF.EventList;
-            fm.TimeMax = (int)(ev[ev.Length - 1].Time / mSMF.Ticks);
-            fixed (int* p = &Sender.OutputTime) {
-                fm.Time = p;
-            }
-            mMidiSender.FileOut(filePath, ev, mSMF.Ticks);
-            fm.Show();
+            mMidiSender.FileOut(filePath, mSMF);
         }
 
         private void btnPalyStop_Click(object sender, EventArgs e) {
@@ -159,8 +153,12 @@ namespace EasySequencer {
             lblPosition.Text = mPlayer.PositionText;
             lblTempo.Text = mPlayer.TempoText;
             lblTempoPercent.Text = trkSpeed.Value + "%";
+
             mGActive.Clear(Color.Transparent);
-            mGActive.FillRectangle(Brushes.LightGreen, 0, 0, (float)*Sender.ActiveCountPtr * mBmpActive.Width / Sender.SAMPLER_COUNT, mBmpActive.Height);
+            mGActive.FillRectangle(Brushes.LightGreen, 0, 0,
+                (float)Sender.ActiveCount * mBmpActive.Width / Sender.SAMPLER_COUNT,
+                mBmpActive.Height);
+
             picActive.Image = mBmpActive;
 
             if (!mIsSeek) {

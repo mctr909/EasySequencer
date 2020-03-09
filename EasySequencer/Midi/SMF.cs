@@ -44,18 +44,21 @@ namespace MIDI {
 
         public Event[] EventList {
             get {
-                var hash = new HashSet<Event>();
+                var list = new List<Event>();
                 foreach (var tr in mTracks) {
                     foreach (var ev in tr.Value.Events) {
-                        hash.Add(ev);
+                        list.Add(ev);
                     }
                 }
+                list.Sort(Event.Compare);
+                return list.ToArray();
+            }
+        }
 
-                var evList = new Event[hash.Count];
-                hash.CopyTo(evList);
-                Array.Sort(evList, Event.Compare);
-
-                return evList;
+        public int MaxTime {
+            get {
+                var list = EventList;
+                return (int)(list[list.Length - 1].Time / Ticks);
             }
         }
 

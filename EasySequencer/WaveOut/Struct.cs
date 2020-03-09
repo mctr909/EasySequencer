@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Runtime.InteropServices;
 
-namespace Player {
+namespace WaveOut {
     public enum E_KEY_STATE : byte {
         STANDBY,
         PURGE,
@@ -17,6 +17,20 @@ namespace Player {
         public byte programNo;
         public byte bankMSB;
         public byte bankLSB;
+    };
+
+    [StructLayout(LayoutKind.Sequential, Pack = 8)]
+    public struct FILTER {
+        public double cut;
+        public double res;
+        public double a00;  //  16
+        public double b00;  //  24
+        public double a01;  //  32
+        public double b01;  //  40
+        public double a10;  //  48
+        public double b10;  //  56
+        public double a11;  //  64
+        public double b11;  //  72
     };
 
     [StructLayout(LayoutKind.Sequential, Pack = 8)]
@@ -41,30 +55,6 @@ namespace Player {
         public ushort reserved;
         public double gain;
         public double delta;
-    }
-
-    [StructLayout(LayoutKind.Sequential, Pack = 1)]
-    public struct CHANNEL_PARAM {
-        public bool Enable;
-        public INST_ID InstId;
-        public IntPtr Name;
-        public byte Vol;
-        public byte Exp;
-        public byte Pan;
-        public byte Rev;
-        public byte Del;
-        public byte Cho;
-        public byte Mod;
-        public byte Hld;
-        public byte Fc;
-        public byte Fq;
-        public byte Atk;
-        public byte Rel;
-        public byte VibRate;
-        public byte VibDepth;
-        public byte VibDelay;
-        public byte BendRange;
-        public int Pitch;
     }
 
     [StructLayout(LayoutKind.Sequential, Pack = 8)]

@@ -93,15 +93,23 @@ namespace MIDI {
                 var sysEx = Util.ReadBytes(ms);
                 Data = new byte[sysEx.Length + 1];
                 Data[0] = status;
-                sysEx.CopyTo(Data, 1);
+                Data[1] = (byte)(sysEx.Length & 0xFF);
+                Data[2] = (byte)((sysEx.Length >> 8) & 0xFF);
+                Data[3] = (byte)((sysEx.Length >> 16) & 0xFF);
+                Data[4] = (byte)((sysEx.Length >> 24) & 0xFF);
+                sysEx.CopyTo(Data, 5);
                 break;
             case E_EVENT_TYPE.META:
                 var metaType = (byte)ms.ReadByte();
                 var metaData = Util.ReadBytes(ms);
-                Data = new byte[metaData.Length + 2];
+                Data = new byte[metaData.Length + 6];
                 Data[0] = status;
                 Data[1] = metaType;
-                metaData.CopyTo(Data, 2);
+                Data[2] = (byte)(metaData.Length & 0xFF);
+                Data[3] = (byte)((metaData.Length >> 8) & 0xFF);
+                Data[4] = (byte)((metaData.Length >> 16) & 0xFF);
+                Data[5] = (byte)((metaData.Length >> 24) & 0xFF);
+                metaData.CopyTo(Data, 6);
                 break;
             default:
                 Data = new byte[] { 0 };
@@ -116,20 +124,24 @@ namespace MIDI {
             data.CopyTo(Data, 1);
         }
 
-        public Event(E_CTRL_TYPE type, byte channel, params byte[] data) {
+        public Event(E_CTRL_TYPE type, byte channel, byte data) {
             Time = 0;
-            Data = new byte[data.Length + 2];
+            Data = new byte[3];
             Data[0] = (byte)((byte)E_EVENT_TYPE.CTRL_CHG | channel);
             Data[1] = (byte)type;
-            data.CopyTo(Data, 2);
+            Data[2] = data;
         }
 
         public Event(E_META_TYPE type, params byte[] data) {
             Time = 0;
-            Data = new byte[data.Length + 2];
+            Data = new byte[data.Length + 6];
             Data[0] = (byte)E_EVENT_TYPE.META;
             Data[1] = (byte)type;
-            data.CopyTo(Data, 2);
+            Data[2] = (byte)(data.Length & 0xFF);
+            Data[3] = (byte)((data.Length >> 8) & 0xFF);
+            Data[4] = (byte)((data.Length >> 16) & 0xFF);
+            Data[5] = (byte)((data.Length >> 24) & 0xFF);
+            data.CopyTo(Data, 6);
         }
 
         public void WriteMessage(MemoryStream ms) {
@@ -177,23 +189,23 @@ namespace MIDI {
         public static readonly Comparison<Event> Compare = new Comparison<Event>((a, b) => {
             var dTime = (long)a.Time - b.Time;
             if (0 == dTime) {
-                var aV = (uint)a.Type;
-                var bV = (uint)b.Type;
-                if (aV < 0xA0) {
-                    aV += 0x200;
-                    aV |= (uint)a.Channel << 10;
-                } else if (aV < 0xF0) {
-                    aV += 0x100;
-                    aV |= (uint)a.Channel << 10;
+                var aEv = (uint)a.Type;
+                var bEv = (uint)b.Type;
+                if (aEv < 0xA0) {
+                    aEv += 0x200;
+                    aEv |= (uint)a.Channel << 10;
+                } else if (aEv < 0xF0) {
+                    aEv += 0x100;
+                    aEv |= (uint)a.Channel << 10;
                 }
-                if (bV < 0xA0) {
-                    bV += 0x200;
-                    bV |= (uint)b.Channel << 10;
-                } else if (bV < 0xF0) {
-                    bV += 0x100;
-                    bV |= (uint)b.Channel << 10;
+                if (bEv < 0xA0) {
+                    bEv += 0x200;
+                    bEv |= (uint)b.Channel << 10;
+                } else if (bEv < 0xF0) {
+                    bEv += 0x100;
+                    bEv |= (uint)b.Channel << 10;
                 }
-                var dComp = (long)aV - bV;
+                var dComp = (long)aEv - bEv;
                 return 0 == dComp ? 0 : (0 < dComp ? 1 : -1);
             } else {
                 return 0 < dTime ? 1 : -1;
