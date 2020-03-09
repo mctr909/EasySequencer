@@ -45,6 +45,28 @@ enum struct E_EVENT_TYPE : byte {
     META = 0xFF
 };
 
+enum struct E_META_TYPE : byte {
+    SEQ_NO = 0x00,
+    TEXT = 0x01,
+    COMPOSER = 0x02,
+    SEQ_NAME = 0x03,
+    INST_NAME = 0x04,
+    LYRIC = 0x05,
+    MARKER = 0x06,
+    QUEUE = 0x07,
+    PRG_NAME = 0x08,
+    DEVICE = 0x09,
+    CH_PREFIX = 0x20,
+    PORT = 0x21,
+    TRACK_END = 0x2F,
+    TEMPO = 0x51,
+    SMPTE = 0x54,
+    MEASURE = 0x58,
+    KEY = 0x59,
+    META = 0x7F,
+    INVALID = 0xFF
+};
+
 /******************************************************************************/
 #pragma pack(push, 4)
 typedef struct INST_ID {

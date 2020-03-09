@@ -34,123 +34,17 @@ typedef struct {
 
 /******************************************************************************/
 LPBYTE        gpWaveTable = NULL;
-SYSTEM_VALUE  gSysValue;
-CHANNEL_VALUE **gppFileOutChValues = NULL;
-CHANNEL       **gppFileOutChParams = NULL;
-SAMPLER       **gppFileOutSamplers = NULL;
-
-LPBYTE        gpFileOutBuffer = NULL;
-FILE          *gfpFileOut = NULL;
-RIFF          gRiff;
-FMT_          gFmt;
 Channel       **gppChannels = NULL;
 CHANNEL_PARAM **gppChParam = NULL;
 
+SYSTEM_VALUE  gSysValue;
+int           gFileOutProgress = 0;
+FMT_          gFmt = { 0 };
+FILE          *gfpFileOut = NULL;
+
 /******************************************************************************/
-CHANNEL** wavfileout_GetChannelPtr() {
-    return gppFileOutChParams;
-}
-
-SAMPLER** wavfileout_GetSamplerPtr() {
-    return gppFileOutSamplers;
-}
-
-void wavfileout_Open(LPWSTR filePath, LPBYTE pWaveTable, uint sampleRate, uint bitRate) {
-    gpWaveTable = pWaveTable;
-    disposeSamplers(gppFileOutSamplers, gSysValue.samplerCount);
-    disposeChannels(gppFileOutChValues);
-    //
-    gSysValue.bufferLength = 512;
-    gSysValue.bufferCount = 16;
-    gSysValue.channelCount = 16;
-    gSysValue.samplerCount = 64;
-    gSysValue.sampleRate = sampleRate;
-    gSysValue.bits = bitRate;
-    gSysValue.deltaTime = 1.0 / gSysValue.sampleRate;
-    //
-    free(gpFileOutBuffer);
-    gpFileOutBuffer = (LPBYTE)malloc(gSysValue.bufferLength * gFmt.blockAlign);
-    //
-    free(gppFileOutChParams);
-    gppFileOutChValues = createChannels(&gSysValue);
-    gppFileOutChParams = (CHANNEL**)malloc(sizeof(CHANNEL*) * gSysValue.channelCount);
-    for (int i = 0; i < gSysValue.channelCount; ++i) {
-        gppFileOutChParams[i] = gppFileOutChValues[i]->pParam;
-    }
-    //
-    gppFileOutSamplers = createSamplers(gSysValue.samplerCount);
-    //
-    if (NULL != gfpFileOut) {
-        fclose(gfpFileOut);
-        gfpFileOut = NULL;
-    }
-    _wfopen_s(&gfpFileOut, filePath, L"wb");
-    //
-    gRiff.riff = 0x46464952;
-    gRiff.fileSize = 0;
-    gRiff.dataId = 0x45564157;
-    //
-    gFmt.chunkId = 0x20746D66;
-    gFmt.chunkSize = 16;
-    gFmt.formatId = 32 == bitRate ? 3 : 1;
-    gFmt.channels = 2;
-    gFmt.sampleRate = gSysValue.sampleRate;
-    gFmt.bitPerSample = (ushort)bitRate;
-    gFmt.blockAlign = gFmt.channels * gFmt.bitPerSample >> 3;
-    gFmt.bytePerSec = gFmt.sampleRate * gFmt.blockAlign;
-    gFmt.dataId = 0x61746164;
-    gFmt.dataSize = 0;
-    //
-    fwrite(&gRiff, sizeof(gRiff), 1, gfpFileOut);
-    fwrite(&gFmt, sizeof(gFmt), 1, gfpFileOut);
-}
-
-void wavfileout_Close() {
-    if (NULL == gfpFileOut) {
-        return;
-    }
-    //
-    gRiff.fileSize = gFmt.dataSize + sizeof(gFmt) + 4;
-    //
-    fseek(gfpFileOut, 0, SEEK_SET);
-    fwrite(&gRiff, sizeof(gRiff), 1, gfpFileOut);
-    fwrite(&gFmt, sizeof(gFmt), 1, gfpFileOut);
-    //
-    fclose(gfpFileOut);
-    gfpFileOut = NULL;
-}
-
-void wavfileout_Write() {
-    for (int s = 0; s < gSysValue.samplerCount; ++s) {
-        if (E_KEY_STATE_STANDBY == gppFileOutSamplers[s]->state) {
-            continue;
-        }
-        sampler(gppFileOutChValues, gppFileOutSamplers[s], gpWaveTable);
-    }
-
-    int buffSize = gSysValue.bufferLength * gFmt.blockAlign;
-    memset(gpFileOutBuffer, 0, buffSize);
-
-    switch (gSysValue.bits) {
-    case 16:
-        for (int c = 0; c < gSysValue.channelCount; ++c) {
-            channel16(gppFileOutChValues[c], (short*)gpFileOutBuffer);
-        }
-        break;
-    case 24:
-        for (int c = 0; c < gSysValue.channelCount; ++c) {
-            channel24(gppFileOutChValues[c], (int24*)gpFileOutBuffer);
-        }
-        break;
-    case 32:
-        for (int c = 0; c < gSysValue.channelCount; ++c) {
-            channel32(gppFileOutChValues[c], (float*)gpFileOutBuffer);
-        }
-        break;
-    }
-    fwrite(gpFileOutBuffer, buffSize, 1, gfpFileOut);
-    gFmt.dataSize += buffSize;
-}
+uint wavFileOutSend(Channel **ppCh, LPBYTE msg);
+void wavFileOutWrite(SAMPLER **ppSmpl, CHANNEL_VALUE **ppCh, LPBYTE outBuffer);
 
 /******************************************************************************/
 CHANNEL_PARAM** midi_GetChannelParamPtr() {
@@ -161,6 +55,10 @@ CHANNEL_PARAM** midi_GetChannelParamPtr() {
         }
     }
     return gppChParam;
+}
+
+int* midi_GetWavFileOutProgressPtr() {
+    return &gFileOutProgress;
 }
 
 void midi_CreateChannels(INST_LIST *list, SAMPLER **ppSmpl, CHANNEL **ppCh, uint samplerCount) {
@@ -199,4 +97,165 @@ void midi_Send(LPBYTE msg) {
         gppChannels[ch]->PitchBend(((msg[2] << 7) | msg[1]) - 8192);
         break;
     }
+}
+
+void midi_WavFileOut(
+    LPWSTR filePath,
+    LPBYTE pWaveTable,
+    INST_LIST *list,
+    uint sampleRate,
+    uint bitRate,
+    LPBYTE pEvents,
+    uint eventSize,
+    uint baseTick
+) {
+    gpWaveTable = pWaveTable;
+    // set system value
+    gSysValue.bufferLength = 512;
+    gSysValue.bufferCount = 16;
+    gSysValue.channelCount = 16;
+    gSysValue.samplerCount = 64;
+    gSysValue.sampleRate = sampleRate;
+    gSysValue.bits = bitRate;
+    gSysValue.deltaTime = 1.0 / gSysValue.sampleRate;
+    // riff wave format
+    RIFF riff;
+    riff.riff = 0x46464952;
+    riff.fileSize = 0;
+    riff.dataId = 0x45564157;
+    gFmt.chunkId = 0x20746D66;
+    gFmt.chunkSize = 16;
+    gFmt.formatId = 32 == bitRate ? 3 : 1;
+    gFmt.channels = 2;
+    gFmt.sampleRate = gSysValue.sampleRate;
+    gFmt.bitPerSample = (ushort)bitRate;
+    gFmt.blockAlign = gFmt.channels * gFmt.bitPerSample >> 3;
+    gFmt.bytePerSec = gFmt.sampleRate * gFmt.blockAlign;
+    gFmt.dataId = 0x61746164;
+    gFmt.dataSize = 0;
+    // allocate out buffer
+    LPBYTE pOutBuffer = (LPBYTE)malloc(gSysValue.bufferLength * gFmt.blockAlign);
+    // allocate samplers
+    SAMPLER **ppSamplers = createSamplers(gSysValue.samplerCount);
+    // allocate channels
+    Channel **ppChannels = (Channel**)malloc(sizeof(Channel*) * gSysValue.channelCount);
+    CHANNEL_VALUE **ppChValues = createChannels(&gSysValue);
+    for (int i = 0; i < gSysValue.channelCount; ++i) {
+        ppChannels[i] = new Channel(list, ppSamplers, ppChValues[i]->pParam, i, gSysValue.samplerCount);
+    }
+    // open file
+    if (NULL != gfpFileOut) {
+        fclose(gfpFileOut);
+        gfpFileOut = NULL;
+    }
+    _wfopen_s(&gfpFileOut, filePath, L"wb");
+    fwrite(&riff, sizeof(riff), 1, gfpFileOut);
+    fwrite(&gFmt, sizeof(gFmt), 1, gfpFileOut);
+    //********************************
+    // output wave
+    //********************************
+    uint curPos = 0;
+    double curTime = 0.0;
+    double bpm = 120.0;
+    double delta_sec = gSysValue.bufferLength * gSysValue.deltaTime;
+    while (curPos < eventSize) {
+        auto evTime = (double)(*(uint*)(pEvents + curPos)) / baseTick;
+        auto evValue = pEvents + curPos + 4;
+        while (curTime < evTime) {
+            wavFileOutWrite(ppSamplers, ppChValues, pOutBuffer);
+            curTime += bpm * delta_sec / 60.0;
+            gFileOutProgress = (int)curTime;
+        }
+        if (E_EVENT_TYPE::META == (E_EVENT_TYPE)evValue[0]) {
+            if (E_META_TYPE::TEMPO == (E_META_TYPE)evValue[1]) {
+                bpm = 60000000.0 / ((evValue[6] << 16) | (evValue[7] << 8) | evValue[8]);
+            }
+        }
+        auto readSize = wavFileOutSend(ppChannels, evValue);
+        if (0 == readSize) {
+            break;
+        }
+        curPos += readSize + 4;
+    }
+    // close file
+    riff.fileSize = gFmt.dataSize + sizeof(gFmt) + 4;
+    fseek(gfpFileOut, 0, SEEK_SET);
+    fwrite(&riff, sizeof(riff), 1, gfpFileOut);
+    fwrite(&gFmt, sizeof(gFmt), 1, gfpFileOut);
+    fclose(gfpFileOut);
+    // dispose
+    disposeSamplers(ppSamplers, gSysValue.samplerCount);
+    disposeChannels(ppChValues);
+    for (int i = 0; i < gSysValue.channelCount; ++i) {
+        delete ppChannels[i];
+        ppChannels[i] = NULL;
+    }
+    free(ppChannels);
+}
+
+/******************************************************************************/
+uint wavFileOutSend(Channel **ppCh, LPBYTE msg) {
+    auto type = (E_EVENT_TYPE)(*msg & 0xF0);
+    auto ch = *msg & 0x0F;
+    switch (type) {
+    case E_EVENT_TYPE::NOTE_OFF:
+        ppCh[ch]->NoteOff(msg[1], E_KEY_STATE_RELEASE);
+        return 3;
+    case E_EVENT_TYPE::NOTE_ON:
+        ppCh[ch]->NoteOn(msg[1], msg[2]);
+        return 3;
+    case E_EVENT_TYPE::POLY_KEY:
+        return 3;
+    case E_EVENT_TYPE::CTRL_CHG:
+        ppCh[ch]->CtrlChange(msg[1], msg[2]);
+        return 3;
+    case E_EVENT_TYPE::PROG_CHG:
+        ppCh[ch]->ProgramChange(msg[1]);
+        return 2;
+    case E_EVENT_TYPE::CH_PRESS:
+        return 2;
+    case E_EVENT_TYPE::PITCH:
+        ppCh[ch]->PitchBend(((msg[2] << 7) | msg[1]) - 8192);
+        return 3;
+    case E_EVENT_TYPE::SYS_EX:
+        if (E_EVENT_TYPE::META == (E_EVENT_TYPE)*msg) {
+            return (msg[2] | (msg[3] << 8) | (msg[4] << 16) | (msg[5] << 24)) + 6;
+        } else {
+            return (msg[1] | (msg[2] << 8) | (msg[3] << 16) | (msg[4] << 24)) + 5;
+        }
+    default:
+        return 0;
+    }
+}
+
+void wavFileOutWrite(SAMPLER **ppSmpl, CHANNEL_VALUE **ppCh, LPBYTE outBuffer) {
+    for (int s = 0; s < gSysValue.samplerCount; ++s) {
+        if (E_KEY_STATE_STANDBY == ppSmpl[s]->state) {
+            continue;
+        }
+        sampler(ppCh, ppSmpl[s], gpWaveTable);
+    }
+
+    int buffSize = gSysValue.bufferLength * gFmt.blockAlign;
+    memset(outBuffer, 0, buffSize);
+
+    switch (gSysValue.bits) {
+    case 16:
+        for (int c = 0; c < gSysValue.channelCount; ++c) {
+            channel16(ppCh[c], (short*)outBuffer);
+        }
+        break;
+    case 24:
+        for (int c = 0; c < gSysValue.channelCount; ++c) {
+            channel24(ppCh[c], (int24*)outBuffer);
+        }
+        break;
+    case 32:
+        for (int c = 0; c < gSysValue.channelCount; ++c) {
+            channel32(ppCh[c], (float*)outBuffer);
+        }
+        break;
+    }
+    fwrite(outBuffer, buffSize, 1, gfpFileOut);
+    gFmt.dataSize += buffSize;
 }
