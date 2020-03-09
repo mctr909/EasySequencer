@@ -91,7 +91,7 @@ namespace MIDI {
                 break;
             case E_EVENT_TYPE.SYS_EX:
                 var sysEx = Util.ReadBytes(ms);
-                Data = new byte[sysEx.Length + 1];
+                Data = new byte[sysEx.Length + 5];
                 Data[0] = status;
                 Data[1] = (byte)(sysEx.Length & 0xFF);
                 Data[2] = (byte)((sysEx.Length >> 8) & 0xFF);

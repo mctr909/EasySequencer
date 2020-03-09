@@ -84,7 +84,7 @@ namespace Player {
             //var sf2 = new SF2.SF2(dlsPath, mpWaveTable, fileSize);
             //sf2.GetInstList(mInstList);
 
-            waveout_SystemValues(SampleRate, 32, 1024, 8, CHANNEL_COUNT, SAMPLER_COUNT);
+            waveout_SystemValues(SampleRate, 32, 512, 16, CHANNEL_COUNT, SAMPLER_COUNT);
             mppChannels = waveout_GetChannelPtr();
             ppWaveOutSampler = waveout_GetSamplerPtr();
             midi_CreateChannels(InstList, ppWaveOutSampler, mppChannels, SAMPLER_COUNT);

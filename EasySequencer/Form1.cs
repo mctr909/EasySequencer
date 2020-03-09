@@ -34,12 +34,9 @@ namespace EasySequencer {
             mBmpActive = new Bitmap(picActive.Width, picActive.Height);
             mGActive = Graphics.FromImage(mBmpActive);
 
-            timer1.Interval = 16;
+            timer1.Interval = 25;
             timer1.Enabled = true;
             timer1.Start();
-
-            Width = 150;
-            Height = 100;
         }
 
         private void 開くOToolStripMenuItem_Click(object sender, EventArgs e) {

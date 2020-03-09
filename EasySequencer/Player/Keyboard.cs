@@ -122,7 +122,7 @@ namespace Player {
                 while (true) {
                     draw();
                     sendValue();
-                    Thread.Sleep(10);
+                    Thread.Sleep(25);
                 }
             });
         }
