@@ -8,6 +8,8 @@
 #pragma comment (lib, "winmm.lib")
 #pragma comment (lib, "WaveOut.lib")
 
+#define PARALLEL_MAX 4
+
 /******************************************************************************/
 #pragma pack(push, 4)
 typedef struct {
@@ -229,11 +231,14 @@ uint wavFileOutSend(Channel **ppCh, LPBYTE msg) {
 }
 
 void wavFileOutWrite(SAMPLER **ppSmpl, CHANNEL_VALUE **ppCh, LPBYTE outBuffer) {
-    for (int s = 0; s < gSysValue.samplerCount; ++s) {
-        if (E_KEY_STATE_STANDBY == ppSmpl[s]->state) {
-            continue;
+    for (int sj = 0; sj < gSysValue.samplerCount; sj += PARALLEL_MAX) {
+        #pragma loop(hint_parallel(PARALLEL_MAX))
+        for (int si = 0; si < PARALLEL_MAX; ++si) {
+            if (E_KEY_STATE_STANDBY == ppSmpl[si + sj]->state) {
+                continue;
+            }
+            sampler(ppCh, ppSmpl[si + sj], gpWaveTable);
         }
-        sampler(ppCh, ppSmpl[s], gpWaveTable);
     }
 
     int buffSize = gSysValue.bufferLength * gFmt.blockAlign;
@@ -241,18 +246,27 @@ void wavFileOutWrite(SAMPLER **ppSmpl, CHANNEL_VALUE **ppCh, LPBYTE outBuffer) {
 
     switch (gSysValue.bits) {
     case 16:
-        for (int c = 0; c < gSysValue.channelCount; ++c) {
-            channel16(ppCh[c], (short*)outBuffer);
+        for (int cj = 0; cj < gSysValue.bufferCount; cj += PARALLEL_MAX) {
+            #pragma loop(hint_parallel(PARALLEL_MAX))
+            for (int ci = 0; ci < PARALLEL_MAX; ++ci) {
+                channel16(ppCh[ci + cj], (short*)outBuffer);
+            }
         }
         break;
     case 24:
-        for (int c = 0; c < gSysValue.channelCount; ++c) {
-            channel24(ppCh[c], (int24*)outBuffer);
+        for (int cj = 0; cj < gSysValue.bufferCount; cj += PARALLEL_MAX) {
+            #pragma loop(hint_parallel(PARALLEL_MAX))
+            for (int ci = 0; ci < PARALLEL_MAX; ++ci) {
+                channel24(ppCh[ci + cj], (int24*)outBuffer);
+            }
         }
         break;
     case 32:
-        for (int c = 0; c < gSysValue.channelCount; ++c) {
-            channel32(ppCh[c], (float*)outBuffer);
+        for (int cj = 0; cj < gSysValue.bufferCount; cj += PARALLEL_MAX) {
+            #pragma loop(hint_parallel(PARALLEL_MAX))
+            for (int ci = 0; ci < PARALLEL_MAX; ++ci) {
+                channel32(ppCh[ci + cj], (float*)outBuffer);
+            }
         }
         break;
     }

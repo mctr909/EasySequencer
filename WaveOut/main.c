@@ -6,6 +6,8 @@
 
 #pragma comment (lib, "winmm.lib")
 
+#define PARALLEL_MAX 4
+
 /******************************************************************************/
 DWORD            gThreadId;
 CRITICAL_SECTION csBufferInfo;
@@ -229,28 +231,40 @@ DWORD writeWaveOutBuffer(LPVOID *param) {
         memset(outBuff, 0, gppWaveHdr[gWriteIndex]->dwBufferLength);
         //
         gActiveCount = 0;
-        for (int s = 0; s < gSysValue.samplerCount; ++s) {
-            if (E_KEY_STATE_STANDBY == gppSamplers[s]->state) {
-                continue;
+        for (int sj = 0; sj < gSysValue.samplerCount; sj += PARALLEL_MAX) {
+            #pragma loop(hint_parallel(PARALLEL_MAX))
+            for (int si = 0; si < PARALLEL_MAX; ++si) {
+                if (E_KEY_STATE_STANDBY == gppSamplers[si + sj]->state) {
+                    continue;
+                }
+                sampler(gppChValues, gppSamplers[si + sj], gpWaveTable);
+                gActiveCount++;
             }
-            sampler(gppChValues, gppSamplers[s], gpWaveTable);
-            gActiveCount++;
         }
         //
         switch (gSysValue.bits) {
         case 16:
-            for (int c = 0; c < gSysValue.channelCount; ++c) {
-                channel16(gppChValues[c], (short*)outBuff);
+            for (int cj = 0; cj < gSysValue.bufferCount; cj += PARALLEL_MAX) {
+                #pragma loop(hint_parallel(PARALLEL_MAX))
+                for (int ci = 0; ci < PARALLEL_MAX; ++ci) {
+                    channel16(gppChValues[ci + cj], (short*)outBuff);
+                }
             }
             break;
         case 24:
-            for (int c = 0; c < gSysValue.channelCount; ++c) {
-                channel24(gppChValues[c], (int24*)outBuff);
+            for (int cj = 0; cj < gSysValue.bufferCount; cj += PARALLEL_MAX) {
+                #pragma loop(hint_parallel(PARALLEL_MAX))
+                for (int ci = 0; ci < PARALLEL_MAX; ++ci) {
+                    channel24(gppChValues[ci + cj], (int24*)outBuff);
+                }
             }
             break;
         case 32:
-            for (int c = 0; c < gSysValue.channelCount; ++c) {
-                channel32(gppChValues[c], (float*)outBuff);
+            for (int cj = 0; cj < gSysValue.bufferCount; cj += PARALLEL_MAX) {
+                #pragma loop(hint_parallel(PARALLEL_MAX))
+                for (int ci = 0; ci < PARALLEL_MAX; ++ci) {
+                    channel32(gppChValues[ci + cj], (float*)outBuff);
+                }
             }
             break;
         }
