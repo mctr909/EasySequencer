@@ -91,11 +91,11 @@ namespace Player {
             mpWaveTable = waveout_LoadWaveTable(Marshal.StringToHGlobalAuto(dlsPath), out fileSize);
 
             mpInstList = (INST_LIST*)Marshal.AllocHGlobal(Marshal.SizeOf<INST_LIST>());
-            var dls = new DLS.DLS(mpWaveTable, fileSize);
-            dls.GetInstList(mpInstList);
+            //var dls = new DLS.DLS(mpWaveTable, fileSize);
+            //dls.GetInstList(mpInstList);
 
-            //var sf2 = new SF2.SF2(dlsPath, mpWaveTable, fileSize);
-            //sf2.GetInstList(mInstList);
+            var sf2 = new SF2.SF2(dlsPath, mpWaveTable, fileSize);
+            sf2.GetInstList(mpInstList);
 
             waveout_SystemValues(SampleRate, 32, 512, 16, CHANNEL_COUNT, SAMPLER_COUNT);
             mppChannels = waveout_GetChannelPtr();

@@ -29,7 +29,9 @@ namespace EasySequencer {
                     mInstList.Add(cat, new Dictionary<INST_ID, string>());
                     cmbCategory.Items.Add(cat);
                 }
-                mInstList[cat].Add(inst.id, nam);
+                if (!mInstList[cat].ContainsKey(inst.id)) {
+                    mInstList[cat].Add(inst.id, nam);
+                }
                 var chParam = mSender.Channel(mChNum);
                 if (chParam.InstId.isDrum == inst.id.isDrum &&
                     chParam.InstId.programNo == inst.id.programNo &&

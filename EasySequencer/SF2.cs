@@ -137,7 +137,7 @@ namespace SF2 {
         public short  genAmount;
     };
 
-    public struct PRESET {
+    public struct Layer {
         public byte   keyLo;
         public byte   keyHi;
         public byte   velLo;
@@ -216,7 +216,7 @@ namespace SF2 {
                 var pInst = list->ppInst[list->instCount];
                 list->instCount++;
                 //
-                pInst->id.isDrum = (byte)(preset.Key.isDrum == 0x80 ? 1 : 0);
+                pInst->id.isDrum = (byte)(0 < preset.Key.isDrum ? 1 : 0);
                 pInst->id.programNo = preset.Key.programNo;
                 pInst->id.bankMSB = preset.Key.bankMSB;
                 pInst->id.bankLSB = preset.Key.bankLSB;
@@ -280,8 +280,7 @@ namespace SF2 {
                         }
                         //
                         pRegion->waveInfo.gain = pv.gain * iv.gain / 32768.0;
-                        pRegion->waveInfo.delta = pv.fineTune * pv.coarseTune * iv.fineTune * iv.coarseTune
-                            * smpl.sampleRate / Sender.SampleRate;
+                        pRegion->waveInfo.delta = iv.fineTune * iv.coarseTune * smpl.sampleRate / Sender.SampleRate;
                         pRegion->env = iv.env;
                     }
                 }
@@ -462,11 +461,17 @@ namespace SF2 {
     }
 
     public class PDTA : RiffChunk {
-        public Dictionary<INST_ID, Tuple<string, PRESET[]>> PresetList
-            = new Dictionary<INST_ID, Tuple<string, PRESET[]>>();
+        public Dictionary<INST_ID, Tuple<string, Layer[]>> PresetList
+            = new Dictionary<INST_ID, Tuple<string, Layer[]>>();
         public List<Tuple<string, INSTRUMENT[]>> InstList
             = new List<Tuple<string, INSTRUMENT[]>>();
         public List<SHDR> SHDR = new List<SHDR>();
+
+        private struct Preset {
+            public INST_ID Id;
+            public string Name;
+            public Layer[] Layer;
+        }
 
         private List<PHDR> mPHDR = new List<PHDR>();
         private List<BAG> mPBAG = new List<BAG>();
@@ -483,6 +488,7 @@ namespace SF2 {
         }
 
         private void SetPresetList() {
+            var presetList = new List<Preset>();
             for (int i = 0; i < mPHDR.Count; i++) {
                 var preset = mPHDR[i];
                 int bagCount;
@@ -491,12 +497,12 @@ namespace SF2 {
                 } else {
                     bagCount = mPBAG.Count - preset.bagIndex;
                 }
-                var global = new PRESET();
+                var global = new Layer();
                 global.Init();
-                var list = new List<PRESET>();
+                var list = new List<Layer>();
                 for (int ib = 0, bagIdx = preset.bagIndex; ib < bagCount; ib++, bagIdx++) {
                     var bag = mPBAG[bagIdx];
-                    var pv = new PRESET();
+                    var pv = new Layer();
                     pv.Init();
                     int genCount;
                     if (bagIdx < mPBAG.Count - 1) {
@@ -613,19 +619,25 @@ namespace SF2 {
                         list.Add(pv);
                     }
                 }
-                var id = new INST_ID();
-                id.isDrum = (byte)(0 < (preset.bank & 0x80) ? 1 : 0);
-                id.bankMSB = (byte)(preset.bank & 0x7F);
-                id.programNo = (byte)preset.presetno;
-                if (!PresetList.ContainsKey(id)) {
-                    var name = Encoding.ASCII.GetString(preset.name);
-                    if (0 <= name.IndexOf("\0")) {
-                        name = name.Substring(0, name.IndexOf("\0"));
-                    }
-                    PresetList.Add(id,new Tuple<string, PRESET[]>(
-                        name.Replace("\0", "").TrimEnd(), list.ToArray()));
+                var name = Encoding.ASCII.GetString(preset.name);
+                if (0 <= name.IndexOf("\0")) {
+                    name = name.Substring(0, name.IndexOf("\0"));
                 }
+                var pre = new Preset();
+                pre.Id.isDrum = (byte)(0 < (preset.bank & 0x80) ? 1 : 0);
+                pre.Id.bankMSB = (byte)(preset.bank & 0x7F);
+                pre.Id.programNo = (byte)preset.presetno;
+                pre.Name = name.Replace("\0", "").TrimEnd();
+                pre.Layer = list.ToArray();
+                presetList.Add(pre);
             }
+
+            presetList.Sort(Compare);
+            foreach (var preset in presetList) {
+                PresetList.Add(preset.Id, new Tuple<string, Layer[]>(preset.Name, preset.Layer));
+            }
+            presetList.Clear();
+
             mPHDR.Clear();
             mPBAG.Clear();
             mPGEN.Clear();
@@ -790,6 +802,19 @@ namespace SF2 {
             mIGEN.Clear();
             mIMOD.Clear();
         }
+
+        private static readonly Comparison<Preset> Compare = new Comparison<Preset>((a, b) => {
+            var av = (long)a.Id.isDrum << 24;
+            av |= (long)a.Id.programNo << 16;
+            av |= (long)a.Id.bankMSB << 8;
+            av |= a.Id.bankLSB;
+            var bv = (long)b.Id.isDrum << 24;
+            bv |= (long)b.Id.programNo << 16;
+            bv |= (long)b.Id.bankMSB << 8;
+            bv |= b.Id.bankLSB;
+            var dComp = av - bv;
+            return 0 == dComp ? 0 : (0 < dComp ? 1 : -1);
+        });
 
         protected override void LoadChunk(IntPtr ptr, string chunkType, uint chunkSize) {
             switch (chunkType) {
