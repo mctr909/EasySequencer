@@ -220,7 +220,22 @@ namespace SF2 {
                 pInst->id.programNo = preset.Key.programNo;
                 pInst->id.bankMSB = preset.Key.bankMSB;
                 pInst->id.bankLSB = preset.Key.bankLSB;
-                pInst->pName = Marshal.StringToHGlobalAuto(preset.Value.Item1);
+                if (string.IsNullOrWhiteSpace(preset.Value.Item1)) {
+                    pInst->pName = Marshal.StringToHGlobalAuto(string.Format(
+                        "MSB:{0} LSB:{1} PROG:{2}",
+                        pInst->id.bankMSB.ToString("000"),
+                        pInst->id.bankLSB.ToString("000"),
+                        pInst->id.programNo.ToString("000")
+                    ));
+                } else {
+                    pInst->pName = Marshal.StringToHGlobalAuto(preset.Value.Item1);
+                }
+                if (0 < pInst->id.isDrum) {
+                    pInst->pCategory = Marshal.StringToHGlobalAuto("Drum set");
+                } else {
+                    pInst->pCategory = Marshal.StringToHGlobalAuto("");
+                }
+                //
                 pInst->regionCount = 0;
                 foreach (var pv in preset.Value.Item2) {
                     foreach (var iv in mPdta.InstList[pv.instId].Item2) {

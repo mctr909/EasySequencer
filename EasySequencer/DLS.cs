@@ -219,8 +219,25 @@ namespace DLS {
                 pInst->id.bankMSB = inst.Header.locale.bankMSB;
                 pInst->id.bankLSB = inst.Header.locale.bankLSB;
                 pInst->regionCount = inst.Regions.List.Count;
-                pInst->pName = Marshal.StringToHGlobalAuto(inst.Name);
-                pInst->pCategory = Marshal.StringToHGlobalAuto(inst.Category);
+                if (string.IsNullOrWhiteSpace(inst.Name)) {
+                    pInst->pName = Marshal.StringToHGlobalAuto(string.Format(
+                        "MSB:{0} LSB:{1} PROG:{2}",
+                        pInst->id.bankMSB.ToString("000"),
+                        pInst->id.bankLSB.ToString("000"),
+                        pInst->id.programNo.ToString("000")
+                    ));
+                } else {
+                    pInst->pName = Marshal.StringToHGlobalAuto(inst.Name);
+                }
+                if (string.IsNullOrWhiteSpace(inst.Category)) {
+                    if (0 < pInst->id.isDrum) {
+                        pInst->pCategory = Marshal.StringToHGlobalAuto("Drum set");
+                    } else {
+                        pInst->pCategory = Marshal.StringToHGlobalAuto("");
+                    }
+                } else {
+                    pInst->pCategory = Marshal.StringToHGlobalAuto(inst.Category);
+                }
                 pInst->ppRegions = (REGION**)Marshal.AllocHGlobal(sizeof(REGION*) * inst.Regions.List.Count);
 
                 #region instEnv
