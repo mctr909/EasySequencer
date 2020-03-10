@@ -165,12 +165,12 @@ namespace MIDI {
             // システムエクスクルーシブ
             case E_EVENT_TYPE.SYS_EX:
                 ms.WriteByte(Data[0]);
-                Util.WriteDelta(ms, (uint)(Data.Length - 2));
-                ms.Write(Data, 2, Data.Length - 2);
+                Util.WriteDelta(ms, (uint)(Data.Length - 5));
+                ms.Write(Data, 5, Data.Length - 5);
                 return;
             // メタデータ
             case E_EVENT_TYPE.META:
-                ms.WriteByte(Status);
+                ms.WriteByte(Data[0]);
                 Meta.Write(ms);
                 return;
             default:

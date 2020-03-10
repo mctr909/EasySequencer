@@ -29,41 +29,41 @@ namespace MIDI {
             return arr;
         }
 
-        public static void WriteUI16(MemoryStream ms, ushort value) {
-            ms.WriteByte((byte)(value >> 8));
-            ms.WriteByte((byte)(value & 0xFF));
+        public static void WriteUI16(Stream str, ushort value) {
+            str.WriteByte((byte)(value >> 8));
+            str.WriteByte((byte)(value & 0xFF));
         }
 
-        public static void WriteUI32(MemoryStream ms, uint value) {
-            ms.WriteByte((byte)((value >> 24) & 0xFF));
-            ms.WriteByte((byte)((value >> 16) & 0xFF));
-            ms.WriteByte((byte)((value >> 8) & 0xFF));
-            ms.WriteByte((byte)(value & 0xFF));
+        public static void WriteUI32(Stream str, uint value) {
+            str.WriteByte((byte)((value >> 24) & 0xFF));
+            str.WriteByte((byte)((value >> 16) & 0xFF));
+            str.WriteByte((byte)((value >> 8) & 0xFF));
+            str.WriteByte((byte)(value & 0xFF));
         }
 
-        public static void WriteDelta(MemoryStream ms, uint value) {
+        public static void WriteDelta(Stream str, uint value) {
             if (0 < (value >> 21)) {
-                ms.WriteByte((byte)(0x80 | ((value >> 21) & 0x7F)));
-                ms.WriteByte((byte)(0x80 | ((value >> 14) & 0x7F)));
-                ms.WriteByte((byte)(0x80 | ((value >> 7) & 0x7F)));
-                ms.WriteByte((byte)(value & 0x7F));
+                str.WriteByte((byte)(0x80 | ((value >> 21) & 0x7F)));
+                str.WriteByte((byte)(0x80 | ((value >> 14) & 0x7F)));
+                str.WriteByte((byte)(0x80 | ((value >> 7) & 0x7F)));
+                str.WriteByte((byte)(value & 0x7F));
                 return;
             }
 
             if (0 < (value >> 14)) {
-                ms.WriteByte((byte)(0x80 | ((value >> 14) & 0x7F)));
-                ms.WriteByte((byte)(0x80 | ((value >> 7) & 0x7F)));
-                ms.WriteByte((byte)(value & 0x7F));
+                str.WriteByte((byte)(0x80 | ((value >> 14) & 0x7F)));
+                str.WriteByte((byte)(0x80 | ((value >> 7) & 0x7F)));
+                str.WriteByte((byte)(value & 0x7F));
                 return;
             }
 
             if (0 < (value >> 7)) {
-                ms.WriteByte((byte)(0x80 | ((value >> 7) & 0x7F)));
-                ms.WriteByte((byte)(value & 0x7F));
+                str.WriteByte((byte)(0x80 | ((value >> 7) & 0x7F)));
+                str.WriteByte((byte)(value & 0x7F));
                 return;
             }
 
-            ms.WriteByte((byte)value);
+            str.WriteByte((byte)value);
             return;
         }
     }

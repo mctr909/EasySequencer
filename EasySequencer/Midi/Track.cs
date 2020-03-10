@@ -28,22 +28,19 @@ namespace MIDI {
             }
         }
 
-        public void Write(MemoryStream ms) {
+        public void Write(Stream str) {
             var temp = new MemoryStream();
             Util.WriteUI32(temp, 0x4D54726B);
             Util.WriteUI32(temp, 0);
-
             uint currentTime = 0;
             foreach (var ev in Events) {
                 Util.WriteDelta(temp, ev.Time - currentTime);
                 ev.WriteMessage(temp);
                 currentTime = ev.Time;
             }
-
             temp.Seek(4, SeekOrigin.Begin);
             Util.WriteUI32(temp, (uint)(temp.Length - 8));
-
-            temp.WriteTo(ms);
+            temp.WriteTo(str);
         }
 
         public List<Event> Copy(uint beginTime, uint endTime, byte lowNote, byte highNote) {
@@ -180,7 +177,5 @@ namespace MIDI {
             }
             return targetList;
         }
-
-
     }
 }

@@ -27,12 +27,12 @@ namespace MIDI {
                 }
             }
 
-            public void Write(MemoryStream ms) {
-                Util.WriteUI32(ms, 0x4D546864);
-                Util.WriteUI32(ms, 6);
-                Util.WriteUI16(ms, (ushort)Format);
-                Util.WriteUI16(ms, Tracks);
-                Util.WriteUI16(ms, Ticks);
+            public void Write(Stream str) {
+                Util.WriteUI32(str, 0x4D546864);
+                Util.WriteUI32(str, 6);
+                Util.WriteUI16(str, (ushort)Format);
+                Util.WriteUI16(str, Tracks);
+                Util.WriteUI16(str, Ticks);
             }
         }
 
@@ -80,6 +80,16 @@ namespace MIDI {
             }
 
             br.Close();
+        }
+
+        public void Write(string path) {
+            var str = new FileStream(path, FileMode.Create);
+            mHead.Write(str);
+            foreach (var tr in mTracks.Values) {
+                tr.Write(str);
+            }
+            str.Close();
+            str.Dispose();
         }
     }
 }
