@@ -143,33 +143,29 @@ namespace Player {
 
             if (0 <= knobY && knobY <= 15) {
                 mChannelNo = knobY;
-                //if (MuteButton.X <= mMouseDownPos.X && mMouseDownPos.X < MuteButton.X + MuteButton.Width) {
-                //    if (e.Button == MouseButtons.Right) {
-                //        if (mPlayer.Channel[knobY]->Enable) {
-                //            for (int i = 0; i < 16; ++i) {
-                //                if (knobY == i) {
-                //                    mPlayer.Channel[i]->Enable = false;
-                //                }
-                //                else {
-                //                    mPlayer.Channel[i]->Enable = true;
-                //                }
-                //            }
-                //        }
-                //        else {
-                //            for (int i = 0; i < 16; ++i) {
-                //                if (knobY == i) {
-                //                    mPlayer.Channel[i]->Enable = true;
-                //                }
-                //                else {
-                //                    mPlayer.Channel[i]->Enable = false;
-                //                }
-                //            }
-                //        }
-                //    }
-                //    else {
-                //        mPlayer.Channel[knobY]->Enable = !mPlayer.Channel[knobY]->Enable;
-                //    }
-                //}
+                if (MuteButton.X <= mMouseDownPos.X && mMouseDownPos.X < MuteButton.X + MuteButton.Width) {
+                    if (e.Button == MouseButtons.Right) {
+                        if (mPlayer.Channel(knobY).Enable) {
+                            for (int i = 0; i < 16; ++i) {
+                                if (knobY == i) {
+                                    mSender.MuteChannel(i, true);
+                                } else {
+                                    mSender.MuteChannel(i, false);
+                                }
+                            }
+                        } else {
+                            for (int i = 0; i < 16; ++i) {
+                                if (knobY == i) {
+                                    mSender.MuteChannel(i, false);
+                                } else {
+                                    mSender.MuteChannel(i, true);
+                                }
+                            }
+                        }
+                    } else {
+                        mSender.MuteChannel(knobY, mPlayer.Channel(knobY).Enable);
+                    }
+                }
                 if (0 <= knobX && knobX <= 7) {
                     mKnobNo = knobX;
                     mIsDrag = true;

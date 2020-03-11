@@ -8,6 +8,7 @@ using EasySequencer;
 
 namespace Player {
     unsafe public class Sender {
+        #region MidiSender.dll
         [DllImport("MidiSender.dll")]
         private static extern CHANNEL_PARAM** midi_GetChannelParamPtr();
         [DllImport("MidiSender.dll")]
@@ -27,7 +28,9 @@ namespace Player {
             uint eventSize,
             uint baseTick
         );
+        #endregion
 
+        #region WaveOut.dll
         [DllImport("WaveOut.dll")]
         private static extern IntPtr waveout_GetActiveSamplersPtr();
         [DllImport("WaveOut.dll")]
@@ -51,6 +54,7 @@ namespace Player {
         private static extern void waveout_Close();
         [DllImport("WaveOut.dll")]
         private static extern void waveout_Dispose();
+        #endregion
 
         public static readonly int SampleRate = 44100;
         public static readonly double DeltaTime = 1.0 / SampleRate;
@@ -58,9 +62,8 @@ namespace Player {
 
         public static int CHANNEL_COUNT = 16;
         public static int SAMPLER_COUNT = 64;
-        public static bool IsFileOutput {
-            get { return false; }
-        }
+        public static bool IsFileOutput { get; private set; }
+
         public static int ActiveCount {
             get { return Marshal.PtrToStructure<int>(mpActiveCountPtr); }
         }
@@ -85,18 +88,24 @@ namespace Player {
         public CHANNEL_PARAM Channel(int num) {
             return *mppChParam[num];
         }
+        public void MuteChannel(int num, bool mute) {
+            mppChParam[num]->Enable = !mute;
+        }
+        public void DrumChannel(int num, bool isDrum) {
+            mppChParam[num]->InstId.isDrum = (byte)(isDrum ? 1 : 0);
+        }
+        public void OscChannel(int num, bool isOsc) {
+            mppChParam[num]->IsOsc = isOsc;
+        }
 
         public Sender(string dlsPath) {
             uint fileSize = 0;
             mpWaveTable = waveout_LoadWaveTable(Marshal.StringToHGlobalAuto(dlsPath), out fileSize);
-
             mpInstList = (INST_LIST*)Marshal.AllocHGlobal(Marshal.SizeOf<INST_LIST>());
-            //var dls = new DLS.DLS(mpWaveTable, fileSize);
-            //dls.GetInstList(mpInstList);
-
-            var sf2 = new SF2.SF2(dlsPath, mpWaveTable, fileSize);
-            sf2.GetInstList(mpInstList);
-
+            var dls = new DLS.DLS(mpWaveTable, fileSize);
+            dls.GetInstList(mpInstList);
+            //var sf2 = new SF2.SF2(dlsPath, mpWaveTable, fileSize);
+            //sf2.GetInstList(mpInstList);
             waveout_SystemValues(SampleRate, 32, 512, 16, CHANNEL_COUNT, SAMPLER_COUNT);
             mppChannels = waveout_GetChannelPtr();
             mppSamplers = waveout_GetSamplerPtr();
@@ -112,6 +121,7 @@ namespace Player {
         }
 
         public void FileOut(string filePath, SMF smf) {
+            IsFileOutput = true;
             var prog = midi_GetWavFileOutProgressPtr();
             *(int*)prog = 0;
             var fm = new StatusWindow(smf.MaxTime, prog);
@@ -128,6 +138,7 @@ namespace Player {
                     midi_WavFileOut(Marshal.StringToHGlobalAuto(filePath), mpWaveTable, mpInstList,
                         44100, 16, (IntPtr)evPtr, (uint)evArr.Length, (uint)smf.Ticks);
                 }
+                IsFileOutput = false;
             });
         }
     }

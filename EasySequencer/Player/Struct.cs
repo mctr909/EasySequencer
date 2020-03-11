@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Runtime.InteropServices;
 
 namespace Player {
@@ -17,6 +16,20 @@ namespace Player {
         public byte programNo;
         public byte bankMSB;
         public byte bankLSB;
+    };
+
+    [StructLayout(LayoutKind.Sequential, Pack = 8)]
+    public struct FILTER {
+        private double cut;
+        private double res;
+        private double a00;
+        private double b00;
+        private double a01;
+        private double b01;
+        private double a10;
+        private double b10;
+        private double a11;
+        private double b11;
     };
 
     [StructLayout(LayoutKind.Sequential, Pack = 8)]
@@ -46,6 +59,7 @@ namespace Player {
     [StructLayout(LayoutKind.Sequential, Pack = 1)]
     public struct CHANNEL_PARAM {
         public bool Enable;
+        public bool IsOsc;
         public INST_ID InstId;
         public IntPtr Name;
         public byte Vol;
@@ -69,32 +83,77 @@ namespace Player {
 
     [StructLayout(LayoutKind.Sequential, Pack = 8)]
     public struct CHANNEL {
-        public double amp;
-        public double pitch;
-        public double holdDelta;
-        public double panLeft;
-        public double panRight;
-        public double cutoff;
-        public double resonance;
-        public double delaySend;
-        public double delayTime;
-        public double delayCross;
-        public double chorusSend;
-        public double chorusRate;
-        public double chorusDepth;
+        private double amp;
+        private double pitch;
+        private double holdDelta;
+        private double panLeft;
+        private double panRight;
+        private double cutoff;
+        private double resonance;
+        private double delaySend;
+        private double delayTime;
+        private double delayCross;
+        private double chorusSend;
+        private double chorusRate;
+        private double chorusDepth;
     }
 
     [StructLayout(LayoutKind.Sequential, Pack = 4)]
     public struct SAMPLER {
-        public ushort      channelNum;
-        public byte        noteNum;
+        public byte channelNum;
+        public byte noteNum;
         public E_KEY_STATE state;
-        public double      velocity;
-        public double      index;
-        public double      time;
-        public double      egAmp;
-        public ENVELOPE    envAmp;
-        public WAVE_INFO   waveInfo;
+        private bool isOsc;
+        private double velocity;
+        private double time;
+        private double index;
+        private double egAmp;
+        private double egPitch;
+        private ENVELOPE envAmp;
+        private ENVELOPE envPitch;
+        private ENVELOPE envCutoff;
+        private FILTER filter;
+        private WAVE_INFO waveInfo;
+        private byte waveForm0;
+        private byte waveForm1;
+        private byte waveForm2;
+        private byte waveForm3;
+        private byte waveForm4;
+        private byte waveForm5;
+        private byte waveForm6;
+        private byte waveForm7;
+        private double gain0;
+        private double gain1;
+        private double gain2;
+        private double gain3;
+        private double gain4;
+        private double gain5;
+        private double gain6;
+        private double gain7;
+        private double pitch0;
+        private double pitch1;
+        private double pitch2;
+        private double pitch3;
+        private double pitch4;
+        private double pitch5;
+        private double pitch6;
+        private double pitch7;
+        private double param0;
+        private double param1;
+        private double param2;
+        private double param3;
+        private double param4;
+        private double param5;
+        private double param6;
+        private double param7;
+        private double value0;
+        private double value1;
+        private double value2;
+        private double value3;
+        private double value4;
+        private double value5;
+        private double value6;
+        private double value7;
     };
 
     [StructLayout(LayoutKind.Sequential, Pack = 4)]
@@ -120,11 +179,5 @@ namespace Player {
         public IntPtr pName;
         public IntPtr pCategory;
         public REGION **ppRegions;
-    }
-
-    public struct INST_INFO {
-        public string name;
-        public string catgory;
-        public List<REGION> regions;
     }
 }
