@@ -6,7 +6,7 @@
 
 #pragma comment (lib, "winmm.lib")
 
-#define PARALLEL_MAX 4
+#define PARALLEL_MAX 16
 
 /******************************************************************************/
 DWORD            gThreadId;
@@ -230,17 +230,22 @@ DWORD writeWaveOutBuffer(LPVOID *param) {
         LPBYTE outBuff = gppWaveHdr[gWriteIndex]->lpData;
         memset(outBuff, 0, gppWaveHdr[gWriteIndex]->dwBufferLength);
         //
-        gActiveCount = 0;
+        int activeCount = 0;
         for (int sj = 0; sj < gSysValue.samplerCount; sj += PARALLEL_MAX) {
             #pragma loop(hint_parallel(PARALLEL_MAX))
             for (int si = 0; si < PARALLEL_MAX; ++si) {
                 if (E_KEY_STATE_STANDBY == gppSamplers[si + sj]->state) {
                     continue;
                 }
-                sampler(gppChValues, gppSamplers[si + sj], gpWaveTable);
-                gActiveCount++;
+                if (gppSamplers[si + sj]->isOsc) {
+                    oscillator(gppChValues, gppSamplers[si + sj], gpWaveTable);
+                } else {
+                    sampler(gppChValues, gppSamplers[si + sj], gpWaveTable);
+                }
+                activeCount++;
             }
         }
+        gActiveCount = activeCount;
         //
         switch (gSysValue.bits) {
         case 16:

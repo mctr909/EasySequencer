@@ -8,7 +8,7 @@
 #pragma comment (lib, "winmm.lib")
 #pragma comment (lib, "WaveOut.lib")
 
-#define PARALLEL_MAX 4
+#define PARALLEL_MAX 16
 
 /******************************************************************************/
 #pragma pack(push, 4)
@@ -237,7 +237,11 @@ void wavFileOutWrite(SAMPLER **ppSmpl, CHANNEL_VALUE **ppCh, LPBYTE outBuffer) {
             if (E_KEY_STATE_STANDBY == ppSmpl[si + sj]->state) {
                 continue;
             }
-            sampler(ppCh, ppSmpl[si + sj], gpWaveTable);
+            if (ppSmpl[si + sj]->isOsc) {
+                oscillator(ppCh, ppSmpl[si + sj], gpWaveTable);
+            } else {
+                sampler(ppCh, ppSmpl[si + sj], gpWaveTable);
+            }
         }
     }
 
@@ -270,6 +274,7 @@ void wavFileOutWrite(SAMPLER **ppSmpl, CHANNEL_VALUE **ppCh, LPBYTE outBuffer) {
         }
         break;
     }
+
     fwrite(outBuffer, buffSize, 1, gfpFileOut);
     gFmt.dataSize += buffSize;
 }

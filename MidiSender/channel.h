@@ -108,6 +108,7 @@ typedef struct INST_LIST {
 #pragma pack(push, 1)
 typedef struct CHANNEL_PARAM {
     Bool Enable;
+    Bool IsOsc;
     INST_ID InstId;
     byte* Name;
     byte Vol;
@@ -159,7 +160,6 @@ public:
     void NoteOn(byte noteNo, byte velocity);
     void CtrlChange(byte type, byte b1);
     void ProgramChange(byte value);
-    void ProgramChange(byte value, bool isDrum);
     void PitchBend(short pitch);
 
 private:

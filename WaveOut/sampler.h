@@ -16,6 +16,13 @@ enum E_CH_STATE {
     E_CH_STATE_ACTIVE
 };
 
+enum E_WAVE_FORM {
+    E_WAVE_FORM_SINE,
+    E_WAVE_FORM_PWM,
+    E_WAVE_FORM_SAW,
+    E_WAVE_FORM_TRI
+};
+
 /******************************************************************************/
 #pragma pack(push, 8)
 typedef struct ENVELOPE {
@@ -75,15 +82,25 @@ typedef struct CHANNEL {
 
 #pragma pack(push, 4)
 typedef struct SAMPLER {
-    ushort channelNum;
+    byte channelNum;
     byte noteNum;
     byte state;
+    Bool isOsc;
     double velocity;
-    double index;
     double time;
+    double index;
     double egAmp;
+    double egPitch;
     ENVELOPE envAmp;
+    ENVELOPE envPitch;
+    ENVELOPE envCutoff;
+    FILTER filter;
     WAVE_INFO waveInfo;
+    byte waveForm[8];
+    double gain[8];
+    double pitch[8];
+    double param[8];
+    double value[8];
 } SAMPLER;
 #pragma pack(pop)
 
@@ -96,9 +113,15 @@ typedef struct CHANNEL_VALUE {
     double amp;
     double panL;
     double panR;
-    double choLfo[3];
-    double choPanL[3];
-    double choPanR[3];
+    double choLfoU;
+    double choLfoV;
+    double choLfoW;
+    double choPanUL;
+    double choPanUR;
+    double choPanVL;
+    double choPanVR;
+    double choPanWL;
+    double choPanWR;
     double *pDelTapL;
     double *pDelTapR;
     double *pWave;
@@ -117,6 +140,7 @@ extern "C" {
     __declspec(dllexport) void disposeSamplers(SAMPLER** ppSmpl, uint count);
     __declspec(dllexport) void disposeChannels(CHANNEL_VALUE**ppCh);
     __declspec(dllexport) inline void sampler(CHANNEL_VALUE **ppCh, SAMPLER *pSmpl, byte *pWaveBuffer);
+    __declspec(dllexport) inline void oscillator(CHANNEL_VALUE **ppCh, SAMPLER *pSmpl, byte *pWaveBuffer);
     __declspec(dllexport) inline void channel32(CHANNEL_VALUE *pCh, float *waveBuff);
     __declspec(dllexport) inline void channel24(CHANNEL_VALUE *pCh, int24 *waveBuff);
     __declspec(dllexport) inline void channel16(CHANNEL_VALUE *pCh, short *waveBuff);
