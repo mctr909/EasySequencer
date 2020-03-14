@@ -24,6 +24,9 @@ SAMPLER** createSamplers(uint count) {
     for (uint i = 0; i < count; ++i) {
         samplers[i] = (SAMPLER*)malloc(sizeof(SAMPLER));
         memset(samplers[i], 0, sizeof(SAMPLER));
+        for (uint w = 0; w < 8; w++) {
+            samplers[i]->value[w] = ((8.0 * i) + w) / (8 * count);
+        }
     }
     return samplers;
 }
@@ -206,7 +209,11 @@ inline void oscillator(CHANNEL_VALUE **ppCh, SAMPLER *pSmpl, byte *pWaveBuffer) 
                 break;
             case E_WAVE_FORM_SAW:
                 for (int o = 0; o < 16; o++) {
-                    sumWave += gain * (*value < 0.5) ? (*value * 2.0) : (*value * 2.0 - 2.0);
+                    if (*value < 0.5) {
+                        sumWave += gain * *value * 2.0;
+                    } else {
+                        sumWave += gain * (*value * 2.0 - 2.0);
+                    }
                     *value += delta;
                     if (1.0 <= *value) {
                         *value -= 1.0;

@@ -1,3 +1,4 @@
+#include <math.h>
 #include "channel.h"
 #include "channel_const.h"
 
@@ -111,20 +112,6 @@ Channel::NoteOn(byte noteNo, byte velocity) {
             pSmpl->velocity = velocity / 127.0;
             pSmpl->egAmp = 0.0;
             pSmpl->envAmp = pRegion->env;
-
-            pSmpl->isOsc = Param.IsOsc;
-            pSmpl->envPitch = ENVELOPE();
-            pSmpl->envCutoff = ENVELOPE();
-            pSmpl->egPitch = 1.0;
-            pSmpl->filter.cut = 1.0;
-            pSmpl->filter.res = 0.0;
-            for (int w = 0; w < 8; w++) {
-                pSmpl->waveForm[w] = E_WAVE_FORM_SAW;
-                pSmpl->gain[w] = w == 0 ? 1.0 : 0.0;
-                pSmpl->pitch[w] = 8.1758 * SemiTone[noteNo];
-                pSmpl->param[w] = 0.0;
-                pSmpl->value[w] = 0.0;
-            }
 
             pSmpl->state = E_KEY_STATE_PRESS;
             break;
