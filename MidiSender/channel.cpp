@@ -38,7 +38,7 @@ Channel::AllReset() {
     mpChannel->chorusDepth = 0.005;
     mpChannel->delayTime = 0.2;
     mpChannel->delayCross = 0.375;
-    mpChannel->holdDelta = DeltaTime;
+    mpChannel->holdDelta = DeltaTime * 0.25;
 
     mRpnLSB = 0xFF;
     mRpnMSB = 0xFF;

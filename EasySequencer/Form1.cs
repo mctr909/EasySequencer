@@ -23,11 +23,11 @@ namespace EasySequencer {
 
         private void Form1_Load(object sender, EventArgs e) {
             //mDlsFilePath = Path.GetDirectoryName(Application.ExecutablePath) + "\\AnyConv.com__Equinox_Grand_Pianos.sf2";
-            //mDlsFilePath = Path.GetDirectoryName(Application.ExecutablePath) + "\\gs.sf2";
+            //mDlsFilePath = Path.GetDirectoryName(Application.ExecutablePath) + "\\gm.sf2";
             mDlsFilePath = Path.GetDirectoryName(Application.ExecutablePath) + "\\gm.dls";
             mMidiSender = new Sender(mDlsFilePath);
             mPlayer = new Player.Player(mMidiSender);
-            mKeyboard = new Keyboard(picKey, mMidiSender, mPlayer);
+            mKeyboard = new Keyboard(picKeyBack, mMidiSender, mPlayer);
 
             setSize();
 
@@ -145,8 +145,8 @@ namespace EasySequencer {
             hsbSeek.Left = 0;
             pnlPlayer.Width = hsbSeek.Width + 4;
 
-            Width = Properties.Resources.keyboard.Width + 50;
-            Height = Properties.Resources.keyboard.Height + pnlPlayer.Height + 122;
+            Width = Properties.Resources.Keyboard.Width + 50;
+            Height = Properties.Resources.Keyboard.Height + pnlPlayer.Height + 122;
         }
 
         private void timer1_Tick(object sender, EventArgs e) {

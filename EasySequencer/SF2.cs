@@ -463,8 +463,10 @@ namespace SF2 {
     public class PDTA : RiffChunk {
         public Dictionary<INST_ID, Tuple<string, Layer[]>> PresetList
             = new Dictionary<INST_ID, Tuple<string, Layer[]>>();
+
         public List<Tuple<string, INSTRUMENT[]>> InstList
             = new List<Tuple<string, INSTRUMENT[]>>();
+
         public List<SHDR> SHDR = new List<SHDR>();
 
         private struct Preset {
@@ -497,128 +499,26 @@ namespace SF2 {
                 } else {
                     bagCount = mPBAG.Count - preset.bagIndex;
                 }
+
                 var global = new Layer();
                 global.Init();
                 var list = new List<Layer>();
                 for (int ib = 0, bagIdx = preset.bagIndex; ib < bagCount; ib++, bagIdx++) {
                     var bag = mPBAG[bagIdx];
-                    var pv = new Layer();
-                    pv.Init();
                     int genCount;
                     if (bagIdx < mPBAG.Count - 1) {
                         genCount = mPBAG[bagIdx + 1].genIndex - bag.genIndex;
                     } else {
                         genCount = mPGEN.Count - bag.genIndex;
                     }
-                    for (int j = 0, genIdx = bag.genIndex; j < genCount; j++, genIdx++) {
-                        var gen = mPGEN[genIdx];
-                        switch (gen.genOper) {
-                        case E_OPER.KEY_RANGE:
-                            pv.keyLo = (byte)(gen.genAmount & 0x7F);
-                            pv.keyHi = (byte)((gen.genAmount >> 8) & 0x7F);
-                            break;
-                        case E_OPER.VEL_RANGE:
-                            pv.velLo = (byte)(gen.genAmount & 0x7F);
-                            pv.velHi = (byte)((gen.genAmount >> 8) & 0x7F);
-                            break;
-
-                        case E_OPER.INITIAL_ATTENUATION:
-                            pv.gain = Math.Pow(10.0, -gen.genAmount / 200.0);
-                            break;
-                        case E_OPER.PAN:
-                            pv.pan = gen.genAmount / 500.0;
-                            break;
-                        case E_OPER.INSTRUMENT:
-                            pv.instId = gen.genAmount;
-                            break;
-                        case E_OPER.COARSE_TUNE:
-                            pv.coarseTune = Math.Pow(2.0, gen.genAmount / 120.0);
-                            break;
-                        case E_OPER.FINETUNE:
-                            pv.fineTune = Math.Pow(2.0, gen.genAmount / 1200.0);
-                            break;
-                        case E_OPER.OVERRIDING_ROOTKEY:
-                            pv.rootKey = gen.genAmount;
-                            break;
-
-                        case E_OPER.ENV_VOL__ATTACK:
-                            pv.env.deltaA = Sender.EnvelopeSpeed * Sender.DeltaTime
-                                / Math.Pow(2.0, gen.genAmount / 1200.0);
-                            break;
-                        case E_OPER.ENV_VOL__HOLD:
-                            pv.env.hold = Math.Pow(2.0, gen.genAmount / 1200.0);
-                            break;
-                        case E_OPER.ENV_VOL__DECAY:
-                            pv.env.deltaD = Sender.EnvelopeSpeed * Sender.DeltaTime
-                                / Math.Pow(2.0, gen.genAmount / 1200.0);
-                            break;
-                        case E_OPER.ENV_VOL__SUSTAIN:
-                            pv.env.levelS = Math.Pow(10.0, -(ushort)gen.genAmount / 200.0);
-                            break;
-                        case E_OPER.ENV_VOL__RELEASE:
-                            pv.env.deltaR = Sender.EnvelopeSpeed * Sender.DeltaTime
-                                / Math.Pow(2.0, gen.genAmount / 1200.0);
-                            break;
-
-                        default:
-                            break;
-                        }
-                    }
-                    if (pv.instId < 0) {
-                        global = pv;
+                    var v = GetPresetGen(global, bag.genIndex, genCount);
+                    if (v.instId < 0) {
+                        global = v;
                     } else {
-                        // set global value
-                        if (pv.rootKey < 0) {
-                            pv.rootKey = global.rootKey;
-                        }
-                        if (pv.coarseTune == 0.0) {
-                            pv.coarseTune = global.coarseTune;
-                        }
-                        if (pv.fineTune == 0.0) {
-                            pv.fineTune = global.fineTune;
-                        }
-                        if (pv.env.deltaA <= 0.0) {
-                            pv.env.deltaA = global.env.deltaA;
-                        }
-                        if (pv.env.deltaD <= 0.0) {
-                            pv.env.deltaD = global.env.deltaD;
-                        }
-                        if (pv.env.deltaR <= 0.0) {
-                            pv.env.deltaR = global.env.deltaR;
-                        }
-                        if (pv.env.hold < 0.0) {
-                            pv.env.hold = global.env.hold;
-                        }
-                        if (pv.env.levelS < 0.0) {
-                            pv.env.levelS = global.env.levelS;
-                        }
-                        // set default value
-                        if (pv.coarseTune == 0.0) {
-                            pv.coarseTune = 1.0;
-                        }
-                        if (pv.fineTune == 0.0) {
-                            pv.fineTune = 1.0;
-                        }
-                        if (pv.env.deltaA <= 0.0) {
-                            pv.env.deltaA = 1000 * Sender.EnvelopeSpeed * Sender.DeltaTime;
-                        }
-                        if (pv.env.deltaD <= 0.0) {
-                            pv.env.deltaD = 1000 * Sender.EnvelopeSpeed * Sender.DeltaTime;
-                        }
-                        if (pv.env.deltaR <= 0.0) {
-                            pv.env.deltaR = 1000 * Sender.EnvelopeSpeed * Sender.DeltaTime;
-                        }
-                        if (pv.env.hold < 0.0) {
-                            pv.env.hold = 0.0;
-                        }
-                        if (pv.env.levelS < 0.0) {
-                            pv.env.levelS = 1.0;
-                        }
-                        pv.env.hold += Sender.EnvelopeSpeed * Sender.DeltaTime / pv.env.deltaA;
-                        //
-                        list.Add(pv);
+                        list.Add(v);
                     }
                 }
+
                 var name = Encoding.ASCII.GetString(preset.name);
                 if (0 <= name.IndexOf("\0")) {
                     name = name.Substring(0, name.IndexOf("\0"));
@@ -653,6 +553,7 @@ namespace SF2 {
                 } else {
                     bagCount = mIBAG.Count - inst.bagIndex;
                 }
+
                 var global = new INSTRUMENT();
                 global.Init();
                 var list = new List<INSTRUMENT>();
@@ -664,133 +565,14 @@ namespace SF2 {
                     } else {
                         genCount = mIGEN.Count - bag.genIndex;
                     }
-                    var iv = new INSTRUMENT();
-                    iv.Init();
-                    for (int j = 0, genIdx = bag.genIndex; j < genCount; j++, genIdx++) {
-                        var gen = mIGEN[genIdx];
-                        switch (gen.genOper) {
-                        case E_OPER.KEY_RANGE:
-                            iv.keyLo = (byte)(gen.genAmount & 0x7F);
-                            iv.keyHi = (byte)((gen.genAmount >> 8) & 0x7F);
-                            break;
-                        case E_OPER.VEL_RANGE:
-                            iv.velLo = (byte)(gen.genAmount & 0x7F);
-                            iv.velHi = (byte)((gen.genAmount >> 8) & 0x7F);
-                            break;
-
-                        case E_OPER.INITIAL_ATTENUATION:
-                            iv.gain = Math.Pow(10.0, -gen.genAmount / 200.0);
-                            break;
-                        case E_OPER.PAN:
-                            iv.pan = gen.genAmount / 500.0;
-                            break;
-                        case E_OPER.COARSE_TUNE:
-                            iv.coarseTune = Math.Pow(2.0, gen.genAmount / 120.0);
-                            break;
-                        case E_OPER.FINETUNE:
-                            iv.fineTune = Math.Pow(2.0, gen.genAmount / 1200.0);
-                            break;
-                        case E_OPER.OVERRIDING_ROOTKEY:
-                            iv.rootKey = gen.genAmount;
-                            break;
-
-                        case E_OPER.SAMPLE_MODES:
-                            iv.loopEnable = 0 < (gen.genAmount & 1);
-                            break;
-                        case E_OPER.SAMPLE_ID:
-                            iv.sampleId = gen.genAmount;
-                            break;
-
-                        case E_OPER.OFFSET_ADDRS__START_LSB:
-                            iv.waveBegin |= (ushort)gen.genAmount;
-                            break;
-                        case E_OPER.OFFSET_ADDRS__START_MSB:
-                            iv.waveBegin |= (uint)((ushort)gen.genAmount << 16);
-                            break;
-                        case E_OPER.OFFSET_ADDRS__END_LSB:
-                            iv.waveEnd |= (ushort)gen.genAmount;
-                            break;
-                        case E_OPER.OFFSET_ADDRS__END_MSB:
-                            iv.waveEnd |= (uint)((ushort)gen.genAmount << 16);
-                            break;
-
-                        case E_OPER.ENV_VOL__ATTACK:
-                            iv.env.deltaA = Sender.EnvelopeSpeed * Sender.DeltaTime
-                                / Math.Pow(2.0, gen.genAmount / 1200.0);
-                            break;
-                        case E_OPER.ENV_VOL__HOLD:
-                            iv.env.hold = Math.Pow(2.0, gen.genAmount / 1200.0);
-                            break;
-                        case E_OPER.ENV_VOL__DECAY:
-                            iv.env.deltaD = Sender.EnvelopeSpeed * Sender.DeltaTime
-                                / Math.Pow(2.0, gen.genAmount / 1200.0);
-                            break;
-                        case E_OPER.ENV_VOL__SUSTAIN:
-                            iv.env.levelS = Math.Pow(10.0, -(ushort)gen.genAmount / 200.0);
-                            break;
-                        case E_OPER.ENV_VOL__RELEASE:
-                            iv.env.deltaR = Sender.EnvelopeSpeed * Sender.DeltaTime
-                                / Math.Pow(2.0, gen.genAmount / 1200.0);
-                            break;
-                        default:
-                            break;
-                        }
-                    }
-                    if (iv.sampleId < 0) {
-                        global = iv;
+                    var v = GetInstGen(global, bag.genIndex, genCount);
+                    if (v.sampleId < 0) {
+                        global = v;
                     } else {
-                        // set global value
-                        if (iv.rootKey < 0) {
-                            iv.rootKey = global.rootKey;
-                        }
-                        if (iv.coarseTune == 0.0) {
-                            iv.coarseTune = global.coarseTune;
-                        }
-                        if (iv.fineTune == 0.0) {
-                            iv.fineTune = global.fineTune;
-                        }
-                        if (iv.env.deltaA <= 0.0) {
-                            iv.env.deltaA = global.env.deltaA;
-                        }
-                        if (iv.env.deltaD <= 0.0) {
-                            iv.env.deltaD = global.env.deltaD;
-                        }
-                        if (iv.env.deltaR <= 0.0) {
-                            iv.env.deltaR = global.env.deltaR;
-                        }
-                        if (iv.env.hold < 0.0) {
-                            iv.env.hold = global.env.hold;
-                        }
-                        if (iv.env.levelS < 0.0) {
-                            iv.env.levelS = global.env.levelS;
-                        }
-                        // set default value
-                        if (iv.coarseTune == 0.0) {
-                            iv.coarseTune = 1.0;
-                        }
-                        if (iv.fineTune == 0.0) {
-                            iv.fineTune = 1.0;
-                        }
-                        if (iv.env.deltaA <= 0.0) {
-                            iv.env.deltaA = 1000 * Sender.EnvelopeSpeed * Sender.DeltaTime;
-                        }
-                        if (iv.env.deltaD <= 0.0) {
-                            iv.env.deltaD = 1000 * Sender.EnvelopeSpeed * Sender.DeltaTime;
-                        }
-                        if (iv.env.deltaR <= 0.0) {
-                            iv.env.deltaR = 1000 * Sender.EnvelopeSpeed * Sender.DeltaTime;
-                        }
-                        if (iv.env.hold < 0.0) {
-                            iv.env.hold = 0.0;
-                        }
-                        if (iv.env.levelS < 0.0) {
-                            iv.env.levelS = 1.0;
-                        }
-                        iv.env.hold += Sender.EnvelopeSpeed * Sender.DeltaTime / iv.env.deltaA;
-                        //
-                        list.Add(iv);
+                        list.Add(v);
                     }
                 }
+
                 var name = Encoding.ASCII.GetString(inst.name);
                 if (0 <= name.IndexOf("\0")) {
                     name = name.Substring(0, name.IndexOf("\0"));
@@ -801,6 +583,256 @@ namespace SF2 {
             mIBAG.Clear();
             mIGEN.Clear();
             mIMOD.Clear();
+        }
+
+        private Layer GetPresetGen(Layer global, int begin, int count) {
+            var v = new Layer();
+            v.Init();
+
+            for (int i = 0, genIdx = begin; i < count; i++, genIdx++) {
+                var g = mPGEN[genIdx];
+
+                switch (g.genOper) {
+                case E_OPER.KEY_RANGE:
+                    v.keyLo = (byte)(g.genAmount & 0x7F);
+                    v.keyHi = (byte)((g.genAmount >> 8) & 0x7F);
+                    break;
+                case E_OPER.VEL_RANGE:
+                    v.velLo = (byte)(g.genAmount & 0x7F);
+                    v.velHi = (byte)((g.genAmount >> 8) & 0x7F);
+                    break;
+
+                case E_OPER.INITIAL_ATTENUATION:
+                    v.gain = Math.Pow(10.0, -g.genAmount / 200.0);
+                    break;
+                case E_OPER.PAN:
+                    v.pan = g.genAmount / 500.0;
+                    break;
+                case E_OPER.INSTRUMENT:
+                    v.instId = g.genAmount;
+                    break;
+                case E_OPER.COARSE_TUNE:
+                    v.coarseTune = Math.Pow(2.0, g.genAmount / 120.0);
+                    break;
+                case E_OPER.FINETUNE:
+                    v.fineTune = Math.Pow(2.0, g.genAmount / 1200.0);
+                    break;
+                case E_OPER.OVERRIDING_ROOTKEY:
+                    v.rootKey = g.genAmount;
+                    break;
+
+                case E_OPER.ENV_VOL__ATTACK:
+                    v.env.deltaA = Sender.EnvelopeSpeed * Sender.DeltaTime
+                        / Math.Pow(2.0, g.genAmount / 1200.0);
+                    break;
+                case E_OPER.ENV_VOL__HOLD:
+                    v.env.hold = Math.Pow(2.0, g.genAmount / 1200.0);
+                    break;
+                case E_OPER.ENV_VOL__DECAY:
+                    v.env.deltaD = Sender.EnvelopeSpeed * Sender.DeltaTime
+                        / Math.Pow(2.0, g.genAmount / 1200.0);
+                    break;
+                case E_OPER.ENV_VOL__SUSTAIN:
+                    v.env.levelS = Math.Pow(10.0, -(ushort)g.genAmount / 200.0);
+                    break;
+                case E_OPER.ENV_VOL__RELEASE:
+                    v.env.deltaR = Sender.EnvelopeSpeed * Sender.DeltaTime
+                        / Math.Pow(2.0, g.genAmount / 1200.0);
+                    break;
+
+                default:
+                    break;
+                }
+            }
+
+            /**** set global value ****/
+            if (0 <= v.instId) {
+                if (v.rootKey < 0) {
+                    v.rootKey = global.rootKey;
+                }
+                if (v.coarseTune == 0.0) {
+                    v.coarseTune = global.coarseTune;
+                }
+                if (v.fineTune == 0.0) {
+                    v.fineTune = global.fineTune;
+                }
+                if (v.env.deltaA <= 0.0) {
+                    v.env.deltaA = global.env.deltaA;
+                }
+                if (v.env.deltaD <= 0.0) {
+                    v.env.deltaD = global.env.deltaD;
+                }
+                if (v.env.deltaR <= 0.0) {
+                    v.env.deltaR = global.env.deltaR;
+                }
+                if (v.env.hold < 0.0) {
+                    v.env.hold = global.env.hold;
+                }
+                if (v.env.levelS < 0.0) {
+                    v.env.levelS = global.env.levelS;
+                }
+            }
+
+            /**** set default value ****/
+            {
+                if (v.coarseTune == 0.0) {
+                    v.coarseTune = 1.0;
+                }
+                if (v.fineTune == 0.0) {
+                    v.fineTune = 1.0;
+                }
+                if (v.env.deltaA <= 0.0) {
+                    v.env.deltaA = 1000 * Sender.EnvelopeSpeed * Sender.DeltaTime;
+                }
+                if (v.env.deltaD <= 0.0) {
+                    v.env.deltaD = 1000 * Sender.EnvelopeSpeed * Sender.DeltaTime;
+                }
+                if (v.env.deltaR <= 0.0) {
+                    v.env.deltaR = 1000 * Sender.EnvelopeSpeed * Sender.DeltaTime;
+                }
+                if (v.env.hold < 0.0) {
+                    v.env.hold = 0.0;
+                }
+                if (v.env.levelS < 0.0) {
+                    v.env.levelS = 1.0;
+                }
+                v.env.hold += Sender.EnvelopeSpeed * Sender.DeltaTime / v.env.deltaA;
+            }
+
+            return v;
+        }
+
+        private INSTRUMENT GetInstGen(INSTRUMENT global, int begin, int count) {
+            var v = new INSTRUMENT();
+            v.Init();
+
+            for (int i = 0, genIdx = begin; i < count; i++, genIdx++) {
+                var g = mIGEN[genIdx];
+
+                switch (g.genOper) {
+                case E_OPER.KEY_RANGE:
+                    v.keyLo = (byte)(g.genAmount & 0x7F);
+                    v.keyHi = (byte)((g.genAmount >> 8) & 0x7F);
+                    break;
+                case E_OPER.VEL_RANGE:
+                    v.velLo = (byte)(g.genAmount & 0x7F);
+                    v.velHi = (byte)((g.genAmount >> 8) & 0x7F);
+                    break;
+
+                case E_OPER.INITIAL_ATTENUATION:
+                    v.gain = Math.Pow(10.0, -g.genAmount / 200.0);
+                    break;
+                case E_OPER.PAN:
+                    v.pan = g.genAmount / 500.0;
+                    break;
+                case E_OPER.COARSE_TUNE:
+                    v.coarseTune = Math.Pow(2.0, g.genAmount / 120.0);
+                    break;
+                case E_OPER.FINETUNE:
+                    v.fineTune = Math.Pow(2.0, g.genAmount / 1200.0);
+                    break;
+                case E_OPER.OVERRIDING_ROOTKEY:
+                    v.rootKey = g.genAmount;
+                    break;
+
+                case E_OPER.SAMPLE_MODES:
+                    v.loopEnable = 0 < (g.genAmount & 1);
+                    break;
+                case E_OPER.SAMPLE_ID:
+                    v.sampleId = g.genAmount;
+                    break;
+
+                case E_OPER.OFFSET_ADDRS__START_LSB:
+                    v.waveBegin |= (ushort)g.genAmount;
+                    break;
+                case E_OPER.OFFSET_ADDRS__START_MSB:
+                    v.waveBegin |= (uint)((ushort)g.genAmount << 16);
+                    break;
+                case E_OPER.OFFSET_ADDRS__END_LSB:
+                    v.waveEnd |= (ushort)g.genAmount;
+                    break;
+                case E_OPER.OFFSET_ADDRS__END_MSB:
+                    v.waveEnd |= (uint)((ushort)g.genAmount << 16);
+                    break;
+
+                case E_OPER.ENV_VOL__ATTACK:
+                    v.env.deltaA = Sender.EnvelopeSpeed * Sender.DeltaTime
+                        / Math.Pow(2.0, g.genAmount / 1200.0);
+                    break;
+                case E_OPER.ENV_VOL__HOLD:
+                    v.env.hold = Math.Pow(2.0, g.genAmount / 1200.0);
+                    break;
+                case E_OPER.ENV_VOL__DECAY:
+                    v.env.deltaD = Sender.EnvelopeSpeed * Sender.DeltaTime
+                        / Math.Pow(2.0, g.genAmount / 1200.0);
+                    break;
+                case E_OPER.ENV_VOL__SUSTAIN:
+                    v.env.levelS = Math.Pow(10.0, -(ushort)g.genAmount / 200.0);
+                    break;
+                case E_OPER.ENV_VOL__RELEASE:
+                    v.env.deltaR = Sender.EnvelopeSpeed * Sender.DeltaTime
+                        / Math.Pow(2.0, g.genAmount / 1200.0);
+                    break;
+                default:
+                    break;
+                }
+            }
+
+            /**** set global value ****/
+            if (0 <= v.sampleId) {
+                if (v.rootKey < 0) {
+                    v.rootKey = global.rootKey;
+                }
+                if (v.coarseTune == 0.0) {
+                    v.coarseTune = global.coarseTune;
+                }
+                if (v.fineTune == 0.0) {
+                    v.fineTune = global.fineTune;
+                }
+                if (v.env.deltaA <= 0.0) {
+                    v.env.deltaA = global.env.deltaA;
+                }
+                if (v.env.deltaD <= 0.0) {
+                    v.env.deltaD = global.env.deltaD;
+                }
+                if (v.env.deltaR <= 0.0) {
+                    v.env.deltaR = global.env.deltaR;
+                }
+                if (v.env.hold < 0.0) {
+                    v.env.hold = global.env.hold;
+                }
+                if (v.env.levelS < 0.0) {
+                    v.env.levelS = global.env.levelS;
+                }
+            }
+
+            /**** set default value ****/
+            {
+                if (v.coarseTune == 0.0) {
+                    v.coarseTune = 1.0;
+                }
+                if (v.fineTune == 0.0) {
+                    v.fineTune = 1.0;
+                }
+                if (v.env.deltaA <= 0.0) {
+                    v.env.deltaA = 1000 * Sender.EnvelopeSpeed * Sender.DeltaTime;
+                }
+                if (v.env.deltaD <= 0.0) {
+                    v.env.deltaD = 1000 * Sender.EnvelopeSpeed * Sender.DeltaTime;
+                }
+                if (v.env.deltaR <= 0.0) {
+                    v.env.deltaR = 1000 * Sender.EnvelopeSpeed * Sender.DeltaTime;
+                }
+                if (v.env.hold < 0.0) {
+                    v.env.hold = 0.0;
+                }
+                if (v.env.levelS < 0.0) {
+                    v.env.levelS = 1.0;
+                }
+                v.env.hold += Sender.EnvelopeSpeed * Sender.DeltaTime / v.env.deltaA;
+            }
+
+            return v;
         }
 
         private static readonly Comparison<Preset> Compare = new Comparison<Preset>((a, b) => {

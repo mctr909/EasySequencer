@@ -63,9 +63,9 @@ namespace EasySequencer.Properties {
         /// <summary>
         ///   型 System.Drawing.Bitmap のローカライズされたリソースを検索します。
         /// </summary>
-        internal static System.Drawing.Bitmap keyboard {
+        internal static System.Drawing.Bitmap Keyboard {
             get {
-                object obj = ResourceManager.GetObject("keyboard", resourceCulture);
+                object obj = ResourceManager.GetObject("Keyboard", resourceCulture);
                 return ((System.Drawing.Bitmap)(obj));
             }
         }

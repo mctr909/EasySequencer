@@ -23,50 +23,57 @@ namespace Player {
         private int mChangeValue;
 
         private static readonly Font mKnobFont = new Font("ＭＳ ゴシック", 9.0f, FontStyle.Regular, GraphicsUnit.Point);
-        private static readonly Font mInstFont = new Font("Meiryo UI", 16.0f, FontStyle.Regular, GraphicsUnit.Point);
-
-        private static readonly int ChannelHeight = 40;
-        private static readonly int KnobRadius = 14;
-        private static readonly int KnobWidth = 40;
-
-        private static readonly Rectangle MuteButton = new Rectangle(925, 4, 13, 18);
-        private static readonly Rectangle InstName = new Rectangle(944, 4, 238, 38);
-
-        private static readonly Rectangle[] KeyboardPos = {
-            new Rectangle( 1, 21, 7, 10),   // C
-            new Rectangle( 6,  0, 5, 21),   // Db
-            new Rectangle( 9, 21, 7, 10),   // D
-            new Rectangle(14,  0, 5, 21),   // Eb
-            new Rectangle(17, 21, 7, 10),   // E
-            new Rectangle(25, 21, 7, 10),   // F
-            new Rectangle(30,  0, 5, 21),   // Gb
-            new Rectangle(33, 21, 7, 10),   // G
-            new Rectangle(38,  0, 5, 21),   // Ab
-            new Rectangle(41, 21, 7, 10),   // A
-            new Rectangle(46,  0, 5, 21),   // Bb
-            new Rectangle(49, 21, 7, 10)    // B
+        private static readonly Brush mKnobFontColor = (new Pen(Color.FromArgb(255, 255, 255, 255), 1.0f)).Brush;
+        private static readonly Font mInstFont = new Font("Meiryo UI", 9.0f, FontStyle.Regular, GraphicsUnit.Point);
+        private static readonly StringFormat mInstFormat = new StringFormat() {
+            Alignment = StringAlignment.Near,
+            LineAlignment = StringAlignment.Near,
+            Trimming = StringTrimming.EllipsisCharacter,
         };
 
-        private static readonly Point[] KnobPos = {
-            new Point(619, 19),  // Vol.
-            new Point(659, 19),  // Exp.
-            new Point(699, 19),  // Pan.
-            new Point(739, 19),  // Rev.
-            new Point(779, 19),  // Cho.
-            new Point(819, 19),  // Del.
-            new Point(859, 19),  // Fc
-            new Point(899, 19)   // Q
+        private static readonly int ChannelHeight = 40;
+        private static readonly float KnobRadius = 11.0f;
+
+        private static readonly Rectangle MuteButton = new Rectangle(853, 8, 13, 18);
+        private static readonly Rectangle InstName = new Rectangle(875, 9, 146, 19);
+
+        private static readonly Rectangle[] KeyboardPos = {
+            new Rectangle( 1, 20, 6, 10),   // C
+            new Rectangle( 5,  1, 5, 19),   // Db
+            new Rectangle( 8, 20, 6, 10),   // D
+            new Rectangle(12,  1, 5, 19),   // Eb
+            new Rectangle(15, 20, 6, 10),   // E
+            new Rectangle(22, 20, 6, 10),   // F
+            new Rectangle(26,  1, 5, 19),   // Gb
+            new Rectangle(29, 20, 6, 10),   // G
+            new Rectangle(33,  1, 5, 19),   // Ab
+            new Rectangle(36, 20, 6, 10),   // A
+            new Rectangle(40,  1, 5, 19),   // Bb
+            new Rectangle(43, 20, 6, 10)    // B
+        };
+
+        private static readonly PointF[] KnobPos = {
+            new PointF(548.5f, 15), // Vol.
+            new PointF(581.5f, 15), // Exp.
+            new PointF(614.5f, 15), // Pan.
+            new PointF(653.5f, 15), // Rev.
+            new PointF(686.5f, 15), // Cho.
+            new PointF(719.5f, 15), // Del.
+            new PointF(758.5f, 15), // Fc
+            new PointF(791.5f, 15), // Q
+            new PointF(824.5f, 15)  // Mod.
         };
 
         private static readonly Point[] KnobValPos = {
-            new Point(610, 15),  // Vol.
-            new Point(650, 15),  // Exp.
-            new Point(690, 15),  // Pan.
-            new Point(730, 15),  // Rev.
-            new Point(770, 15),  // Cho.
-            new Point(810, 15),  // Del.
-            new Point(850, 15),  // Fc
-            new Point(890, 15)   // Q
+            new Point(540, 11), // Vol.
+            new Point(573, 11), // Exp.
+            new Point(606, 11), // Pan.
+            new Point(645, 11), // Rev.
+            new Point(678, 11), // Cho.
+            new Point(711, 11), // Del.
+            new Point(750, 11), // Fc
+            new Point(783, 11), // Q
+            new Point(816, 11)  // Mod.
         };
 
         private static readonly PointF[] Knob = {
@@ -106,15 +113,16 @@ namespace Player {
 
         public Keyboard(PictureBox picKey, Sender sender, Player player) {
             mCtrl = picKey;
-            mCtrl.Width = EasySequencer.Properties.Resources.keyboard.Width + 2;
-            mCtrl.Height = EasySequencer.Properties.Resources.keyboard.Height + 2;
+            mCtrl.Width = EasySequencer.Properties.Resources.Keyboard.Width + 2;
+            mCtrl.Height = EasySequencer.Properties.Resources.Keyboard.Height + 2;
 
             mCtrl.DoubleClick += new EventHandler(picKeyboard_DoubleClick);
             mCtrl.MouseDown += new MouseEventHandler(picKeyboard_MouseDown);
             mCtrl.MouseMove += new MouseEventHandler(picKeyboard_MouseMove);
             mCtrl.MouseUp += new MouseEventHandler(picKeyboard_MouseUp);
 
-            mBuffer = new DoubleBuffer(mCtrl, (Image)mCtrl.BackgroundImage.Clone());
+            mCtrl.Image = new Bitmap(mCtrl.Width, mCtrl.Height);
+            mBuffer = new DoubleBuffer(mCtrl, EasySequencer.Properties.Resources.Keyboard);
             mSender = sender;
             mPlayer = player;
 
@@ -138,39 +146,41 @@ namespace Player {
 
         private void picKeyboard_MouseDown(object sender, MouseEventArgs e) {
             mMouseDownPos = mCtrl.PointToClient(Cursor.Position);
-            var knobX = (mMouseDownPos.X - KnobValPos[0].X + KnobWidth / 4) / KnobWidth;
             var knobY = mMouseDownPos.Y / ChannelHeight;
+            var knobX = -1;
+            for (int i = 0; i < KnobPos.Length; i++) {
+                var x = mMouseDownPos.X - KnobPos[i].X;
+                if (-KnobRadius <= x && x <= KnobRadius + 2) {
+                    knobX = i;
+                }
+            }
+            mIsDrag = 0 <= knobX;
 
-            if (0 <= knobY && knobY <= 15) {
-                mChannelNo = knobY;
-                if (MuteButton.X <= mMouseDownPos.X && mMouseDownPos.X < MuteButton.X + MuteButton.Width) {
-                    if (e.Button == MouseButtons.Right) {
-                        if (mPlayer.Channel(knobY).Enable) {
-                            for (int i = 0; i < 16; ++i) {
-                                if (knobY == i) {
-                                    mSender.MuteChannel(i, true);
-                                } else {
-                                    mSender.MuteChannel(i, false);
-                                }
-                            }
-                        } else {
-                            for (int i = 0; i < 16; ++i) {
-                                if (knobY == i) {
-                                    mSender.MuteChannel(i, false);
-                                } else {
-                                    mSender.MuteChannel(i, true);
-                                }
+            mChannelNo = knobY;
+            if (MuteButton.X <= mMouseDownPos.X && mMouseDownPos.X < MuteButton.X + MuteButton.Width) {
+                if (e.Button == MouseButtons.Right) {
+                    if (mPlayer.Channel(knobY).Enable) {
+                        for (int i = 0; i < 16; ++i) {
+                            if (knobY == i) {
+                                mSender.MuteChannel(i, true);
+                            } else {
+                                mSender.MuteChannel(i, false);
                             }
                         }
                     } else {
-                        mSender.MuteChannel(knobY, mPlayer.Channel(knobY).Enable);
+                        for (int i = 0; i < 16; ++i) {
+                            if (knobY == i) {
+                                mSender.MuteChannel(i, false);
+                            } else {
+                                mSender.MuteChannel(i, true);
+                            }
+                        }
                     }
-                }
-                if (0 <= knobX && knobX <= 7) {
-                    mKnobNo = knobX;
-                    mIsDrag = true;
+                } else {
+                    mSender.MuteChannel(knobY, mPlayer.Channel(knobY).Enable);
                 }
             }
+            mKnobNo = knobX;
         }
 
         private void picKeyboard_MouseUp(object sender, MouseEventArgs e) {
@@ -239,121 +249,133 @@ namespace Player {
                 var y_ch = ChannelHeight * ch;
                 // Vol
                 g.FillRectangle(
-                    Brushes.White,
-                    (int)(KnobRadius * Knob[channel.Vol].X) + KnobPos[0].X,
-                    (int)(KnobRadius * Knob[channel.Vol].Y) + KnobPos[0].Y + y_ch,
+                    Brushes.GreenYellow,
+                    (KnobRadius * Knob[channel.Vol].X) + KnobPos[0].X,
+                    (KnobRadius * Knob[channel.Vol].Y) + KnobPos[0].Y + y_ch,
                     3, 3
                 );
                 g.DrawString(
                     channel.Vol.ToString("000"),
-                    mKnobFont, Brushes.LightGray,
+                    mKnobFont, mKnobFontColor,
                     KnobValPos[0].X, KnobValPos[0].Y + y_ch
                 );
                 // Exp
                 g.FillRectangle(
-                    Brushes.White,
-                    (int)(KnobRadius * Knob[channel.Exp].X) + KnobPos[1].X,
-                    (int)(KnobRadius * Knob[channel.Exp].Y) + KnobPos[1].Y + y_ch,
+                    Brushes.GreenYellow,
+                    (KnobRadius * Knob[channel.Exp].X) + KnobPos[1].X,
+                    (KnobRadius * Knob[channel.Exp].Y) + KnobPos[1].Y + y_ch,
                     3, 3
                 );
                 g.DrawString(
                     channel.Exp.ToString("000"),
-                    mKnobFont, Brushes.LightGray,
+                    mKnobFont, mKnobFontColor,
                     KnobValPos[1].X, KnobValPos[1].Y + y_ch
                 );
                 // Pan
                 g.FillRectangle(
-                    Brushes.White,
-                    (int)(KnobRadius * Knob[channel.Pan].X) + KnobPos[2].X,
-                    (int)(KnobRadius * Knob[channel.Pan].Y) + KnobPos[2].Y + y_ch,
+                    Brushes.GreenYellow,
+                    (KnobRadius * Knob[channel.Pan].X) + KnobPos[2].X,
+                    (KnobRadius * Knob[channel.Pan].Y) + KnobPos[2].Y + y_ch,
                     3, 3
                 );
                 var pan = channel.Pan - 64;
                 if (0 == pan) {
                     g.DrawString(
                         " C ",
-                        mKnobFont, Brushes.LightGray,
+                        mKnobFont, mKnobFontColor,
                         KnobValPos[2].X, KnobValPos[2].Y + y_ch
                     );
                 } else if (pan < 0) {
                     g.DrawString(
                         "L" + (-pan).ToString("00"),
-                        mKnobFont, Brushes.LightGray,
+                        mKnobFont, mKnobFontColor,
                         KnobValPos[2].X, KnobValPos[2].Y + y_ch
                     );
                 } else {
                     g.DrawString(
                         "R" + pan.ToString("00"),
-                        mKnobFont, Brushes.LightGray,
+                        mKnobFont, mKnobFontColor,
                         KnobValPos[2].X, KnobValPos[2].Y + y_ch
                     );
                 }
                 // Rev
                 g.FillRectangle(
-                    Brushes.White,
-                    (int)(KnobRadius * Knob[channel.Rev].X) + KnobPos[3].X,
-                    (int)(KnobRadius * Knob[channel.Rev].Y) + KnobPos[3].Y + y_ch,
+                    Brushes.Blue,
+                    (KnobRadius * Knob[channel.Rev].X) + KnobPos[3].X,
+                    (KnobRadius * Knob[channel.Rev].Y) + KnobPos[3].Y + y_ch,
                     3, 3
                 );
                 g.DrawString(
                     channel.Rev.ToString("000"),
-                    mKnobFont, Brushes.LightGray,
+                    mKnobFont, mKnobFontColor,
                     KnobValPos[3].X, KnobValPos[3].Y + y_ch
                 );
                 // Cho
                 g.FillRectangle(
-                    Brushes.White,
-                    (int)(KnobRadius * Knob[channel.Cho].X) + KnobPos[4].X,
-                    (int)(KnobRadius * Knob[channel.Cho].Y) + KnobPos[4].Y + y_ch,
+                    Brushes.Blue,
+                    (KnobRadius * Knob[channel.Cho].X) + KnobPos[4].X,
+                    (KnobRadius * Knob[channel.Cho].Y) + KnobPos[4].Y + y_ch,
                     3, 3
                 );
                 g.DrawString(
                     channel.Cho.ToString("000"),
-                    mKnobFont, Brushes.LightGray,
+                    mKnobFont, mKnobFontColor,
                     KnobValPos[4].X, KnobValPos[4].Y + y_ch
                 );
                 // Del
                 g.FillRectangle(
-                    Brushes.White,
-                    (int)(KnobRadius * Knob[channel.Del].X) + KnobPos[5].X,
-                    (int)(KnobRadius * Knob[channel.Del].Y) + KnobPos[5].Y + y_ch,
+                    Brushes.Blue,
+                    (KnobRadius * Knob[channel.Del].X) + KnobPos[5].X,
+                    (KnobRadius * Knob[channel.Del].Y) + KnobPos[5].Y + y_ch,
                     3, 3
                 );
                 g.DrawString(
                     channel.Del.ToString("000"),
-                    mKnobFont, Brushes.LightGray,
+                    mKnobFont, mKnobFontColor,
                     KnobValPos[5].X, KnobValPos[5].Y + y_ch
                 );
                 // Fc
                 g.FillRectangle(
-                    Brushes.White,
-                    (int)(KnobRadius * Knob[channel.Fc].X) + KnobPos[6].X,
-                    (int)(KnobRadius * Knob[channel.Fc].Y) + KnobPos[6].Y + y_ch,
+                    Brushes.Yellow,
+                    (KnobRadius * Knob[channel.Fc].X) + KnobPos[6].X,
+                    (KnobRadius * Knob[channel.Fc].Y) + KnobPos[6].Y + y_ch,
                     3, 3
                 );
                 g.DrawString(
                     channel.Fc.ToString("000"),
-                    mKnobFont, Brushes.LightGray,
+                    mKnobFont, mKnobFontColor,
                     KnobValPos[6].X, KnobValPos[6].Y + y_ch
                 );
                 // Fq
                 g.FillRectangle(
-                    Brushes.White,
-                    (int)(KnobRadius * Knob[channel.Fq].X) + KnobPos[7].X,
-                    (int)(KnobRadius * Knob[channel.Fq].Y) + KnobPos[7].Y + y_ch,
+                    Brushes.Yellow,
+                    (KnobRadius * Knob[channel.Fq].X) + KnobPos[7].X,
+                    (KnobRadius * Knob[channel.Fq].Y) + KnobPos[7].Y + y_ch,
                     3, 3
                 );
                 g.DrawString(
                     channel.Fq.ToString("000"),
-                    mKnobFont, Brushes.LightGray,
+                    mKnobFont, mKnobFontColor,
                     KnobValPos[7].X, KnobValPos[7].Y + y_ch
+                );
+                // Mod.
+                g.FillRectangle(
+                    Brushes.Yellow,
+                    (KnobRadius * Knob[channel.Mod].X) + KnobPos[8].X,
+                    (KnobRadius * Knob[channel.Mod].Y) + KnobPos[8].Y + y_ch,
+                    3, 3
+                );
+                g.DrawString(
+                    channel.Mod.ToString("000"),
+                    mKnobFont, mKnobFontColor,
+                    KnobValPos[8].X, KnobValPos[8].Y + y_ch
                 );
                 // Mute Button
                 if (!channel.Enable) {
                     g.FillRectangle(Brushes.Red, MuteButton.X, MuteButton.Y + y_ch, MuteButton.Width, MuteButton.Height);
                 }
                 // InstName
-                g.DrawString(Marshal.PtrToStringAuto(channel.Name), mInstFont, Brushes.Black, InstName.X, InstName.Y + y_ch);
+                g.DrawString(Marshal.PtrToStringAuto(channel.Name), mInstFont, Brushes.Black, InstName.X, InstName.Y + y_ch, mInstFormat);
             }
             mBuffer.Render();
         }
@@ -418,6 +440,13 @@ namespace Player {
             case 7:
                 mSender.Send(new Event(
                     E_CTRL_TYPE.RESONANCE,
+                    (byte)mChannelNo,
+                    (byte)mChangeValue
+                ));
+                break;
+            case 8:
+                mSender.Send(new Event(
+                    E_CTRL_TYPE.MODULATION,
                     (byte)mChannelNo,
                     (byte)mChangeValue
                 ));
