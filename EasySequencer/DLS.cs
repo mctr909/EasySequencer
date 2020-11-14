@@ -242,9 +242,9 @@ namespace DLS {
 
                 #region instEnv
                 var instEnv = new ENVELOPE();
-                instEnv.deltaA = 1000.0 * Sender.EnvelopeSpeed * Sender.DeltaTime; // 1msec
-                instEnv.deltaD = 1000.0 * Sender.EnvelopeSpeed * Sender.DeltaTime; // 1msec
-                instEnv.deltaR = 1000.0 * Sender.EnvelopeSpeed * Sender.DeltaTime; // 1msec
+                instEnv.deltaA = 1000.0 * Sender.DeltaTime * Sender.AttackSpeed;  // 1msec
+                instEnv.deltaD = 1000.0 * Sender.DeltaTime * Sender.DecaySpeed;   // 1msec
+                instEnv.deltaR = 1000.0 * Sender.DeltaTime * Sender.ReleaseSpeed; // 1msec
                 instEnv.levelS = 1.0;
                 instEnv.hold = 0.0;
                 if (null != inst.Articulations) {
@@ -254,17 +254,17 @@ namespace DLS {
                         }
                         switch (conn.destination) {
                         case DST_TYPE.EG1_ATTACK_TIME:
-                            instEnv.deltaA = Sender.EnvelopeSpeed * Sender.DeltaTime / ART.GetValue(conn);
+                            instEnv.deltaA = Sender.AttackSpeed * Sender.DeltaTime / ART.GetValue(conn);
                             instEnv.hold += ART.GetValue(conn);
                             break;
                         case DST_TYPE.EG1_HOLD_TIME:
                             instEnv.hold += ART.GetValue(conn);
                             break;
                         case DST_TYPE.EG1_DECAY_TIME:
-                            instEnv.deltaD = Sender.EnvelopeSpeed * Sender.DeltaTime / ART.GetValue(conn);
+                            instEnv.deltaD = Sender.DecaySpeed * Sender.DeltaTime / ART.GetValue(conn);
                             break;
                         case DST_TYPE.EG1_RELEASE_TIME:
-                            instEnv.deltaR = Sender.EnvelopeSpeed * Sender.DeltaTime / ART.GetValue(conn);
+                            instEnv.deltaR = Sender.ReleaseSpeed * Sender.DeltaTime / ART.GetValue(conn);
                             break;
                         case DST_TYPE.EG1_SUSTAIN_LEVEL:
                             instEnv.levelS = (0.0 == ART.GetValue(conn)) ? 1.0 : (ART.GetValue(conn) * 0.01);
@@ -289,9 +289,9 @@ namespace DLS {
                     } else {
                         #region regionEnv
                         var regionEnv = new ENVELOPE();
-                        regionEnv.deltaA = 1000.0 * Sender.EnvelopeSpeed * Sender.DeltaTime; // 1msec
-                        regionEnv.deltaD = 1000.0 * Sender.EnvelopeSpeed * Sender.DeltaTime; // 1msec
-                        regionEnv.deltaR = 1000.0 * Sender.EnvelopeSpeed * Sender.DeltaTime; // 1msec
+                        regionEnv.deltaA = 1000.0 * Sender.DeltaTime * Sender.AttackSpeed;  // 1msec
+                        regionEnv.deltaD = 1000.0 * Sender.DeltaTime * Sender.DecaySpeed;   // 1msec
+                        regionEnv.deltaR = 1000.0 * Sender.DeltaTime * Sender.ReleaseSpeed; // 1msec
                         regionEnv.levelS = 1.0;
                         regionEnv.hold = 0.0;
                         foreach (var conn in rgn.Articulations.Art.List) {
@@ -300,20 +300,20 @@ namespace DLS {
                             }
                             switch (conn.destination) {
                             case DST_TYPE.EG1_ATTACK_TIME:
-                                regionEnv.deltaA = Sender.EnvelopeSpeed * Sender.DeltaTime / ART.GetValue(conn);
+                                regionEnv.deltaA = Sender.AttackSpeed * Sender.DeltaTime / ART.GetValue(conn);
                                 regionEnv.hold += ART.GetValue(conn);
                                 break;
                             case DST_TYPE.EG1_HOLD_TIME:
                                 regionEnv.hold += ART.GetValue(conn);
                                 break;
                             case DST_TYPE.EG1_DECAY_TIME:
-                                regionEnv.deltaD = Sender.EnvelopeSpeed * Sender.DeltaTime / ART.GetValue(conn);
+                                regionEnv.deltaD = Sender.DecaySpeed * Sender.DeltaTime / ART.GetValue(conn);
                                 break;
                             case DST_TYPE.EG1_SUSTAIN_LEVEL:
                                 regionEnv.levelS = (0.0 == ART.GetValue(conn)) ? 1.0 : (ART.GetValue(conn) * 0.01);
                                 break;
                             case DST_TYPE.EG1_RELEASE_TIME:
-                                regionEnv.deltaR = Sender.EnvelopeSpeed * Sender.DeltaTime / ART.GetValue(conn);
+                                regionEnv.deltaR = Sender.ReleaseSpeed * Sender.DeltaTime / ART.GetValue(conn);
                                 break;
                             }
                         }

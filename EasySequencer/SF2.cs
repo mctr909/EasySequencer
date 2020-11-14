@@ -345,11 +345,11 @@ namespace SF2 {
                         sw.Write(",{0}", 1200.0 / Math.Log(2.0, prgn.fineTune));
                     }
 
-                    sw.Write(",{0}", (Sender.EnvelopeSpeed * Sender.DeltaTime / prgn.env.deltaA).ToString("0.000"));
+                    sw.Write(",{0}", (Sender.AttackSpeed * Sender.DeltaTime / prgn.env.deltaA).ToString("0.000"));
                     sw.Write(",{0}", prgn.env.hold.ToString("0.000"));
-                    sw.Write(",{0}", (Sender.EnvelopeSpeed * Sender.DeltaTime / prgn.env.deltaD).ToString("0.000"));
+                    sw.Write(",{0}", (Sender.AttackSpeed * Sender.DeltaTime / prgn.env.deltaD).ToString("0.000"));
                     sw.Write(",{0}", prgn.env.levelS.ToString("0.000"));
-                    sw.Write(",{0}", (Sender.EnvelopeSpeed * Sender.DeltaTime / prgn.env.deltaR).ToString("0.000"));
+                    sw.Write(",{0}", (Sender.AttackSpeed * Sender.DeltaTime / prgn.env.deltaR).ToString("0.000"));
 
                     sw.Write(",{0}:{1}",
                         prgn.instId,
@@ -405,11 +405,11 @@ namespace SF2 {
                         sw.Write(",{0}", 1200.0 / Math.Log(2.0, irgn.fineTune));
                     }
 
-                    sw.Write(",{0}", (Sender.EnvelopeSpeed * Sender.DeltaTime / irgn.env.deltaA).ToString("0.000"));
+                    sw.Write(",{0}", (Sender.AttackSpeed * Sender.DeltaTime / irgn.env.deltaA).ToString("0.000"));
                     sw.Write(",{0}", irgn.env.hold.ToString("0.000"));
-                    sw.Write(",{0}", (Sender.EnvelopeSpeed * Sender.DeltaTime / irgn.env.deltaD).ToString("0.000"));
+                    sw.Write(",{0}", (Sender.AttackSpeed * Sender.DeltaTime / irgn.env.deltaD).ToString("0.000"));
                     sw.Write(",{0}", irgn.env.levelS.ToString("0.000"));
-                    sw.Write(",{0}", (Sender.EnvelopeSpeed * Sender.DeltaTime / irgn.env.deltaR).ToString("0.000"));
+                    sw.Write(",{0}", (Sender.AttackSpeed * Sender.DeltaTime / irgn.env.deltaR).ToString("0.000"));
 
                     var waveBegin = smpl.start + irgn.waveBegin;
                     var waveEnd = smpl.end + irgn.waveEnd;
@@ -622,21 +622,21 @@ namespace SF2 {
                     break;
 
                 case E_OPER.ENV_VOL__ATTACK:
-                    v.env.deltaA = Sender.EnvelopeSpeed * Sender.DeltaTime
+                    v.env.deltaA = Sender.AttackSpeed * Sender.DeltaTime
                         / Math.Pow(2.0, g.genAmount / 1200.0);
                     break;
                 case E_OPER.ENV_VOL__HOLD:
                     v.env.hold = Math.Pow(2.0, g.genAmount / 1200.0);
                     break;
                 case E_OPER.ENV_VOL__DECAY:
-                    v.env.deltaD = Sender.EnvelopeSpeed * Sender.DeltaTime
+                    v.env.deltaD = Sender.AttackSpeed * Sender.DeltaTime
                         / Math.Pow(2.0, g.genAmount / 1200.0);
                     break;
                 case E_OPER.ENV_VOL__SUSTAIN:
                     v.env.levelS = Math.Pow(10.0, -(ushort)g.genAmount / 200.0);
                     break;
                 case E_OPER.ENV_VOL__RELEASE:
-                    v.env.deltaR = Sender.EnvelopeSpeed * Sender.DeltaTime
+                    v.env.deltaR = Sender.AttackSpeed * Sender.DeltaTime
                         / Math.Pow(2.0, g.genAmount / 1200.0);
                     break;
 
@@ -682,13 +682,13 @@ namespace SF2 {
                     v.fineTune = 1.0;
                 }
                 if (v.env.deltaA <= 0.0) {
-                    v.env.deltaA = 1000 * Sender.EnvelopeSpeed * Sender.DeltaTime;
+                    v.env.deltaA = 1000 * Sender.AttackSpeed * Sender.DeltaTime;
                 }
                 if (v.env.deltaD <= 0.0) {
-                    v.env.deltaD = 1000 * Sender.EnvelopeSpeed * Sender.DeltaTime;
+                    v.env.deltaD = 1000 * Sender.AttackSpeed * Sender.DeltaTime;
                 }
                 if (v.env.deltaR <= 0.0) {
-                    v.env.deltaR = 1000 * Sender.EnvelopeSpeed * Sender.DeltaTime;
+                    v.env.deltaR = 1000 * Sender.AttackSpeed * Sender.DeltaTime;
                 }
                 if (v.env.hold < 0.0) {
                     v.env.hold = 0.0;
@@ -696,7 +696,7 @@ namespace SF2 {
                 if (v.env.levelS < 0.0) {
                     v.env.levelS = 1.0;
                 }
-                v.env.hold += Sender.EnvelopeSpeed * Sender.DeltaTime / v.env.deltaA;
+                v.env.hold += Sender.AttackSpeed * Sender.DeltaTime / v.env.deltaA;
             }
 
             return v;
@@ -756,21 +756,21 @@ namespace SF2 {
                     break;
 
                 case E_OPER.ENV_VOL__ATTACK:
-                    v.env.deltaA = Sender.EnvelopeSpeed * Sender.DeltaTime
+                    v.env.deltaA = Sender.AttackSpeed * Sender.DeltaTime
                         / Math.Pow(2.0, g.genAmount / 1200.0);
                     break;
                 case E_OPER.ENV_VOL__HOLD:
                     v.env.hold = Math.Pow(2.0, g.genAmount / 1200.0);
                     break;
                 case E_OPER.ENV_VOL__DECAY:
-                    v.env.deltaD = Sender.EnvelopeSpeed * Sender.DeltaTime
+                    v.env.deltaD = Sender.AttackSpeed * Sender.DeltaTime
                         / Math.Pow(2.0, g.genAmount / 1200.0);
                     break;
                 case E_OPER.ENV_VOL__SUSTAIN:
                     v.env.levelS = Math.Pow(10.0, -(ushort)g.genAmount / 200.0);
                     break;
                 case E_OPER.ENV_VOL__RELEASE:
-                    v.env.deltaR = Sender.EnvelopeSpeed * Sender.DeltaTime
+                    v.env.deltaR = Sender.AttackSpeed * Sender.DeltaTime
                         / Math.Pow(2.0, g.genAmount / 1200.0);
                     break;
                 default:
@@ -815,13 +815,13 @@ namespace SF2 {
                     v.fineTune = 1.0;
                 }
                 if (v.env.deltaA <= 0.0) {
-                    v.env.deltaA = 1000 * Sender.EnvelopeSpeed * Sender.DeltaTime;
+                    v.env.deltaA = 1000 * Sender.AttackSpeed * Sender.DeltaTime;
                 }
                 if (v.env.deltaD <= 0.0) {
-                    v.env.deltaD = 1000 * Sender.EnvelopeSpeed * Sender.DeltaTime;
+                    v.env.deltaD = 1000 * Sender.AttackSpeed * Sender.DeltaTime;
                 }
                 if (v.env.deltaR <= 0.0) {
-                    v.env.deltaR = 1000 * Sender.EnvelopeSpeed * Sender.DeltaTime;
+                    v.env.deltaR = 1000 * Sender.AttackSpeed * Sender.DeltaTime;
                 }
                 if (v.env.hold < 0.0) {
                     v.env.hold = 0.0;
@@ -829,7 +829,7 @@ namespace SF2 {
                 if (v.env.levelS < 0.0) {
                     v.env.levelS = 1.0;
                 }
-                v.env.hold += Sender.EnvelopeSpeed * Sender.DeltaTime / v.env.deltaA;
+                v.env.hold += Sender.AttackSpeed * Sender.DeltaTime / v.env.deltaA;
             }
 
             return v;

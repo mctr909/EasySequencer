@@ -58,7 +58,9 @@ namespace Player {
 
         public static readonly int SampleRate = 44100;
         public static readonly double DeltaTime = 1.0 / SampleRate;
-        public static readonly double EnvelopeSpeed = 24.0;
+        public static readonly double AttackSpeed = 54.3656;
+        public static readonly double DecaySpeed = 15;
+        public static readonly double ReleaseSpeed = 15;
 
         public static int CHANNEL_COUNT = 16;
         public static int SAMPLER_COUNT = 64;

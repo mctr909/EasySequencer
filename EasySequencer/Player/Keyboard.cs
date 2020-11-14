@@ -150,7 +150,7 @@ namespace Player {
             var knobX = -1;
             for (int i = 0; i < KnobPos.Length; i++) {
                 var x = mMouseDownPos.X - KnobPos[i].X;
-                if (-KnobRadius <= x && x <= KnobRadius + 2) {
+                if (-KnobRadius - 1 <= x && x <= KnobRadius + 4) {
                     knobX = i;
                 }
             }
