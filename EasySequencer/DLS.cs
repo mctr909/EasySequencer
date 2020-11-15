@@ -583,7 +583,7 @@ namespace DLS {
             case DST_TYPE.EG2_RELEASE_TIME:
             case DST_TYPE.EG2_DELAY_TIME:
             case DST_TYPE.EG2_HOLD_TIME:
-                return (conn.scale == int.MinValue) ? 1.0 : Math.Pow(2.0, conn.scale / (1200 * 65536.0));
+                return Math.Pow(2.0, conn.scale / (1200 * 65536.0));
 
             case DST_TYPE.EG1_SUSTAIN_LEVEL:
             case DST_TYPE.EG2_SUSTAIN_LEVEL:
