@@ -437,7 +437,7 @@ namespace DLS {
             case "INAM":
                 Name = Marshal.PtrToStringAnsi(ptr).Trim();
                 break;
-            case "IKEY":
+            case "ICAT":
                 Category = Marshal.PtrToStringAnsi(ptr).Trim();
                 break;
             }
