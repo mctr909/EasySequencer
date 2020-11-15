@@ -116,9 +116,6 @@
     <None Include="App.config" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="keyboard.bmp" />
-  </ItemGroup>
-  <ItemGroup>
     <None Include="Keyboard.png" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />

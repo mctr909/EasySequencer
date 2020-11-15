@@ -149,8 +149,10 @@ namespace Player {
             var knobY = mMouseDownPos.Y / ChannelHeight;
             var knobX = -1;
             for (int i = 0; i < KnobPos.Length; i++) {
-                var x = mMouseDownPos.X - KnobPos[i].X;
-                if (-KnobRadius - 1 <= x && x <= KnobRadius + 4) {
+                var x = mMouseDownPos.X - KnobPos[i].X - 1.5;
+                var y = mMouseDownPos.Y - knobY * ChannelHeight - KnobPos[i].Y;
+                var r = Math.Sqrt(x * x + y * y);
+                if (r <= KnobRadius + 5) {
                     knobX = i;
                 }
             }

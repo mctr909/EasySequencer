@@ -15,6 +15,7 @@ namespace EasySequencer {
 
         public InstList(Sender sender, int chNum) {
             InitializeComponent();
+            StartPosition = FormStartPosition.CenterParent;
             mInstList = new Dictionary<string, Dictionary<INST_ID, string>>();
             mSender = sender;
             mChNum = chNum;
