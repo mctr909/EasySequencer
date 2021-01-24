@@ -24,7 +24,9 @@ namespace EasySequencer {
             var selectedInst = 0;
             for (int i = 0; i < mSender.InstCount; i++) {
                 var inst = mSender.Instruments(i);
-                var nam = Marshal.PtrToStringAuto(inst.pName);
+                var nam = string.Format("{0} {1}",
+                    inst.id.programNo,
+                    Marshal.PtrToStringAuto(inst.pName));
                 var cat = Marshal.PtrToStringAuto(inst.pCategory);
                 if (!mInstList.ContainsKey(cat)) {
                     mInstList.Add(cat, new Dictionary<INST_ID, string>());
