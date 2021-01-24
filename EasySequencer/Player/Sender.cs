@@ -3,7 +3,7 @@ using System.IO;
 using System.Threading.Tasks;
 using System.Runtime.InteropServices;
 
-using MIDI;
+using SMF;
 using EasySequencer;
 
 namespace Player {
@@ -117,12 +117,12 @@ namespace Player {
         }
 
         public void Send(Event msg) {
-            fixed (byte* ptr = &msg.Data[0]) {
+            fixed (byte* ptr = &msg.data[0]) {
                 midi_Send(ptr);
             }
         }
 
-        public void FileOut(string filePath, SMF smf) {
+        public void FileOut(string filePath, SMF.SMF smf) {
             IsFileOutput = true;
             var prog = midi_GetWavFileOutProgressPtr();
             *(int*)prog = 0;
@@ -132,8 +132,8 @@ namespace Player {
                 var ms = new MemoryStream();
                 var bw = new BinaryWriter(ms);
                 foreach (var ev in smf.EventList) {
-                    bw.Write(ev.Time);
-                    bw.Write(ev.Data);
+                    bw.Write(ev.tick);
+                    bw.Write(ev.data);
                 }
                 var evArr = ms.ToArray();
                 fixed (byte* evPtr = &evArr[0]) {

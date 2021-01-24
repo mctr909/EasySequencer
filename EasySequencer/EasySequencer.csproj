@@ -68,20 +68,15 @@
     <Compile Include="InstList.Designer.cs">
       <DependentUpon>InstList.cs</DependentUpon>
     </Compile>
-    <Compile Include="MIDI\Const.cs" />
-    <Compile Include="MIDI\Meta.cs" />
-    <Compile Include="MIDI\Event.cs" />
-    <Compile Include="MIDI\Track.cs" />
-    <Compile Include="MIDI\Util.cs" />
     <Compile Include="SF2.cs" />
     <Compile Include="Player\DoubleBuffer.cs" />
     <Compile Include="Player\Keyboard.cs" />
     <Compile Include="Player\Player.cs" />
     <Compile Include="Player\Sender.cs" />
-    <Compile Include="MIDI\SMF.cs" />
     <Compile Include="Player\Struct.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="SMF.cs" />
     <Compile Include="StatusWindow.cs">
       <SubType>Form</SubType>
     </Compile>

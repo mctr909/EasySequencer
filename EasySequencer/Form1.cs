@@ -4,11 +4,11 @@ using System.IO;
 using System.Drawing;
 
 using Player;
-using MIDI;
+using SMF;
 
 namespace EasySequencer {
     public partial class Form1 : Form {
-        private SMF mSMF;
+        private SMF.SMF mSMF;
         private Sender mMidiSender;
         private Player.Player mPlayer;
         private Keyboard mKeyboard;
@@ -53,7 +53,7 @@ namespace EasySequencer {
             }
 
             try {
-                mSMF = new SMF(filePath);
+                mSMF = new SMF.SMF(filePath);
                 mPlayer.SetEventList(mSMF.EventList, mSMF.Ticks);
                 hsbSeek.Maximum = mPlayer.MaxTick;
                 Text = Path.GetFileNameWithoutExtension(filePath);

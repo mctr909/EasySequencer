@@ -2,7 +2,7 @@
 using System.Threading;
 using System.Threading.Tasks;
 
-using MIDI;
+using SMF;
 
 namespace Player {
     public class Player {
@@ -63,30 +63,31 @@ namespace Player {
             int beat = 0;
             int measures = 0;
             int currentTick = 0;
-            int measureNumer = 4;
-            int measureDenomi = 4;
+            var mesure = new Mesure() {
+                denominator = 4,
+                numerator = 4
+            };
 
             foreach (var ev in mEventList) {
                 if (tick <= currentTick) {
                     break;
                 }
-                long eventTick = 960 * ev.Time / mTicksPerBeat;
+                long eventTick = 960 * ev.tick / mTicksPerBeat;
                 while (currentTick < eventTick) {
                     currentTick++;
                     ticks++;
-                    if (3840 / measureDenomi <= ticks) {
-                        ticks -= 3840 / measureDenomi;
+                    if (3840 / mesure.denominator <= ticks) {
+                        ticks -= 3840 / mesure.denominator;
                         ++beat;
-                        if (measureNumer <= beat) {
-                            beat -= measureNumer;
+                        if (mesure.numerator <= beat) {
+                            beat -= mesure.numerator;
                             ++measures;
                         }
                     }
                 }
-                if (E_EVENT_TYPE.META == ev.Type) {
-                    if (E_META_TYPE.MEASURE == ev.Meta.Type) {
-                        measureNumer = ev.Meta.MeasureNumer;
-                        measureDenomi = ev.Meta.MeasureDenomi;
+                if (E_STATUS.META == ev.Type) {
+                    if (E_META.MEASURE == ev.Meta.Type) {
+                        mesure = new Mesure(ev.Meta.Int);
                     }
                 }
             }
@@ -132,8 +133,8 @@ namespace Player {
             MaxTick = 0;
 
             foreach (var ev in eventList) {
-                if (E_EVENT_TYPE.NOTE_OFF == ev.Type || E_EVENT_TYPE.NOTE_ON == ev.Type) {
-                    var time = 960 * ev.Time / ticksPerBeat;
+                if (E_STATUS.NOTE_OFF == ev.Type || E_STATUS.NOTE_ON == ev.Type) {
+                    var time = 960 * ev.tick / ticksPerBeat;
                     if (MaxTick < time) {
                         MaxTick = (int)time;
                     }
@@ -170,10 +171,10 @@ namespace Player {
 
             for (byte ch = 0; ch < 16; ++ch) {
                 for (byte noteNo = 0; noteNo < 128; ++noteNo) {
-                    mSender.Send(Event.NoteOff(ch, noteNo));
+                    mSender.Send(new Event(ch, E_STATUS.NOTE_OFF, noteNo));
                     Task.Delay(10);
                 }
-                mSender.Send(new Event(E_CTRL_TYPE.ALL_RESET, ch, 0));
+                mSender.Send(new Event(ch, E_CONTROL.ALL_RESET));
             }
         }
 
@@ -184,7 +185,7 @@ namespace Player {
                 }
 
                 var ev = e;
-                var eventTick = 960 * ev.Time / mTicksPerBeat;
+                var eventTick = 960 * ev.tick / mTicksPerBeat;
 
                 while (mCurrentTick < eventTick) {
                     if (!IsPlay) {
@@ -207,19 +208,22 @@ namespace Player {
                     Thread.Sleep(1);
                 }
 
-                var chParam = mSender.Channel(ev.Channel);
+
                 switch (ev.Type) {
-                case E_EVENT_TYPE.NOTE_OFF:
+                case E_STATUS.NOTE_OFF: {
+                    var chParam = mSender.Channel(ev.Channel);
                     if (0 == chParam.InstId.isDrum) {
-                        if ((ev.NoteNo + Transpose) < 0 || 127 < (ev.NoteNo + Transpose)) {
+                        if ((ev.data[1] + Transpose) < 0 || 127 < (ev.data[1] + Transpose)) {
                             continue;
                         } else {
-                            ev = new Event(ev.Status, (byte)(ev.NoteNo + Transpose), ev.Velocity);
+                            ev = new Event(ev.Channel, E_STATUS.NOTE_OFF, ev.data[1] + Transpose, ev.data[2]);
                         }
                     }
-                    break;
-                case E_EVENT_TYPE.NOTE_ON:
-                    if (ev.Velocity != 0) {
+                }
+                break;
+                case E_STATUS.NOTE_ON: {
+                    var chParam = mSender.Channel(ev.Channel);
+                    if (ev.data[2] != 0) {
                         if (0.25 * mTicksPerBeat < (mCurrentTick - eventTick)) {
                             continue;
                         }
@@ -228,24 +232,26 @@ namespace Player {
                         }
                     }
                     if (0 == chParam.InstId.isDrum) {
-                        if ((ev.NoteNo + Transpose) < 0 || 127 < (ev.NoteNo + Transpose)) {
+                        if ((ev.data[1] + Transpose) < 0 || 127 < (ev.data[1] + Transpose)) {
                             continue;
                         } else {
-                            ev = new Event(ev.Status, (byte)(ev.NoteNo + Transpose), ev.Velocity);
+                            ev = new Event(ev.Channel, E_STATUS.NOTE_ON, ev.data[1] + Transpose, ev.data[2]);
                         }
                     }
-                    break;
-                case E_EVENT_TYPE.META:
+                }
+                break;
+                case E_STATUS.META:
                     switch (ev.Meta.Type) {
-                    case E_META_TYPE.TEMPO:
-                        mBPM = ev.Meta.Tempo;
+                    case E_META.TEMPO:
+                        mBPM = 60000000.0 / ev.Meta.Int;
                         break;
-                    case E_META_TYPE.MEASURE:
-                        mMeasureNumer = ev.Meta.MeasureNumer;
-                        mMeasureDenomi = ev.Meta.MeasureDenomi;
+                    case E_META.MEASURE:
+                        var m = new Mesure(ev.Meta.Int);
+                        mMeasureNumer = m.numerator;
+                        mMeasureDenomi = m.denominator;
                         break;
-                    case E_META_TYPE.KEY:
-                        mKey = ev.Meta.Key;
+                    case E_META.KEY:
+                        mKey = (E_KEY)ev.Meta.Int;
                         break;
                     }
                     break;

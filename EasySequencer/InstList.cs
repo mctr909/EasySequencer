@@ -4,7 +4,7 @@ using System.Linq;
 using System.Windows.Forms;
 using System.Runtime.InteropServices;
 
-using MIDI;
+using SMF;
 using Player;
 
 namespace EasySequencer {
@@ -71,9 +71,9 @@ namespace EasySequencer {
             var list = mInstList[(string)cmbCategory.SelectedItem].ToArray();
             var inst = list[(lstInst.SelectedIndex < list.Count()) ? lstInst.SelectedIndex : list.Count() - 1];
 
-            mSender.Send(new Event(E_CTRL_TYPE.BANK_MSB, (byte)mChNum, inst.Key.bankMSB));
-            mSender.Send(new Event(E_CTRL_TYPE.BANK_LSB, (byte)mChNum, inst.Key.bankLSB));
-            mSender.Send(new Event(E_EVENT_TYPE.PROG_CHG, (byte)mChNum, inst.Key.programNo));
+            mSender.Send(new Event(mChNum, E_CONTROL.BANK_MSB, inst.Key.bankMSB));
+            mSender.Send(new Event(mChNum, E_CONTROL.BANK_LSB, inst.Key.bankLSB));
+            mSender.Send(new Event(mChNum, E_STATUS.PROGRAM, inst.Key.programNo));
         }
 
         private void btnCommit_Click(object sender, EventArgs e) {
