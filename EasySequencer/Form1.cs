@@ -54,7 +54,7 @@ namespace EasySequencer {
 
             try {
                 mSMF = new SMF.SMF(filePath);
-                mPlayer.SetEventList(mSMF.EventList, mSMF.Ticks);
+                mPlayer.SetEventList(mSMF.EventList);
                 hsbSeek.Maximum = mPlayer.MaxTick;
                 Text = Path.GetFileNameWithoutExtension(filePath);
             }

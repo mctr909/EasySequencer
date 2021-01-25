@@ -11,7 +11,6 @@ namespace Player {
         private Stopwatch mSw;
         private Task mTask;
 
-        private int mTicksPerBeat;
         private long mPrevious_mSec;
         private double mCurrentTick;
         private double mPreviousTick;
@@ -72,8 +71,7 @@ namespace Player {
                 if (tick <= currentTick) {
                     break;
                 }
-                long eventTick = 960 * ev.tick / mTicksPerBeat;
-                while (currentTick < eventTick) {
+                while (currentTick < ev.tick) {
                     currentTick++;
                     ticks++;
                     if (3840 / mesure.denominator <= ticks) {
@@ -117,7 +115,6 @@ namespace Player {
         public Player(Sender sender) {
             mSender = sender;
             mEventList = null;
-            mTicksPerBeat = 960;
             mBPM = 120;
             mMeasureDenomi = 4;
             mMeasureNumer = 4;
@@ -127,16 +124,14 @@ namespace Player {
             mTask = new Task(MainProc);
         }
 
-        public void SetEventList(Event[] eventList, int ticksPerBeat) {
+        public void SetEventList(Event[] eventList) {
             mEventList = eventList;
-            mTicksPerBeat = ticksPerBeat;
             MaxTick = 0;
 
             foreach (var ev in eventList) {
                 if (E_STATUS.NOTE_OFF == ev.Type || E_STATUS.NOTE_ON == ev.Type) {
-                    var time = 960 * ev.tick / ticksPerBeat;
-                    if (MaxTick < time) {
-                        MaxTick = (int)time;
+                    if (MaxTick < ev.tick) {
+                        MaxTick = ev.tick;
                     }
                 }
             }
@@ -185,9 +180,8 @@ namespace Player {
                 }
 
                 var ev = e;
-                var eventTick = 960 * ev.tick / mTicksPerBeat;
 
-                while (mCurrentTick < eventTick) {
+                while (mCurrentTick < ev.tick) {
                     if (!IsPlay) {
                         return;
                     }
@@ -224,7 +218,7 @@ namespace Player {
                 case E_STATUS.NOTE_ON: {
                     var chParam = mSender.Channel(ev.Channel);
                     if (ev.data[2] != 0) {
-                        if (0.25 * mTicksPerBeat < (mCurrentTick - eventTick)) {
+                        if (0.25 * 960 < (mCurrentTick - ev.tick)) {
                             continue;
                         }
                         if (!chParam.Enable || (0 <= SoloChannel && SoloChannel != ev.Channel)) {

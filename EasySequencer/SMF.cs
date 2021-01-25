@@ -519,7 +519,7 @@ namespace SMF {
             Events = new List<Event>();
         }
 
-        public Track(BinaryReader br, int no) {
+        public Track(BinaryReader br, int no, int baseTick) {
             No = no;
             Events = new List<Event>();
 
@@ -530,7 +530,7 @@ namespace SMF {
             int time = 0;
             byte currentStatus = 0;
             while (ms.Position < ms.Length) {
-                var delta = Utils.ReadDelta(ms);
+                var delta = Utils.ReadDelta(ms) * 960 / baseTick;
                 time += delta;
                 Events.Add(new Event(ms, time, no, ref currentStatus));
             }
@@ -703,9 +703,9 @@ namespace SMF {
         }
 
         private struct Header {
-            public readonly E_FORMAT Format;
+            public E_FORMAT Format;
             public int Tracks;
-            public readonly int Ticks;
+            public int Ticks;
 
             public Header(E_FORMAT format, int tracks, int ticks) {
                 Format = format;
@@ -736,8 +736,6 @@ namespace SMF {
         private string mPath;
         private Header mHead;
         private List<Track> mTracks;
-
-        public int Ticks { get { return mHead.Ticks; } }
 
         public Event[] EventList {
             get {
@@ -773,8 +771,11 @@ namespace SMF {
 
             mTracks = new List<Track>();
             for (var i = 0; i < mHead.Tracks; ++i) {
-                mTracks.Add(new Track(br, i));
+                mTracks.Add(new Track(br, i, mHead.Ticks));
             }
+
+            mHead.Ticks = 960;
+            mHead.Format = E_FORMAT.FORMAT1;
 
             br.Close();
         }

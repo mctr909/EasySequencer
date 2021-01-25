@@ -138,7 +138,7 @@ namespace Player {
                 var evArr = ms.ToArray();
                 fixed (byte* evPtr = &evArr[0]) {
                     midi_WavFileOut(Marshal.StringToHGlobalAuto(filePath), mpWaveTable, mpInstList,
-                        44100, 16, (IntPtr)evPtr, (uint)evArr.Length, (uint)smf.Ticks);
+                        44100, 16, (IntPtr)evPtr, (uint)evArr.Length, 960);
                 }
                 IsFileOutput = false;
             });
