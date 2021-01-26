@@ -391,10 +391,10 @@ namespace Player {
 
             switch (mKnobNo) {
             case 0:
-                mSender.Send(new Event(mChannelNo, E_CONTROL.VOL, mChangeValue));
+                mSender.Send(new Event(mChannelNo, E_CONTROL.VOLUME, mChangeValue));
                 break;
             case 1:
-                mSender.Send(new Event(mChannelNo, E_CONTROL.EXP, mChangeValue));
+                mSender.Send(new Event(mChannelNo, E_CONTROL.EXPRESSION, mChangeValue));
                 break;
             case 2:
                 mSender.Send(new Event(mChannelNo, E_CONTROL.PAN, mChangeValue));

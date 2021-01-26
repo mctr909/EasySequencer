@@ -71,7 +71,7 @@ namespace Player {
                 if (tick <= currentTick) {
                     break;
                 }
-                while (currentTick < ev.tick) {
+                while (currentTick < ev.Tick) {
                     currentTick++;
                     ticks++;
                     if (3840 / mesure.denominator <= ticks) {
@@ -130,8 +130,8 @@ namespace Player {
 
             foreach (var ev in eventList) {
                 if (E_STATUS.NOTE_OFF == ev.Type || E_STATUS.NOTE_ON == ev.Type) {
-                    if (MaxTick < ev.tick) {
-                        MaxTick = ev.tick;
+                    if (MaxTick < ev.Tick) {
+                        MaxTick = ev.Tick;
                     }
                 }
             }
@@ -181,7 +181,7 @@ namespace Player {
 
                 var ev = e;
 
-                while (mCurrentTick < ev.tick) {
+                while (mCurrentTick < ev.Tick) {
                     if (!IsPlay) {
                         return;
                     }
@@ -207,18 +207,18 @@ namespace Player {
                 case E_STATUS.NOTE_OFF: {
                     var chParam = mSender.Channel(ev.Channel);
                     if (0 == chParam.InstId.isDrum) {
-                        if ((ev.data[1] + Transpose) < 0 || 127 < (ev.data[1] + Transpose)) {
+                        if ((ev.Data[1] + Transpose) < 0 || 127 < (ev.Data[1] + Transpose)) {
                             continue;
                         } else {
-                            ev = new Event(ev.Channel, E_STATUS.NOTE_OFF, ev.data[1] + Transpose, ev.data[2]);
+                            ev = new Event(ev.Channel, E_STATUS.NOTE_OFF, ev.Data[1] + Transpose, ev.Data[2]);
                         }
                     }
                 }
                 break;
                 case E_STATUS.NOTE_ON: {
                     var chParam = mSender.Channel(ev.Channel);
-                    if (ev.data[2] != 0) {
-                        if (0.25 * 960 < (mCurrentTick - ev.tick)) {
+                    if (ev.Data[2] != 0) {
+                        if (0.25 * 960 < (mCurrentTick - ev.Tick)) {
                             continue;
                         }
                         if (!chParam.Enable || (0 <= SoloChannel && SoloChannel != ev.Channel)) {
@@ -226,10 +226,10 @@ namespace Player {
                         }
                     }
                     if (0 == chParam.InstId.isDrum) {
-                        if ((ev.data[1] + Transpose) < 0 || 127 < (ev.data[1] + Transpose)) {
+                        if ((ev.Data[1] + Transpose) < 0 || 127 < (ev.Data[1] + Transpose)) {
                             continue;
                         } else {
-                            ev = new Event(ev.Channel, E_STATUS.NOTE_ON, ev.data[1] + Transpose, ev.data[2]);
+                            ev = new Event(ev.Channel, E_STATUS.NOTE_ON, ev.Data[1] + Transpose, ev.Data[2]);
                         }
                     }
                 }

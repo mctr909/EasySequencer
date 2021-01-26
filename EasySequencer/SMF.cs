@@ -5,54 +5,62 @@ using System.IO;
 
 namespace SMF {
     public enum E_STATUS : byte {
-        NOTE_OFF = 0x80,
-        NOTE_ON = 0x90,
+        NOTE_OFF  = 0x80,
+        NOTE_ON   = 0x90,
         KEY_PRESS = 0xA0,
-        CONTROL = 0xB0,
-        PROGRAM = 0xC0,
-        CH_PRESS = 0xD0,
-        PITCH = 0xE0,
+        CONTROL   = 0xB0,
+        PROGRAM   = 0xC0,
+        CH_PRESS  = 0xD0,
+        PITCH     = 0xE0,
+
         SYSEX_BEGIN = 0xF0,
-        TIME_CODE = 0xF1,
-        SONG_POS = 0xF2,
-        SONG_NUM = 0xF3,
-        RESERVED1 = 0xF4,
-        RESERVED2 = 0xF5,
-        TUNE_REQ = 0xF6,
-        SYSEX_END = 0xF7,
-        CLOCK = 0xF8,
-        RESERVED3 = 0xF9,
-        START = 0xFA,
-        CONTINUE = 0xFB,
-        STOP = 0xFC,
-        RESERVED4 = 0xFD,
-        SENS = 0xFE,
-        META = 0xFF
+        TIME_CODE   = 0xF1,
+        SONG_POS    = 0xF2,
+        SONG_NUM    = 0xF3,
+        TUNE_REQ    = 0xF6,
+        SYSEX_END   = 0xF7,
+        CLOCK       = 0xF8,
+        START       = 0xFA,
+        CONTINUE    = 0xFB,
+        STOP        = 0xFC,
+        SENS        = 0xFE,
+        META        = 0xFF
     }
 
     public enum E_CONTROL : byte {
         BANK_MSB = 0,
-        MODULATION = 1,
-        DATA_MSB = 6,
-        VOL = 7,
-        PAN = 10,
-        EXP = 11,
-        FX_CTRL = 12,
         BANK_LSB = 32,
-        DATA_LSB = 38,
+        MODULATION = 1,
+        PORTAMENTO_TIME = 5,
+        VOLUME = 7,
+        PAN = 10,
+        EXPRESSION = 11,
         DAMPER = 64,
+        PORTAMENTO = 65,
+
         RESONANCE = 71,
         RELEASE = 72,
         ATTACK = 73,
         CUTOFF = 74,
+
         VIB_RATE = 76,
+        VIB_DEPTH = 77,
         VIB_DELAY = 78,
+
         REVERB = 91,
         CHORUS = 93,
         DELAY = 94,
+        EFFECT_MSB = 12,
+        EFFECT_LSB = 44,
+
+        DATA_MSB = 6,
+        DATA_LSB = 38,
         RPN_LSB = 100,
         RPN_MSB = 101,
-        ALL_RESET = 121
+
+        ALL_OFF = 120,
+        ALL_RESET = 121,
+        ALL_NOTE_OFF = 123
     }
 
     public enum E_META {
@@ -114,36 +122,49 @@ namespace SMF {
 
     public struct Event {
         public static readonly Comparison<Event> Compare = new Comparison<Event>((a, b) => {
-            var dTime = a.tick - b.tick;
+            var dTime = a.Tick - b.Tick;
             if (0 == dTime) {
-                var aEv = (uint)a.Type;
-                var bEv = (uint)b.Type;
-                if (aEv < 0xA0) {
-                    aEv += 0x200;
-                    aEv |= (uint)a.Channel << 10;
-                } else if (aEv < 0xF0) {
-                    aEv += 0x100;
-                    aEv |= (uint)a.Channel << 10;
+                var dCh = a.Channel - b.Channel;
+                if (0 == dCh) {
+                    var dTrack = a.Track - b.Track;
+                    if (0 == dTrack) {
+                        var aStatus = (int)a.Type;
+                        if (aStatus < 0xA0) {
+                            // 0x280 - 0x290
+                            aStatus |= 0x0200;
+                        } else if (aStatus < 0xF0) {
+                            // 0x1A0 - 0x1E0
+                            aStatus |= 0x0100;
+                        } else {
+                            // 0x0F0 - 0x0FF
+                        }
+                        var bStatus = (int)b.Type;
+                        if (bStatus < 0xA0) {
+                            // 0x280 - 0x290
+                            bStatus |= 0x0200;
+                        } else if (bStatus < 0xF0) {
+                            // 0x1A0 - 0x1E0
+                            bStatus |= 0x0100;
+                        } else {
+                            // 0x0F0 - 0x0FF
+                        }
+                        return aStatus - bStatus;
+                    } else {
+                        return dTrack;
+                    }
+                } else {
+                    return dCh;
                 }
-                if (bEv < 0xA0) {
-                    bEv += 0x200;
-                    bEv |= (uint)b.Channel << 10;
-                } else if (bEv < 0xF0) {
-                    bEv += 0x100;
-                    bEv |= (uint)b.Channel << 10;
-                }
-                var dComp = (long)aEv - bEv;
-                return 0 == dComp ? 0 : (0 < dComp ? 1 : -1);
             } else {
-                return 0 < dTime ? 1 : -1;
+                return dTime;
             }
         });
 
-        public int tick;
-        public int track;
-        public byte[] data;
+        public int Tick;
+        public int Track;
+        public byte[] Data { get; private set; }
 
-        public byte Status { get { return data[0]; } }
+        public byte Status { get { return Data[0]; } }
 
         public E_STATUS Type {
             get {
@@ -165,27 +186,35 @@ namespace SMF {
             }
         }
 
-        public Meta Meta { get { return Meta.Instance(data); } }
+        public Meta Meta {
+            get {
+                if (Type == E_STATUS.META) {
+                    return new Meta(Data);
+                } else {
+                    return null;
+                }
+            }
+        }
 
         public Event(int tick, int track, int ch, E_STATUS type, params int[] value) {
-            this.tick = tick;
-            this.track = track;
+            Tick = tick;
+            Track = track;
             switch (value.Length) {
             case 1:
-                data = new byte[] {
+                Data = new byte[] {
                     (byte)((byte)type | ch),
                     (byte)value[0]
                 };
                 break;
             case 2:
-                data = new byte[] {
+                Data = new byte[] {
                     (byte)((byte)type | ch),
                     (byte)value[0],
                     (byte)value[1]
                 };
                 break;
             default:
-                data = new byte[] {
+                Data = new byte[] {
                     (byte)((byte)type | ch)
                 };
                 break;
@@ -193,18 +222,18 @@ namespace SMF {
         }
 
         public Event(int tick, int track, int ch, E_CONTROL type, params int[] value) {
-            this.tick = tick;
-            this.track = track;
+            Tick = tick;
+            Track = track;
             switch (value.Length) {
             case 1:
-                data = new byte[] {
+                Data = new byte[] {
                     (byte)((byte)E_STATUS.CONTROL | ch),
                     (byte)type,
                     (byte)value[0]
                 };
                 break;
             default:
-                data = new byte[] {
+                Data = new byte[] {
                     (byte)((byte)E_STATUS.CONTROL | ch),
                     (byte)type,
                     0
@@ -214,30 +243,30 @@ namespace SMF {
         }
 
         public Event(int tick, int track, Meta meta) {
-            this.tick = tick;
-            this.track = track;
-            meta.Copy(out data);
+            Tick = tick;
+            Track = track;
+            Data = meta.Data;
         }
 
         public Event(int ch, E_STATUS type, params int[] value) {
-            tick = 0;
-            track = 0;
+            Tick = 0;
+            Track = 0;
             switch (value.Length) {
             case 1:
-                data = new byte[] {
+                Data = new byte[] {
                     (byte)((byte)type | ch),
                     (byte)value[0]
                 };
                 break;
             case 2:
-                data = new byte[] {
+                Data = new byte[] {
                     (byte)((byte)type | ch),
                     (byte)value[0],
                     (byte)value[1]
                 };
                 break;
             default:
-                data = new byte[] {
+                Data = new byte[] {
                     (byte)((byte)type | ch)
                 };
                 break;
@@ -245,18 +274,18 @@ namespace SMF {
         }
 
         public Event(int ch, E_CONTROL type, params int[] value) {
-            tick = 0;
-            track = 0;
+            Tick = 0;
+            Track = 0;
             switch (value.Length) {
             case 1:
-                data = new byte[] {
+                Data = new byte[] {
                     (byte)((byte)E_STATUS.CONTROL | ch),
                     (byte)type,
                     (byte)value[0]
                 };
                 break;
             default:
-                data = new byte[] {
+                Data = new byte[] {
                     (byte)((byte)E_STATUS.CONTROL | ch),
                     (byte)type,
                     0
@@ -266,14 +295,14 @@ namespace SMF {
         }
 
         public Event(Meta meta) {
-            tick = 0;
-            track = 0;
-            meta.Copy(out data);
+            Tick = 0;
+            Track = 0;
+            Data = meta.Data;
         }
 
         public Event(MemoryStream ms, int tick, int track, ref byte currentStatus) {
-            this.tick = tick;
-            this.track = track;
+            Tick = tick;
+            Track = track;
 
             var status = (byte)ms.ReadByte();
             if (status < 0x80) {
@@ -296,7 +325,7 @@ namespace SMF {
             case E_STATUS.KEY_PRESS:
             case E_STATUS.CONTROL:
             case E_STATUS.PITCH:
-                data = new byte[] {
+                Data = new byte[] {
                     status,
                     (byte)ms.ReadByte(),
                     (byte)ms.ReadByte()
@@ -304,7 +333,7 @@ namespace SMF {
                 break;
             case E_STATUS.PROGRAM:
             case E_STATUS.CH_PRESS:
-                data = new byte[] {
+                Data = new byte[] {
                     status,
                     (byte)ms.ReadByte()
                 };
@@ -318,26 +347,30 @@ namespace SMF {
                     temp = (byte)ms.ReadByte();
                 }
                 list.Add(temp);
-                data = list.ToArray();
+                Data = list.ToArray();
                 break;
             case E_STATUS.META:
                 var metaType = (byte)ms.ReadByte();
                 var dataLen = Utils.ReadDelta(ms);
                 var delta = Utils.GetDeltaBytes(dataLen);
-                data = new byte[2 + delta.Length + dataLen];
-                data[0] = status;
-                data[1] = metaType;
-                Array.Copy(delta, 0, data, 2, delta.Length);
-                ms.Read(data, 2 + delta.Length, dataLen);
+                Data = new byte[2 + delta.Length + dataLen];
+                Data[0] = status;
+                Data[1] = metaType;
+                Array.Copy(delta, 0, Data, 2, delta.Length);
+                ms.Read(Data, 2 + delta.Length, dataLen);
                 break;
             default:
-                data = null;
+                Data = null;
                 break;
+            }
+
+            if (type == E_STATUS.NOTE_ON && Data[2] == 0) {
+                Data[0] = (byte)((byte)E_STATUS.NOTE_OFF | (Data[0] & 0x0F));
             }
         }
 
         public void WriteMessage(MemoryStream ms) {
-            ms.Write(data, 0, data.Length);
+            ms.Write(Data, 0, Data.Length);
         }
     }
 
@@ -360,13 +393,13 @@ namespace SMF {
     }
 
     public class Meta {
-        byte[] data;
+        public byte[] Data { get; private set; }
 
-        public E_META Type { get { return (E_META)data[1]; } }
+        public E_META Type { get { return (E_META)Data[1]; } }
 
         public string String {
             get {
-                switch(Type) {
+                switch (Type) {
                 case E_META.TEXT:
                 case E_META.COPYWRITAE:
                 case E_META.TRACK_NAME:
@@ -377,8 +410,8 @@ namespace SMF {
                 case E_META.PROG_NAME:
                 case E_META.DEVICE_NAME:
                     int dataLen;
-                    var begin = Utils.GetDelta(data, out dataLen, 2) + 2;
-                    return Encoding.Default.GetString(data, begin, dataLen);
+                    var begin = Utils.GetDelta(Data, out dataLen, 2) + 3;
+                    return Encoding.Default.GetString(Data, begin, dataLen);
                 default:
                     return null;
                 }
@@ -397,11 +430,11 @@ namespace SMF {
                     var data = Encoding.Default.GetBytes(value);
                     var delta = Utils.GetDeltaBytes(data.Length);
                     var type = Type;
-                    this.data = new byte[data.Length + delta.Length + 2];
-                    this.data[0] = 0xFF;
-                    this.data[1] = (byte)type;
-                    Array.Copy(delta, 0, this.data, 2, delta.Length);
-                    Array.Copy(data, 0, this.data, 2 + delta.Length, data.Length);
+                    Data = new byte[data.Length + delta.Length + 2];
+                    Data[0] = 0xFF;
+                    Data[1] = (byte)type;
+                    Array.Copy(delta, 0, Data, 2, delta.Length);
+                    Array.Copy(data, 0, Data, 2 + delta.Length, data.Length);
                     break;
                 }
             }
@@ -412,13 +445,13 @@ namespace SMF {
                 switch (Type) {
                 case E_META.SEQ_NUM:
                 case E_META.CH_PREF:
-                    return data[3];
+                    return Data[3];
                 case E_META.TEMPO:
-                    return Utils.GetUINT24(data, 3);
+                    return Utils.GetUINT24(Data, 3);
                 case E_META.MEASURE:
-                    return Utils.GetUINT32(data, 3);
+                    return Utils.GetUINT32(Data, 3);
                 case E_META.KEY:
-                    return Utils.GetUINT16(data, 3);
+                    return Utils.GetUINT16(Data, 3);
                 default:
                     return 0xFFFFFFFF;
                 }
@@ -427,27 +460,27 @@ namespace SMF {
                 switch (Type) {
                 case E_META.SEQ_NUM:
                 case E_META.CH_PREF:
-                    data[3] = (byte)value;
+                    Data[3] = (byte)value;
                     break;
                 case E_META.TEMPO:
-                    Utils.SetUINT24(data, value, 3);
+                    Utils.SetUINT24(Data, value, 3);
                     break;
                 case E_META.MEASURE:
-                    Utils.SetUINT32(data, value, 3);
+                    Utils.SetUINT32(Data, value, 3);
                     break;
                 case E_META.KEY:
-                    Utils.SetUINT16(data, value, 3);
+                    Utils.SetUINT16(Data, value, 3);
                     break;
                 }
             }
         }
 
-        Meta(byte[] data) {
-            this.data = data;
+        public Meta(byte[] data) {
+            Data = data;
         }
 
         public Meta(E_META type) {
-            switch(type) {
+            switch (type) {
             case E_META.TEXT:
             case E_META.COPYWRITAE:
             case E_META.TRACK_NAME:
@@ -457,98 +490,22 @@ namespace SMF {
             case E_META.QUEUE:
             case E_META.PROG_NAME:
             case E_META.DEVICE_NAME:
-                data = new byte[3];
-                data[0] = 0xFF;
-                data[1] = (byte)type;
+                Data = new byte[] { 0xFF, (byte)type, 0 };
                 break;
             case E_META.SEQ_NUM:
             case E_META.CH_PREF:
-                data = new byte[4];
-                data[0] = 0xFF;
-                data[1] = (byte)type;
-                data[2] = 1;
+                Data = new byte[] { 0xFF, (byte)type, 1, 0 };
                 break;
             case E_META.TEMPO:
-                data = new byte[6];
-                data[0] = 0xFF;
-                data[1] = (byte)type;
-                data[2] = 3;
-                data[3] = 0x07;
-                data[4] = 0xA1;
-                data[5] = 0x20;
+                Data = new byte[] { 0xFF, (byte)type, 3, 0x07, 0xA1, 0x20 };
                 break;
             case E_META.MEASURE:
-                data = new byte[7];
-                data[0] = 0xFF;
-                data[1] = (byte)type;
-                data[2] = 4;
-                data[3] = 4;
-                data[4] = 2;
-                data[5] = 24;
-                data[6] = 8;
+                Data = new byte[] { 0xFF, (byte)type, 4, 4, 2, 24, 8 };
                 break;
             case E_META.KEY:
-                data = new byte[5];
-                data[0] = 0xFF;
-                data[1] = (byte)type;
-                data[2] = 2;
+                Data = new byte[] { 0xFF, (byte)type, 2, 0, 0 };
                 break;
             }
-        }
-
-        public void Copy(out byte[] data) {
-            data = new byte[this.data.Length];
-            Array.Copy(this.data, data, data.Length);
-        }
-
-        public static Meta Instance(byte[] data) {
-            if (0xFF == data[0]) {
-                return new Meta(data);
-            } else {
-                return null;
-            }
-        }
-    }
-
-    public class Track {
-        public readonly int No;
-        public List<Event> Events { get; private set; }
-
-        public Track(int no) {
-            No = no;
-            Events = new List<Event>();
-        }
-
-        public Track(BinaryReader br, int no, int baseTick) {
-            No = no;
-            Events = new List<Event>();
-
-            Utils.ReadUINT32(br);
-            int size = (int)Utils.ReadUINT32(br);
-
-            var ms = new MemoryStream(br.ReadBytes(size), false);
-            int time = 0;
-            byte currentStatus = 0;
-            while (ms.Position < ms.Length) {
-                var delta = Utils.ReadDelta(ms) * 960 / baseTick;
-                time += delta;
-                Events.Add(new Event(ms, time, no, ref currentStatus));
-            }
-        }
-
-        public void Write(Stream str) {
-            var temp = new MemoryStream();
-            Utils.WriteUINT32(temp, 0x4D54726B);
-            Utils.WriteUINT32(temp, 0);
-            int currentTime = 0;
-            foreach (var ev in Events) {
-                Utils.WriteDelta(temp, ev.tick - currentTime);
-                ev.WriteMessage(temp);
-                currentTime = ev.tick;
-            }
-            temp.Seek(4, SeekOrigin.Begin);
-            Utils.WriteUINT32(temp, (uint)(temp.Length - 8));
-            temp.WriteTo(str);
         }
     }
 
@@ -735,13 +692,13 @@ namespace SMF {
 
         private string mPath;
         private Header mHead;
-        private List<Track> mTracks;
+        private List<List<Event>> mTracks;
 
         public Event[] EventList {
             get {
                 var list = new List<Event>();
                 foreach (var tr in mTracks) {
-                    foreach (var ev in tr.Events) {
+                    foreach (var ev in tr) {
                         list.Add(ev);
                     }
                 }
@@ -753,13 +710,13 @@ namespace SMF {
         public int MaxTime {
             get {
                 var list = EventList;
-                return list[list.Length - 1].tick;
+                return list[list.Length - 1].Tick;
             }
         }
 
         public SMF(E_FORMAT format = E_FORMAT.FORMAT1, int ticks = 960) {
             mHead = new Header(format, 0, ticks);
-            mTracks = new List<Track>();
+            mTracks = new List<List<Event>>();
         }
 
         public SMF(string filePath) {
@@ -769,9 +726,9 @@ namespace SMF {
             mPath = filePath;
             mHead = new Header(br);
 
-            mTracks = new List<Track>();
+            mTracks = new List<List<Event>>();
             for (var i = 0; i < mHead.Tracks; ++i) {
-                mTracks.Add(new Track(br, i, mHead.Ticks));
+                mTracks.Add(LoadTrack(br, i, mHead.Ticks));
             }
 
             mHead.Ticks = 960;
@@ -784,10 +741,54 @@ namespace SMF {
             var str = new FileStream(path, FileMode.Create);
             mHead.Write(str);
             foreach (var tr in mTracks) {
-                tr.Write(str);
+                WriteTrack(str, tr);
             }
             str.Close();
             str.Dispose();
+        }
+
+        public void AddEvent(Event ev) {
+            if (mTracks.Count <= ev.Track) {
+                return;
+            }
+            var eventList = mTracks[ev.Track];
+            if (ev.Type == E_STATUS.NOTE_OFF || ev.Type == E_STATUS.NOTE_ON) {
+
+            } else {
+                mTracks[ev.Track].Add(ev);
+            }
+            mTracks[ev.Track].Sort(Event.Compare);
+        }
+
+        private List<Event> LoadTrack(BinaryReader br, int trackNum, int baseTick) {
+            Utils.ReadUINT32(br);
+            int size = (int)Utils.ReadUINT32(br);
+
+            var ms = new MemoryStream(br.ReadBytes(size), false);
+            int time = 0;
+            byte currentStatus = 0;
+            var events = new List<Event>();
+            while (ms.Position < ms.Length) {
+                var delta = Utils.ReadDelta(ms) * 960 / baseTick;
+                time += delta;
+                events.Add(new Event(ms, time, trackNum, ref currentStatus));
+            }
+            return events;
+        }
+
+        private void WriteTrack(Stream str, List<Event> eventList) {
+            var temp = new MemoryStream();
+            Utils.WriteUINT32(temp, 0x4D54726B);
+            Utils.WriteUINT32(temp, 0);
+            int currentTime = 0;
+            foreach (var ev in eventList) {
+                Utils.WriteDelta(temp, ev.Tick - currentTime);
+                ev.WriteMessage(temp);
+                currentTime = ev.Tick;
+            }
+            temp.Seek(4, SeekOrigin.Begin);
+            Utils.WriteUINT32(temp, (uint)(temp.Length - 8));
+            temp.WriteTo(str);
         }
     }
 }

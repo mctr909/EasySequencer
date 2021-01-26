@@ -117,7 +117,7 @@ namespace Player {
         }
 
         public void Send(Event msg) {
-            fixed (byte* ptr = &msg.data[0]) {
+            fixed (byte* ptr = &msg.Data[0]) {
                 midi_Send(ptr);
             }
         }
@@ -132,8 +132,8 @@ namespace Player {
                 var ms = new MemoryStream();
                 var bw = new BinaryWriter(ms);
                 foreach (var ev in smf.EventList) {
-                    bw.Write(ev.tick);
-                    bw.Write(ev.data);
+                    bw.Write(ev.Tick);
+                    bw.Write(ev.Data);
                 }
                 var evArr = ms.ToArray();
                 fixed (byte* evPtr = &evArr[0]) {
