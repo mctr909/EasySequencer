@@ -201,6 +201,7 @@ void CALLBACK waveOutProc(HWAVEOUT hwo, uint uMsg) {
         //
         EnterCriticalSection((LPCRITICAL_SECTION)&csBufferInfo);
         if (gWriteCount < 1) {
+            Sleep(20);
             waveOutWrite(ghWaveOut, gppWaveHdr[gReadIndex], sizeof(WAVEHDR));
             return;
         }
