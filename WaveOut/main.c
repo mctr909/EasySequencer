@@ -201,8 +201,9 @@ void CALLBACK waveOutProc(HWAVEOUT hwo, uint uMsg) {
         //
         EnterCriticalSection((LPCRITICAL_SECTION)&csBufferInfo);
         if (gWriteCount < 1) {
-            Sleep(20);
             waveOutWrite(ghWaveOut, gppWaveHdr[gReadIndex], sizeof(WAVEHDR));
+            LeaveCriticalSection((LPCRITICAL_SECTION)&csBufferInfo);
+            Sleep(100);
             return;
         }
         gReadIndex = (gReadIndex + 1) % gSysValue.bufferCount;
@@ -221,9 +222,9 @@ DWORD writeWaveOutBuffer(LPVOID *param) {
             continue;
         }
         EnterCriticalSection((LPCRITICAL_SECTION)&csBufferInfo);
-        if (gSysValue.bufferCount <= gWriteCount ||
-            (gWriteIndex + 1) % gSysValue.bufferCount == gReadIndex) {
+        if (gSysValue.bufferCount <= gWriteCount + 1) {
             LeaveCriticalSection((LPCRITICAL_SECTION)&csBufferInfo);
+            Sleep(5);
             continue;
         }
         gWriteIndex = (gWriteIndex + 1) % gSysValue.bufferCount;
@@ -250,7 +251,7 @@ DWORD writeWaveOutBuffer(LPVOID *param) {
         //
         switch (gSysValue.bits) {
         case 16:
-            for (int cj = 0; cj < gSysValue.bufferCount; cj += PARALLEL_MAX) {
+            for (int cj = 0; cj < gSysValue.channelCount; cj += PARALLEL_MAX) {
                 #pragma loop(hint_parallel(PARALLEL_MAX))
                 for (int ci = 0; ci < PARALLEL_MAX; ++ci) {
                     channel16(gppChValues[ci + cj], (short*)outBuff);
@@ -258,7 +259,7 @@ DWORD writeWaveOutBuffer(LPVOID *param) {
             }
             break;
         case 24:
-            for (int cj = 0; cj < gSysValue.bufferCount; cj += PARALLEL_MAX) {
+            for (int cj = 0; cj < gSysValue.channelCount; cj += PARALLEL_MAX) {
                 #pragma loop(hint_parallel(PARALLEL_MAX))
                 for (int ci = 0; ci < PARALLEL_MAX; ++ci) {
                     channel24(gppChValues[ci + cj], (int24*)outBuff);
@@ -266,7 +267,7 @@ DWORD writeWaveOutBuffer(LPVOID *param) {
             }
             break;
         case 32:
-            for (int cj = 0; cj < gSysValue.bufferCount; cj += PARALLEL_MAX) {
+            for (int cj = 0; cj < gSysValue.channelCount; cj += PARALLEL_MAX) {
                 #pragma loop(hint_parallel(PARALLEL_MAX))
                 for (int ci = 0; ci < PARALLEL_MAX; ++ci) {
                     channel32(gppChValues[ci + cj], (float*)outBuff);

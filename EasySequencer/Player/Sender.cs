@@ -108,7 +108,7 @@ namespace Player {
             dls.GetInstList(mpInstList);
             //var sf2 = new SF2.SF2(dlsPath, mpWaveTable, fileSize);
             //sf2.GetInstList(mpInstList);
-            waveout_SystemValues(SampleRate, 32, 512, 16, CHANNEL_COUNT, SAMPLER_COUNT);
+            waveout_SystemValues(SampleRate, 32, 256, 48, CHANNEL_COUNT, SAMPLER_COUNT);
             mppChannels = waveout_GetChannelPtr();
             mppSamplers = waveout_GetSamplerPtr();
             midi_CreateChannels(mpInstList, mppSamplers, mppChannels, SAMPLER_COUNT);
