@@ -1,37 +1,23 @@
 ﻿#include "main.h"
 #include "sampler.h"
+#include "wave_out.h"
+#include "filter.h"
+
 #include <stdio.h>
-#include <math.h>
-#include <mmsystem.h>
-
-#pragma comment (lib, "winmm.lib")
-
-#define PARALLEL_MAX 16
 
 /******************************************************************************/
-DWORD            gThreadId;
-CRITICAL_SECTION csBufferInfo;
-
-volatile Bool   gDoStop = true;
-volatile Bool   gIsStopped = true;
-volatile int    gWriteCount = 0;
-volatile int    gWriteIndex = -1;
-volatile int    gReadIndex = -1;
-int             gActiveCount = 0;
-
-HWAVEOUT        ghWaveOut = NULL;
-WAVEFORMATEX    gWaveFmt = { 0 };
-WAVEHDR         **gppWaveHdr = NULL;
-
-LPBYTE          gpWaveTable = NULL;
-SYSTEM_VALUE    gSysValue = { 0 };
-CHANNEL_VALUE   **gppChValues = NULL;
-CHANNEL         **gppChParams = NULL;
-SAMPLER         **gppSamplers = NULL;
+int           gActiveCount = 0;
+LPBYTE        gpWaveTable = NULL;
+SYSTEM_VALUE  gSysValue = { 0 };
+CHANNEL_VALUE **gppChValues = NULL;
+CHANNEL       **gppChParams = NULL;
+SAMPLER       **gppSamplers = NULL;
 
 /******************************************************************************/
-void CALLBACK waveOutProc(HWAVEOUT hwo, uint uMsg);
-DWORD writeWaveOutBuffer(LPVOID *param);
+inline void setSampler();
+void write16(LPBYTE pData);
+void write24(LPBYTE pData);
+void write32(LPBYTE pData);
 
 /******************************************************************************/
 int* waveout_GetActiveSamplersPtr() {
@@ -50,11 +36,7 @@ LPBYTE waveout_LoadWaveTable(LPWSTR filePath, uint *size) {
     if (NULL == size) {
         return NULL;
     }
-    //
-    gDoStop = true;
-    while (!gIsStopped) {
-        Sleep(100);
-    }
+    waveout_close();
     //
     if (NULL != gpWaveTable) {
         free(gpWaveTable);
@@ -74,8 +56,6 @@ LPBYTE waveout_LoadWaveTable(LPWSTR filePath, uint *size) {
         }
         fclose(fpDLS);
     }
-    //
-    gDoStop = false;
     return gpWaveTable;
 }
 
@@ -87,7 +67,7 @@ void waveout_SystemValues(
     int channelCount,
     int samplerCount
 ) {
-    waveout_Dispose();
+    waveout_Close();
     //
     gSysValue.bufferLength = bufferLength;
     gSysValue.bufferCount = bufferCount;
@@ -107,177 +87,126 @@ void waveout_SystemValues(
     gppSamplers = createSamplers(gSysValue.samplerCount);
 }
 
-Bool waveout_Open() {
-    if (NULL != ghWaveOut) {
-        waveout_Close();
-    }
-    //
-    gWaveFmt.wFormatTag = 32 == gSysValue.bits ? 3 : 1;
-    gWaveFmt.nChannels = 2;
-    gWaveFmt.wBitsPerSample = (WORD)gSysValue.bits;
-    gWaveFmt.nSamplesPerSec = (DWORD)gSysValue.sampleRate;
-    gWaveFmt.nBlockAlign = gWaveFmt.nChannels * gWaveFmt.wBitsPerSample / 8;
-    gWaveFmt.nAvgBytesPerSec = gWaveFmt.nSamplesPerSec * gWaveFmt.nBlockAlign;
-    //
-    if (MMSYSERR_NOERROR != waveOutOpen(
-        &ghWaveOut,
-        WAVE_MAPPER,
-        &gWaveFmt,
-        (DWORD_PTR)waveOutProc,
-        (DWORD_PTR)gppWaveHdr,
-        CALLBACK_FUNCTION
-    )) {
-        return false;
-    }
-    //
-    gppWaveHdr = (PWAVEHDR*)malloc(sizeof(PWAVEHDR) * gSysValue.bufferCount);
-    for (int n = 0; n < gSysValue.bufferCount; ++n) {
-        gppWaveHdr[n] = (PWAVEHDR)malloc(sizeof(WAVEHDR));
-        gppWaveHdr[n]->dwBufferLength = gSysValue.bufferLength * gWaveFmt.nBlockAlign;
-        gppWaveHdr[n]->dwFlags = WHDR_BEGINLOOP | WHDR_ENDLOOP;
-        gppWaveHdr[n]->dwLoops = 0;
-        gppWaveHdr[n]->dwUser = 0;
-        gppWaveHdr[n]->lpData = (LPSTR)malloc(gSysValue.bufferLength * gWaveFmt.nBlockAlign);
-        memset(gppWaveHdr[n]->lpData, 0, gSysValue.bufferLength * gWaveFmt.nBlockAlign);
-        waveOutPrepareHeader(ghWaveOut, gppWaveHdr[n], sizeof(WAVEHDR));
-        waveOutWrite(ghWaveOut, gppWaveHdr[n], sizeof(WAVEHDR));
-    }
-    //
-    gDoStop = false;
-    InitializeCriticalSection((LPCRITICAL_SECTION)&csBufferInfo);
-    CreateThread(NULL, 0, writeWaveOutBuffer, NULL, 0, &gThreadId);
-    return true;
-}
-
-void waveout_Close() {
-    if (NULL == ghWaveOut) {
-        return;
-    }
-    //
-    gDoStop = true;
-    while (!gIsStopped) {
-        Sleep(100);
-    }
-    //
-    for (int n = 0; n < gSysValue.bufferCount; ++n) {
-        waveOutUnprepareHeader(ghWaveOut, gppWaveHdr[n], sizeof(WAVEHDR));
-    }
-    waveOutReset(ghWaveOut);
-    waveOutClose(ghWaveOut);
-    ghWaveOut = NULL;
-}
-
-void waveout_Dispose() {
-    if (NULL != ghWaveOut) {
-        waveout_Close();
-    }
-    disposeChannels(gppChValues);
-    disposeSamplers(gppSamplers, gSysValue.samplerCount);
-}
-
-/******************************************************************************/
-void CALLBACK waveOutProc(HWAVEOUT hwo, uint uMsg) {
-    switch (uMsg) {
-    case MM_WOM_OPEN:
+void waveout_Open() {
+    switch (gSysValue.bits) {
+    case 16:
+        waveout_open(gSysValue.sampleRate, 16, 2, gSysValue.bufferLength, gSysValue.bufferCount, write16);
         break;
-    case MM_WOM_CLOSE:
-        gDoStop = true;
-        while (!gIsStopped) {
-            Sleep(100);
-        }
-        gDoStop = false;
-        for (int b = 0; b < gSysValue.bufferCount; ++b) {
-            free(gppWaveHdr[b]->lpData);
-            gppWaveHdr[b]->lpData = NULL;
-        }
+    case 24:
+        waveout_open(gSysValue.sampleRate, 24, 2, gSysValue.bufferLength, gSysValue.bufferCount, write24);
         break;
-    case MM_WOM_DONE:
-        //
-        if (gDoStop) {
-            gIsStopped = true;
-            break;
-        }
-        gIsStopped = false;
-        //
-        EnterCriticalSection((LPCRITICAL_SECTION)&csBufferInfo);
-        if (gWriteCount < 1) {
-            waveOutWrite(ghWaveOut, gppWaveHdr[gReadIndex], sizeof(WAVEHDR));
-            LeaveCriticalSection((LPCRITICAL_SECTION)&csBufferInfo);
-            Sleep(100);
-            return;
-        }
-        gReadIndex = (gReadIndex + 1) % gSysValue.bufferCount;
-        waveOutWrite(ghWaveOut, gppWaveHdr[gReadIndex], sizeof(WAVEHDR));
-        gWriteCount--;
-        LeaveCriticalSection((LPCRITICAL_SECTION)&csBufferInfo);
+    case 32:
+        waveout_open(gSysValue.sampleRate, 32, 2, gSysValue.bufferLength, gSysValue.bufferCount, write32);
         break;
     default:
         break;
     }
 }
 
-DWORD writeWaveOutBuffer(LPVOID *param) {
-    while (true) {
-        if (NULL == gppWaveHdr[0]->lpData) {
+void waveout_Close() {
+    waveout_close();
+    disposeChannels(gppChValues);
+    disposeSamplers(gppSamplers, gSysValue.samplerCount);
+}
+
+/******************************************************************************/
+inline void setSampler() {
+    int activeCount = 0;
+    for (int sj = 0; sj < gSysValue.samplerCount; sj++) {
+        if (E_KEY_STATE_STANDBY == gppSamplers[sj]->state) {
             continue;
         }
-        EnterCriticalSection((LPCRITICAL_SECTION)&csBufferInfo);
-        if (gSysValue.bufferCount <= gWriteCount + 1) {
-            LeaveCriticalSection((LPCRITICAL_SECTION)&csBufferInfo);
-            Sleep(5);
-            continue;
-        }
-        gWriteIndex = (gWriteIndex + 1) % gSysValue.bufferCount;
-        //
-        LPBYTE outBuff = gppWaveHdr[gWriteIndex]->lpData;
-        memset(outBuff, 0, gppWaveHdr[gWriteIndex]->dwBufferLength);
-        //
-        int activeCount = 0;
-        for (int sj = 0; sj < gSysValue.samplerCount; sj += PARALLEL_MAX) {
-            #pragma loop(hint_parallel(PARALLEL_MAX))
-            for (int si = 0; si < PARALLEL_MAX; ++si) {
-                if (E_KEY_STATE_STANDBY == gppSamplers[si + sj]->state) {
-                    continue;
-                }
-                if (gppSamplers[si + sj]->isOsc) {
-                    oscillator(gppChValues, gppSamplers[si + sj], gpWaveTable);
-                } else {
-                    sampler(gppChValues, gppSamplers[si + sj], gpWaveTable);
-                }
-                activeCount++;
-            }
-        }
-        gActiveCount = activeCount;
-        //
-        switch (gSysValue.bits) {
-        case 16:
-            for (int cj = 0; cj < gSysValue.channelCount; cj += PARALLEL_MAX) {
-                #pragma loop(hint_parallel(PARALLEL_MAX))
-                for (int ci = 0; ci < PARALLEL_MAX; ++ci) {
-                    channel16(gppChValues[ci + cj], (short*)outBuff);
-                }
-            }
-            break;
-        case 24:
-            for (int cj = 0; cj < gSysValue.channelCount; cj += PARALLEL_MAX) {
-                #pragma loop(hint_parallel(PARALLEL_MAX))
-                for (int ci = 0; ci < PARALLEL_MAX; ++ci) {
-                    channel24(gppChValues[ci + cj], (int24*)outBuff);
-                }
-            }
-            break;
-        case 32:
-            for (int cj = 0; cj < gSysValue.channelCount; cj += PARALLEL_MAX) {
-                #pragma loop(hint_parallel(PARALLEL_MAX))
-                for (int ci = 0; ci < PARALLEL_MAX; ++ci) {
-                    channel32(gppChValues[ci + cj], (float*)outBuff);
-                }
-            }
-            break;
-        }
-        //
-        gWriteCount++;
-        LeaveCriticalSection((LPCRITICAL_SECTION)&csBufferInfo);
+        sampler(gppChValues, gppSamplers[sj], gpWaveTable);
+        activeCount++;
     }
-    return 0;
+    gActiveCount = activeCount;
+}
+
+void write16(LPBYTE pData) {
+    setSampler();
+    for (int i = 0; i < gSysValue.channelCount; i++) {
+        CHANNEL_VALUE* pCh = gppChValues[i];
+        double* inputBuff = pCh->pWave;
+        double* inputBuffTerm = inputBuff + pCh->pSystemValue->bufferLength;
+        short* pBuff = (short*)pData;
+        for (; inputBuff < inputBuffTerm; inputBuff++, pBuff += 2) {
+            // filter
+            filter_lpf(&pCh->filter, *inputBuff * pCh->amp);
+            // pan
+            double tempL = pCh->filter.a10 * pCh->panL;
+            double tempR = pCh->filter.a10 * pCh->panR;
+            // effect
+            effect(pCh, &tempL, &tempR);
+            // output
+            tempL *= 32767.0;
+            tempR *= 32767.0;
+            tempL += *(pBuff + 0);
+            tempR += *(pBuff + 1);
+            if (32767.0 < tempL) tempL = 32767.0;
+            if (tempL < -32767.0) tempL = -32767.0;
+            if (32767.0 < tempR) tempR = 32767.0;
+            if (tempR < -32767.0) tempR = -32767.0;
+            *(pBuff + 0) = (short)tempL;
+            *(pBuff + 1) = (short)tempR;
+            *inputBuff = 0.0;
+        }
+    }
+}
+
+void write24(LPBYTE pData) {
+    setSampler();
+    for (int i = 0; i < gSysValue.channelCount; i++) {
+        CHANNEL_VALUE* pCh = gppChValues[i];
+        double* inputBuff = pCh->pWave;
+        double* inputBuffTerm = inputBuff + pCh->pSystemValue->bufferLength;
+        int24* pBuff = (int24*)pData;
+        for (; inputBuff < inputBuffTerm; inputBuff++, pBuff += 2) {
+            // filter
+            filter_lpf(&pCh->filter, *inputBuff * pCh->amp);
+            // pan
+            double tempL = pCh->filter.a10 * pCh->panL;
+            double tempR = pCh->filter.a10 * pCh->panR;
+            // effect
+            effect(pCh, &tempL, &tempR);
+            // output
+            tempL += fromInt24(pBuff + 0);
+            tempR += fromInt24(pBuff + 1);
+            if (1.0 < tempL) tempL = 1.0;
+            if (tempL < -1.0) tempL = -1.0;
+            if (1.0 < tempR) tempR = 1.0;
+            if (tempR < -1.0) tempR = -1.0;
+            setInt24(pBuff + 0, tempL);
+            setInt24(pBuff + 1, tempR);
+            *inputBuff = 0.0;
+        }
+    }
+}
+
+void write32(LPBYTE pData) {
+    setSampler();
+    for (int i = 0; i < gSysValue.channelCount; i++) {
+        CHANNEL_VALUE* pCh = gppChValues[i];
+        double* inputBuff = pCh->pWave;
+        double* inputBuffTerm = inputBuff + pCh->pSystemValue->bufferLength;
+        float* pBuff = (float*)pData;
+        for (; inputBuff < inputBuffTerm; inputBuff++, pBuff += 2) {
+            // filter
+            filter_lpf(&pCh->filter, *inputBuff * pCh->amp);
+            // pan
+            double tempL = pCh->filter.a10 * pCh->panL;
+            double tempR = pCh->filter.a10 * pCh->panR;
+            // effect
+            effect(pCh, &tempL, &tempR);
+            // output
+            tempL += *(pBuff + 0);
+            tempR += *(pBuff + 1);
+            if (1.0 < tempL) tempL = 1.0;
+            if (tempL < -1.0) tempL = -1.0;
+            if (1.0 < tempR) tempR = 1.0;
+            if (tempR < -1.0) tempR = -1.0;
+            *(pBuff + 0) = (float)tempL;
+            *(pBuff + 1) = (float)tempR;
+            *inputBuff = 0.0;
+        }
+    }
 }

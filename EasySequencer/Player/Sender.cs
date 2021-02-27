@@ -49,7 +49,7 @@ namespace Player {
             int samplerCount
         );
         [DllImport("WaveOut.dll")]
-        private static extern bool waveout_Open();
+        private static extern void waveout_Open();
         [DllImport("WaveOut.dll")]
         private static extern void waveout_Close();
         [DllImport("WaveOut.dll")]
@@ -63,7 +63,7 @@ namespace Player {
         public static readonly double ReleaseSpeed = 15;
 
         public static int CHANNEL_COUNT = 16;
-        public static int SAMPLER_COUNT = 64;
+        public static int SAMPLER_COUNT = 32;
         public static bool IsFileOutput { get; private set; }
 
         public static int ActiveCount {
@@ -108,7 +108,7 @@ namespace Player {
             dls.GetInstList(mpInstList);
             //var sf2 = new SF2.SF2(dlsPath, mpWaveTable, fileSize);
             //sf2.GetInstList(mpInstList);
-            waveout_SystemValues(SampleRate, 32, 256, 48, CHANNEL_COUNT, SAMPLER_COUNT);
+            waveout_SystemValues(SampleRate, 16, 220, 50, CHANNEL_COUNT, SAMPLER_COUNT);
             mppChannels = waveout_GetChannelPtr();
             mppSamplers = waveout_GetSamplerPtr();
             midi_CreateChannels(mpInstList, mppSamplers, mppChannels, SAMPLER_COUNT);

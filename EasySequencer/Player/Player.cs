@@ -212,6 +212,8 @@ namespace Player {
                         } else {
                             ev = new Event(ev.Channel, E_STATUS.NOTE_OFF, ev.Data[1] + Transpose, ev.Data[2]);
                         }
+                    } else {
+                        continue;
                     }
                 }
                 break;

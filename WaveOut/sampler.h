@@ -85,22 +85,13 @@ typedef struct SAMPLER {
     byte channelNum;
     byte noteNum;
     byte state;
-    Bool isOsc;
+    byte unisonNum;
     double velocity;
     double time;
     double index;
     double egAmp;
-    double egPitch;
     ENVELOPE envAmp;
-    ENVELOPE envPitch;
-    ENVELOPE envCutoff;
-    FILTER filter;
     WAVE_INFO waveInfo;
-    byte waveForm[8];
-    double gain[8];
-    double pitch[8];
-    double param[8];
-    double value[8];
 } SAMPLER;
 #pragma pack(pop)
 
@@ -140,10 +131,7 @@ extern "C" {
     __declspec(dllexport) void disposeSamplers(SAMPLER** ppSmpl, uint count);
     __declspec(dllexport) void disposeChannels(CHANNEL_VALUE**ppCh);
     __declspec(dllexport) inline void sampler(CHANNEL_VALUE **ppCh, SAMPLER *pSmpl, byte *pWaveBuffer);
-    __declspec(dllexport) inline void oscillator(CHANNEL_VALUE **ppCh, SAMPLER *pSmpl, byte *pWaveBuffer);
-    __declspec(dllexport) inline void channel32(CHANNEL_VALUE *pCh, float *waveBuff);
-    __declspec(dllexport) inline void channel24(CHANNEL_VALUE *pCh, int24 *waveBuff);
-    __declspec(dllexport) inline void channel16(CHANNEL_VALUE *pCh, short *waveBuff);
+    __declspec(dllexport) inline void effect(CHANNEL_VALUE* pCh, double* waveL, double* waveR);
 #ifdef __cplusplus
 }
 #endif

@@ -18,9 +18,8 @@ extern "C" {
         int channelCount,
         int samplerCount
     );
-    __declspec(dllexport) Bool WINAPI waveout_Open();
+    __declspec(dllexport) void WINAPI waveout_Open();
     __declspec(dllexport) void WINAPI waveout_Close();
-    __declspec(dllexport) void WINAPI waveout_Dispose();
 #ifdef __cplusplus
 }
 #endif

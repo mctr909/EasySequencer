@@ -231,50 +231,10 @@ uint wavFileOutSend(Channel **ppCh, LPBYTE msg) {
 }
 
 void wavFileOutWrite(SAMPLER **ppSmpl, CHANNEL_VALUE **ppCh, LPBYTE outBuffer) {
-    for (int sj = 0; sj < gSysValue.samplerCount; sj += PARALLEL_MAX) {
-        #pragma loop(hint_parallel(PARALLEL_MAX))
-        for (int si = 0; si < PARALLEL_MAX; ++si) {
-            if (E_KEY_STATE_STANDBY == ppSmpl[si + sj]->state) {
-                continue;
-            }
-            if (ppSmpl[si + sj]->isOsc) {
-                oscillator(ppCh, ppSmpl[si + sj], gpWaveTable);
-            } else {
-                sampler(ppCh, ppSmpl[si + sj], gpWaveTable);
-            }
-        }
-    }
-
+    // sampler loop
     int buffSize = gSysValue.bufferLength * gFmt.blockAlign;
     memset(outBuffer, 0, buffSize);
-
-    switch (gSysValue.bits) {
-    case 16:
-        for (int cj = 0; cj < gSysValue.bufferCount; cj += PARALLEL_MAX) {
-            #pragma loop(hint_parallel(PARALLEL_MAX))
-            for (int ci = 0; ci < PARALLEL_MAX; ++ci) {
-                channel16(ppCh[ci + cj], (short*)outBuffer);
-            }
-        }
-        break;
-    case 24:
-        for (int cj = 0; cj < gSysValue.bufferCount; cj += PARALLEL_MAX) {
-            #pragma loop(hint_parallel(PARALLEL_MAX))
-            for (int ci = 0; ci < PARALLEL_MAX; ++ci) {
-                channel24(ppCh[ci + cj], (int24*)outBuffer);
-            }
-        }
-        break;
-    case 32:
-        for (int cj = 0; cj < gSysValue.bufferCount; cj += PARALLEL_MAX) {
-            #pragma loop(hint_parallel(PARALLEL_MAX))
-            for (int ci = 0; ci < PARALLEL_MAX; ++ci) {
-                channel32(ppCh[ci + cj], (float*)outBuffer);
-            }
-        }
-        break;
-    }
-
+    // channel loop
     fwrite(outBuffer, buffSize, 1, gfpFileOut);
     gFmt.dataSize += buffSize;
 }

@@ -7,7 +7,7 @@
 #define PURGE_THRESHOLD 0.0005
 #define PURGE_SPEED     500
 
-#define OVER_SAMPLING   8
+#define OVER_SAMPLING   4
 #define DELAY_TAPS             1048576
 #define VALUE_TRANSITION_SPEED 250
 
@@ -16,17 +16,11 @@
 #define INV_SQRT3 0.577350269
 
 /******************************************************************************/
-inline void effect(CHANNEL_VALUE *pCh, double *waveL, double *waveR);
-
-/******************************************************************************/
 SAMPLER** createSamplers(uint count) {
     SAMPLER** samplers = (SAMPLER**)malloc(sizeof(SAMPLER*) * count);
     for (uint i = 0; i < count; ++i) {
         samplers[i] = (SAMPLER*)malloc(sizeof(SAMPLER));
         memset(samplers[i], 0, sizeof(SAMPLER));
-        for (uint w = 0; w < 8; w++) {
-            samplers[i]->value[w] = ((8.0 * i) + w) / (8 * count);
-        }
     }
     return samplers;
 }
@@ -101,6 +95,7 @@ inline void sampler(CHANNEL_VALUE **ppCh, SAMPLER *pSmpl, byte *pWaveBuffer) {
     WAVE_INFO *pWaveInfo = &pSmpl->waveInfo;
     ENVELOPE *pEnvAmp = &pSmpl->envAmp;
 
+    long loopEnd = (long)pWaveInfo->loopBegin + pWaveInfo->loopLength;
     short *pWave = (short*)(pWaveBuffer + pWaveInfo->waveOfs);
     double *pOutput = pChValue->pWave;
     double *pOutputTerm = pOutput + pSystemValue->bufferLength;
@@ -111,25 +106,26 @@ inline void sampler(CHANNEL_VALUE **ppCh, SAMPLER *pSmpl, byte *pWaveBuffer) {
         //*******************************
         // generate wave
         //*******************************
-        double sumWave = 0.0;
-        for (auto o = 0; o < OVER_SAMPLING; o++) {
-            int pos = (int)pSmpl->index;
-            double dt = pSmpl->index - pos;
-            sumWave += (pWave[pos - 1] * (1.0 - dt) + pWave[pos] * dt) * pWaveInfo->gain;
+        double smoothedWave = 0.0;
+        double delta = pWaveInfo->delta * pChParam->pitch / OVER_SAMPLING;
+        for (int o = 0; o < OVER_SAMPLING; o++) {
+            int idx = (int)pSmpl->index;
+            double dt = pSmpl->index - idx;
+            smoothedWave += (pWave[idx - 1] * (1.0 - dt) + pWave[idx] * dt) * pWaveInfo->gain;
             //
-            pSmpl->index += pWaveInfo->delta * pChParam->pitch / OVER_SAMPLING;
-            if ((pWaveInfo->loopBegin + pWaveInfo->loopLength) < pSmpl->index) {
+            pSmpl->index += delta;
+            if (loopEnd < pSmpl->index) {
                 if (pWaveInfo->loopEnable) {
                     pSmpl->index -= pWaveInfo->loopLength;
                 } else {
-                    pSmpl->index = pWaveInfo->loopBegin + pWaveInfo->loopLength;
+                    pSmpl->index = loopEnd;
                     pSmpl->state = E_KEY_STATE_STANDBY;
                     return;
                 }
             }
         }
         // output
-        *pOutput += sumWave * pSmpl->velocity * pSmpl->egAmp / OVER_SAMPLING;
+        *pOutput += smoothedWave * pSmpl->velocity * pSmpl->egAmp / OVER_SAMPLING;
         //*******************************
         // generate envelope
         //*******************************
@@ -162,207 +158,6 @@ inline void sampler(CHANNEL_VALUE **ppCh, SAMPLER *pSmpl, byte *pWaveBuffer) {
     }
 }
 
-inline void oscillator(CHANNEL_VALUE **ppCh, SAMPLER *pSmpl, byte *pWaveBuffer) {
-    CHANNEL_VALUE *pChValue = ppCh[pSmpl->channelNum];
-    SYSTEM_VALUE *pSystemValue = pChValue->pSystemValue;
-    CHANNEL *pChParam = pChValue->pParam;
-    ENVELOPE *pEnvAmp = &pSmpl->envAmp;
-    ENVELOPE *pEnvPitch = &pSmpl->envPitch;
-    ENVELOPE *pEnvCutoff = &pSmpl->envCutoff;
-    FILTER *pFilter = &pSmpl->filter;
-
-
-    double *pOutput = pChValue->pWave;
-    double *pOutputTerm = pOutput + pSystemValue->bufferLength;
-    
-    pChValue->state = E_CH_STATE_ACTIVE;
-
-    for (; pOutput < pOutputTerm; pOutput++) {
-        //*******************************
-        // generate wave
-        //*******************************
-        double sumWave = 0.0;
-        for (int w = 0; w < 8; w++) {
-            if (0.0 == pSmpl->gain[w]) {
-                continue;
-            }
-            double gain = pSmpl->gain[w] * pSmpl->velocity * pSmpl->egAmp * 0.0625;
-            double delta = pSmpl->pitch[w] * pSmpl->egPitch * pChParam->pitch * pSystemValue->deltaTime * 0.0625;
-            double *value = &pSmpl->value[w];
-            double *param = &pSmpl->param[w];
-            switch (pSmpl->waveForm[w]) {
-            case E_WAVE_FORM_SINE:
-                for (int o = 0; o < 16; o++) {
-                    sumWave += *value * gain;
-                    *param -= *value * PI2 * delta;
-                    *value += *param * PI2 * delta;
-                }
-                break;
-            case E_WAVE_FORM_PWM:
-                for (int o = 0; o < 16; o++) {
-                    sumWave += (*value < *param) ? gain : -gain;
-                    *value += delta;
-                    if (1.0 <= *value) {
-                        *value -= 1.0;
-                    }
-                }
-                break;
-            case E_WAVE_FORM_SAW:
-                for (int o = 0; o < 16; o++) {
-                    if (*value < 0.5) {
-                        sumWave += gain * *value * 2.0;
-                    } else {
-                        sumWave += gain * (*value * 2.0 - 2.0);
-                    }
-                    *value += delta;
-                    if (1.0 <= *value) {
-                        *value -= 1.0;
-                    }
-                }
-                break;
-            case E_WAVE_FORM_TRI:
-                for (int o = 0; o < 16; o++) {
-                    if (*value < 0.25) {
-                        sumWave += gain * *value * 4.0;
-                    } else if (*value < 0.75) {
-                        sumWave += gain * (2.0 - *value * 4.0);
-                    } else {
-                        sumWave += gain * (*value * 4.0 - 4.0);
-                    }
-                    *value += delta;
-                    if (1.0 <= *value) {
-                        *value -= 1.0;
-                    }
-                }
-                break;
-            }
-        }
-        // output
-        filter_lpf(pFilter, sumWave);
-        *pOutput += pFilter->a10;
-        //*******************************
-        // generate envelope
-        //*******************************
-        switch (pSmpl->state) {
-        case E_KEY_STATE_PURGE:
-            pSmpl->egAmp -= pSmpl->egAmp * pSystemValue->deltaTime * PURGE_SPEED;
-            pSmpl->egPitch += (pEnvPitch->fall - pSmpl->egPitch) * pEnvPitch->release;
-            pFilter->cut += (pEnvCutoff->fall - pFilter->cut) * pEnvCutoff->release;
-            break;
-        case E_KEY_STATE_RELEASE:
-            pSmpl->egAmp -= pSmpl->egAmp * pEnvAmp->release;
-            pSmpl->egPitch += (pEnvPitch->fall - pSmpl->egPitch) * pEnvPitch->release;
-            pFilter->cut += (pEnvCutoff->fall - pFilter->cut) * pEnvCutoff->release;
-            break;
-        case E_KEY_STATE_HOLD:
-            pSmpl->egAmp -= pSmpl->egAmp * pChParam->holdDelta;
-            pSmpl->egPitch += (pEnvPitch->fall - pSmpl->egPitch) * pEnvPitch->release;
-            pFilter->cut += (pEnvCutoff->fall - pFilter->cut) * pEnvCutoff->release;
-            break;
-        case E_KEY_STATE_PRESS:
-            if (pSmpl->time <= pEnvAmp->hold) {
-                pSmpl->egAmp += (1.0 - pSmpl->egAmp) * pEnvAmp->attack;
-            } else {
-                pSmpl->egAmp += (pEnvAmp->sustain - pSmpl->egAmp) * pEnvAmp->decay;
-            }
-            if (pSmpl->time <= pEnvPitch->hold) {
-                pSmpl->egPitch += (pEnvPitch->top - pSmpl->egPitch) * pEnvPitch->attack;
-            } else {
-                pSmpl->egPitch += (1.0 - pSmpl->egPitch) * pEnvPitch->decay;
-            }
-            if (pSmpl->time <= pEnvCutoff->hold) {
-                pFilter->cut += (pEnvCutoff->top - pFilter->cut) * pEnvCutoff->attack;
-            } else {
-                pFilter->cut += (pEnvCutoff->sustain - pFilter->cut) * pEnvCutoff->decay;
-            }
-            break;
-        }
-        pSmpl->time += pSystemValue->deltaTime;
-        //*******************************
-        // standby condition
-        //*******************************
-        if (pEnvAmp->hold < pSmpl->time && pSmpl->egAmp < PURGE_THRESHOLD) {
-            pSmpl->state = E_KEY_STATE_STANDBY;
-            return;
-        }
-    }
-}
-
-inline void channel32(CHANNEL_VALUE *pCh, float *outBuff) {
-    double *inputBuff = pCh->pWave;
-    double *inputBuffTerm = inputBuff + pCh->pSystemValue->bufferLength;
-    for (; inputBuff < inputBuffTerm; inputBuff++, outBuff += 2) {
-        // filter
-        filter_lpf(&pCh->filter, *inputBuff * pCh->amp);
-        // pan
-        double tempL = pCh->filter.a10 * pCh->panL;
-        double tempR = pCh->filter.a10 * pCh->panR;
-        // effect
-        effect(pCh, &tempL, &tempR);
-        // output
-        tempL += *(outBuff + 0);
-        tempR += *(outBuff + 1);
-        if (1.0 < tempL) tempL = 1.0;
-        if (tempL < -1.0) tempL = -1.0;
-        if (1.0 < tempR) tempR = 1.0;
-        if (tempR < -1.0) tempR = -1.0;
-        *(outBuff + 0) = (float)tempL;
-        *(outBuff + 1) = (float)tempR;
-        *inputBuff = 0.0;
-    }
-}
-
-inline void channel24(CHANNEL_VALUE *pCh, int24 *outBuff) {
-    double *inputBuff = pCh->pWave;
-    double *inputBuffTerm = inputBuff + pCh->pSystemValue->bufferLength;
-    for (; inputBuff < inputBuffTerm; inputBuff++, outBuff += 2) {
-        // filter
-        filter_lpf(&pCh->filter, *inputBuff * pCh->amp);
-        // pan
-        double tempL = pCh->filter.a10 * pCh->panL;
-        double tempR = pCh->filter.a10 * pCh->panR;
-        // effect
-        effect(pCh, &tempL, &tempR);
-        // output
-        tempL += fromInt24(outBuff + 0);
-        tempR += fromInt24(outBuff + 1);
-        if (1.0 < tempL) tempL = 1.0;
-        if (tempL < -1.0) tempL = -1.0;
-        if (1.0 < tempR) tempR = 1.0;
-        if (tempR < -1.0) tempR = -1.0;
-        setInt24(outBuff + 0, tempL);
-        setInt24(outBuff + 1, tempR);
-        *inputBuff = 0.0;
-    }
-}
-
-inline void channel16(CHANNEL_VALUE *pCh, short *outBuff) {
-    double *inputBuff = pCh->pWave;
-    double *inputBuffTerm = inputBuff + pCh->pSystemValue->bufferLength;
-    for (; inputBuff < inputBuffTerm; inputBuff++, outBuff += 2) {
-        // filter
-        filter_lpf(&pCh->filter, *inputBuff * pCh->amp);
-        // pan
-        double tempL = pCh->filter.a10 * pCh->panL;
-        double tempR = pCh->filter.a10 * pCh->panR;
-        // effect
-        effect(pCh, &tempL, &tempR);
-        // output
-        tempL *= 32767.0;
-        tempR *= 32767.0;
-        tempL += *(outBuff + 0);
-        tempR += *(outBuff + 1);
-        if (32767.0 < tempL) tempL = 32767.0;
-        if (tempL < -32767.0) tempL = -32767.0;
-        if (32767.0 < tempR) tempR = 32767.0;
-        if (tempR < -32767.0) tempR = -32767.0;
-        *(outBuff + 0) = (short)tempL;
-        *(outBuff + 1) = (short)tempR;
-        *inputBuff = 0.0;
-    }
-}
-
-/******************************************************************************/
 inline void effect(CHANNEL_VALUE *pCh, double *waveL, double *waveR) {
     CHANNEL *pParam = pCh->pParam;
     double *pTapL = pCh->pDelTapL;
