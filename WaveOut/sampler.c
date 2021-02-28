@@ -16,6 +16,15 @@
 #define INV_SQRT3 0.577350269
 
 /******************************************************************************/
+NOTE** createNotes(uint count) {
+    NOTE** notes = (NOTE**)malloc(sizeof(NOTE*) * count);
+    for (uint i = 0; i < count; ++i) {
+        notes[i] = (NOTE*)malloc(sizeof(NOTE));
+        memset(notes[i], 0, sizeof(NOTE));
+    }
+    return notes;
+}
+
 SAMPLER** createSamplers(uint count) {
     SAMPLER** samplers = (SAMPLER**)malloc(sizeof(SAMPLER*) * count);
     for (uint i = 0; i < count; ++i) {
@@ -88,19 +97,18 @@ void disposeChannels(CHANNEL_VALUE **ppCh) {
     free(ppCh);
 }
 
-inline void sampler(CHANNEL_VALUE **ppCh, SAMPLER *pSmpl, byte *pWaveBuffer) {
-    CHANNEL_VALUE *pChValue = ppCh[pSmpl->channelNum];
-    SYSTEM_VALUE *pSystemValue = pChValue->pSystemValue;
-    CHANNEL *pChParam = pChValue->pParam;
-    WAVE_INFO *pWaveInfo = pSmpl->pWaveInfo;
-    ENVELOPE *pEnvAmp = pSmpl->pEnvAmp;
+inline Bool sampler(CHANNEL_VALUE** ppCh, SAMPLER* pSmpl, byte* pWaveBuffer) {
+    NOTE* pNote = pSmpl->pNote;
+    CHANNEL_VALUE* pChValue = ppCh[pNote->channelNum];
+    SYSTEM_VALUE* pSystemValue = pChValue->pSystemValue;
+    CHANNEL* pChParam = pChValue->pParam;
+    WAVE_INFO* pWaveInfo = pSmpl->pWaveInfo;
+    ENVELOPE* pEnvAmp = pSmpl->pEnvAmp;
 
     long loopEnd = (long)pWaveInfo->loopBegin + pWaveInfo->loopLength;
-    short *pWave = (short*)(pWaveBuffer + pWaveInfo->waveOfs);
-    double *pOutput = pChValue->pWave;
-    double *pOutputTerm = pOutput + pSystemValue->bufferLength;
-
-    pChValue->state = E_CH_STATE_ACTIVE;
+    short* pWave = (short*)(pWaveBuffer + pWaveInfo->waveOfs);
+    double* pOutput = pChValue->pWave;
+    double* pOutputTerm = pOutput + pSystemValue->bufferLength;
 
     for (; pOutput < pOutputTerm; pOutput++) {
         //*******************************
@@ -119,17 +127,16 @@ inline void sampler(CHANNEL_VALUE **ppCh, SAMPLER *pSmpl, byte *pWaveBuffer) {
                     pSmpl->index -= pWaveInfo->loopLength;
                 } else {
                     pSmpl->index = loopEnd;
-                    pSmpl->state = E_NOTE_STATE_FREE;
-                    return;
+                    return true;
                 }
             }
         }
         // output
-        *pOutput += smoothedWave * pSmpl->velocity * pSmpl->egAmp / OVER_SAMPLING;
+        *pOutput += smoothedWave * pNote->velocity * pSmpl->egAmp / OVER_SAMPLING;
         //*******************************
         // generate envelope
         //*******************************
-        switch (pSmpl->state) {
+        switch (pNote->state) {
         case E_NOTE_STATE_PURGE:
             pSmpl->egAmp -= pSmpl->egAmp * pSystemValue->deltaTime * PURGE_SPEED;
             break;
@@ -149,13 +156,13 @@ inline void sampler(CHANNEL_VALUE **ppCh, SAMPLER *pSmpl, byte *pWaveBuffer) {
         }
         pSmpl->time += pSystemValue->deltaTime;
         //*******************************
-        // standby condition
+        // free condition
         //*******************************
         if (pEnvAmp->hold < pSmpl->time && pSmpl->egAmp < PURGE_THRESHOLD) {
-            pSmpl->state = E_NOTE_STATE_FREE;
-            return;
+            return true;
         }
     }
+    return false;
 }
 
 inline void effect(CHANNEL_VALUE *pCh, double *waveL, double *waveR) {
@@ -247,5 +254,4 @@ inline void effect(CHANNEL_VALUE *pCh, double *waveL, double *waveR) {
     pCh->panR       += (pCh->pParam->panRight  - pCh->panR)       * transitionDelta;
     pCh->filter.cut += (pCh->pParam->cutoff    - pCh->filter.cut) * transitionDelta;
     pCh->filter.res += (pCh->pParam->resonance - pCh->filter.res) * transitionDelta;
-    pCh->state = E_CH_STATE_STANDBY;
 }

@@ -140,6 +140,7 @@ public:
 
 private:
     CHANNEL* mpChannel = NULL;
+    NOTE** mppNote = NULL;
     SAMPLER** mppSampler = NULL;
     REGION** mppRegions = NULL;
     int mRegionCount = 0;
@@ -152,7 +153,7 @@ private:
     byte mNrpnMSB;
 
 public:
-    Channel(INST_LIST *inst, SAMPLER** ppSampler, CHANNEL* pChannel, int no, int samplerCount);
+    Channel(INST_LIST *inst, SAMPLER** ppSampler, NOTE** ppNote, CHANNEL* pChannel, int no, int samplerCount);
 
 public:
     void AllReset();

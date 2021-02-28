@@ -222,17 +222,17 @@ namespace Player {
             var g = mBuffer.Graphics;
             /** Keyboad **/
             for (var s = 0; s < Sender.SAMPLER_COUNT; ++s) {
-                var smpl = mSender.Sampler(s);
-                var channel = mPlayer.Channel(smpl.channelNum);
-                var y_ch = ChannelHeight * smpl.channelNum;
+                var note = mSender.Note(s);
+                var channel = mPlayer.Channel(note.channelNum);
+                var y_ch = ChannelHeight * note.channelNum;
                 var transpose = (int)(channel.Pitch * channel.BendRange / 8192.0 - 0.5);
-                var k = smpl.noteNum + transpose;
+                var k = note.num + transpose;
                 if (k < 0 || 127 < k) {
                     continue;
                 }
                 int x_oct;
                 Rectangle key;
-                switch (smpl.state) {
+                switch (note.state) {
                 case E_NOTE_STATE.PRESS:
                     x_oct = 7 * whiteWidth * (k / 12 - 1);
                     key = KeyboardPos[k % 12];

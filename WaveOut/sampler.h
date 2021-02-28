@@ -2,6 +2,8 @@
 #include "type.h"
 #include "filter.h"
 
+#define UNISON_COUNT 8
+
 /******************************************************************************/
 enum E_NOTE_STATE {
     E_NOTE_STATE_FREE,
@@ -12,11 +14,6 @@ enum E_NOTE_STATE {
     E_NOTE_STATE_PURGE
 };
 
-enum E_CH_STATE {
-    E_CH_STATE_STANDBY,
-    E_CH_STATE_ACTIVE
-};
-
 /******************************************************************************/
 struct ENVELOPE;
 struct WAVE_INFO;
@@ -24,6 +21,7 @@ struct SYSTEM_VALUE;
 struct CHANNEL;
 struct SAMPLER;
 struct CHANNEL_VALUE;
+struct NOTE;
 
 /******************************************************************************/
 #pragma pack(push, 8)
@@ -84,25 +82,31 @@ typedef struct CHANNEL {
 
 #pragma pack(push, 4)
 typedef struct SAMPLER {
-    byte channelNum;
-    byte noteNum;
-    byte state;
-    byte unisonNum;
-    double velocity;
+    int unisonNum;
     double delta;
     double index;
     double time;
     double egAmp;
-    ENVELOPE *pEnvAmp;
-    WAVE_INFO *pWaveInfo;
+    ENVELOPE* pEnvAmp;
+    WAVE_INFO* pWaveInfo;
+    void* pNote;
 } SAMPLER;
 #pragma pack(pop)
 
 #pragma pack(push, 4)
-typedef struct CHANNEL_VALUE {
+typedef struct NOTE {
+    byte channelNum;
+    byte num;
     byte state;
-    byte reserved1;
-    ushort reserved2;
+    byte reserved;
+    double velocity;
+    CHANNEL* pChannel;
+    SAMPLER* ppSamplers[UNISON_COUNT];
+} NOTE;
+#pragma pack(pop)
+
+#pragma pack(push, 4)
+typedef struct CHANNEL_VALUE {
     int writeIndex;
     double amp;
     double panL;
@@ -116,24 +120,24 @@ typedef struct CHANNEL_VALUE {
     double choPanVR;
     double choPanWL;
     double choPanWR;
-    double *pDelTapL;
-    double *pDelTapR;
-    double *pWave;
-    CHANNEL *pParam;
-    SYSTEM_VALUE *pSystemValue;
+    double* pDelTapL;
+    double* pDelTapR;
+    double* pWave;
+    CHANNEL* pParam;
+    SYSTEM_VALUE* pSystemValue;
     FILTER filter;
 } CHANNEL_VALUE;
 #pragma pack(pop)
 
-/******************************************************************************/
 #ifdef __cplusplus
 extern "C" {
 #endif
+    __declspec(dllexport) NOTE** createNotes(uint count);
     __declspec(dllexport) SAMPLER** createSamplers(uint count);
     __declspec(dllexport) CHANNEL_VALUE** createChannels(SYSTEM_VALUE *pSys);
     __declspec(dllexport) void disposeSamplers(SAMPLER** ppSmpl, uint count);
     __declspec(dllexport) void disposeChannels(CHANNEL_VALUE**ppCh);
-    __declspec(dllexport) inline void sampler(CHANNEL_VALUE **ppCh, SAMPLER *pSmpl, byte *pWaveBuffer);
+    __declspec(dllexport) inline Bool sampler(CHANNEL_VALUE **ppCh, SAMPLER *pSmpl, byte *pWaveBuffer);
     __declspec(dllexport) inline void effect(CHANNEL_VALUE* pCh, double* waveL, double* waveR);
 #ifdef __cplusplus
 }

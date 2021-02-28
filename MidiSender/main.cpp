@@ -63,7 +63,7 @@ int* midi_GetWavFileOutProgressPtr() {
     return &gFileOutProgress;
 }
 
-void midi_CreateChannels(INST_LIST *list, SAMPLER **ppSmpl, CHANNEL **ppCh, uint samplerCount) {
+void midi_CreateChannels(INST_LIST *list, SAMPLER **ppSmpl, NOTE **ppNote, CHANNEL **ppCh, uint samplerCount) {
     if (NULL != gppChannels) {
         for (int i = 0; i < 16; i++) {
             delete gppChannels[i];
@@ -75,7 +75,7 @@ void midi_CreateChannels(INST_LIST *list, SAMPLER **ppSmpl, CHANNEL **ppCh, uint
     //
     gppChannels = (Channel**)malloc(sizeof(Channel*) * 16);
     for (int i = 0; i < 16; i++) {
-        gppChannels[i] = new Channel(list, ppSmpl, ppCh[i], i, samplerCount);
+        gppChannels[i] = new Channel(list, ppSmpl, ppNote, ppCh[i], i, samplerCount);
     }
 }
 
@@ -137,13 +137,15 @@ void midi_WavFileOut(
     gFmt.dataSize = 0;
     // allocate out buffer
     LPBYTE pOutBuffer = (LPBYTE)malloc(gSysValue.bufferLength * gFmt.blockAlign);
+    // allocate notes
+    NOTE** ppNotes = createNotes(gSysValue.samplerCount);
     // allocate samplers
     SAMPLER **ppSamplers = createSamplers(gSysValue.samplerCount);
     // allocate channels
     Channel **ppChannels = (Channel**)malloc(sizeof(Channel*) * gSysValue.channelCount);
     CHANNEL_VALUE **ppChValues = createChannels(&gSysValue);
     for (int i = 0; i < gSysValue.channelCount; ++i) {
-        ppChannels[i] = new Channel(list, ppSamplers, ppChValues[i]->pParam, i, gSysValue.samplerCount);
+        ppChannels[i] = new Channel(list, ppSamplers, ppNotes, ppChValues[i]->pParam, i, gSysValue.samplerCount);
     }
     // open file
     if (NULL != gfpFileOut) {

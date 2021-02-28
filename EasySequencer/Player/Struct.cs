@@ -100,18 +100,14 @@ namespace Player {
     }
 
     [StructLayout(LayoutKind.Sequential, Pack = 4)]
-    public struct SAMPLER {
+    public struct NOTE {
         public byte channelNum;
-        public byte noteNum;
+        public byte num;
         public E_NOTE_STATE state;
-        private bool unisonNum;
-        private double velocity;
-        private double delta;
-        private double index;
-        private double time;
-        private double egAmp;
-        private IntPtr envAmp;
-        private IntPtr waveInfo;
+        private byte reserved;
+        public double velocity;
+        private IntPtr pChannel;
+        private IntPtr ppSamplers;
     };
 
     [StructLayout(LayoutKind.Sequential, Pack = 4)]

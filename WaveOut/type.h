@@ -15,6 +15,7 @@ typedef struct {
 #define true  ((Bool)1)
 #define false ((Bool)0)
 
+/******************************************************************************/
 extern inline void setInt24(int24 *output, double value) {
     int tmp = (int)(value * 0x7FFFFFFF);
     output->lsb = (tmp & 0x0000FF00) >> 8;

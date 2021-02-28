@@ -2,9 +2,10 @@
 #include "channel.h"
 #include "channel_const.h"
 
-Channel::Channel(INST_LIST *inst, SAMPLER** ppSampler, CHANNEL* pChannel, int no, int samplerCount) {
+Channel::Channel(INST_LIST *inst, SAMPLER** ppSampler, NOTE** ppNote, CHANNEL* pChannel, int no, int samplerCount) {
     InstList = inst;
     mppSampler = ppSampler;
+    mppNote = ppNote;
     mpChannel = pChannel;
     mSamplerCount = samplerCount;
     No = (byte)no;
@@ -38,7 +39,7 @@ Channel::AllReset() {
     mpChannel->chorusDepth = 0.005;
     mpChannel->delayTime = 0.2;
     mpChannel->delayCross = 0.375;
-    mpChannel->holdDelta = DeltaTime * 0.25;
+    mpChannel->holdDelta = DeltaTime;
 
     mRpnLSB = 0xFF;
     mRpnMSB = 0xFF;
@@ -58,18 +59,16 @@ Channel::AllReset() {
 void
 Channel::NoteOff(byte noteNo, E_NOTE_STATE keyState) {
     for (auto i = 0; i < mSamplerCount; ++i) {
-        auto pSmpl = mppSampler[i];
-        if (pSmpl->state == E_NOTE_STATE_FREE) {
+        auto pNote = mppNote[i];
+        if (pNote->state < E_NOTE_STATE_PRESS) {
             continue;
         }
-        if (pSmpl->channelNum == No && pSmpl->noteNum == noteNo) {
+        if (pNote->channelNum == No && pNote->num == noteNo) {
             if (E_NOTE_STATE_PURGE == keyState) {
-                pSmpl->state = E_NOTE_STATE_PURGE;
+                pNote->state = E_NOTE_STATE_PURGE;
             } else {
-                if (!Param.Enable || Param.Hld < 64) {
-                    pSmpl->state = E_NOTE_STATE_RELEASE;
-                } else {
-                    pSmpl->state = E_NOTE_STATE_HOLD;
+                if (E_NOTE_STATE_PRESS == pNote->state) {
+                    pNote->state = Param.Hld < 64 ? E_NOTE_STATE_RELEASE : E_NOTE_STATE_HOLD;
                 }
             }
         }
@@ -84,12 +83,32 @@ Channel::NoteOn(byte noteNo, byte velocity) {
     } else {
         NoteOff(noteNo, E_NOTE_STATE_PURGE);
     }
+
+    NOTE* pSetNote = NULL;
+    for (auto j = 0; j < mSamplerCount; ++j) {
+        if (E_NOTE_STATE_FREE == mppNote[j]->state) {
+            mppNote[j]->state = E_NOTE_STATE_RESERVED;
+            pSetNote = mppNote[j];
+            break;
+        }
+    }
+    if (NULL == pSetNote) {
+        return;
+    }
+
+    pSetNote->channelNum = No;
+    pSetNote->num = noteNo;
+    pSetNote->velocity = velocity / 127.0;
+
+    int unisonCount = 0;
+
     for (int rgnIdx = 0; rgnIdx < mRegionCount; rgnIdx++) {
         auto pRegion = mppRegions[rgnIdx];
         if (noteNo < pRegion->keyLo || pRegion->keyHi < noteNo ||
             velocity < pRegion->velLo || pRegion->velHi < velocity) {
             continue;
         }
+
         double pitch;
         auto diffNote = noteNo - pRegion->waveInfo.originNote;
         if (diffNote < 0) {
@@ -101,26 +120,26 @@ Channel::NoteOn(byte noteNo, byte velocity) {
 
         for (auto j = 0; j < mSamplerCount; ++j) {
             auto pSmpl = mppSampler[j];
-            if (E_NOTE_STATE_FREE != pSmpl->state) {
-                continue;
+            if (NULL == pSmpl->pNote) {
+                pSmpl->pNote = pSetNote;
+                pSmpl->unisonNum = unisonCount;
+                pSmpl->delta = pitch;
+                pSmpl->index = 0.0;
+                pSmpl->time = 0.0;
+                pSmpl->egAmp = 0.0;
+                pSmpl->pWaveInfo = &pRegion->waveInfo;
+                pSmpl->pEnvAmp = &pRegion->env;
+                pSetNote->ppSamplers[unisonCount] = pSmpl;
+                unisonCount++;
+                break;
             }
+        }
 
-            pSmpl->channelNum = No;
-            pSmpl->noteNum = noteNo;
-            pSmpl->velocity = velocity / 127.0;
-
-            pSmpl->delta = pitch;
-            pSmpl->index = 0.0;
-            pSmpl->time = 0.0;
-            pSmpl->egAmp = 0.0;
-            pSmpl->pWaveInfo = &pRegion->waveInfo;
-            pSmpl->pEnvAmp = &pRegion->env;
-
-            pSmpl->state = E_NOTE_STATE_PRESS;
+        if (UNISON_COUNT <= unisonCount) {
             break;
         }
-        break;
     }
+    pSetNote->state = unisonCount ? E_NOTE_STATE_PRESS : E_NOTE_STATE_FREE;
 }
 
 void
@@ -258,9 +277,16 @@ void
 Channel::setHld(byte value) {
     if (value < 64) {
         for (auto s = 0; s < mSamplerCount; ++s) {
-            auto pSmpl = mppSampler[s];
-            if (E_NOTE_STATE_HOLD == pSmpl->state) {
-                pSmpl->state = E_NOTE_STATE_RELEASE;
+            auto pNote = mppNote[s];
+            if (E_NOTE_STATE_HOLD == pNote->state) {
+                pNote->state = E_NOTE_STATE_RELEASE;
+            }
+        }
+    } else {
+        for (auto s = 0; s < mSamplerCount; ++s) {
+            auto pNote = mppNote[s];
+            if (E_NOTE_STATE_RELEASE == pNote->state) {
+                pNote->state = E_NOTE_STATE_HOLD;
             }
         }
     }

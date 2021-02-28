@@ -534,7 +534,9 @@ namespace SF2 {
 
             presetList.Sort(Compare);
             foreach (var preset in presetList) {
-                PresetList.Add(preset.Id, new Tuple<string, Layer[]>(preset.Name, preset.Layer));
+                if (!PresetList.ContainsKey(preset.Id)) {
+                    PresetList.Add(preset.Id, new Tuple<string, Layer[]>(preset.Name, preset.Layer));
+                }
             }
             presetList.Clear();
 

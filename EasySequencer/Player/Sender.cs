@@ -14,7 +14,7 @@ namespace Player {
         [DllImport("MidiSender.dll")]
         private static extern IntPtr midi_GetWavFileOutProgressPtr();
         [DllImport("MidiSender.dll")]
-        private static extern void midi_CreateChannels(INST_LIST* list, SAMPLER** ppSmpl, CHANNEL** ppCh, int samplerCount);
+        private static extern void midi_CreateChannels(INST_LIST* list, IntPtr ppSmpl, NOTE** ppNote, CHANNEL** ppCh, int samplerCount);
         [DllImport("MidiSender.dll")]
         private static extern void midi_Send(byte *pMsg);
         [DllImport("MidiSender.dll")]
@@ -36,7 +36,9 @@ namespace Player {
         [DllImport("WaveOut.dll")]
         private static extern CHANNEL** waveout_GetChannelPtr();
         [DllImport("WaveOut.dll")]
-        private static extern SAMPLER** waveout_GetSamplerPtr();
+        private static extern NOTE** waveout_GetNotePtr();
+        [DllImport("WaveOut.dll")]
+        private static extern IntPtr waveout_GetSamplerPtr();
         [DllImport("WaveOut.dll")]
         private static extern IntPtr waveout_LoadWaveTable(IntPtr filePath, out uint size);
         [DllImport("WaveOut.dll")]
@@ -60,7 +62,7 @@ namespace Player {
         public static readonly double DeltaTime = 1.0 / SampleRate;
         public static readonly double AttackSpeed = 54.3656;
         public static readonly double DecaySpeed = 15;
-        public static readonly double ReleaseSpeed = 15;
+        public static readonly double ReleaseSpeed = 0.1;
 
         public static int CHANNEL_COUNT = 16;
         public static int SAMPLER_COUNT = 32;
@@ -74,7 +76,8 @@ namespace Player {
 
         private IntPtr mpWaveTable;
         private INST_LIST* mpInstList;
-        private SAMPLER** mppSamplers;
+        private IntPtr mppSamplers;
+        private NOTE** mppNotes;
         private CHANNEL** mppChannels;
         private CHANNEL_PARAM** mppChParam;
 
@@ -84,8 +87,8 @@ namespace Player {
         public INST_REC Instruments(int num) {
             return *mpInstList->ppInst[num];
         }
-        public SAMPLER Sampler(int num) {
-            return *mppSamplers[num];
+        public NOTE Note(int num) {
+            return *mppNotes[num];
         }
         public CHANNEL_PARAM Channel(int num) {
             return *mppChParam[num];
@@ -111,7 +114,8 @@ namespace Player {
             waveout_SystemValues(SampleRate, 16, 220, 50, CHANNEL_COUNT, SAMPLER_COUNT);
             mppChannels = waveout_GetChannelPtr();
             mppSamplers = waveout_GetSamplerPtr();
-            midi_CreateChannels(mpInstList, mppSamplers, mppChannels, SAMPLER_COUNT);
+            mppNotes = waveout_GetNotePtr();
+            midi_CreateChannels(mpInstList, mppSamplers, mppNotes, mppChannels, SAMPLER_COUNT);
             mppChParam = midi_GetChannelParamPtr();
             waveout_Open();
         }
