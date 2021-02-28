@@ -2,12 +2,13 @@
 using System.Runtime.InteropServices;
 
 namespace Player {
-    public enum E_KEY_STATE : byte {
-        STANDBY,
-        PURGE,
+    public enum E_NOTE_STATE : byte {
+        FREE,
+        RESERVED,
+        PRESS,
         RELEASE,
         HOLD,
-        PRESS
+        PURGE
     };
 
     [StructLayout(LayoutKind.Sequential, Pack = 4)]
@@ -102,14 +103,15 @@ namespace Player {
     public struct SAMPLER {
         public byte channelNum;
         public byte noteNum;
-        public E_KEY_STATE state;
+        public E_NOTE_STATE state;
         private bool unisonNum;
         private double velocity;
-        private double time;
+        private double delta;
         private double index;
+        private double time;
         private double egAmp;
-        private ENVELOPE envAmp;
-        private WAVE_INFO waveInfo;
+        private IntPtr envAmp;
+        private IntPtr waveInfo;
     };
 
     [StructLayout(LayoutKind.Sequential, Pack = 4)]

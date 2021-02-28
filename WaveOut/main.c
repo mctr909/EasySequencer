@@ -113,7 +113,7 @@ void waveout_Close() {
 inline void setSampler() {
     int activeCount = 0;
     for (int sj = 0; sj < gSysValue.samplerCount; sj++) {
-        if (E_KEY_STATE_STANDBY == gppSamplers[sj]->state) {
+        if (E_NOTE_STATE_FREE == gppSamplers[sj]->state) {
             continue;
         }
         sampler(gppChValues, gppSamplers[sj], gpWaveTable);

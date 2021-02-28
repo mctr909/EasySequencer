@@ -56,20 +56,20 @@ Channel::AllReset() {
 }
 
 void
-Channel::NoteOff(byte noteNo, E_KEY_STATE keyState) {
+Channel::NoteOff(byte noteNo, E_NOTE_STATE keyState) {
     for (auto i = 0; i < mSamplerCount; ++i) {
         auto pSmpl = mppSampler[i];
-        if (pSmpl->state == E_KEY_STATE_STANDBY) {
+        if (pSmpl->state == E_NOTE_STATE_FREE) {
             continue;
         }
         if (pSmpl->channelNum == No && pSmpl->noteNum == noteNo) {
-            if (E_KEY_STATE_PURGE == keyState) {
-                pSmpl->state = E_KEY_STATE_PURGE;
+            if (E_NOTE_STATE_PURGE == keyState) {
+                pSmpl->state = E_NOTE_STATE_PURGE;
             } else {
                 if (!Param.Enable || Param.Hld < 64) {
-                    pSmpl->state = E_KEY_STATE_RELEASE;
+                    pSmpl->state = E_NOTE_STATE_RELEASE;
                 } else {
-                    pSmpl->state = E_KEY_STATE_HOLD;
+                    pSmpl->state = E_NOTE_STATE_HOLD;
                 }
             }
         }
@@ -79,10 +79,10 @@ Channel::NoteOff(byte noteNo, E_KEY_STATE keyState) {
 void
 Channel::NoteOn(byte noteNo, byte velocity) {
     if (0 == velocity) {
-        NoteOff(noteNo, E_KEY_STATE_RELEASE);
+        NoteOff(noteNo, E_NOTE_STATE_RELEASE);
         return;
     } else {
-        NoteOff(noteNo, E_KEY_STATE_PURGE);
+        NoteOff(noteNo, E_NOTE_STATE_PURGE);
     }
     for (int rgnIdx = 0; rgnIdx < mRegionCount; rgnIdx++) {
         auto pRegion = mppRegions[rgnIdx];
@@ -97,23 +97,26 @@ Channel::NoteOn(byte noteNo, byte velocity) {
         } else {
             pitch = SemiTone[diffNote];
         }
+        pitch *= pRegion->waveInfo.delta;
+
         for (auto j = 0; j < mSamplerCount; ++j) {
             auto pSmpl = mppSampler[j];
-            if (E_KEY_STATE_STANDBY != pSmpl->state) {
+            if (E_NOTE_STATE_FREE != pSmpl->state) {
                 continue;
             }
 
             pSmpl->channelNum = No;
             pSmpl->noteNum = noteNo;
-            pSmpl->waveInfo = pRegion->waveInfo;
-            pSmpl->waveInfo.delta = pRegion->waveInfo.delta * pitch;
+            pSmpl->velocity = velocity / 127.0;
+
+            pSmpl->delta = pitch;
             pSmpl->index = 0.0;
             pSmpl->time = 0.0;
-            pSmpl->velocity = velocity / 127.0;
             pSmpl->egAmp = 0.0;
-            pSmpl->envAmp = pRegion->env;
+            pSmpl->pWaveInfo = &pRegion->waveInfo;
+            pSmpl->pEnvAmp = &pRegion->env;
 
-            pSmpl->state = E_KEY_STATE_PRESS;
+            pSmpl->state = E_NOTE_STATE_PRESS;
             break;
         }
         break;
@@ -256,8 +259,8 @@ Channel::setHld(byte value) {
     if (value < 64) {
         for (auto s = 0; s < mSamplerCount; ++s) {
             auto pSmpl = mppSampler[s];
-            if (E_KEY_STATE_HOLD == pSmpl->state) {
-                pSmpl->state = E_KEY_STATE_RELEASE;
+            if (E_NOTE_STATE_HOLD == pSmpl->state) {
+                pSmpl->state = E_NOTE_STATE_RELEASE;
             }
         }
     }

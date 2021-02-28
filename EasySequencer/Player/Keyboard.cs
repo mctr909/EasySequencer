@@ -233,12 +233,12 @@ namespace Player {
                 int x_oct;
                 Rectangle key;
                 switch (smpl.state) {
-                case E_KEY_STATE.PRESS:
+                case E_NOTE_STATE.PRESS:
                     x_oct = 7 * whiteWidth * (k / 12 - 1);
                     key = KeyboardPos[k % 12];
                     g.FillRectangle(Brushes.Red, key.X + x_oct, key.Y + y_ch, key.Width, key.Height);
                     break;
-                case E_KEY_STATE.HOLD:
+                case E_NOTE_STATE.HOLD:
                     x_oct = 7 * whiteWidth * (k / 12 - 1);
                     key = KeyboardPos[k % 12];
                     g.FillRectangle(Brushes.Blue, key.X + x_oct, key.Y + y_ch, key.Width, key.Height);

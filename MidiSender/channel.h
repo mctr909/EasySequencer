@@ -156,7 +156,7 @@ public:
 
 public:
     void AllReset();
-    void NoteOff(byte noteNo, E_KEY_STATE keyState);
+    void NoteOff(byte noteNo, E_NOTE_STATE keyState);
     void NoteOn(byte noteNo, byte velocity);
     void CtrlChange(byte type, byte b1);
     void ProgramChange(byte value);

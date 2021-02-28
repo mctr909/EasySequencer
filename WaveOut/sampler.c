@@ -92,8 +92,8 @@ inline void sampler(CHANNEL_VALUE **ppCh, SAMPLER *pSmpl, byte *pWaveBuffer) {
     CHANNEL_VALUE *pChValue = ppCh[pSmpl->channelNum];
     SYSTEM_VALUE *pSystemValue = pChValue->pSystemValue;
     CHANNEL *pChParam = pChValue->pParam;
-    WAVE_INFO *pWaveInfo = &pSmpl->waveInfo;
-    ENVELOPE *pEnvAmp = &pSmpl->envAmp;
+    WAVE_INFO *pWaveInfo = pSmpl->pWaveInfo;
+    ENVELOPE *pEnvAmp = pSmpl->pEnvAmp;
 
     long loopEnd = (long)pWaveInfo->loopBegin + pWaveInfo->loopLength;
     short *pWave = (short*)(pWaveBuffer + pWaveInfo->waveOfs);
@@ -107,7 +107,7 @@ inline void sampler(CHANNEL_VALUE **ppCh, SAMPLER *pSmpl, byte *pWaveBuffer) {
         // generate wave
         //*******************************
         double smoothedWave = 0.0;
-        double delta = pWaveInfo->delta * pChParam->pitch / OVER_SAMPLING;
+        double delta = pSmpl->delta * pChParam->pitch / OVER_SAMPLING;
         for (int o = 0; o < OVER_SAMPLING; o++) {
             int idx = (int)pSmpl->index;
             double dt = pSmpl->index - idx;
@@ -119,7 +119,7 @@ inline void sampler(CHANNEL_VALUE **ppCh, SAMPLER *pSmpl, byte *pWaveBuffer) {
                     pSmpl->index -= pWaveInfo->loopLength;
                 } else {
                     pSmpl->index = loopEnd;
-                    pSmpl->state = E_KEY_STATE_STANDBY;
+                    pSmpl->state = E_NOTE_STATE_FREE;
                     return;
                 }
             }
@@ -130,16 +130,16 @@ inline void sampler(CHANNEL_VALUE **ppCh, SAMPLER *pSmpl, byte *pWaveBuffer) {
         // generate envelope
         //*******************************
         switch (pSmpl->state) {
-        case E_KEY_STATE_PURGE:
+        case E_NOTE_STATE_PURGE:
             pSmpl->egAmp -= pSmpl->egAmp * pSystemValue->deltaTime * PURGE_SPEED;
             break;
-        case E_KEY_STATE_RELEASE:
+        case E_NOTE_STATE_RELEASE:
             pSmpl->egAmp -= pSmpl->egAmp * pEnvAmp->release;
             break;
-        case E_KEY_STATE_HOLD:
+        case E_NOTE_STATE_HOLD:
             pSmpl->egAmp -= pSmpl->egAmp * pChParam->holdDelta;
             break;
-        case E_KEY_STATE_PRESS:
+        case E_NOTE_STATE_PRESS:
             if (pSmpl->time <= pEnvAmp->hold) {
                 pSmpl->egAmp += (1.0 - pSmpl->egAmp) * pEnvAmp->attack;
             } else {
@@ -152,7 +152,7 @@ inline void sampler(CHANNEL_VALUE **ppCh, SAMPLER *pSmpl, byte *pWaveBuffer) {
         // standby condition
         //*******************************
         if (pEnvAmp->hold < pSmpl->time && pSmpl->egAmp < PURGE_THRESHOLD) {
-            pSmpl->state = E_KEY_STATE_STANDBY;
+            pSmpl->state = E_NOTE_STATE_FREE;
             return;
         }
     }

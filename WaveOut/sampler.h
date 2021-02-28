@@ -3,12 +3,13 @@
 #include "filter.h"
 
 /******************************************************************************/
-enum E_KEY_STATE {
-    E_KEY_STATE_STANDBY,
-    E_KEY_STATE_PURGE,
-    E_KEY_STATE_RELEASE,
-    E_KEY_STATE_HOLD,
-    E_KEY_STATE_PRESS
+enum E_NOTE_STATE {
+    E_NOTE_STATE_FREE,
+    E_NOTE_STATE_RESERVED,
+    E_NOTE_STATE_PRESS,
+    E_NOTE_STATE_RELEASE,
+    E_NOTE_STATE_HOLD,
+    E_NOTE_STATE_PURGE
 };
 
 enum E_CH_STATE {
@@ -16,12 +17,13 @@ enum E_CH_STATE {
     E_CH_STATE_ACTIVE
 };
 
-enum E_WAVE_FORM {
-    E_WAVE_FORM_SINE,
-    E_WAVE_FORM_PWM,
-    E_WAVE_FORM_SAW,
-    E_WAVE_FORM_TRI
-};
+/******************************************************************************/
+struct ENVELOPE;
+struct WAVE_INFO;
+struct SYSTEM_VALUE;
+struct CHANNEL;
+struct SAMPLER;
+struct CHANNEL_VALUE;
 
 /******************************************************************************/
 #pragma pack(push, 8)
@@ -51,7 +53,7 @@ typedef struct WAVE_INFO {
 #pragma pack(pop)
 
 #pragma pack(push, 8)
-typedef struct {
+typedef struct SYSTEM_VALUE {
     int bufferLength;
     int bufferCount;
     int channelCount;
@@ -87,11 +89,12 @@ typedef struct SAMPLER {
     byte state;
     byte unisonNum;
     double velocity;
-    double time;
+    double delta;
     double index;
+    double time;
     double egAmp;
-    ENVELOPE envAmp;
-    WAVE_INFO waveInfo;
+    ENVELOPE *pEnvAmp;
+    WAVE_INFO *pWaveInfo;
 } SAMPLER;
 #pragma pack(pop)
 

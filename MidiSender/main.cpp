@@ -84,7 +84,7 @@ void midi_Send(LPBYTE msg) {
     auto ch = *msg & 0x0F;
     switch (type) {
     case E_EVENT_TYPE::NOTE_OFF:
-        gppChannels[ch]->NoteOff(msg[1], E_KEY_STATE_RELEASE);
+        gppChannels[ch]->NoteOff(msg[1], E_NOTE_STATE_RELEASE);
         break;
     case E_EVENT_TYPE::NOTE_ON:
         gppChannels[ch]->NoteOn(msg[1], msg[2]);
@@ -201,7 +201,7 @@ uint wavFileOutSend(Channel **ppCh, LPBYTE msg) {
     auto ch = *msg & 0x0F;
     switch (type) {
     case E_EVENT_TYPE::NOTE_OFF:
-        ppCh[ch]->NoteOff(msg[1], E_KEY_STATE_RELEASE);
+        ppCh[ch]->NoteOff(msg[1], E_NOTE_STATE_RELEASE);
         return 3;
     case E_EVENT_TYPE::NOTE_ON:
         ppCh[ch]->NoteOn(msg[1], msg[2]);
