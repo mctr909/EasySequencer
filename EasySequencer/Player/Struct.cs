@@ -20,20 +20,6 @@ namespace Player {
     };
 
     [StructLayout(LayoutKind.Sequential, Pack = 8)]
-    public struct FILTER {
-        private double cut;
-        private double res;
-        private double a00;
-        private double b00;
-        private double a01;
-        private double b01;
-        private double a10;
-        private double b10;
-        private double a11;
-        private double b11;
-    };
-
-    [StructLayout(LayoutKind.Sequential, Pack = 8)]
     public struct ENVELOPE {
         public double deltaA;
         public double deltaD;
@@ -80,23 +66,6 @@ namespace Player {
         public byte VibDelay;
         public byte BendRange;
         public int Pitch;
-    }
-
-    [StructLayout(LayoutKind.Sequential, Pack = 8)]
-    public struct CHANNEL {
-        private double amp;
-        private double pitch;
-        private double holdDelta;
-        private double panLeft;
-        private double panRight;
-        private double cutoff;
-        private double resonance;
-        private double delaySend;
-        private double delayTime;
-        private double delayCross;
-        private double chorusSend;
-        private double chorusRate;
-        private double chorusDepth;
     }
 
     [StructLayout(LayoutKind.Sequential, Pack = 4)]

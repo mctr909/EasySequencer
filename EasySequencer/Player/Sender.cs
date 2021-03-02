@@ -14,7 +14,7 @@ namespace Player {
         [DllImport("MidiSender.dll")]
         private static extern IntPtr midi_GetWavFileOutProgressPtr();
         [DllImport("MidiSender.dll")]
-        private static extern void midi_CreateChannels(INST_LIST* list, IntPtr ppSmpl, NOTE** ppNote, CHANNEL** ppCh, int samplerCount);
+        private static extern void midi_CreateChannels(INST_LIST* list, IntPtr ppSmpl, NOTE** ppNote, IntPtr ppCh, int samplerCount);
         [DllImport("MidiSender.dll")]
         private static extern void midi_Send(byte *pMsg);
         [DllImport("MidiSender.dll")]
@@ -34,7 +34,7 @@ namespace Player {
         [DllImport("WaveOut.dll")]
         private static extern IntPtr waveout_GetActiveSamplersPtr();
         [DllImport("WaveOut.dll")]
-        private static extern CHANNEL** waveout_GetChannelPtr();
+        private static extern IntPtr waveout_GetChannelPtr();
         [DllImport("WaveOut.dll")]
         private static extern NOTE** waveout_GetNotePtr();
         [DllImport("WaveOut.dll")]
@@ -78,7 +78,7 @@ namespace Player {
         private INST_LIST* mpInstList;
         private IntPtr mppSamplers;
         private NOTE** mppNotes;
-        private CHANNEL** mppChannels;
+        private IntPtr mppChannels;
         private CHANNEL_PARAM** mppChParam;
 
         public int InstCount {

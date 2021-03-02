@@ -23,8 +23,8 @@ CHANNEL_VALUE** createChannels(SYSTEM_VALUE* pSys) {
         pCh->pSystemValue = pSys;
 
         // allocate wave buffer
-        pCh->pWave = (double*)malloc(sizeof(double) * pCh->pSystemValue->bufferLength * 2);
-        memset(pCh->pWave, 0, sizeof(double) * pCh->pSystemValue->bufferLength * 2);
+        pCh->pWave = (double*)malloc(sizeof(double) * pCh->pSystemValue->bufferLength);
+        memset(pCh->pWave, 0, sizeof(double) * pCh->pSystemValue->bufferLength);
         // allocate channels
         pCh->pParam = (CHANNEL*)malloc(sizeof(CHANNEL));
         memset(pCh->pParam, 0, sizeof(CHANNEL));
