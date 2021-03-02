@@ -171,6 +171,7 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClInclude Include="effect.h" />
     <ClInclude Include="filter.h" />
     <ClInclude Include="main.h" />
     <ClInclude Include="sampler.h" />
@@ -178,6 +179,7 @@
     <ClInclude Include="wave_out.h" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="effect.c" />
     <ClCompile Include="filter.c" />
     <ClCompile Include="main.c" />
     <ClCompile Include="sampler.c" />

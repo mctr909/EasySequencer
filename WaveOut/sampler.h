@@ -134,11 +134,8 @@ extern "C" {
 #endif
     __declspec(dllexport) NOTE** createNotes(uint count);
     __declspec(dllexport) SAMPLER** createSamplers(uint count);
-    __declspec(dllexport) CHANNEL_VALUE** createChannels(SYSTEM_VALUE *pSys);
     __declspec(dllexport) void disposeSamplers(SAMPLER** ppSmpl, uint count);
-    __declspec(dllexport) void disposeChannels(CHANNEL_VALUE**ppCh);
     __declspec(dllexport) inline Bool sampler(CHANNEL_VALUE **ppCh, SAMPLER *pSmpl, byte *pWaveBuffer);
-    __declspec(dllexport) inline void effect(CHANNEL_VALUE* pCh, double* waveL, double* waveR);
 #ifdef __cplusplus
 }
 #endif

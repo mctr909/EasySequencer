@@ -138,7 +138,7 @@ void CALLBACK waveOutProc(HWAVEOUT hwo, UINT uMsg, DWORD_PTR dwInstance, DWORD d
         }
         gWaveOutStopped = FALSE;
         EnterCriticalSection((LPCRITICAL_SECTION)&gcsBufferLock);
-        if (gWriteCount < 2) {
+        if (gWriteCount < gBufferCount / 4) {
             waveOutWrite(ghWaveOut, gppWaveHdr[gReadIndex], sizeof(WAVEHDR));
             LeaveCriticalSection((LPCRITICAL_SECTION)&gcsBufferLock);
             return;

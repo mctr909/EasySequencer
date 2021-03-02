@@ -1,5 +1,6 @@
 ﻿#include "main.h"
 #include "sampler.h"
+#include "effect.h"
 #include "wave_out.h"
 #include "filter.h"
 

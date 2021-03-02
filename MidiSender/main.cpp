@@ -1,4 +1,5 @@
 #include "../WaveOut/sampler.h"
+#include "../WaveOut/effect.h"
 #include "main.h"
 #include "channel.h"
 #include <stdio.h>
