@@ -1,6 +1,8 @@
 #pragma once
+#include "filter.h"
 #include "sampler.h"
 
+/******************************************************************************/
 #ifdef __cplusplus
 extern "C" {
 #endif

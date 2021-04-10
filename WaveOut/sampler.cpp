@@ -8,15 +8,6 @@
 #define OVER_SAMPLING   4
 
 /******************************************************************************/
-NOTE** createNotes(int count) {
-    auto notes = (NOTE**)malloc(sizeof(NOTE*) * count);
-    for (int i = 0; i < count; ++i) {
-        notes[i] = (NOTE*)malloc(sizeof(NOTE));
-        memset(notes[i], 0, sizeof(NOTE));
-    }
-    return notes;
-}
-
 SAMPLER** createSamplers(int count) {
     auto samplers = (SAMPLER**)malloc(sizeof(SAMPLER*) * count);
     for (int i = 0; i < count; ++i) {
@@ -38,12 +29,12 @@ void disposeSamplers(SAMPLER** ppSmpl, int count) {
 
 /******************************************************************************/
 inline Bool sampler(CHANNEL_VALUE** ppCh, SAMPLER* pSmpl, byte* pWaveBuffer) {
-    auto pNote = (NOTE*)pSmpl->pNote;
+    auto pNote = pSmpl->pNote;
     auto pChValue = ppCh[pNote->channelNum];
     auto pSystemValue = pChValue->pSystemValue;
-    auto pChParam = (CHANNEL*)pChValue->pParam;
-    auto pWaveInfo = (WAVE_INFO*)pSmpl->pWaveInfo;
-    auto pEnvAmp = (ENVELOPE*)pSmpl->pEnvAmp;
+    auto pChParam = pChValue->pParam;
+    auto pWaveInfo = pSmpl->pWaveInfo;
+    auto pEnvAmp = pSmpl->pEnvAmp;
 
     long loopEnd = (long)pWaveInfo->loopBegin + pWaveInfo->loopLength;
     auto pWave = (short*)(pWaveBuffer + pWaveInfo->waveOfs);
@@ -77,16 +68,16 @@ inline Bool sampler(CHANNEL_VALUE** ppCh, SAMPLER* pSmpl, byte* pWaveBuffer) {
         // generate envelope
         //*******************************
         switch (pNote->state) {
-        case E_NOTE_STATE_PURGE:
+        case E_NOTE_STATE::PURGE:
             pSmpl->egAmp -= pSmpl->egAmp * pSystemValue->deltaTime * PURGE_SPEED;
             break;
-        case E_NOTE_STATE_RELEASE:
+        case E_NOTE_STATE::RELEASE:
             pSmpl->egAmp -= pSmpl->egAmp * pEnvAmp->release;
             break;
-        case E_NOTE_STATE_HOLD:
+        case E_NOTE_STATE::HOLD:
             pSmpl->egAmp -= pSmpl->egAmp * pChParam->holdDelta;
             break;
-        case E_NOTE_STATE_PRESS:
+        case E_NOTE_STATE::PRESS:
             if (pSmpl->time <= pEnvAmp->hold) {
                 pSmpl->egAmp += (1.0 - pSmpl->egAmp) * pEnvAmp->attack;
             } else {

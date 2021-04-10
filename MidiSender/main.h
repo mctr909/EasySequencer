@@ -7,9 +7,9 @@
 #ifdef __cplusplus
 extern "C" {
 #endif
-    __declspec(dllexport) CHANNEL_PARAM** WINAPI midi_GetChannelParamPtr();
+    __declspec(dllexport) CHANNEL** WINAPI midi_GetChannelParamPtr();
     __declspec(dllexport) int* midi_GetWavFileOutProgressPtr();
-    __declspec(dllexport) void WINAPI midi_CreateChannels(INST_LIST *list, SAMPLER **ppSmpl, NOTE **ppNote, CHANNEL **ppCh, uint samplerCount);
+    __declspec(dllexport) void WINAPI midi_CreateChannels(INST_LIST *list, SAMPLER **ppSmpl, NOTE **ppNote, CHANNEL_PARAM **ppCh, uint samplerCount);
     __declspec(dllexport) void WINAPI midi_Send(LPBYTE msg);
     __declspec(dllexport) void WINAPI midi_WavFileOut(
         LPWSTR filePath,

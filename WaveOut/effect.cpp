@@ -26,8 +26,8 @@ CHANNEL_VALUE** createChannels(SYSTEM_VALUE* pSys) {
         pCh->pWave = (double*)malloc(sizeof(double) * pCh->pSystemValue->bufferLength);
         memset(pCh->pWave, 0, sizeof(double) * pCh->pSystemValue->bufferLength);
         // allocate channels
-        pCh->pParam = (CHANNEL*)malloc(sizeof(CHANNEL));
-        memset(pCh->pParam, 0, sizeof(CHANNEL));
+        pCh->pParam = (CHANNEL_PARAM*)malloc(sizeof(CHANNEL_PARAM));
+        memset(pCh->pParam, 0, sizeof(CHANNEL_PARAM));
         // allocate delay taps
         pCh->writeIndex = 0;
         pCh->pDelTapL = (double*)malloc(sizeof(double) * DELAY_TAPS);
@@ -68,7 +68,7 @@ void disposeChannels(CHANNEL_VALUE** ppCh) {
 
 /******************************************************************************/
 inline void effect(CHANNEL_VALUE* pCh, double* waveL, double* waveR) {
-    auto pParam = (CHANNEL*)pCh->pParam;
+    auto pParam = pCh->pParam;
     auto pTapL = pCh->pDelTapL;
     auto pTapR = pCh->pDelTapR;
     pCh->writeIndex++;

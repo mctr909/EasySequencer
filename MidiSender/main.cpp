@@ -36,9 +36,9 @@ typedef struct {
 #pragma pack(pop)
 
 /******************************************************************************/
-LPBYTE        gpWaveTable = NULL;
-Channel       **gppChannels = NULL;
-CHANNEL_PARAM **gppChParam = NULL;
+LPBYTE  gpWaveTable = NULL;
+Channel **gppChannels = NULL;
+CHANNEL **gppChParam = NULL;
 
 SYSTEM_VALUE  gSysValue;
 int           gFileOutProgress = 0;
@@ -50,9 +50,9 @@ uint wavFileOutSend(Channel **ppCh, LPBYTE msg);
 void wavFileOutWrite(SAMPLER **ppSmpl, CHANNEL_VALUE **ppCh, LPBYTE outBuffer);
 
 /******************************************************************************/
-CHANNEL_PARAM** midi_GetChannelParamPtr() {
+CHANNEL** midi_GetChannelParamPtr() {
     if (NULL == gppChParam) {
-        gppChParam = (CHANNEL_PARAM**)malloc(sizeof(CHANNEL_PARAM*) * 16);
+        gppChParam = (CHANNEL**)malloc(sizeof(CHANNEL*) * 16);
         for (int i = 0; i < 16; i++) {
             gppChParam[i] = &gppChannels[i]->Param;
         }
@@ -64,7 +64,7 @@ int* midi_GetWavFileOutProgressPtr() {
     return &gFileOutProgress;
 }
 
-void midi_CreateChannels(INST_LIST *list, SAMPLER **ppSmpl, NOTE **ppNote, CHANNEL **ppCh, uint samplerCount) {
+void midi_CreateChannels(INST_LIST *list, SAMPLER **ppSmpl, NOTE **ppNote, CHANNEL_PARAM **ppCh, uint samplerCount) {
     if (NULL != gppChannels) {
         for (int i = 0; i < 16; i++) {
             delete gppChannels[i];
@@ -85,7 +85,7 @@ void midi_Send(LPBYTE msg) {
     auto ch = *msg & 0x0F;
     switch (type) {
     case E_EVENT_TYPE::NOTE_OFF:
-        gppChannels[ch]->NoteOff(msg[1], E_NOTE_STATE_RELEASE);
+        gppChannels[ch]->NoteOff(msg[1], E_NOTE_STATE::RELEASE);
         break;
     case E_EVENT_TYPE::NOTE_ON:
         gppChannels[ch]->NoteOn(msg[1], msg[2]);
@@ -146,7 +146,7 @@ void midi_WavFileOut(
     Channel **ppChannels = (Channel**)malloc(sizeof(Channel*) * gSysValue.channelCount);
     CHANNEL_VALUE **ppChValues = createChannels(&gSysValue);
     for (int i = 0; i < gSysValue.channelCount; ++i) {
-        ppChannels[i] = new Channel(list, ppSamplers, ppNotes, (CHANNEL*)ppChValues[i]->pParam, i, gSysValue.samplerCount);
+        ppChannels[i] = new Channel(list, ppSamplers, ppNotes, ppChValues[i]->pParam, i, gSysValue.samplerCount);
     }
     // open file
     if (NULL != gfpFileOut) {
@@ -204,7 +204,7 @@ uint wavFileOutSend(Channel **ppCh, LPBYTE msg) {
     auto ch = *msg & 0x0F;
     switch (type) {
     case E_EVENT_TYPE::NOTE_OFF:
-        ppCh[ch]->NoteOff(msg[1], E_NOTE_STATE_RELEASE);
+        ppCh[ch]->NoteOff(msg[1], E_NOTE_STATE::RELEASE);
         return 3;
     case E_EVENT_TYPE::NOTE_ON:
         ppCh[ch]->NoteOn(msg[1], msg[2]);

@@ -106,7 +106,7 @@ typedef struct INST_LIST {
 #pragma pack(pop)
 
 #pragma pack(push, 1)
-typedef struct CHANNEL_PARAM {
+typedef struct CHANNEL {
     Bool Enable;
     Bool IsOsc;
     INST_ID InstId;
@@ -128,7 +128,7 @@ typedef struct CHANNEL_PARAM {
     byte VibDelay;
     byte BendRange;
     int Pitch;
-} CHANNEL_PARAM;
+} CHANNEL;
 #pragma pack(pop)
 
 /******************************************************************************/
@@ -136,10 +136,10 @@ class Channel {
 public:
     INST_LIST *InstList = NULL;
     byte No;
-    CHANNEL_PARAM Param = { 0 };
+    CHANNEL Param = { 0 };
 
 private:
-    CHANNEL* mpChannel = NULL;
+    CHANNEL_PARAM* mpChannel = NULL;
     NOTE** mppNote = NULL;
     SAMPLER** mppSampler = NULL;
     REGION** mppRegions = NULL;
@@ -153,7 +153,7 @@ private:
     byte mNrpnMSB;
 
 public:
-    Channel(INST_LIST *inst, SAMPLER** ppSampler, NOTE** ppNote, CHANNEL* pChannel, int no, int samplerCount);
+    Channel(INST_LIST *inst, SAMPLER** ppSampler, NOTE** ppNote, CHANNEL_PARAM* pChannel, int no, int samplerCount);
 
 public:
     void AllReset();
