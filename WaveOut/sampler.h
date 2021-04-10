@@ -132,9 +132,9 @@ typedef struct CHANNEL_VALUE {
 #ifdef __cplusplus
 extern "C" {
 #endif
-    __declspec(dllexport) NOTE** createNotes(uint count);
-    __declspec(dllexport) SAMPLER** createSamplers(uint count);
-    __declspec(dllexport) void disposeSamplers(SAMPLER** ppSmpl, uint count);
+    __declspec(dllexport) NOTE** createNotes(int count);
+    __declspec(dllexport) SAMPLER** createSamplers(int count);
+    __declspec(dllexport) void disposeSamplers(SAMPLER** ppSmpl, int count);
     __declspec(dllexport) inline Bool sampler(CHANNEL_VALUE **ppCh, SAMPLER *pSmpl, byte *pWaveBuffer);
 #ifdef __cplusplus
 }

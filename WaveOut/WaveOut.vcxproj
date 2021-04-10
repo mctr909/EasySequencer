@@ -182,7 +182,7 @@
     <ClCompile Include="effect.c" />
     <ClCompile Include="filter.c" />
     <ClCompile Include="main.cpp" />
-    <ClCompile Include="sampler.c" />
+    <ClCompile Include="sampler.cpp" />
     <ClCompile Include="wave_out.c" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

@@ -8,29 +8,29 @@
 #define OVER_SAMPLING   4
 
 /******************************************************************************/
-NOTE** createNotes(uint count) {
-    NOTE** notes = (NOTE**)malloc(sizeof(NOTE*) * count);
-    for (uint i = 0; i < count; ++i) {
+NOTE** createNotes(int count) {
+    auto notes = (NOTE**)malloc(sizeof(NOTE*) * count);
+    for (int i = 0; i < count; ++i) {
         notes[i] = (NOTE*)malloc(sizeof(NOTE));
         memset(notes[i], 0, sizeof(NOTE));
     }
     return notes;
 }
 
-SAMPLER** createSamplers(uint count) {
-    SAMPLER** samplers = (SAMPLER**)malloc(sizeof(SAMPLER*) * count);
-    for (uint i = 0; i < count; ++i) {
+SAMPLER** createSamplers(int count) {
+    auto samplers = (SAMPLER**)malloc(sizeof(SAMPLER*) * count);
+    for (int i = 0; i < count; ++i) {
         samplers[i] = (SAMPLER*)malloc(sizeof(SAMPLER));
         memset(samplers[i], 0, sizeof(SAMPLER));
     }
     return samplers;
 }
 
-void disposeSamplers(SAMPLER** ppSmpl, uint count) {
+void disposeSamplers(SAMPLER** ppSmpl, int count) {
     if (NULL == ppSmpl) {
         return;
     }
-    for (uint i = 0; i < count; ++i) {
+    for (int i = 0; i < count; ++i) {
         free(ppSmpl[i]);
     }
     free(ppSmpl);
@@ -38,17 +38,17 @@ void disposeSamplers(SAMPLER** ppSmpl, uint count) {
 
 /******************************************************************************/
 inline Bool sampler(CHANNEL_VALUE** ppCh, SAMPLER* pSmpl, byte* pWaveBuffer) {
-    NOTE* pNote = pSmpl->pNote;
-    CHANNEL_VALUE* pChValue = ppCh[pNote->channelNum];
-    SYSTEM_VALUE* pSystemValue = pChValue->pSystemValue;
-    CHANNEL* pChParam = pChValue->pParam;
-    WAVE_INFO* pWaveInfo = pSmpl->pWaveInfo;
-    ENVELOPE* pEnvAmp = pSmpl->pEnvAmp;
+    auto pNote = (NOTE*)pSmpl->pNote;
+    auto pChValue = ppCh[pNote->channelNum];
+    auto pSystemValue = pChValue->pSystemValue;
+    auto pChParam = pChValue->pParam;
+    auto pWaveInfo = pSmpl->pWaveInfo;
+    auto pEnvAmp = pSmpl->pEnvAmp;
 
     long loopEnd = (long)pWaveInfo->loopBegin + pWaveInfo->loopLength;
-    short* pWave = (short*)(pWaveBuffer + pWaveInfo->waveOfs);
-    double* pOutput = pChValue->pWave;
-    double* pOutputTerm = pOutput + pSystemValue->bufferLength;
+    auto pWave = (short*)(pWaveBuffer + pWaveInfo->waveOfs);
+    auto pOutput = pChValue->pWave;
+    auto pOutputTerm = pOutput + pSystemValue->bufferLength;
 
     for (; pOutput < pOutputTerm; pOutput++) {
         //*******************************
