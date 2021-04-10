@@ -181,7 +181,7 @@
   <ItemGroup>
     <ClCompile Include="effect.c" />
     <ClCompile Include="filter.c" />
-    <ClCompile Include="main.c" />
+    <ClCompile Include="main.cpp" />
     <ClCompile Include="sampler.c" />
     <ClCompile Include="wave_out.c" />
   </ItemGroup>

@@ -121,7 +121,7 @@ inline void setSampler() {
     int activeCount = 0;
     for (int sj = 0; sj < gSysValue.samplerCount; sj++) {
         SAMPLER* pSmpl = gppSamplers[sj];
-        NOTE* pNote = pSmpl->pNote;
+        NOTE* pNote = (NOTE*)pSmpl->pNote;
         if (NULL == pNote || pNote->state < E_NOTE_STATE_PRESS) {
             continue;
         }
