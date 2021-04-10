@@ -14,11 +14,11 @@
 
 /******************************************************************************/
 CHANNEL_VALUE** createChannels(SYSTEM_VALUE* pSys) {
-    CHANNEL_VALUE** channel = (CHANNEL_VALUE**)malloc(sizeof(CHANNEL_VALUE*) * pSys->channelCount);
+    auto ppCh = (CHANNEL_VALUE**)malloc(sizeof(CHANNEL_VALUE*) * pSys->channelCount);
     for (int i = 0; i < pSys->channelCount; ++i) {
-        CHANNEL_VALUE* pCh = (CHANNEL_VALUE*)malloc(sizeof(CHANNEL_VALUE));
+        auto pCh = (CHANNEL_VALUE*)malloc(sizeof(CHANNEL_VALUE));
         memset(pCh, 0, sizeof(CHANNEL_VALUE));
-        channel[i] = pCh;
+        ppCh[i] = pCh;
 
         pCh->pSystemValue = pSys;
 
@@ -48,7 +48,7 @@ CHANNEL_VALUE** createChannels(SYSTEM_VALUE* pSys) {
         memset(&pCh->filter, 0, sizeof(FILTER));
     }
 
-    return channel;
+    return ppCh;
 }
 
 void disposeChannels(CHANNEL_VALUE** ppCh) {
@@ -68,9 +68,9 @@ void disposeChannels(CHANNEL_VALUE** ppCh) {
 
 /******************************************************************************/
 inline void effect(CHANNEL_VALUE* pCh, double* waveL, double* waveR) {
-    CHANNEL* pParam = pCh->pParam;
-    double* pTapL = pCh->pDelTapL;
-    double* pTapR = pCh->pDelTapR;
+    auto pParam = (CHANNEL*)pCh->pParam;
+    auto pTapL = pCh->pDelTapL;
+    auto pTapR = pCh->pDelTapR;
     pCh->writeIndex++;
     if (DELAY_TAPS <= pCh->writeIndex) {
         pCh->writeIndex = 0;
@@ -151,9 +151,9 @@ inline void effect(CHANNEL_VALUE* pCh, double* waveL, double* waveR) {
     pCh->choLfoW += (pCh->choLfoU - pCh->choLfoV) * lfoDelta;
     /*** next step ***/
     double transitionDelta = pCh->pSystemValue->deltaTime * VALUE_TRANSITION_SPEED;
-    pCh->amp += (pCh->pParam->amp - pCh->amp) * transitionDelta;
-    pCh->panL += (pCh->pParam->panLeft - pCh->panL) * transitionDelta;
-    pCh->panR += (pCh->pParam->panRight - pCh->panR) * transitionDelta;
-    pCh->filter.cut += (pCh->pParam->cutoff - pCh->filter.cut) * transitionDelta;
-    pCh->filter.res += (pCh->pParam->resonance - pCh->filter.res) * transitionDelta;
+    pCh->amp += (pParam->amp - pCh->amp) * transitionDelta;
+    pCh->panL += (pParam->panLeft - pCh->panL) * transitionDelta;
+    pCh->panR += (pParam->panRight - pCh->panR) * transitionDelta;
+    pCh->filter.cut += (pParam->cutoff - pCh->filter.cut) * transitionDelta;
+    pCh->filter.res += (pParam->resonance - pCh->filter.res) * transitionDelta;
 }

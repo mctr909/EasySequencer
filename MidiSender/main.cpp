@@ -146,7 +146,7 @@ void midi_WavFileOut(
     Channel **ppChannels = (Channel**)malloc(sizeof(Channel*) * gSysValue.channelCount);
     CHANNEL_VALUE **ppChValues = createChannels(&gSysValue);
     for (int i = 0; i < gSysValue.channelCount; ++i) {
-        ppChannels[i] = new Channel(list, ppSamplers, ppNotes, ppChValues[i]->pParam, i, gSysValue.samplerCount);
+        ppChannels[i] = new Channel(list, ppSamplers, ppNotes, (CHANNEL*)ppChValues[i]->pParam, i, gSysValue.samplerCount);
     }
     // open file
     if (NULL != gfpFileOut) {

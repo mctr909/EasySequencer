@@ -23,7 +23,7 @@ HWAVEOUT        ghWaveOut = NULL;
 WAVEFORMATEX    gWaveFmt = { 0 };
 WAVEHDR         **gppWaveHdr = NULL;
 
-void (*gfpWriteBuffer)(LPBYTE) = NULL;
+void (*gfpWriteBuffer)(LPSTR) = NULL;
 
 /******************************************************************************/
 void CALLBACK waveOutProc(HWAVEOUT hwo, UINT uMsg, DWORD_PTR dwInstance, DWORD dwParam1, DWORD dwParam);
@@ -36,7 +36,7 @@ BOOL waveout_open(
     int channelCount,
     int bufferLength,
     int bufferCount,
-    void (*fpWriteBufferProc)(LPBYTE)
+    void (*fpWriteBufferProc)(LPSTR)
 ) {
     if (NULL != ghWaveOut) {
         if (!waveout_close()) {
@@ -173,7 +173,7 @@ DWORD writeBufferTask(LPVOID *param) {
             continue;
         }
         {
-            LPBYTE pBuff = gppWaveHdr[gWriteIndex]->lpData;
+            LPSTR pBuff = gppWaveHdr[gWriteIndex]->lpData;
             memset(pBuff, 0, gWaveFmt.nBlockAlign * gBufferLength);
             gfpWriteBuffer(pBuff);
             gWriteIndex = (gWriteIndex + 1) % gBufferCount;

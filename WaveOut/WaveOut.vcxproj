@@ -179,11 +179,11 @@
     <ClInclude Include="wave_out.h" />
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="effect.c" />
-    <ClCompile Include="filter.c" />
+    <ClCompile Include="effect.cpp" />
+    <ClCompile Include="filter.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="sampler.cpp" />
-    <ClCompile Include="wave_out.c" />
+    <ClCompile Include="wave_out.cpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

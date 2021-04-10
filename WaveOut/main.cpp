@@ -17,9 +17,9 @@ NOTE          **gppNotes = NULL;
 
 /******************************************************************************/
 inline void setSampler();
-void write16(LPBYTE pData);
-void write24(LPBYTE pData);
-void write32(LPBYTE pData);
+void write16(LPSTR pData);
+void write24(LPSTR pData);
+void write32(LPSTR pData);
 
 /******************************************************************************/
 int* waveout_GetActiveSamplersPtr() {
@@ -87,7 +87,7 @@ void waveout_SystemValues(
     free(gppChParams);
     gppChParams = (CHANNEL**)malloc(sizeof(CHANNEL*) * gSysValue.channelCount);
     for (int i = 0; i < gSysValue.channelCount; ++i) {
-        gppChParams[i] = gppChValues[i]->pParam;
+        gppChParams[i] = (CHANNEL*)gppChValues[i]->pParam;
     }
     //
     gppNotes = createNotes(gSysValue.samplerCount);
@@ -120,8 +120,8 @@ void waveout_Close() {
 inline void setSampler() {
     int activeCount = 0;
     for (int sj = 0; sj < gSysValue.samplerCount; sj++) {
-        SAMPLER* pSmpl = gppSamplers[sj];
-        NOTE* pNote = (NOTE*)pSmpl->pNote;
+        auto pSmpl = gppSamplers[sj];
+        auto pNote = (NOTE*)pSmpl->pNote;
         if (NULL == pNote || pNote->state < E_NOTE_STATE_PRESS) {
             continue;
         }
@@ -144,13 +144,13 @@ inline void setSampler() {
     gActiveCount = activeCount;
 }
 
-void write16(LPBYTE pData) {
+void write16(LPSTR pData) {
     setSampler();
     for (int i = 0; i < gSysValue.channelCount; i++) {
-        CHANNEL_VALUE* pCh = gppChValues[i];
-        double* inputBuff = pCh->pWave;
-        double* inputBuffTerm = inputBuff + pCh->pSystemValue->bufferLength;
-        short* pBuff = (short*)pData;
+        auto pCh = gppChValues[i];
+        auto inputBuff = pCh->pWave;
+        auto inputBuffTerm = inputBuff + pCh->pSystemValue->bufferLength;
+        auto pBuff = (short*)pData;
         for (; inputBuff < inputBuffTerm; inputBuff++, pBuff += 2) {
             // filter
             filter_lpf(&pCh->filter, *inputBuff * pCh->amp);
@@ -175,13 +175,13 @@ void write16(LPBYTE pData) {
     }
 }
 
-void write24(LPBYTE pData) {
+void write24(LPSTR pData) {
     setSampler();
     for (int i = 0; i < gSysValue.channelCount; i++) {
-        CHANNEL_VALUE* pCh = gppChValues[i];
-        double* inputBuff = pCh->pWave;
-        double* inputBuffTerm = inputBuff + pCh->pSystemValue->bufferLength;
-        int24* pBuff = (int24*)pData;
+        auto pCh = gppChValues[i];
+        auto inputBuff = pCh->pWave;
+        auto inputBuffTerm = inputBuff + pCh->pSystemValue->bufferLength;
+        auto pBuff = (int24*)pData;
         for (; inputBuff < inputBuffTerm; inputBuff++, pBuff += 2) {
             // filter
             filter_lpf(&pCh->filter, *inputBuff * pCh->amp);
@@ -204,13 +204,13 @@ void write24(LPBYTE pData) {
     }
 }
 
-void write32(LPBYTE pData) {
+void write32(LPSTR pData) {
     setSampler();
     for (int i = 0; i < gSysValue.channelCount; i++) {
-        CHANNEL_VALUE* pCh = gppChValues[i];
-        double* inputBuff = pCh->pWave;
-        double* inputBuffTerm = inputBuff + pCh->pSystemValue->bufferLength;
-        float* pBuff = (float*)pData;
+        auto pCh = gppChValues[i];
+        auto inputBuff = pCh->pWave;
+        auto inputBuffTerm = inputBuff + pCh->pSystemValue->bufferLength;
+        auto pBuff = (float*)pData;
         for (; inputBuff < inputBuffTerm; inputBuff++, pBuff += 2) {
             // filter
             filter_lpf(&pCh->filter, *inputBuff * pCh->amp);

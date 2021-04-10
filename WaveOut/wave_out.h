@@ -11,7 +11,7 @@ extern "C" {
         int channelCount,
         int bufferLength,
         int bufferCount,
-        void (*fpWriteBufferProc)(LPBYTE)
+        void (*fpWriteBufferProc)(LPSTR)
     );
     __declspec(dllexport) BOOL waveout_close();
 #ifdef __cplusplus

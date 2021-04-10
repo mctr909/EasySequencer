@@ -87,8 +87,8 @@ typedef struct SAMPLER {
     double index;
     double time;
     double egAmp;
-    ENVELOPE* pEnvAmp;
-    WAVE_INFO* pWaveInfo;
+    void* pEnvAmp;
+    void* pWaveInfo;
     void* pNote;
 } SAMPLER;
 #pragma pack(pop)
@@ -100,8 +100,8 @@ typedef struct NOTE {
     byte state;
     byte reserved;
     double velocity;
-    CHANNEL* pChannel;
-    SAMPLER* ppSamplers[UNISON_COUNT];
+    void* pChannel;
+    void* ppSamplers[UNISON_COUNT];
 } NOTE;
 #pragma pack(pop)
 
@@ -123,7 +123,7 @@ typedef struct CHANNEL_VALUE {
     double* pDelTapL;
     double* pDelTapR;
     double* pWave;
-    CHANNEL* pParam;
+    void* pParam;
     SYSTEM_VALUE* pSystemValue;
     FILTER filter;
 } CHANNEL_VALUE;

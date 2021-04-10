@@ -41,9 +41,9 @@ inline Bool sampler(CHANNEL_VALUE** ppCh, SAMPLER* pSmpl, byte* pWaveBuffer) {
     auto pNote = (NOTE*)pSmpl->pNote;
     auto pChValue = ppCh[pNote->channelNum];
     auto pSystemValue = pChValue->pSystemValue;
-    auto pChParam = pChValue->pParam;
-    auto pWaveInfo = pSmpl->pWaveInfo;
-    auto pEnvAmp = pSmpl->pEnvAmp;
+    auto pChParam = (CHANNEL*)pChValue->pParam;
+    auto pWaveInfo = (WAVE_INFO*)pSmpl->pWaveInfo;
+    auto pEnvAmp = (ENVELOPE*)pSmpl->pEnvAmp;
 
     long loopEnd = (long)pWaveInfo->loopBegin + pWaveInfo->loopLength;
     auto pWave = (short*)(pWaveBuffer + pWaveInfo->waveOfs);
