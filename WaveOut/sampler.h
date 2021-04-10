@@ -101,7 +101,7 @@ typedef struct SAMPLER {
     double egAmp;
     ENVELOPE* pEnvAmp;
     WAVE_INFO* pWaveInfo;
-    NOTE* pNote;
+    void* pNote;
 } SAMPLER;
 #pragma pack(pop)
 

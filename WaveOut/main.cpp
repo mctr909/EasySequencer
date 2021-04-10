@@ -11,9 +11,9 @@ int           gActiveCount = 0;
 LPBYTE        gpWaveTable = NULL;
 SYSTEM_VALUE  gSysValue = { 0 };
 CHANNEL_VALUE **gppChValues = NULL;
-CHANNEL_PARAM       **gppChParams = NULL;
+CHANNEL_PARAM **gppChParams = NULL;
 SAMPLER       **gppSamplers = NULL;
-NOTE          **gppNotes = NULL;
+Note          **gppNotes = NULL;
 
 /******************************************************************************/
 inline void setSampler();
@@ -30,7 +30,7 @@ CHANNEL_PARAM** waveout_GetChannelPtr() {
     return gppChParams;
 }
 
-NOTE** waveout_GetNotePtr() {
+Note** waveout_GetNotePtr() {
     return gppNotes;
 }
 
@@ -90,7 +90,7 @@ void waveout_SystemValues(
         gppChParams[i] = gppChValues[i]->pParam;
     }
     //
-    gppNotes = createNotes(gSysValue.samplerCount);
+    gppNotes = Note::create(gSysValue.samplerCount);
     gppSamplers = createSamplers(gSysValue.samplerCount);
 }
 
@@ -121,21 +121,21 @@ inline void setSampler() {
     int activeCount = 0;
     for (int sj = 0; sj < gSysValue.samplerCount; sj++) {
         auto pSmpl = gppSamplers[sj];
-        auto pNote = pSmpl->pNote;
-        if (NULL == pNote || pNote->state < E_NOTE_STATE::PRESS) {
+        auto pNote = (Note*)pSmpl->pNote;
+        if (NULL == pNote || pNote->mState < E_NOTE_STATE::PRESS) {
             continue;
         }
         if (sampler(gppChValues, pSmpl, gpWaveTable)) {
-            pNote->ppSamplers[pSmpl->unisonNum] = NULL;
+            pNote->mppSamplers[pSmpl->unisonNum] = NULL;
             pSmpl->pNote = NULL;
             int stoppedUnisonCount = 0;
             for (int u = 0; u < UNISON_COUNT; u++) {
-                if (pNote->ppSamplers[u] == NULL) {
+                if (pNote->mppSamplers[u] == NULL) {
                     stoppedUnisonCount++;
                 }
             }
             if (UNISON_COUNT <= stoppedUnisonCount) {
-                pNote->state = E_NOTE_STATE::FREE;
+                pNote->mState = E_NOTE_STATE::FREE;
             }
         } else {
             activeCount++;

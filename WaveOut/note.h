@@ -1,5 +1,6 @@
 #pragma once
 #include "type.h"
+#include "sampler.h"
 
 #define UNISON_COUNT 8
 
@@ -13,22 +14,17 @@ enum struct E_NOTE_STATE : byte {
     PURGE
 };
 
-#pragma pack(push, 4)
-typedef struct NOTE {
-    byte channelNum;
-    byte num;
-    E_NOTE_STATE state;
-    byte reserved;
-    double velocity;
-    void* pChannel;
-    void* ppSamplers[UNISON_COUNT];
-} NOTE;
-#pragma pack(pop)
-
-#ifdef __cplusplus
-extern "C" {
-#endif
-    __declspec(dllexport) NOTE** createNotes(int count);
-#ifdef __cplusplus
-}
-#endif
+class Note {
+public:
+    byte mChannelNum;
+    byte mNum;
+    E_NOTE_STATE mState;
+    byte mReserved;
+    double mVelocity;
+    void* mpChannel;
+    void* mppSamplers[UNISON_COUNT];
+private:
+    Note();
+public:
+    __declspec(dllexport) static Note** create(int count);
+};

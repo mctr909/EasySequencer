@@ -8,7 +8,7 @@ extern "C" {
 #endif
     __declspec(dllexport) int* WINAPI waveout_GetActiveSamplersPtr();
     __declspec(dllexport) CHANNEL_PARAM** WINAPI waveout_GetChannelPtr();
-    __declspec(dllexport) NOTE** WINAPI waveout_GetNotePtr();
+    __declspec(dllexport) Note** WINAPI waveout_GetNotePtr();
     __declspec(dllexport) SAMPLER** WINAPI waveout_GetSamplerPtr();
     __declspec(dllexport) LPBYTE WINAPI waveout_LoadWaveTable(LPWSTR filePath, uint *size);
     __declspec(dllexport) void WINAPI waveout_SystemValues(

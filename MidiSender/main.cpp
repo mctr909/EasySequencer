@@ -64,7 +64,7 @@ int* midi_GetWavFileOutProgressPtr() {
     return &gFileOutProgress;
 }
 
-void midi_CreateChannels(INST_LIST *list, SAMPLER **ppSmpl, NOTE **ppNote, CHANNEL_PARAM **ppCh, uint samplerCount) {
+void midi_CreateChannels(INST_LIST *list, SAMPLER **ppSmpl, Note **ppNote, CHANNEL_PARAM **ppCh, uint samplerCount) {
     if (NULL != gppChannels) {
         for (int i = 0; i < 16; i++) {
             delete gppChannels[i];
@@ -139,7 +139,7 @@ void midi_WavFileOut(
     // allocate out buffer
     LPBYTE pOutBuffer = (LPBYTE)malloc(gSysValue.bufferLength * gFmt.blockAlign);
     // allocate notes
-    NOTE** ppNotes = createNotes(gSysValue.samplerCount);
+    Note** ppNotes = Note::create(gSysValue.samplerCount);
     // allocate samplers
     SAMPLER **ppSamplers = createSamplers(gSysValue.samplerCount);
     // allocate channels

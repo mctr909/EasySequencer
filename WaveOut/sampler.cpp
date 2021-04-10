@@ -29,8 +29,8 @@ void disposeSamplers(SAMPLER** ppSmpl, int count) {
 
 /******************************************************************************/
 inline Bool sampler(CHANNEL_VALUE** ppCh, SAMPLER* pSmpl, byte* pWaveBuffer) {
-    auto pNote = pSmpl->pNote;
-    auto pChValue = ppCh[pNote->channelNum];
+    auto pNote = (Note*)pSmpl->pNote;
+    auto pChValue = ppCh[pNote->mChannelNum];
     auto pSystemValue = pChValue->pSystemValue;
     auto pChParam = pChValue->pParam;
     auto pWaveInfo = pSmpl->pWaveInfo;
@@ -63,11 +63,11 @@ inline Bool sampler(CHANNEL_VALUE** ppCh, SAMPLER* pSmpl, byte* pWaveBuffer) {
             }
         }
         // output
-        *pOutput += smoothedWave * pNote->velocity * pSmpl->egAmp / OVER_SAMPLING;
+        *pOutput += smoothedWave * pNote->mVelocity * pSmpl->egAmp / OVER_SAMPLING;
         //*******************************
         // generate envelope
         //*******************************
-        switch (pNote->state) {
+        switch (pNote->mState) {
         case E_NOTE_STATE::PURGE:
             pSmpl->egAmp -= pSmpl->egAmp * pSystemValue->deltaTime * PURGE_SPEED;
             break;
