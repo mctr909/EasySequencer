@@ -66,6 +66,7 @@ LPBYTE WINAPI waveout_loadWaveTable(LPWSTR filePath, unsigned int *size) {
         free(gSysValue.pWaveTable);
         gSysValue.pWaveTable = NULL;
     }
+
     //
     FILE *fpWaveTable = NULL;
     _wfopen_s(&fpWaveTable, filePath, TEXT("rb"));

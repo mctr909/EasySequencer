@@ -139,6 +139,7 @@
     <ClCompile Include="fileout.cpp" />
     <ClCompile Include="filter.cpp" />
     <ClCompile Include="message_reciever.cpp" />
+    <ClCompile Include="riff_chunk.cpp" />
     <ClCompile Include="sampler.cpp" />
     <ClCompile Include="wave_out.cpp" />
   </ItemGroup>
@@ -148,8 +149,10 @@
     <ClInclude Include="effect.h" />
     <ClInclude Include="fileout.h" />
     <ClInclude Include="filter.h" />
-    <ClInclude Include="instruments.h" />
+    <ClInclude Include="inst_ck.h" />
     <ClInclude Include="message_reciever.h" />
+    <ClInclude Include="riff_chunk.h" />
+    <ClInclude Include="riff_struct.h" />
     <ClInclude Include="sampler.h" />
     <ClInclude Include="type.h" />
     <ClInclude Include="wave_out.h" />

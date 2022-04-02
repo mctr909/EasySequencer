@@ -1,5 +1,5 @@
 #pragma once
-#include "instruments.h"
+#include "inst_ck.h"
 #include "channel_const.h"
 #include <windows.h>
 
