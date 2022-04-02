@@ -277,7 +277,8 @@ BOOL waveOutOpen(
         waveOutWrite(ghWaveOut, gppWaveHdr[n], sizeof(WAVEHDR));
     }
     //
-    CreateThread(NULL, 0, (LPTHREAD_START_ROUTINE)writeBufferTask, NULL, 0, &gThreadId);
+    auto hThread = CreateThread(NULL, 0, (LPTHREAD_START_ROUTINE)writeBufferTask, NULL, 0, &gThreadId);
+    SetThreadPriority(hThread, THREAD_PRIORITY_HIGHEST);
     return TRUE;
 }
 
@@ -357,7 +358,6 @@ DWORD writeBufferTask(LPVOID *param) {
         EnterCriticalSection((LPCRITICAL_SECTION)&gcsBufferLock);
         if (gBufferCount <= gWriteCount + 1) {
             LeaveCriticalSection((LPCRITICAL_SECTION)&gcsBufferLock);
-            Sleep(1);
             continue;
         }
         {
