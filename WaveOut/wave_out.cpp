@@ -52,11 +52,11 @@ void CALLBACK waveOutProc(HWAVEOUT hwo, UINT uMsg, DWORD_PTR dwInstance, DWORD d
 DWORD writeBufferTask(LPVOID *param);
 
 /******************************************************************************/
-int* WINAPI waveout_GetActiveSamplersPtr() {
+int* WINAPI waveout_getActiveSamplersPtr() {
     return &gActiveCount;
 }
 
-LPBYTE WINAPI waveout_LoadWaveTable(LPWSTR filePath, unsigned int *size) {
+LPBYTE WINAPI waveout_loadWaveTable(LPWSTR filePath, unsigned int *size) {
     if (NULL == size) {
         return NULL;
     }
@@ -84,14 +84,14 @@ LPBYTE WINAPI waveout_LoadWaveTable(LPWSTR filePath, unsigned int *size) {
     return gSysValue.pWaveTable;
 }
 
-void WINAPI waveout_SystemValues(
+void WINAPI waveout_systemValues(
     INST_LIST *pList,
     int sampleRate,
     int bits,
     int bufferLength,
     int bufferCount
 ) {
-    waveout_Close();
+    waveout_close();
     //
     gSysValue.pInstList = pList;
     gSysValue.bufferLength = bufferLength;
@@ -105,7 +105,7 @@ void WINAPI waveout_SystemValues(
     message_createChannels(&gSysValue);
 }
 
-void WINAPI waveout_Open() {
+void WINAPI waveout_open() {
     switch (gSysValue.bits) {
     case 16:
         waveOutOpen(gSysValue.sampleRate, 16, 2, gSysValue.bufferLength, gSysValue.bufferCount, write16);
@@ -121,7 +121,7 @@ void WINAPI waveout_Open() {
     }
 }
 
-void WINAPI waveout_Close() {
+void WINAPI waveout_close() {
     waveOutClose();
     effect_dispose(&gSysValue);
     sampler_dispose(&gSysValue);

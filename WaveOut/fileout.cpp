@@ -41,11 +41,11 @@ uint fileOutSend(Channel **ppCh, LPBYTE msg);
 void fileOutWrite(SAMPLER **ppSmpl, EFFECT **ppCh, LPBYTE outBuffer);
 
 /******************************************************************************/
-int* WINAPI waveout_GetFileOutProgressPtr() {
+int* WINAPI waveout_getFileOutProgressPtr() {
     return &gFileOutProgress;
 }
 
-void WINAPI waveout_FileOut(
+void WINAPI waveout_fileOut(
     LPWSTR filePath,
     LPBYTE pWaveTable,
     INST_LIST *pList,
