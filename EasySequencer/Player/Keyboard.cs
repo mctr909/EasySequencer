@@ -5,8 +5,8 @@ using System.Threading;
 using System.Threading.Tasks;
 using System.Runtime.InteropServices;
 
-using SMF;
 using EasySequencer;
+using Instruments;
 
 namespace Player {
     public class Keyboard {
@@ -221,28 +221,33 @@ namespace Player {
             var whiteWidth = KeyboardPos[0].Width + 1;
             var g = mBuffer.Graphics;
             /** Keyboad **/
-            for (var s = 0; s < Sender.SAMPLER_COUNT; ++s) {
-                var note = mSender.Note(s);
-                var channel = mPlayer.Channel(note.channelNum);
-                var y_ch = ChannelHeight * note.channelNum;
+            for (var c = 0; c < Sender.CHANNEL_COUNT; c++) {
+                var channel = mPlayer.Channel(c);
                 var transpose = (int)(channel.Pitch * channel.BendRange / 8192.0 - 0.5);
-                var k = note.num + transpose;
-                if (k < 0 || 127 < k) {
-                    continue;
-                }
-                int x_oct;
-                Rectangle key;
-                switch (note.state) {
-                case E_NOTE_STATE.PRESS:
-                    x_oct = 7 * whiteWidth * (k / 12 - 1);
-                    key = KeyboardPos[k % 12];
-                    g.FillRectangle(Brushes.Red, key.X + x_oct, key.Y + y_ch, key.Width, key.Height);
-                    break;
-                case E_NOTE_STATE.HOLD:
-                    x_oct = 7 * whiteWidth * (k / 12 - 1);
-                    key = KeyboardPos[k % 12];
-                    g.FillRectangle(Brushes.Blue, key.X + x_oct, key.Y + y_ch, key.Width, key.Height);
-                    break;
+                var y_ch = ChannelHeight * c;
+                for (var n = 0; n < 128; ++n) {
+                    var k = n + transpose;
+                    if (k < 0 || 127 < k) {
+                        continue;
+                    }
+                    E_KEY_STATE keyState;
+                    unsafe {
+                        keyState = (E_KEY_STATE)channel.KeyBoard[n];
+                    }
+                    int x_oct;
+                    Rectangle key;
+                    switch (keyState) {
+                    case E_KEY_STATE.PRESS:
+                        x_oct = 7 * whiteWidth * (k / 12 - 1);
+                        key = KeyboardPos[k % 12];
+                        g.FillRectangle(Brushes.Red, key.X + x_oct, key.Y + y_ch, key.Width, key.Height);
+                        break;
+                    case E_KEY_STATE.HOLD:
+                        x_oct = 7 * whiteWidth * (k / 12 - 1);
+                        key = KeyboardPos[k % 12];
+                        g.FillRectangle(Brushes.Blue, key.X + x_oct, key.Y + y_ch, key.Width, key.Height);
+                        break;
+                    }
                 }
             }
             /** Knob **/

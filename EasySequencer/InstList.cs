@@ -4,8 +4,8 @@ using System.Linq;
 using System.Windows.Forms;
 using System.Runtime.InteropServices;
 
-using SMF;
 using Player;
+using Instruments;
 
 namespace EasySequencer {
     public partial class InstList : Form {
@@ -70,7 +70,6 @@ namespace EasySequencer {
             }
             var list = mInstList[(string)cmbCategory.SelectedItem].ToArray();
             var inst = list[(lstInst.SelectedIndex < list.Count()) ? lstInst.SelectedIndex : list.Count() - 1];
-
             mSender.Send(new Event(mChNum, E_CONTROL.BANK_MSB, inst.Key.bankMSB));
             mSender.Send(new Event(mChNum, E_CONTROL.BANK_LSB, inst.Key.bankLSB));
             mSender.Send(new Event(mChNum, E_STATUS.PROGRAM, inst.Key.programNo));

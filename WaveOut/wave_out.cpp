@@ -1,4 +1,9 @@
 #include "wave_out.h"
+#include "filter.h"
+#include "sampler.h"
+#include "effect.h"
+#include "channel.h"
+#include "message_reciever.h"
 
 #include <stdio.h>
 #include <mmsystem.h>
@@ -26,20 +31,217 @@ WAVEHDR         **gppWaveHdr = NULL;
 void (*gfpWriteBuffer)(LPSTR) = NULL;
 
 /******************************************************************************/
-void CALLBACK waveOutProc(HWAVEOUT hwo, UINT uMsg, DWORD_PTR dwInstance, DWORD dwParam1, DWORD dwParam);
-DWORD writeBufferTask(LPVOID *param);
+int           gActiveCount = 0;
+SYSTEM_VALUE  gSysValue = { 0 };
 
 /******************************************************************************/
-BOOL waveout_open(
+inline void setSampler();
+void write16(LPSTR pData);
+void write24(LPSTR pData);
+void write32(LPSTR pData);
+
+BOOL waveOutOpen(
     int sampleRate,
     int bits,
     int channelCount,
     int bufferLength,
     int bufferCount,
-    void (*fpWriteBufferProc)(LPSTR)
+    void(*fpWriteBufferProc)(LPSTR)
+);
+BOOL waveOutClose();
+void CALLBACK waveOutProc(HWAVEOUT hwo, UINT uMsg, DWORD_PTR dwInstance, DWORD dwParam1, DWORD dwParam);
+DWORD writeBufferTask(LPVOID *param);
+
+/******************************************************************************/
+int* waveout_GetActiveSamplersPtr() {
+    return &gActiveCount;
+}
+
+LPBYTE waveout_LoadWaveTable(LPWSTR filePath, unsigned int *size) {
+    if (NULL == size) {
+        return NULL;
+    }
+    waveOutClose();
+    //
+    if (NULL != gSysValue.pWaveTable) {
+        free(gSysValue.pWaveTable);
+        gSysValue.pWaveTable = NULL;
+    }
+    //
+    FILE *fpWaveTable = NULL;
+    _wfopen_s(&fpWaveTable, filePath, TEXT("rb"));
+    if (NULL != fpWaveTable) {
+        fseek(fpWaveTable, 4, SEEK_SET);
+        fread_s(size, sizeof(*size), sizeof(*size), 1, fpWaveTable);
+        *size -= 8;
+        gSysValue.pWaveTable = (LPBYTE)malloc(*size);
+        if (NULL != gSysValue.pWaveTable) {
+            fseek(fpWaveTable, 12, SEEK_SET);
+            fread_s(gSysValue.pWaveTable, *size, *size, 1, fpWaveTable);
+        }
+        fclose(fpWaveTable);
+    }
+
+    return gSysValue.pWaveTable;
+}
+
+void waveout_SystemValues(
+    INST_LIST *pList,
+    int sampleRate,
+    int bits,
+    int bufferLength,
+    int bufferCount
+) {
+    waveout_Close();
+    //
+    gSysValue.pInstList = pList;
+    gSysValue.bufferLength = bufferLength;
+    gSysValue.bufferCount = bufferCount;
+    gSysValue.sampleRate = sampleRate;
+    gSysValue.bits = bits;
+    gSysValue.deltaTime = 1.0 / sampleRate;
+    //
+    effect_create(&gSysValue);
+    sampler_create(&gSysValue);
+    message_createChannels(&gSysValue);
+}
+
+void waveout_Open() {
+    switch (gSysValue.bits) {
+    case 16:
+        waveOutOpen(gSysValue.sampleRate, 16, 2, gSysValue.bufferLength, gSysValue.bufferCount, write16);
+        break;
+    case 24:
+        waveOutOpen(gSysValue.sampleRate, 24, 2, gSysValue.bufferLength, gSysValue.bufferCount, write24);
+        break;
+    case 32:
+        waveOutOpen(gSysValue.sampleRate, 32, 2, gSysValue.bufferLength, gSysValue.bufferCount, write32);
+        break;
+    default:
+        break;
+    }
+}
+
+void waveout_Close() {
+    waveOutClose();
+    effect_dispose(&gSysValue);
+    sampler_dispose(&gSysValue);
+}
+
+/******************************************************************************/
+inline void setSampler() {
+    int activeCount = 0;
+    for (int s = 0; s < SAMPLER_COUNT; s++) {
+        auto pSmpl = gSysValue.ppSampler[s];
+        if (pSmpl->state < E_SAMPLER_STATE::PRESS) {
+            continue;
+        }
+        if (sampler(&gSysValue, pSmpl)) {
+            activeCount++;
+        }
+    }
+    gActiveCount = activeCount;
+}
+
+void write16(LPSTR pData) {
+    setSampler();
+    for (int c = 0; c < CHANNEL_COUNT; c++) {
+        auto pEffect = gSysValue.ppEffect[c];
+        auto inputBuff = pEffect->pOutput;
+        auto inputBuffTerm = inputBuff + pEffect->pSystemValue->bufferLength;
+        auto pBuff = (short*)pData;
+        for (; inputBuff < inputBuffTerm; inputBuff++, pBuff += 2) {
+            // filter
+            filter_lpf(&pEffect->filter, *inputBuff * pEffect->amp);
+            // pan
+            double tempL = pEffect->filter.a10 * pEffect->panL;
+            double tempR = pEffect->filter.a10 * pEffect->panR;
+            // effect
+            effect(pEffect, &tempL, &tempR);
+            // output
+            tempL *= 32767.0;
+            tempR *= 32767.0;
+            tempL += *(pBuff + 0);
+            tempR += *(pBuff + 1);
+            if (32767.0 < tempL) tempL = 32767.0;
+            if (tempL < -32767.0) tempL = -32767.0;
+            if (32767.0 < tempR) tempR = 32767.0;
+            if (tempR < -32767.0) tempR = -32767.0;
+            *(pBuff + 0) = (short)tempL;
+            *(pBuff + 1) = (short)tempR;
+            *inputBuff = 0.0;
+        }
+    }
+}
+
+void write24(LPSTR pData) {
+    setSampler();
+    for (int c = 0; c < CHANNEL_COUNT; c++) {
+        auto pEffect = gSysValue.ppEffect[c];
+        auto inputBuff = pEffect->pOutput;
+        auto inputBuffTerm = inputBuff + pEffect->pSystemValue->bufferLength;
+        auto pBuff = (int24*)pData;
+        for (; inputBuff < inputBuffTerm; inputBuff++, pBuff += 2) {
+            // filter
+            filter_lpf(&pEffect->filter, *inputBuff * pEffect->amp);
+            // pan
+            double tempL = pEffect->filter.a10 * pEffect->panL;
+            double tempR = pEffect->filter.a10 * pEffect->panR;
+            // effect
+            effect(pEffect, &tempL, &tempR);
+            // output
+            tempL += fromInt24(pBuff + 0);
+            tempR += fromInt24(pBuff + 1);
+            if (1.0 < tempL) tempL = 1.0;
+            if (tempL < -1.0) tempL = -1.0;
+            if (1.0 < tempR) tempR = 1.0;
+            if (tempR < -1.0) tempR = -1.0;
+            setInt24(pBuff + 0, tempL);
+            setInt24(pBuff + 1, tempR);
+            *inputBuff = 0.0;
+        }
+    }
+}
+
+void write32(LPSTR pData) {
+    setSampler();
+    for (int c = 0; c < CHANNEL_COUNT; c++) {
+        auto pEffect = gSysValue.ppEffect[c];
+        auto inputBuff = pEffect->pOutput;
+        auto inputBuffTerm = inputBuff + pEffect->pSystemValue->bufferLength;
+        auto pBuff = (float*)pData;
+        for (; inputBuff < inputBuffTerm; inputBuff++, pBuff += 2) {
+            // filter
+            filter_lpf(&pEffect->filter, *inputBuff * pEffect->amp);
+            // pan
+            double tempL = pEffect->filter.a10 * pEffect->panL;
+            double tempR = pEffect->filter.a10 * pEffect->panR;
+            // effect
+            effect(pEffect, &tempL, &tempR);
+            // output
+            tempL += *(pBuff + 0);
+            tempR += *(pBuff + 1);
+            if (1.0 < tempL) tempL = 1.0;
+            if (tempL < -1.0) tempL = -1.0;
+            if (1.0 < tempR) tempR = 1.0;
+            if (tempR < -1.0) tempR = -1.0;
+            *(pBuff + 0) = (float)tempL;
+            *(pBuff + 1) = (float)tempR;
+            *inputBuff = 0.0;
+        }
+    }
+}
+
+BOOL waveOutOpen(
+    int sampleRate,
+    int bits,
+    int channelCount,
+    int bufferLength,
+    int bufferCount,
+    void(*fpWriteBufferProc)(LPSTR)
 ) {
     if (NULL != ghWaveOut) {
-        if (!waveout_close()) {
+        if (!waveOutClose()) {
             return FALSE;
         }
     }
@@ -92,7 +294,7 @@ BOOL waveout_open(
     return TRUE;
 }
 
-BOOL waveout_close() {
+BOOL waveOutClose() {
     if (NULL == ghWaveOut) {
         return TRUE;
     }
@@ -115,7 +317,6 @@ BOOL waveout_close() {
     return TRUE;
 }
 
-/******************************************************************************/
 void CALLBACK waveOutProc(HWAVEOUT hwo, UINT uMsg, DWORD_PTR dwInstance, DWORD dwParam1, DWORD dwParam) {
     switch (uMsg) {
     case MM_WOM_OPEN:

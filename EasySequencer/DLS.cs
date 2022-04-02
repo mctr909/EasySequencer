@@ -3,6 +3,8 @@ using System.Collections.Generic;
 using System.Runtime.InteropServices;
 using Player;
 
+using Instruments;
+
 namespace DLS {
     #region enum
     public enum SRC_TYPE : ushort {
@@ -208,9 +210,9 @@ namespace DLS {
 
         unsafe public void GetInstList(INST_LIST *list) {
             list->instCount = 0;
-            list->ppInst = (INST_REC**)Marshal.AllocHGlobal(sizeof(INST_REC*) * Instruments.List.Count);
+            list->ppInst = (INST_INFO**)Marshal.AllocHGlobal(sizeof(INST_INFO*) * Instruments.List.Count);
             foreach (var inst in Instruments.List) {
-                list->ppInst[list->instCount] = (INST_REC*)Marshal.AllocHGlobal(Marshal.SizeOf<INST_REC>());
+                list->ppInst[list->instCount] = (INST_INFO*)Marshal.AllocHGlobal(Marshal.SizeOf<INST_INFO>());
                 var pInst = list->ppInst[list->instCount];
                 list->instCount++;
                 //
@@ -241,11 +243,11 @@ namespace DLS {
                 pInst->ppRegions = (REGION**)Marshal.AllocHGlobal(sizeof(REGION*) * inst.Regions.List.Count);
 
                 #region instEnv
-                var instEnv = new ENVELOPE();
-                instEnv.deltaA = 1000.0 * Sender.DeltaTime * Sender.AttackSpeed;  // 1msec
-                instEnv.deltaD = 1000.0 * Sender.DeltaTime * Sender.DecaySpeed;   // 1msec
-                instEnv.deltaR = 1000.0 * Sender.DeltaTime * Sender.ReleaseSpeed; // 1msec
-                instEnv.levelS = 1.0;
+                var instEnv = new ENV_AMP();
+                instEnv.attack = 1000.0 * Sender.DeltaTime * Sender.AttackSpeed;  // 1msec
+                instEnv.decay = 1000.0 * Sender.DeltaTime * Sender.DecaySpeed;   // 1msec
+                instEnv.release = 1000.0 * Sender.DeltaTime * Sender.ReleaseSpeed; // 1msec
+                instEnv.sustain = 1.0;
                 instEnv.hold = 0.0;
                 if (null != inst.Articulations) {
                     foreach (var conn in inst.Articulations.Art.List) {
@@ -254,20 +256,20 @@ namespace DLS {
                         }
                         switch (conn.destination) {
                         case DST_TYPE.EG1_ATTACK_TIME:
-                            instEnv.deltaA = Sender.AttackSpeed * Sender.DeltaTime / ART.GetValue(conn);
+                            instEnv.attack = Sender.AttackSpeed * Sender.DeltaTime / ART.GetValue(conn);
                             instEnv.hold += ART.GetValue(conn);
                             break;
                         case DST_TYPE.EG1_HOLD_TIME:
                             instEnv.hold += ART.GetValue(conn);
                             break;
                         case DST_TYPE.EG1_DECAY_TIME:
-                            instEnv.deltaD = Sender.DecaySpeed * Sender.DeltaTime / ART.GetValue(conn);
+                            instEnv.decay = Sender.DecaySpeed * Sender.DeltaTime / ART.GetValue(conn);
                             break;
                         case DST_TYPE.EG1_RELEASE_TIME:
-                            instEnv.deltaR = Sender.ReleaseSpeed * Sender.DeltaTime / ART.GetValue(conn);
+                            instEnv.release = Sender.ReleaseSpeed * Sender.DeltaTime / ART.GetValue(conn);
                             break;
                         case DST_TYPE.EG1_SUSTAIN_LEVEL:
-                            instEnv.levelS = (0.0 == ART.GetValue(conn)) ? 1.0 : (ART.GetValue(conn) * 0.01);
+                            instEnv.sustain = (0.0 == ART.GetValue(conn)) ? 1.0 : (ART.GetValue(conn) * 0.01);
                             break;
                         }
                     }
@@ -285,14 +287,14 @@ namespace DLS {
                     rgnIdx++;
 
                     if (null == rgn.Articulations) {
-                        pRegion->env = instEnv;
+                        pRegion->envAmp = instEnv;
                     } else {
                         #region regionEnv
-                        var regionEnv = new ENVELOPE();
-                        regionEnv.deltaA = 1000.0 * Sender.DeltaTime * Sender.AttackSpeed;  // 1msec
-                        regionEnv.deltaD = 1000.0 * Sender.DeltaTime * Sender.DecaySpeed;   // 1msec
-                        regionEnv.deltaR = 1000.0 * Sender.DeltaTime * Sender.ReleaseSpeed; // 1msec
-                        regionEnv.levelS = 1.0;
+                        var regionEnv = new ENV_AMP();
+                        regionEnv.attack = 1000.0 * Sender.DeltaTime * Sender.AttackSpeed;  // 1msec
+                        regionEnv.decay = 1000.0 * Sender.DeltaTime * Sender.DecaySpeed;   // 1msec
+                        regionEnv.release = 1000.0 * Sender.DeltaTime * Sender.ReleaseSpeed; // 1msec
+                        regionEnv.sustain = 1.0;
                         regionEnv.hold = 0.0;
                         foreach (var conn in rgn.Articulations.Art.List) {
                             if (SRC_TYPE.NONE != conn.source) {
@@ -300,20 +302,20 @@ namespace DLS {
                             }
                             switch (conn.destination) {
                             case DST_TYPE.EG1_ATTACK_TIME:
-                                regionEnv.deltaA = Sender.AttackSpeed * Sender.DeltaTime / ART.GetValue(conn);
+                                regionEnv.attack = Sender.AttackSpeed * Sender.DeltaTime / ART.GetValue(conn);
                                 regionEnv.hold += ART.GetValue(conn);
                                 break;
                             case DST_TYPE.EG1_HOLD_TIME:
                                 regionEnv.hold += ART.GetValue(conn);
                                 break;
                             case DST_TYPE.EG1_DECAY_TIME:
-                                regionEnv.deltaD = Sender.DecaySpeed * Sender.DeltaTime / ART.GetValue(conn);
+                                regionEnv.decay = Sender.DecaySpeed * Sender.DeltaTime / ART.GetValue(conn);
                                 break;
                             case DST_TYPE.EG1_SUSTAIN_LEVEL:
-                                regionEnv.levelS = (0.0 == ART.GetValue(conn)) ? 1.0 : (ART.GetValue(conn) * 0.01);
+                                regionEnv.sustain = (0.0 == ART.GetValue(conn)) ? 1.0 : (ART.GetValue(conn) * 0.01);
                                 break;
                             case DST_TYPE.EG1_RELEASE_TIME:
-                                regionEnv.deltaR = Sender.ReleaseSpeed * Sender.DeltaTime / ART.GetValue(conn);
+                                regionEnv.release = Sender.ReleaseSpeed * Sender.DeltaTime / ART.GetValue(conn);
                                 break;
                             }
                         }
@@ -321,7 +323,7 @@ namespace DLS {
                             regionEnv.hold = Sender.DeltaTime;
                         }
                         #endregion
-                        pRegion->env = regionEnv;
+                        pRegion->envAmp = regionEnv;
                     }
 
                     var wave = WavePool.List[(int)rgn.WaveLink.tableIndex];
@@ -346,7 +348,7 @@ namespace DLS {
                             pRegion->waveInfo.loopBegin = 0;
                             pRegion->waveInfo.loopLength = samples;
                             pRegion->waveInfo.loopEnable = false;
-                            pRegion->env.deltaR = Sender.DeltaTime * pRegion->waveInfo.delta / samples;
+                            pRegion->envAmp.release = Sender.DeltaTime * pRegion->waveInfo.delta / samples;
                         }
                     } else {
                         pRegion->waveInfo.gain = wave.Sampler.Gain / 32768.0;
@@ -587,7 +589,7 @@ namespace DLS {
 
             case DST_TYPE.EG1_SUSTAIN_LEVEL:
             case DST_TYPE.EG2_SUSTAIN_LEVEL:
-                return conn.scale / 655360.0;
+                return Math.Pow(2.0, -0.005 * conn.scale / 65536.0);
 
             case DST_TYPE.PITCH:
             case DST_TYPE.LFO_FREQUENCY:

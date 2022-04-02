@@ -2,18 +2,23 @@
 #include <windows.h>
 
 /******************************************************************************/
+typedef struct INST_LIST INST_LIST;
+
+/******************************************************************************/
 #ifdef __cplusplus
 extern "C" {
 #endif
-    __declspec(dllexport) BOOL waveout_open(
+    __declspec(dllexport) LPBYTE WINAPI waveout_LoadWaveTable(LPWSTR filePath, unsigned int *size);
+    __declspec(dllexport) void WINAPI waveout_SystemValues(
+        INST_LIST *pList,
         int sampleRate,
         int bits,
-        int channelCount,
         int bufferLength,
-        int bufferCount,
-        void (*fpWriteBufferProc)(LPSTR)
+        int bufferCount
     );
-    __declspec(dllexport) BOOL waveout_close();
+    __declspec(dllexport) int* WINAPI waveout_GetActiveSamplersPtr();
+    __declspec(dllexport) void WINAPI waveout_Open();
+    __declspec(dllexport) void WINAPI waveout_Close();
 #ifdef __cplusplus
 }
 #endif

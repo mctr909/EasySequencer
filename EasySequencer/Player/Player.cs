@@ -2,7 +2,7 @@
 using System.Threading;
 using System.Threading.Tasks;
 
-using SMF;
+using Instruments;
 
 namespace Player {
     public class Player {
@@ -187,7 +187,7 @@ namespace Player {
                     }
                     var current_mSec = mSw.ElapsedMilliseconds;
                     var deltaTime = current_mSec - mPrevious_mSec;
-                    mCurrentTick += 0.96 * mBPM * Speed * deltaTime / 60.0;
+                    mCurrentTick += 0.096 * mBPM * Speed * deltaTime / 6.0;
                     mTick += mCurrentTick - mPreviousTick;
                     if (3840 / mMeasureDenomi <= mTick) {
                         mTick -= 3840 / mMeasureDenomi;
@@ -202,40 +202,42 @@ namespace Player {
                     Thread.Sleep(1);
                 }
 
-
                 switch (ev.Type) {
                 case E_STATUS.NOTE_OFF: {
-                    var chParam = mSender.Channel(ev.Channel);
-                    if (0 == chParam.InstId.isDrum) {
-                        if ((ev.Data[1] + Transpose) < 0 || 127 < (ev.Data[1] + Transpose)) {
-                            continue;
+                        var chParam = mSender.Channel(ev.Channel);
+                        if (0 == chParam.InstId.isDrum) {
+                            if ((ev.Data[1] + Transpose) < 0 || 127 < (ev.Data[1] + Transpose)) {
+                                continue;
+                            } else {
+                                ev = new Event(ev.Channel, E_STATUS.NOTE_OFF, ev.Data[1] + Transpose, ev.Data[2]);
+                            }
                         } else {
-                            ev = new Event(ev.Channel, E_STATUS.NOTE_OFF, ev.Data[1] + Transpose, ev.Data[2]);
+                            ev = new Event(ev.Channel, E_STATUS.NOTE_OFF, ev.Data[1], ev.Data[2]);
                         }
-                    } else {
-                        continue;
                     }
-                }
-                break;
+                    break;
                 case E_STATUS.NOTE_ON: {
-                    var chParam = mSender.Channel(ev.Channel);
-                    if (ev.Data[2] != 0) {
-                        if (0.25 * 960 < (mCurrentTick - ev.Tick)) {
-                            continue;
+                        var chParam = mSender.Channel(ev.Channel);
+                        if (ev.Data[2] != 0) {
+                            if (0.25 * 960 < (mCurrentTick - ev.Tick)) {
+                                continue;
+                            }
+                            if (!chParam.Enable || (0 <= SoloChannel && SoloChannel != ev.Channel)) {
+                                continue;
+                            }
                         }
-                        if (!chParam.Enable || (0 <= SoloChannel && SoloChannel != ev.Channel)) {
-                            continue;
-                        }
-                    }
-                    if (0 == chParam.InstId.isDrum) {
-                        if ((ev.Data[1] + Transpose) < 0 || 127 < (ev.Data[1] + Transpose)) {
-                            continue;
+                        if (0 == chParam.InstId.isDrum) {
+                            if ((ev.Data[1] + Transpose) < 0 || 127 < (ev.Data[1] + Transpose)) {
+                                continue;
+                            } else {
+                                ev = new Event(ev.Channel, E_STATUS.NOTE_ON, ev.Data[1] + Transpose, ev.Data[2]);
+                            }
                         } else {
-                            ev = new Event(ev.Channel, E_STATUS.NOTE_ON, ev.Data[1] + Transpose, ev.Data[2]);
+                            ev = new Event(ev.Channel, E_STATUS.NOTE_ON, ev.Data[1], ev.Data[2]);
                         }
                     }
-                }
-                break;
+                    break;
+
                 case E_STATUS.META:
                     switch (ev.Meta.Type) {
                     case E_META.TEMPO:

@@ -4,11 +4,10 @@ using System.IO;
 using System.Drawing;
 
 using Player;
-using SMF;
 
 namespace EasySequencer {
     public partial class Form1 : Form {
-        private SMF.SMF mSMF;
+        private SMF mSMF;
         private Sender mMidiSender;
         private Player.Player mPlayer;
         private Keyboard mKeyboard;
@@ -24,7 +23,7 @@ namespace EasySequencer {
         private void Form1_Load(object sender, EventArgs e) {
             //mDlsFilePath = Path.GetDirectoryName(Application.ExecutablePath) + "\\AnyConv.com__Equinox_Grand_Pianos.sf2";
             //mDlsFilePath = Path.GetDirectoryName(Application.ExecutablePath) + "\\gm.sf2";
-            mDlsFilePath = Path.GetDirectoryName(Application.ExecutablePath) + "\\test.dls";
+            mDlsFilePath = Path.GetDirectoryName(Application.ExecutablePath) + "\\gm.dls";
             mMidiSender = new Sender(mDlsFilePath);
             mPlayer = new Player.Player(mMidiSender);
             mKeyboard = new Keyboard(picKeyBack, mMidiSender, mPlayer);
@@ -53,7 +52,7 @@ namespace EasySequencer {
             }
 
             try {
-                mSMF = new SMF.SMF(filePath);
+                mSMF = new SMF(filePath);
                 mPlayer.SetEventList(mSMF.EventList);
                 hsbSeek.Maximum = mPlayer.MaxTick;
                 Text = Path.GetFileNameWithoutExtension(filePath);

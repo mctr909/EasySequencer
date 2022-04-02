@@ -1,8 +1,7 @@
-#include "effect.h"
-#include "sampler.h"
-#include <stdlib.h>
-#include <string.h>
 #include <math.h>
+#include "channel.h"
+#include "sampler.h"
+#include "effect.h"
 
 /******************************************************************************/
 #define DELAY_TAPS             1048576
@@ -13,87 +12,92 @@
 #define INV_SQRT3 0.577350269
 
 /******************************************************************************/
-CHANNEL_VALUE** createChannels(SYSTEM_VALUE* pSys) {
-    auto ppCh = (CHANNEL_VALUE**)malloc(sizeof(CHANNEL_VALUE*) * pSys->channelCount);
-    for (int i = 0; i < pSys->channelCount; ++i) {
-        auto pCh = (CHANNEL_VALUE*)malloc(sizeof(CHANNEL_VALUE));
-        memset(pCh, 0, sizeof(CHANNEL_VALUE));
-        ppCh[i] = pCh;
+void effect_create(SYSTEM_VALUE* pSystemValue) {
+    effect_dispose(pSystemValue);
+    pSystemValue->ppEffect = (EFFECT**)malloc(sizeof(EFFECT*) * CHANNEL_COUNT);
+    for (int c = 0; c < CHANNEL_COUNT; c++) {
+        pSystemValue->ppEffect[c] = (EFFECT*)malloc(sizeof(EFFECT));
+        memset(pSystemValue->ppEffect[c], 0, sizeof(EFFECT));
 
-        pCh->pSystemValue = pSys;
+        auto pEffect = pSystemValue->ppEffect[c];
+        pEffect->pSystemValue = pSystemValue;
 
-        // allocate wave buffer
-        pCh->pWave = (double*)malloc(sizeof(double) * pCh->pSystemValue->bufferLength);
-        memset(pCh->pWave, 0, sizeof(double) * pCh->pSystemValue->bufferLength);
-        // allocate channels
-        pCh->pParam = (CHANNEL_PARAM*)malloc(sizeof(CHANNEL_PARAM));
-        memset(pCh->pParam, 0, sizeof(CHANNEL_PARAM));
+        // allocate output buffer
+        pEffect->pOutput = (double*)malloc(sizeof(double) * pEffect->pSystemValue->bufferLength);
+        memset(pEffect->pOutput, 0, sizeof(double) * pEffect->pSystemValue->bufferLength);
+
+        // allocate effect params
+        pEffect->pParam = (EFFECT_PARAM*)malloc(sizeof(EFFECT_PARAM));
+        memset(pEffect->pParam, 0, sizeof(EFFECT_PARAM));
+
         // allocate delay taps
-        pCh->writeIndex = 0;
-        pCh->pDelTapL = (double*)malloc(sizeof(double) * DELAY_TAPS);
-        pCh->pDelTapR = (double*)malloc(sizeof(double) * DELAY_TAPS);
-        memset(pCh->pDelTapL, 0, sizeof(double) * DELAY_TAPS);
-        memset(pCh->pDelTapR, 0, sizeof(double) * DELAY_TAPS);
-        // initialize chorus
-        pCh->choLfoU = 0.505 + 0.495;
-        pCh->choLfoV = 0.505 + 0.495 * -0.5;
-        pCh->choLfoW = 0.505 + 0.495 * -0.5;
-        pCh->choPanUL = cos(0.5 * PI * 0 / 3.0);
-        pCh->choPanUR = sin(0.5 * PI * 0 / 3.0);
-        pCh->choPanVL = cos(0.5 * PI * 1 / 3.0);
-        pCh->choPanVR = sin(0.5 * PI * 1 / 3.0);
-        pCh->choPanWL = cos(0.5 * PI * 2 / 3.0);
-        pCh->choPanWR = sin(0.5 * PI * 2 / 3.0);
-        // initialize filter
-        memset(&pCh->filter, 0, sizeof(FILTER));
-    }
+        pEffect->writeIndex = 0;
+        pEffect->pDelTapL = (double*)malloc(sizeof(double) * DELAY_TAPS);
+        pEffect->pDelTapR = (double*)malloc(sizeof(double) * DELAY_TAPS);
+        memset(pEffect->pDelTapL, 0, sizeof(double) * DELAY_TAPS);
+        memset(pEffect->pDelTapR, 0, sizeof(double) * DELAY_TAPS);
 
-    return ppCh;
+        // initialize chorus
+        pEffect->choLfoU = 0.505 + 0.495;
+        pEffect->choLfoV = 0.505 + 0.495 * -0.5;
+        pEffect->choLfoW = 0.505 + 0.495 * -0.5;
+        pEffect->choPanUL = cos(0.5 * PI * 0 / 3.0);
+        pEffect->choPanUR = sin(0.5 * PI * 0 / 3.0);
+        pEffect->choPanVL = cos(0.5 * PI * 1 / 3.0);
+        pEffect->choPanVR = sin(0.5 * PI * 1 / 3.0);
+        pEffect->choPanWL = cos(0.5 * PI * 2 / 3.0);
+        pEffect->choPanWR = sin(0.5 * PI * 2 / 3.0);
+
+        // initialize filter
+        memset(&pEffect->filter, 0, sizeof(FILTER));
+    }
 }
 
-void disposeChannels(CHANNEL_VALUE** ppCh) {
-    if (NULL == ppCh) {
+void effect_dispose(SYSTEM_VALUE* pSystemValue) {
+    auto ppEffect = pSystemValue->ppEffect;
+    if (NULL == ppEffect) {
         return;
     }
-    uint channels = ppCh[0]->pSystemValue->channelCount;
-    for (uint i = 0; i < channels; ++i) {
-        free(ppCh[i]->pWave);
-        free(ppCh[i]->pParam);
-        free(ppCh[i]->pDelTapL);
-        free(ppCh[i]->pDelTapR);
-        free(ppCh[i]);
+    for (int c = 0; c < CHANNEL_COUNT; c++) {
+        free(ppEffect[c]->pOutput);
+        free(ppEffect[c]->pParam);
+        free(ppEffect[c]->pDelTapL);
+        free(ppEffect[c]->pDelTapR);
+        free(ppEffect[c]);
     }
-    free(ppCh);
+    free(pSystemValue->ppEffect);
+    pSystemValue->ppEffect = NULL;
 }
 
-/******************************************************************************/
-inline void effect(CHANNEL_VALUE* pCh, double* waveL, double* waveR) {
-    auto pParam = pCh->pParam;
-    auto pTapL = pCh->pDelTapL;
-    auto pTapR = pCh->pDelTapR;
-    pCh->writeIndex++;
-    if (DELAY_TAPS <= pCh->writeIndex) {
-        pCh->writeIndex = 0;
+void effect(EFFECT* pEffect, double* waveL, double* waveR) {
+    auto pParam = pEffect->pParam;
+    auto pDelayTapL = pEffect->pDelTapL;
+    auto pDelayTapR = pEffect->pDelTapR;
+    pEffect->writeIndex++;
+    if (DELAY_TAPS <= pEffect->writeIndex) {
+        pEffect->writeIndex = 0;
     }
+
     /*** output delay ***/
     {
-        int delayIndex = pCh->writeIndex - (int)(pParam->delayTime * pCh->pSystemValue->sampleRate);
+        int delayIndex = pEffect->writeIndex - (int)(pParam->delayTime * pEffect->pSystemValue->sampleRate);
         if (delayIndex < 0) {
             delayIndex += DELAY_TAPS;
         }
-        double delayL = pParam->delaySend * pTapL[delayIndex];
-        double delayR = pParam->delaySend * pTapR[delayIndex];
+        double delayL = pParam->delaySend * pDelayTapL[delayIndex];
+        double delayR = pParam->delaySend * pDelayTapR[delayIndex];
         *waveL += (delayL * (1.0 - pParam->delayCross) + delayR * pParam->delayCross);
         *waveR += (delayR * (1.0 - pParam->delayCross) + delayL * pParam->delayCross);
-        pTapL[pCh->writeIndex] = *waveL;
-        pTapR[pCh->writeIndex] = *waveR;
+        pDelayTapL[pEffect->writeIndex] = *waveL;
+        pDelayTapR[pEffect->writeIndex] = *waveR;
     }
+
     /*** output chorus ***/
     {
-        double depth = pCh->pSystemValue->sampleRate * pParam->chorusDepth;
-        double posU = pCh->writeIndex - pCh->choLfoU * depth;
-        double posV = pCh->writeIndex - pCh->choLfoV * depth;
-        double posW = pCh->writeIndex - pCh->choLfoW * depth;
+        double depth = pEffect->pSystemValue->sampleRate * pParam->chorusDepth;
+        double posU = pEffect->writeIndex - pEffect->choLfoU * depth;
+        double posV = pEffect->writeIndex - pEffect->choLfoV * depth;
+        double posW = pEffect->writeIndex - pEffect->choLfoW * depth;
         int idxU = (int)posU;
         int idxV = (int)posV;
         int idxW = (int)posW;
@@ -121,39 +125,41 @@ inline void effect(CHANNEL_VALUE* pCh, double* waveL, double* waveR) {
         double chorusL = 0.0;
         double chorusR = 0.0;
         if (idxU == 0) {
-            chorusL += pCh->choPanUL * (pTapL[DELAY_TAPS - 1] * (1.0 - dtU) + pTapL[idxU] * dtU);
-            chorusR += pCh->choPanUR * (pTapR[DELAY_TAPS - 1] * (1.0 - dtU) + pTapR[idxU] * dtU);
+            chorusL += pEffect->choPanUL * (pDelayTapL[DELAY_TAPS - 1] * (1.0 - dtU) + pDelayTapL[idxU] * dtU);
+            chorusR += pEffect->choPanUR * (pDelayTapR[DELAY_TAPS - 1] * (1.0 - dtU) + pDelayTapR[idxU] * dtU);
         } else {
-            chorusL += pCh->choPanUL * (pTapL[idxU - 1] * (1.0 - dtU) + pTapL[idxU] * dtU);
-            chorusR += pCh->choPanUR * (pTapR[idxU - 1] * (1.0 - dtU) + pTapR[idxU] * dtU);
+            chorusL += pEffect->choPanUL * (pDelayTapL[idxU - 1] * (1.0 - dtU) + pDelayTapL[idxU] * dtU);
+            chorusR += pEffect->choPanUR * (pDelayTapR[idxU - 1] * (1.0 - dtU) + pDelayTapR[idxU] * dtU);
         }
         if (idxV == 0) {
-            chorusL += pCh->choPanVL * (pTapL[DELAY_TAPS - 1] * (1.0 - dtV) + pTapL[idxV] * dtV);
-            chorusR += pCh->choPanVR * (pTapR[DELAY_TAPS - 1] * (1.0 - dtV) + pTapR[idxV] * dtV);
+            chorusL += pEffect->choPanVL * (pDelayTapL[DELAY_TAPS - 1] * (1.0 - dtV) + pDelayTapL[idxV] * dtV);
+            chorusR += pEffect->choPanVR * (pDelayTapR[DELAY_TAPS - 1] * (1.0 - dtV) + pDelayTapR[idxV] * dtV);
         } else {
-            chorusL += pCh->choPanVL * (pTapL[idxV - 1] * (1.0 - dtV) + pTapL[idxV] * dtV);
-            chorusR += pCh->choPanVR * (pTapR[idxV - 1] * (1.0 - dtV) + pTapR[idxV] * dtV);
+            chorusL += pEffect->choPanVL * (pDelayTapL[idxV - 1] * (1.0 - dtV) + pDelayTapL[idxV] * dtV);
+            chorusR += pEffect->choPanVR * (pDelayTapR[idxV - 1] * (1.0 - dtV) + pDelayTapR[idxV] * dtV);
         }
         if (idxW == 0) {
-            chorusL += pCh->choPanWL * (pTapL[DELAY_TAPS - 1] * (1.0 - dtW) + pTapL[idxW] * dtW);
-            chorusR += pCh->choPanWR * (pTapR[DELAY_TAPS - 1] * (1.0 - dtW) + pTapR[idxW] * dtW);
+            chorusL += pEffect->choPanWL * (pDelayTapL[DELAY_TAPS - 1] * (1.0 - dtW) + pDelayTapL[idxW] * dtW);
+            chorusR += pEffect->choPanWR * (pDelayTapR[DELAY_TAPS - 1] * (1.0 - dtW) + pDelayTapR[idxW] * dtW);
         } else {
-            chorusL += pCh->choPanWL * (pTapL[idxW - 1] * (1.0 - dtW) + pTapL[idxW] * dtW);
-            chorusR += pCh->choPanWR * (pTapR[idxW - 1] * (1.0 - dtW) + pTapR[idxW] * dtW);
+            chorusL += pEffect->choPanWL * (pDelayTapL[idxW - 1] * (1.0 - dtW) + pDelayTapL[idxW] * dtW);
+            chorusR += pEffect->choPanWR * (pDelayTapR[idxW - 1] * (1.0 - dtW) + pDelayTapR[idxW] * dtW);
         }
         *waveL += chorusL * pParam->chorusSend / 3.0;
         *waveR += chorusR * pParam->chorusSend / 3.0;
     }
+
     /*** update lfo ***/
-    double lfoDelta = PI2 * INV_SQRT3 * pParam->chorusRate * pCh->pSystemValue->deltaTime;
-    pCh->choLfoU += (pCh->choLfoV - pCh->choLfoW) * lfoDelta;
-    pCh->choLfoV += (pCh->choLfoW - pCh->choLfoU) * lfoDelta;
-    pCh->choLfoW += (pCh->choLfoU - pCh->choLfoV) * lfoDelta;
+    double lfoDelta = PI2 * INV_SQRT3 * pParam->chorusRate * pEffect->pSystemValue->deltaTime;
+    pEffect->choLfoU += (pEffect->choLfoV - pEffect->choLfoW) * lfoDelta;
+    pEffect->choLfoV += (pEffect->choLfoW - pEffect->choLfoU) * lfoDelta;
+    pEffect->choLfoW += (pEffect->choLfoU - pEffect->choLfoV) * lfoDelta;
+
     /*** next step ***/
-    double transitionDelta = pCh->pSystemValue->deltaTime * VALUE_TRANSITION_SPEED;
-    pCh->amp += (pParam->amp - pCh->amp) * transitionDelta;
-    pCh->panL += (pParam->panLeft - pCh->panL) * transitionDelta;
-    pCh->panR += (pParam->panRight - pCh->panR) * transitionDelta;
-    pCh->filter.cut += (pParam->cutoff - pCh->filter.cut) * transitionDelta;
-    pCh->filter.res += (pParam->resonance - pCh->filter.res) * transitionDelta;
+    double transitionDelta = pEffect->pSystemValue->deltaTime * VALUE_TRANSITION_SPEED;
+    pEffect->amp += (pParam->amp - pEffect->amp) * transitionDelta;
+    pEffect->panL += (pParam->panLeft - pEffect->panL) * transitionDelta;
+    pEffect->panR += (pParam->panRight - pEffect->panR) * transitionDelta;
+    pEffect->filter.cut += (pParam->cutoff - pEffect->filter.cut) * transitionDelta;
+    pEffect->filter.res += (pParam->resonance - pEffect->filter.res) * transitionDelta;
 }
