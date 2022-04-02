@@ -69,8 +69,16 @@ void effect_dispose(SYSTEM_VALUE* pSystemValue) {
     pSystemValue->ppEffect = NULL;
 }
 
-void effect(EFFECT* pEffect, double* waveL, double* waveR) {
+void effect(EFFECT* pEffect, double *pInput, double* pOutputL, double* pOutputR) {
     auto pParam = pEffect->pParam;
+
+    /*** filter ***/
+    filter_lpf(&pEffect->filter, *pInput * pEffect->amp);
+
+    /*** pan ***/
+    *pOutputL = pEffect->filter.a10 * pEffect->panL;
+    *pOutputR = pEffect->filter.a10 * pEffect->panR;
+
     auto pDelayTapL = pEffect->pDelTapL;
     auto pDelayTapR = pEffect->pDelTapR;
     pEffect->writeIndex++;
@@ -86,10 +94,10 @@ void effect(EFFECT* pEffect, double* waveL, double* waveR) {
         }
         double delayL = pParam->delaySend * pDelayTapL[delayIndex];
         double delayR = pParam->delaySend * pDelayTapR[delayIndex];
-        *waveL += (delayL * (1.0 - pParam->delayCross) + delayR * pParam->delayCross);
-        *waveR += (delayR * (1.0 - pParam->delayCross) + delayL * pParam->delayCross);
-        pDelayTapL[pEffect->writeIndex] = *waveL;
-        pDelayTapR[pEffect->writeIndex] = *waveR;
+        *pOutputL += (delayL * (1.0 - pParam->delayCross) + delayR * pParam->delayCross);
+        *pOutputR += (delayR * (1.0 - pParam->delayCross) + delayL * pParam->delayCross);
+        pDelayTapL[pEffect->writeIndex] = *pOutputL;
+        pDelayTapR[pEffect->writeIndex] = *pOutputR;
     }
 
     /*** output chorus ***/
@@ -145,8 +153,8 @@ void effect(EFFECT* pEffect, double* waveL, double* waveR) {
             chorusL += pEffect->choPanWL * (pDelayTapL[idxW - 1] * (1.0 - dtW) + pDelayTapL[idxW] * dtW);
             chorusR += pEffect->choPanWR * (pDelayTapR[idxW - 1] * (1.0 - dtW) + pDelayTapR[idxW] * dtW);
         }
-        *waveL += chorusL * pParam->chorusSend / 3.0;
-        *waveR += chorusR * pParam->chorusSend / 3.0;
+        *pOutputL += chorusL * pParam->chorusSend / 3.0;
+        *pOutputR += chorusR * pParam->chorusSend / 3.0;
     }
 
     /*** update lfo ***/

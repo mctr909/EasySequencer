@@ -1,5 +1,4 @@
 #include "wave_out.h"
-#include "filter.h"
 #include "sampler.h"
 #include "effect.h"
 #include "channel.h"
@@ -147,17 +146,13 @@ void write16(LPSTR pData) {
     setSampler();
     for (int c = 0; c < CHANNEL_COUNT; c++) {
         auto pEffect = gSysValue.ppEffect[c];
-        auto inputBuff = pEffect->pOutput;
-        auto inputBuffTerm = inputBuff + pEffect->pSystemValue->bufferLength;
+        auto pInputBuff = pEffect->pOutput;
+        auto pInputBuffTerm = pInputBuff + pEffect->pSystemValue->bufferLength;
         auto pBuff = (short*)pData;
-        for (; inputBuff < inputBuffTerm; inputBuff++, pBuff += 2) {
-            // filter
-            filter_lpf(&pEffect->filter, *inputBuff * pEffect->amp);
-            // pan
-            double tempL = pEffect->filter.a10 * pEffect->panL;
-            double tempR = pEffect->filter.a10 * pEffect->panR;
+        for (; pInputBuff < pInputBuffTerm; pInputBuff++, pBuff += 2) {
+            double tempL, tempR;
             // effect
-            effect(pEffect, &tempL, &tempR);
+            effect(pEffect, pInputBuff, &tempL, &tempR);
             // output
             tempL *= 32767.0;
             tempR *= 32767.0;
@@ -169,7 +164,7 @@ void write16(LPSTR pData) {
             if (tempR < -32767.0) tempR = -32767.0;
             *(pBuff + 0) = (short)tempL;
             *(pBuff + 1) = (short)tempR;
-            *inputBuff = 0.0;
+            *pInputBuff = 0.0;
         }
     }
 }
@@ -178,17 +173,13 @@ void write24(LPSTR pData) {
     setSampler();
     for (int c = 0; c < CHANNEL_COUNT; c++) {
         auto pEffect = gSysValue.ppEffect[c];
-        auto inputBuff = pEffect->pOutput;
-        auto inputBuffTerm = inputBuff + pEffect->pSystemValue->bufferLength;
+        auto pInputBuff = pEffect->pOutput;
+        auto pInputBuffTerm = pInputBuff + pEffect->pSystemValue->bufferLength;
         auto pBuff = (int24*)pData;
-        for (; inputBuff < inputBuffTerm; inputBuff++, pBuff += 2) {
-            // filter
-            filter_lpf(&pEffect->filter, *inputBuff * pEffect->amp);
-            // pan
-            double tempL = pEffect->filter.a10 * pEffect->panL;
-            double tempR = pEffect->filter.a10 * pEffect->panR;
+        for (; pInputBuff < pInputBuffTerm; pInputBuff++, pBuff += 2) {
+            double tempL, tempR;
             // effect
-            effect(pEffect, &tempL, &tempR);
+            effect(pEffect, pInputBuff, &tempL, &tempR);
             // output
             tempL += fromInt24(pBuff + 0);
             tempR += fromInt24(pBuff + 1);
@@ -198,7 +189,7 @@ void write24(LPSTR pData) {
             if (tempR < -1.0) tempR = -1.0;
             setInt24(pBuff + 0, tempL);
             setInt24(pBuff + 1, tempR);
-            *inputBuff = 0.0;
+            *pInputBuff = 0.0;
         }
     }
 }
@@ -207,17 +198,13 @@ void write32(LPSTR pData) {
     setSampler();
     for (int c = 0; c < CHANNEL_COUNT; c++) {
         auto pEffect = gSysValue.ppEffect[c];
-        auto inputBuff = pEffect->pOutput;
-        auto inputBuffTerm = inputBuff + pEffect->pSystemValue->bufferLength;
+        auto pInputBuff = pEffect->pOutput;
+        auto pInputBuffTerm = pInputBuff + pEffect->pSystemValue->bufferLength;
         auto pBuff = (float*)pData;
-        for (; inputBuff < inputBuffTerm; inputBuff++, pBuff += 2) {
-            // filter
-            filter_lpf(&pEffect->filter, *inputBuff * pEffect->amp);
-            // pan
-            double tempL = pEffect->filter.a10 * pEffect->panL;
-            double tempR = pEffect->filter.a10 * pEffect->panR;
+        for (; pInputBuff < pInputBuffTerm; pInputBuff++, pBuff += 2) {
+            double tempL, tempR;
             // effect
-            effect(pEffect, &tempL, &tempR);
+            effect(pEffect, pInputBuff, &tempL, &tempR);
             // output
             tempL += *(pBuff + 0);
             tempR += *(pBuff + 1);
@@ -227,7 +214,7 @@ void write32(LPSTR pData) {
             if (tempR < -1.0) tempR = -1.0;
             *(pBuff + 0) = (float)tempL;
             *(pBuff + 1) = (float)tempR;
-            *inputBuff = 0.0;
+            *pInputBuff = 0.0;
         }
     }
 }

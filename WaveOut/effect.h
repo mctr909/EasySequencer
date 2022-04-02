@@ -53,7 +53,7 @@ extern "C" {
 #endif
     void effect_create(SYSTEM_VALUE* pSystemValue);
     void effect_dispose(SYSTEM_VALUE* pSystemValue);
-    void effect(EFFECT* pEffect, double* waveL, double* waveR);
+    void effect(EFFECT* pEffect, double *pInput, double* pOutputL, double* pOutputR);
 #ifdef __cplusplus
 }
 #endif
