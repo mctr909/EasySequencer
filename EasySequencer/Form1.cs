@@ -21,7 +21,6 @@ namespace EasySequencer {
         }
 
         private void Form1_Load(object sender, EventArgs e) {
-            //mDlsFilePath = Path.GetDirectoryName(Application.ExecutablePath) + "\\AnyConv.com__Equinox_Grand_Pianos.sf2";
             //mDlsFilePath = Path.GetDirectoryName(Application.ExecutablePath) + "\\gm.sf2";
             mDlsFilePath = Path.GetDirectoryName(Application.ExecutablePath) + "\\gm.dls";
             mMidiSender = new Sender(mDlsFilePath);

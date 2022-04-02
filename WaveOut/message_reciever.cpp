@@ -8,7 +8,7 @@ Channel **gppChannels = NULL;
 CHANNEL_PARAM **gppChParam = NULL;
 
 /******************************************************************************/
-void message_createChannels(SYSTEM_VALUE *pSystemValue) {
+void WINAPI message_createChannels(SYSTEM_VALUE *pSystemValue) {
     if (NULL != gppChannels) {
         for (int c = 0; c < CHANNEL_COUNT; c++) {
             delete gppChannels[c];
@@ -33,11 +33,11 @@ void message_createChannels(SYSTEM_VALUE *pSystemValue) {
 }
 
 /******************************************************************************/
-CHANNEL_PARAM** message_getChannelParamPtr() {
+CHANNEL_PARAM** WINAPI message_getChannelParamPtr() {
     return gppChParam;
 }
 
-void message_send(LPBYTE msg) {
+void WINAPI message_send(LPBYTE msg) {
     auto type = (E_EVENT_TYPE)(*msg & 0xF0);
     auto ch = *msg & 0x0F;
     switch (type) {
