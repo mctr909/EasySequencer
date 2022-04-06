@@ -1,9 +1,9 @@
 #include "wave_out.h"
-#include "sampler.h"
-#include "effect.h"
-#include "channel.h"
-#include "inst_list.h"
 #include "message_reciever.h"
+#include "channel.h"
+#include "inst/inst_list.h"
+#include "synth/sampler.h"
+#include "synth/effect.h"
 
 #include <stdio.h>
 #include <mmsystem.h>
@@ -111,7 +111,7 @@ inline void runSampler() {
     int activeCount = 0;
     for (int s = 0; s < SAMPLER_COUNT; s++) {
         auto pSmpl = gSysValue.ppSampler[s];
-        if (pSmpl->state < E_KEY_STATE::PURGE) {
+        if (pSmpl->state < E_SAMPLER_STATE::PURGE) {
             continue;
         }
         if (sampler(&gSysValue, pSmpl)) {

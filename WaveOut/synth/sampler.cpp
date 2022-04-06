@@ -1,6 +1,6 @@
 #include "sampler.h"
 #include "effect.h"
-#include "channel.h"
+#include "../inst/inst_list.h"
 
 /******************************************************************************/
 #define PURGE_THRESHOLD 0.0005
@@ -33,7 +33,7 @@ Bool sampler(SYSTEM_VALUE* pSystemValue, INST_SAMPLER* pSmpl) {
                 if (pWaveInfo->loopEnable) {
                     pSmpl->index -= pWaveInfo->loopLength;
                 } else {
-                    pSmpl->state = E_KEY_STATE::FREE;
+                    pSmpl->state = E_SAMPLER_STATE::FREE;
                     return false;
                 }
             }
@@ -46,20 +46,20 @@ Bool sampler(SYSTEM_VALUE* pSystemValue, INST_SAMPLER* pSmpl) {
         // generate envelope
         //*******************************
         switch (pSmpl->state) {
-        case E_KEY_STATE::PRESS:
+        case E_SAMPLER_STATE::PRESS:
             if (pSmpl->time <= pEnv->ampH) {
                 pSmpl->egAmp += (1.0 - pSmpl->egAmp) * pEnv->ampA;
             } else {
                 pSmpl->egAmp += (pEnv->ampS - pSmpl->egAmp) * pEnv->ampD;
             }
             break;
-        case E_KEY_STATE::RELEASE:
+        case E_SAMPLER_STATE::RELEASE:
             pSmpl->egAmp -= pSmpl->egAmp * pEnv->ampR;
             break;
-        case E_KEY_STATE::HOLD:
+        case E_SAMPLER_STATE::HOLD:
             pSmpl->egAmp -= pSmpl->egAmp * pEffectParam->holdDelta;
             break;
-        case E_KEY_STATE::PURGE:
+        case E_SAMPLER_STATE::PURGE:
             pSmpl->egAmp -= pSmpl->egAmp * pSystemValue->deltaTime * PURGE_SPEED;
             break;
         }
@@ -69,7 +69,7 @@ Bool sampler(SYSTEM_VALUE* pSystemValue, INST_SAMPLER* pSmpl) {
         // free condition
         //*******************************
         if (pEnv->ampH < pSmpl->time && pSmpl->egAmp < PURGE_THRESHOLD) {
-            pSmpl->state = E_KEY_STATE::FREE;
+            pSmpl->state = E_SAMPLER_STATE::FREE;
             return false;
         }
     }

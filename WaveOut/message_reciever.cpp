@@ -1,6 +1,6 @@
 #include "message_reciever.h"
-#include "sampler.h"
 #include "channel.h"
+#include "synth/sampler.h"
 #include <stdio.h>
 
 /******************************************************************************/

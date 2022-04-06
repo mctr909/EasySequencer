@@ -1,7 +1,10 @@
-#include <math.h>
-#include "channel.h"
 #include "sampler.h"
 #include "effect.h"
+#include "../channel_const.h"
+
+#include <stdlib.h>
+#include <string.h>
+#include <math.h>
 
 /******************************************************************************/
 #define DELAY_TAPS             1048576

@@ -1,6 +1,6 @@
 #include "inst_list.h"
 #include "dls.h"
-#include "channel.h"
+#include "../channel.h"
 
 /******************************************************************************/
 #define INVALID_INDEX 0xFFFFFFFF
@@ -97,26 +97,26 @@ WAVDAT *InstList::GetWaveTablePtr() {
 }
 
 void InstList::SetSampler(INST_INFO *pInstInfo, byte channelNum, byte noteNum, byte velocity) {
-    for (uint s = 0; s < SAMPLER_COUNT; s++) {
-        auto pSmpl = mppSampler[s];
+    for (uint idxS = 0; idxS < SAMPLER_COUNT; idxS++) {
+        auto pSmpl = mppSampler[idxS];
         if (pSmpl->channelNum == channelNum && pSmpl->noteNum == noteNum &&
-            E_KEY_STATE::PRESS <= pSmpl->state) {
-            pSmpl->state = E_KEY_STATE::PURGE;
+            E_SAMPLER_STATE::PRESS <= pSmpl->state) {
+            pSmpl->state = E_SAMPLER_STATE::PURGE;
         }
     }
     auto ppLayer = mppLayerList + pInstInfo->layerIndex;
-    for (uint l = 0; l < pInstInfo->layerCount; l++) {
-        auto pLayer = ppLayer[l];
+    for (uint idxL = 0; idxL < pInstInfo->layerCount; idxL++) {
+        auto pLayer = ppLayer[idxL];
         auto ppRegion = mppRegionList + pLayer->regionIndex;
-        for (uint r = 0; r < pLayer->regionCount; r++) {
-            auto pRegion = ppRegion[r];
+        for (uint idxR = 0; idxR < pLayer->regionCount; idxR++) {
+            auto pRegion = ppRegion[idxR];
             if (pRegion->keyLow <= noteNum && noteNum <= pRegion->keyHigh &&
                 pRegion->velocityLow <= velocity && velocity <= pRegion->velocityHigh) {
                 auto pWave = mppWaveList[pRegion->waveIndex];
-                for (uint s = 0; s < SAMPLER_COUNT; s++) {
-                    auto pSmpl = mppSampler[s];
-                    if (E_KEY_STATE::FREE == pSmpl->state) {
-                        pSmpl->state = E_KEY_STATE::RESERVED;
+                for (uint idxS = 0; idxS < SAMPLER_COUNT; idxS++) {
+                    auto pSmpl = mppSampler[idxS];
+                    if (E_SAMPLER_STATE::FREE == pSmpl->state) {
+                        pSmpl->state = E_SAMPLER_STATE::RESERVED;
                         pSmpl->channelNum = channelNum;
                         pSmpl->noteNum = noteNum;
                         pSmpl->index = 0.0;
@@ -179,7 +179,7 @@ void InstList::SetSampler(INST_INFO *pInstInfo, byte channelNum, byte noteNum, b
                         }
 
                         pSmpl->pitch *= pWave->sampleRate;
-                        pSmpl->state = E_KEY_STATE::PRESS;
+                        pSmpl->state = E_SAMPLER_STATE::PRESS;
                         break;
                     }
                 }
@@ -193,17 +193,17 @@ void InstList::SetSampler(INST_INFO *pInstInfo, byte channelNum, byte noteNum, b
 void InstList::loadDls(LPWSTR path) {
     auto cDls = new DLS(path);
 
-    /* count layer, region, art */
+    /* count layer/region/art */
     mWaveCount = cDls->WaveCount;
     mInstList.count = cDls->InstCount;
-    for (uint i = 0; i < mInstList.count; i++) {
-        auto cDlsInst = cDls->cLins->pcInst[i];
+    for (uint idxI = 0; idxI < mInstList.count; idxI++) {
+        auto cDlsInst = cDls->cLins->pcInst[idxI];
         if (NULL != cDlsInst->cLart) {
             mArtCount++;
         }
         uint rgnLayer = 0;
-        for (int r = 0; r < cDlsInst->cLrgn->Count; r++) {
-            auto cDlsRgn = cDlsInst->cLrgn->pcRegion[r];
+        for (int idxR = 0; idxR < cDlsInst->cLrgn->Count; idxR++) {
+            auto cDlsRgn = cDlsInst->cLrgn->pcRegion[idxR];
             if (NULL != cDlsRgn->cLart) {
                 mArtCount++;
             }
@@ -218,10 +218,7 @@ void InstList::loadDls(LPWSTR path) {
         mLayerCount += rgnLayer;
     }
 
-    uint layerIndex = 0;
-    uint regionIndex = 0;
-    uint artIndex = 0;
-    uint waveIndex = cDls->WaveCount;
+    /* alocate inst/layer/region/art/wave */
     mInstList.ppData = (INST_INFO**)malloc(sizeof(INST_INFO*) * mInstList.count);
     memset(mInstList.ppData, 0, sizeof(INST_INFO**));
     mppLayerList = (INST_LAYER**)malloc(sizeof(INST_LAYER*) * mLayerCount);
@@ -236,14 +233,18 @@ void InstList::loadDls(LPWSTR path) {
     /* load wave */
     loadDlsWave(cDls);
 
-    /* load inst, layer, region, art */
-    for (uint i = 0; i < mInstList.count; i++) {
-        auto cDlsInst = cDls->cLins->pcInst[i];
+    /* load inst/layer/region/art */
+    uint layerIndex = 0;
+    uint regionIndex = 0;
+    uint artIndex = 0;
+    uint waveIndex = cDls->WaveCount;
+    for (uint idxI = 0; idxI < mInstList.count; idxI++) {
+        auto cDlsInst = cDls->cLins->pcInst[idxI];
 
         INST_INFO inst;
-        mInstList.ppData[i] = (INST_INFO*)malloc(sizeof(INST_INFO));
-        memcpy_s(mInstList.ppData[i], sizeof(INST_INFO), &inst, sizeof(INST_INFO));
-        auto pInst = mInstList.ppData[i];
+        mInstList.ppData[idxI] = (INST_INFO*)malloc(sizeof(INST_INFO));
+        memcpy_s(mInstList.ppData[idxI], sizeof(INST_INFO), &inst, sizeof(INST_INFO));
+        auto pInst = mInstList.ppData[idxI];
 
         pInst->id.isDrum = cDlsInst->Header.bankFlags >= 0x80 ? 1 : 0;
         pInst->id.bankMSB = cDlsInst->Header.bankMSB;
@@ -265,12 +266,12 @@ void InstList::loadDls(LPWSTR path) {
         }
 
         INST_LAYER *pLayer = NULL;
-        for (int r = 0; r < cDlsInst->cLrgn->Count; r++) {
+        for (int idxR = 0; idxR < cDlsInst->cLrgn->Count; idxR++) {
             INST_REGION region;
             mppRegionList[regionIndex] = (INST_REGION*)malloc(sizeof(INST_REGION));
             memcpy_s(mppRegionList[regionIndex], sizeof(INST_REGION), &region, sizeof(INST_REGION));
             auto pRegion = mppRegionList[regionIndex];
-            auto cDlsRgn = cDlsInst->cLrgn->pcRegion[r];
+            auto cDlsRgn = cDlsInst->cLrgn->pcRegion[idxR];
             pRegion->keyLow = (byte)cDlsRgn->Header.keyLow;
             pRegion->keyHigh = (byte)cDlsRgn->Header.keyHigh;
             pRegion->velocityLow = (byte)cDlsRgn->Header.velocityLow;
@@ -322,10 +323,10 @@ void InstList::loadDlsWave(DLS *cDls) {
     FILE *fpWave = NULL;
     _wfopen_s(&fpWave, mWaveTablePath, TEXT("wb"));
     uint wavePos = 0;
-    for (int w = 0; w < cDls->WaveCount; w++) {
-        mppWaveList[w] = (INST_WAVE*)malloc(sizeof(INST_WAVE));
-        auto pWave = mppWaveList[w];
-        auto cDlsWave = cDls->cWvpl->pcWave[w];
+    for (int idxW = 0; idxW < cDls->WaveCount; idxW++) {
+        mppWaveList[idxW] = (INST_WAVE*)malloc(sizeof(INST_WAVE));
+        auto pWave = mppWaveList[idxW];
+        auto cDlsWave = cDls->cWvpl->pcWave[idxW];
 
         pWave->offset = wavePos;
         pWave->sampleRate = cDlsWave->Format.sampleRate;
@@ -382,8 +383,8 @@ void InstList::loadDlsArt(LART *cLart, INST_ART *pArt) {
     auto ampA = 0.0;
     auto cutoffA = 0.0;
 
-    for (int c = 0; c < cLart->cArt->Count; c++) {
-        auto pConn = cLart->cArt->ppConnection[c];
+    for (int idxC = 0; idxC < cLart->cArt->Count; idxC++) {
+        auto pConn = cLart->cArt->ppConnection[idxC];
         switch (pConn->destination) {
         case E_DLS_DST::PAN:
             pArt->pan = (short)pConn->getValue();

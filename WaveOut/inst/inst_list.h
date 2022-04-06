@@ -1,11 +1,11 @@
 #pragma once
-#include "type.h"
+#include "../type.h"
 #include <windows.h>
 #include <stdio.h>
 
 #define SAMPLER_COUNT 64
 
-enum struct E_KEY_STATE : byte {
+enum struct E_SAMPLER_STATE : byte {
     FREE,
     RESERVED,
     PURGE,
@@ -110,7 +110,7 @@ typedef struct INST_WAVE {
 
 #pragma pack(4)
 typedef struct INST_SAMPLER {
-    E_KEY_STATE state = E_KEY_STATE::FREE;
+    E_SAMPLER_STATE state = E_SAMPLER_STATE::FREE;
     byte channelNum = 0;
     byte noteNum = 0;
     byte reserved1 = 0;

@@ -1,17 +1,18 @@
 #pragma once
-#include "channel_const.h"
-#include "inst_list.h"
 #include <windows.h>
+#include "channel_const.h"
+#include "inst/inst_list.h"
 
 /******************************************************************************/
 typedef struct SYSTEM_VALUE SYSTEM_VALUE;
 typedef struct EFFECT_PARAM EFFECT_PARAM;
 typedef struct INST_ID INST_ID;
+typedef struct INST_INFO INST_INFO;
 
 /******************************************************************************/
 #pragma pack(push, 1)
 typedef struct CHANNEL_PARAM {
-    E_KEY_STATE_M KeyBoard[128] = { };
+    E_KEY_STATE KeyBoard[128] = { };
     INST_ID InstId;
     byte* Name;
     byte Enable;

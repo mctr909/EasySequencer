@@ -1,7 +1,7 @@
-#include <math.h>
-#include "sampler.h"
-#include "effect.h"
 #include "channel.h"
+#include "synth/sampler.h"
+#include "synth/effect.h"
+#include <math.h>
 
 Channel::Channel(SYSTEM_VALUE *pSystemValue, int number) {
     mpSystemValue = pSystemValue;
@@ -60,21 +60,21 @@ void
 Channel::NoteOff(byte noteNumber) {
     for (int s = 0; s < SAMPLER_COUNT; ++s) {
         auto pSmpl = mpSystemValue->ppSampler[s];
-        if (pSmpl->state < E_KEY_STATE::PRESS) {
+        if (pSmpl->state < E_SAMPLER_STATE::PRESS) {
             continue;
         }
         if (pSmpl->channelNum == Number && pSmpl->noteNum == noteNumber) {
             if (Param.Hld < 64) {
-                pSmpl->state = E_KEY_STATE::RELEASE;
+                pSmpl->state = E_SAMPLER_STATE::RELEASE;
             } else {
-                pSmpl->state = E_KEY_STATE::HOLD;
+                pSmpl->state = E_SAMPLER_STATE::HOLD;
             }
         }
     }
     if (Param.Hld < 64) {
-        Param.KeyBoard[noteNumber] = E_KEY_STATE_M::FREE;
+        Param.KeyBoard[noteNumber] = E_KEY_STATE::FREE;
     } else {
-        Param.KeyBoard[noteNumber] = E_KEY_STATE_M::HOLD;
+        Param.KeyBoard[noteNumber] = E_KEY_STATE::HOLD;
     }
 }
 
@@ -84,7 +84,7 @@ Channel::NoteOn(byte noteNumber, byte velocity) {
         NoteOff(noteNumber);
         return;
     }
-    Param.KeyBoard[noteNumber] = E_KEY_STATE_M::PRESS;
+    Param.KeyBoard[noteNumber] = E_KEY_STATE::PRESS;
     mpSystemValue->cInstList->SetSampler(mpInst, Number, noteNumber, velocity);
 }
 
@@ -211,13 +211,13 @@ Channel::setHld(byte value) {
     if (value < 64) {
         for (int s = 0; s < SAMPLER_COUNT; ++s) {
             auto pSmpl = mpSystemValue->ppSampler[s];
-            if (E_KEY_STATE::HOLD == pSmpl->state) {
-                pSmpl->state = E_KEY_STATE::RELEASE;
+            if (E_SAMPLER_STATE::HOLD == pSmpl->state) {
+                pSmpl->state = E_SAMPLER_STATE::RELEASE;
             }
         }
         for (int n = 0; n < 128; ++n) {
-            if (E_KEY_STATE_M::HOLD == Param.KeyBoard[n]) {
-                Param.KeyBoard[n] = E_KEY_STATE_M::FREE;
+            if (E_KEY_STATE::HOLD == Param.KeyBoard[n]) {
+                Param.KeyBoard[n] = E_KEY_STATE::FREE;
             }
         }
     }
