@@ -84,7 +84,7 @@ INST_INFO *InstList::GetInstInfo(INST_ID *id) {
             return mInstList.ppData[i];
         }
     }
-    return NULL;
+    return mInstList.ppData[0];
 }
 
 INST_SAMPLER **InstList::GetSamplerPtr() {
