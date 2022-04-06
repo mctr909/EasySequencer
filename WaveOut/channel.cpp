@@ -176,7 +176,7 @@ void
 Channel::ProgramChange(byte value) {
     Param.InstId.progNum = value;
     mpInst = mpSystemValue->cInstList->GetInstInfo(&Param.InstId);
-    Param.Name = (byte*)&mpInst->name;
+    Param.Name = (byte*)mpInst->pName;
 }
 
 void

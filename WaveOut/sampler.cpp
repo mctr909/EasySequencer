@@ -14,7 +14,7 @@ Bool sampler(SYSTEM_VALUE* pSystemValue, INST_SAMPLER* pSmpl) {
     auto pOutputTerm = pOutput + pSystemValue->bufferLength;
     auto pWaveInfo = pSmpl->pWave;
     auto pEnv = pSmpl->pEnv;
-    auto pWaveData = (short*)(pSystemValue->pWaveTable) + pWaveInfo->offset;
+    auto pWaveData = pSystemValue->pWaveTable + pWaveInfo->offset;
     long loopEnd = (long)pWaveInfo->loopBegin + pWaveInfo->loopLength;
     auto pitch = pSmpl->pitch / pSystemValue->sampleRate / OVER_SAMPLING;
 

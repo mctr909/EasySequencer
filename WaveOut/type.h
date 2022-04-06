@@ -1,4 +1,9 @@
 ﻿#pragma once
+#define true  ((Bool)1)
+#define false ((Bool)0)
+#define WAVMAX 32768.0
+
+typedef short          WAVDAT;
 typedef unsigned char  Bool;
 typedef unsigned char  byte;
 typedef signed   char  sbyte;
@@ -11,9 +16,6 @@ typedef struct {
     short msb;
 } int24;
 #pragma pack(pop)
-
-#define true  ((Bool)1)
-#define false ((Bool)0)
 
 /******************************************************************************/
 extern inline void setInt24(int24 *output, double value) {

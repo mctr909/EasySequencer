@@ -4,14 +4,12 @@
 
 /******************************************************************************/
 #define INVALID_INDEX 0xFFFFFFFF
-#define WAVMAX 32768.0
-typedef short WAVDAT;
 
 /******************************************************************************/
 InstList::InstList(LPWSTR path) {
     swprintf_s(mWaveTablePath, sizeof(mWaveTablePath) / sizeof(mWaveTablePath[0]), TEXT("%s.bin"), path);
     mppSampler = (INST_SAMPLER**)malloc(sizeof(INST_SAMPLER*) * SAMPLER_COUNT);
-    for (unsigned int i = 0; i < SAMPLER_COUNT; i++) {
+    for (uint i = 0; i < SAMPLER_COUNT; i++) {
         INST_SAMPLER smpl;
         mppSampler[i] = (INST_SAMPLER*)malloc(sizeof(INST_SAMPLER));
         memcpy_s(mppSampler[i], sizeof(INST_SAMPLER), &smpl, sizeof(INST_SAMPLER));
@@ -21,37 +19,40 @@ InstList::InstList(LPWSTR path) {
 
 InstList::~InstList() {
     if (NULL != mppSampler) {
-        for (unsigned int i = 0; i < SAMPLER_COUNT; i++) {
+        for (uint i = 0; i < SAMPLER_COUNT; i++) {
             free(mppSampler[i]);
         }
         free(mppSampler);
     }
     if (NULL != mppWaveList) {
-        for (unsigned int i = 0; i < mWaveCount; i++) {
+        for (uint i = 0; i < mWaveCount; i++) {
             free(mppWaveList[i]);
         }
         free(mppWaveList);
     }
     if (NULL != mInstList.ppData) {
-        for (unsigned int i = 0; i < mInstList.count; i++) {
+        for (uint i = 0; i < mInstList.count; i++) {
+            auto pInst = mInstList.ppData[i];
+            free(pInst->pName);
+            free(pInst->pCategory);
             free(mInstList.ppData[i]);
         }
         free(mInstList.ppData);
     }
     if (NULL != mppLayerList) {
-        for (unsigned int i = 0; i < mLayerCount; i++) {
+        for (uint i = 0; i < mLayerCount; i++) {
             free(mppLayerList[i]);
         }
         free(mppLayerList);
     }
     if (NULL != mppRegionList) {
-        for (unsigned int i = 0; i < mRegionCount; i++) {
+        for (uint i = 0; i < mRegionCount; i++) {
             free(mppRegionList[i]);
         }
         free(mppRegionList);
     }
     if (NULL != mppArtList) {
-        for (unsigned int i = 0; i < mArtCount; i++) {
+        for (uint i = 0; i < mArtCount; i++) {
             free(mppArtList[i]);
         }
         free(mppArtList);
@@ -66,7 +67,7 @@ INST_LIST *InstList::GetInstList() {
 }
 
 INST_INFO *InstList::GetInstInfo(INST_ID *id) {
-    for (unsigned int i = 0; i < mInstList.count; i++) {
+    for (uint i = 0; i < mInstList.count; i++) {
         auto listId = mInstList.ppData[i]->id;
         if (listId.isDrum == id->isDrum &&
             listId.bankMSB == id->bankMSB &&
@@ -75,7 +76,7 @@ INST_INFO *InstList::GetInstInfo(INST_ID *id) {
             return mInstList.ppData[i];
         }
     }
-    for (unsigned int i = 0; i < mInstList.count; i++) {
+    for (uint i = 0; i < mInstList.count; i++) {
         auto listId = mInstList.ppData[i]->id;
         if (listId.isDrum == id->isDrum &&
             listId.bankMSB == 0 &&
@@ -91,12 +92,12 @@ INST_SAMPLER **InstList::GetSamplerPtr() {
     return mppSampler;
 }
 
-short *InstList::GetWaveTablePtr() {
+WAVDAT *InstList::GetWaveTablePtr() {
     return mpWaveTable;
 }
 
-void InstList::SetSampler(INST_INFO *pInstInfo, unsigned char channelNum, unsigned char noteNum, unsigned char velocity) {
-    for (unsigned int s = 0; s < SAMPLER_COUNT; s++) {
+void InstList::SetSampler(INST_INFO *pInstInfo, byte channelNum, byte noteNum, byte velocity) {
+    for (uint s = 0; s < SAMPLER_COUNT; s++) {
         auto pSmpl = mppSampler[s];
         if (pSmpl->channelNum == channelNum && pSmpl->noteNum == noteNum &&
             E_KEY_STATE::PRESS <= pSmpl->state) {
@@ -104,15 +105,15 @@ void InstList::SetSampler(INST_INFO *pInstInfo, unsigned char channelNum, unsign
         }
     }
     auto ppLayer = mppLayerList + pInstInfo->layerIndex;
-    for (unsigned int l = 0; l < pInstInfo->layerCount; l++) {
+    for (uint l = 0; l < pInstInfo->layerCount; l++) {
         auto pLayer = ppLayer[l];
         auto ppRegion = mppRegionList + pLayer->regionIndex;
-        for (unsigned int r = 0; r < pLayer->regionCount; r++) {
+        for (uint r = 0; r < pLayer->regionCount; r++) {
             auto pRegion = ppRegion[r];
             if (pRegion->keyLow <= noteNum && noteNum <= pRegion->keyHigh &&
                 pRegion->velocityLow <= velocity && velocity <= pRegion->velocityHigh) {
                 auto pWave = mppWaveList[pRegion->waveIndex];
-                for (unsigned int s = 0; s < SAMPLER_COUNT; s++) {
+                for (uint s = 0; s < SAMPLER_COUNT; s++) {
                     auto pSmpl = mppSampler[s];
                     if (E_KEY_STATE::FREE == pSmpl->state) {
                         pSmpl->state = E_KEY_STATE::RESERVED;
@@ -195,12 +196,12 @@ void InstList::loadDls(LPWSTR path) {
     /* count layer, region, art */
     mWaveCount = cDls->WaveCount;
     mInstList.count = cDls->InstCount;
-    for (unsigned int i = 0; i < mInstList.count; i++) {
+    for (uint i = 0; i < mInstList.count; i++) {
         auto cDlsInst = cDls->cLins->pcInst[i];
         if (NULL != cDlsInst->cLart) {
             mArtCount++;
         }
-        unsigned int rgnLayer = 0;
+        uint rgnLayer = 0;
         for (int r = 0; r < cDlsInst->cLrgn->Count; r++) {
             auto cDlsRgn = cDlsInst->cLrgn->pcRegion[r];
             if (NULL != cDlsRgn->cLart) {
@@ -217,10 +218,10 @@ void InstList::loadDls(LPWSTR path) {
         mLayerCount += rgnLayer;
     }
 
-    unsigned int layerIndex = 0;
-    unsigned int regionIndex = 0;
-    unsigned int artIndex = 0;
-    unsigned int waveIndex = cDls->WaveCount;
+    uint layerIndex = 0;
+    uint regionIndex = 0;
+    uint artIndex = 0;
+    uint waveIndex = cDls->WaveCount;
     mInstList.ppData = (INST_INFO**)malloc(sizeof(INST_INFO*) * mInstList.count);
     memset(mInstList.ppData, 0, sizeof(INST_INFO**));
     mppLayerList = (INST_LAYER**)malloc(sizeof(INST_LAYER*) * mLayerCount);
@@ -234,14 +235,9 @@ void InstList::loadDls(LPWSTR path) {
 
     /* load wave */
     loadDlsWave(cDls);
-    mpWaveTable = (short*)malloc(mWaveTableSize);
-    FILE *fp = NULL;
-    _wfopen_s(&fp, mWaveTablePath, TEXT("rb"));
-    fread_s(mpWaveTable, mWaveTableSize, mWaveTableSize, 1, fp);
-    fclose(fp);
 
     /* load inst, layer, region, art */
-    for (unsigned int i = 0; i < mInstList.count; i++) {
+    for (uint i = 0; i < mInstList.count; i++) {
         auto cDlsInst = cDls->cLins->pcInst[i];
 
         INST_INFO inst;
@@ -254,8 +250,10 @@ void InstList::loadDls(LPWSTR path) {
         pInst->id.bankLSB = cDlsInst->Header.bankLSB;
         pInst->id.progNum = cDlsInst->Header.progNum;
         pInst->layerIndex = layerIndex;
-        memcpy_s(pInst->name, sizeof(pInst->name), cDlsInst->Name, sizeof(cDlsInst->Name));
-        memcpy_s(pInst->category, sizeof(pInst->category), cDlsInst->Category, sizeof(cDlsInst->Category));
+        pInst->pName = (char*)malloc(sizeof(cDlsInst->Name));
+        memcpy_s(pInst->pName, sizeof(cDlsInst->Name), cDlsInst->Name, sizeof(cDlsInst->Name));
+        pInst->pCategory = (char*)malloc(sizeof(cDlsInst->Category));
+        memcpy_s(pInst->pCategory, sizeof(cDlsInst->Category), cDlsInst->Category, sizeof(cDlsInst->Category));
 
         if (NULL == cDlsInst->cLart) {
             pInst->artIndex = INVALID_INDEX;
@@ -273,10 +271,10 @@ void InstList::loadDls(LPWSTR path) {
             memcpy_s(mppRegionList[regionIndex], sizeof(INST_REGION), &region, sizeof(INST_REGION));
             auto pRegion = mppRegionList[regionIndex];
             auto cDlsRgn = cDlsInst->cLrgn->pcRegion[r];
-            pRegion->keyLow = (unsigned char)cDlsRgn->Header.keyLow;
-            pRegion->keyHigh = (unsigned char)cDlsRgn->Header.keyHigh;
-            pRegion->velocityLow = (unsigned char)cDlsRgn->Header.velocityLow;
-            pRegion->velocityHigh = (unsigned char)cDlsRgn->Header.velocityHigh;
+            pRegion->keyLow = (byte)cDlsRgn->Header.keyLow;
+            pRegion->keyHigh = (byte)cDlsRgn->Header.keyHigh;
+            pRegion->velocityLow = (byte)cDlsRgn->Header.velocityLow;
+            pRegion->velocityHigh = (byte)cDlsRgn->Header.velocityHigh;
             pRegion->waveIndex = cDlsRgn->WaveLink.tableIndex;
 
             if (NULL == cDlsRgn->cLart) {
@@ -295,7 +293,7 @@ void InstList::loadDls(LPWSTR path) {
                 mppWaveList[waveIndex] = (INST_WAVE*)malloc(sizeof(INST_WAVE));
                 memcpy_s(mppWaveList[waveIndex], sizeof(INST_WAVE), &region, sizeof(INST_WAVE));
                 auto pWave = mppWaveList[waveIndex];
-                pWave->unityNote = (unsigned char)cDlsRgn->pWaveSmpl->unityNote;
+                pWave->unityNote = (byte)cDlsRgn->pWaveSmpl->unityNote;
                 pWave->pitch = cDlsRgn->pWaveSmpl->getFileTune();
                 pWave->gain = cDlsRgn->pWaveSmpl->getGain();
                 pRegion->wsmpIndex = waveIndex;
@@ -323,7 +321,7 @@ void InstList::loadDls(LPWSTR path) {
 void InstList::loadDlsWave(DLS *cDls) {
     FILE *fpWave = NULL;
     _wfopen_s(&fpWave, mWaveTablePath, TEXT("wb"));
-    unsigned int wavePos = 0;
+    uint wavePos = 0;
     for (int w = 0; w < cDls->WaveCount; w++) {
         mppWaveList[w] = (INST_WAVE*)malloc(sizeof(INST_WAVE));
         auto pWave = mppWaveList[w];
@@ -340,7 +338,7 @@ void InstList::loadDlsWave(DLS *cDls) {
             pWave->loopBegin = 0;
             pWave->loopLength = cDlsWave->DataSize * 8 / cDlsWave->Format.bits;
         }
-        pWave->unityNote = (unsigned char)cDlsWave->WaveSmpl.unityNote;
+        pWave->unityNote = (byte)cDlsWave->WaveSmpl.unityNote;
         pWave->pitch = cDlsWave->WaveSmpl.getFileTune();
         pWave->gain = cDlsWave->WaveSmpl.getGain();
 
@@ -366,8 +364,15 @@ void InstList::loadDlsWave(DLS *cDls) {
             break;
         }
     }
-    mWaveTableSize = wavePos * sizeof(WAVDAT);
     fclose(fpWave);
+
+    auto waveTableSize = wavePos * sizeof(WAVDAT);
+    mpWaveTable = (WAVDAT*)malloc(waveTableSize);
+    fpWave = NULL;
+    _wfopen_s(&fpWave, mWaveTablePath, TEXT("rb"));
+    fread_s(mpWaveTable, waveTableSize, waveTableSize, 1, fpWave);
+    fclose(fpWave);
+    _wremove(mWaveTablePath);
 }
 
 void InstList::loadDlsArt(LART *cLart, INST_ART *pArt) {
@@ -392,37 +397,37 @@ void InstList::loadDlsArt(LART *cLart, INST_ART *pArt) {
 
         case E_DLS_DST::EG1_ATTACK_TIME:
             ampA = pConn->getValue();
-            pArt->env.ampA = 1.0 / ampA;
+            pArt->env.ampA = 0.01 / ampA;
             break;
         case E_DLS_DST::EG1_HOLD_TIME:
             pArt->env.ampH = pConn->getValue();
             break;
         case E_DLS_DST::EG1_DECAY_TIME:
-            pArt->env.ampD = 1.0 / pConn->getValue();
+            pArt->env.ampD = 0.01 / pConn->getValue();
             break;
         case E_DLS_DST::EG1_SUSTAIN_LEVEL:
             pArt->env.ampS = pConn->getValue();
             break;
         case E_DLS_DST::EG1_RELEASE_TIME:
-            pArt->env.ampR = 1.0 / pConn->getValue();
+            pArt->env.ampR = 0.001 / pConn->getValue();
             break;
 
         case E_DLS_DST::EG2_ATTACK_TIME:
             cutoffA = pConn->getValue();
-            pArt->env.cutoffA = 1.0 / cutoffA;
+            pArt->env.cutoffA = 0.01 / cutoffA;
             break;
         case E_DLS_DST::EG2_HOLD_TIME:
             pArt->env.cutoffH = pConn->getValue();
             break;
         case E_DLS_DST::EG2_DECAY_TIME:
-            pArt->env.cutoffD = 1.0 / pConn->getValue();
+            pArt->env.cutoffD = 0.01 / pConn->getValue();
             break;
         case E_DLS_DST::EG2_SUSTAIN_LEVEL:
             pArt->env.cutoffS = pConn->getValue();
             pArt->env.cutoffFall = pArt->env.cutoffS;
             break;
         case E_DLS_DST::EG2_RELEASE_TIME:
-            pArt->env.cutoffR = 1.0 / pConn->getValue();
+            pArt->env.cutoffR = 0.001 / pConn->getValue();
             break;
 
         default:
@@ -434,49 +439,49 @@ void InstList::loadDlsArt(LART *cLart, INST_ART *pArt) {
     pArt->env.cutoffH += cutoffA;
 }
 
-unsigned int InstList::writeWaveTable8(FILE *fp, unsigned char* pData, unsigned int size) {
-    unsigned int samples = size;
-    for (unsigned int i = 0; i < samples; i++) {
+uint InstList::writeWaveTable8(FILE *fp, byte* pData, uint size) {
+    uint samples = size;
+    for (uint i = 0; i < samples; i++) {
         auto tmp = (WAVDAT)((pData[i] - 128) * WAVMAX / 128);
         fwrite(&tmp, sizeof(WAVDAT), 1, fp);
     }
     return samples;
 }
 
-unsigned int InstList::writeWaveTable16(FILE *fp, unsigned char* pData, unsigned int size) {
-    unsigned int samples = size / sizeof(short);
+uint InstList::writeWaveTable16(FILE *fp, byte* pData, uint size) {
+    uint samples = size / sizeof(short);
     auto pShort = (short*)pData;
-    for (unsigned int i = 0; i < samples; i++) {
+    for (uint i = 0; i < samples; i++) {
         auto tmp = (WAVDAT)(pShort[i] * WAVMAX / 0x8000);
         fwrite(&tmp, sizeof(WAVDAT), 1, fp);
     }
     return samples;
 }
 
-unsigned int InstList::writeWaveTable24(FILE *fp, unsigned char* pData, unsigned int size) {
-    unsigned int samples = size / sizeof(RIFFint24);
+uint InstList::writeWaveTable24(FILE *fp, byte* pData, uint size) {
+    uint samples = size / sizeof(RIFFint24);
     auto pInt24 = (RIFFint24*)pData;
-    for (unsigned int i = 0; i < samples; i++) {
+    for (uint i = 0; i < samples; i++) {
         auto tmp = (WAVDAT)(pInt24[i].msb * WAVMAX / 0x8000);
         fwrite(&tmp, sizeof(WAVDAT), 1, fp);
     }
     return samples;
 }
 
-unsigned int InstList::writeWaveTable32(FILE *fp, unsigned char* pData, unsigned int size) {
-    unsigned int samples = size / sizeof(int);
+uint InstList::writeWaveTable32(FILE *fp, byte* pData, uint size) {
+    uint samples = size / sizeof(int);
     auto pInt32 = (int*)pData;
-    for (unsigned int i = 0; i < samples; i++) {
+    for (uint i = 0; i < samples; i++) {
         auto tmp = (WAVDAT)((pInt32[i] >> 16) * WAVMAX / 0x8000);
         fwrite(&tmp, sizeof(WAVDAT), 1, fp);
     }
     return samples;
 }
 
-unsigned int InstList::writeWaveTableFloat(FILE *fp, unsigned char* pData, unsigned int size) {
-    unsigned int samples = size / sizeof(float);
+uint InstList::writeWaveTableFloat(FILE *fp, byte* pData, uint size) {
+    uint samples = size / sizeof(float);
     auto pFloat = (float*)pData;
-    for (unsigned int i = 0; i < samples; i++) {
+    for (uint i = 0; i < samples; i++) {
         auto tmpFloat = pFloat[i];
         if (1.0f < tmpFloat) tmpFloat = 1.0f;
         if (tmpFloat < -1.0f) tmpFloat = -1.0f;

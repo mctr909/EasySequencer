@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Windows.Forms;
 using System.Runtime.InteropServices;
-using System.Text;
 
 using Player;
 
@@ -24,15 +23,8 @@ namespace EasySequencer {
             var selectedInst = 0;
             for (int i = 0; i < mSender.InstCount; i++) {
                 var inst = mSender.Instruments(i);
-                var nam = "";
-                var cat = "";
-                unsafe {
-                    var arr = new byte[32];
-                    Marshal.Copy((IntPtr)inst.name, arr, 0, arr.Length);
-                    nam = string.Format("{0} {1}", inst.id.progNum, Encoding.ASCII.GetString(arr));
-                    Marshal.Copy((IntPtr)inst.category, arr, 0, arr.Length);
-                    //cat = Encoding.ASCII.GetString(arr);
-                }
+                var nam = string.Format("{0} {1}", inst.id.progNum, Marshal.PtrToStringAnsi(inst.pName));
+                var cat = Marshal.PtrToStringAnsi(inst.pCategory);
                 if (!mInstList.ContainsKey(cat)) {
                     mInstList.Add(cat, new Dictionary<INST_ID, string>());
                     cmbCategory.Items.Add(cat);

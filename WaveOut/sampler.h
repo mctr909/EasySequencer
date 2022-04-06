@@ -12,7 +12,7 @@ typedef struct SYSTEM_VALUE {
     InstList *cInstList;
     INST_SAMPLER **ppSampler;
     EFFECT **ppEffect;
-    byte *pWaveTable;
+    WAVDAT *pWaveTable;
     int bufferLength;
     int bufferCount;
     int bits;

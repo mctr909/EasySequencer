@@ -68,7 +68,7 @@ LPBYTE WINAPI waveout_systemValues(
     //
     gSysValue.cInstList = new InstList(filePath);
     gSysValue.ppSampler = gSysValue.cInstList->GetSamplerPtr();
-    gSysValue.pWaveTable = (byte*)gSysValue.cInstList->GetWaveTablePtr();
+    gSysValue.pWaveTable = (WAVDAT*)gSysValue.cInstList->GetWaveTablePtr();
     gSysValue.bufferLength = bufferLength;
     gSysValue.bufferCount = bufferCount;
     gSysValue.sampleRate = sampleRate;

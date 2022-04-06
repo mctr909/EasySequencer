@@ -22,24 +22,24 @@ namespace Player {
     };
 
     [StructLayout(LayoutKind.Sequential, Pack = 4)]
+    public struct INST_INFO {
+        public INST_ID id;
+        uint layerIndex;
+        uint layerCount;
+        uint artIndex;
+        public IntPtr pName;
+        public IntPtr pCategory;
+    }
+
+    [StructLayout(LayoutKind.Sequential, Pack = 4)]
     unsafe public struct INST_LIST {
         public int count;
         public INST_INFO** ppData;
     }
 
-    [StructLayout(LayoutKind.Sequential, Pack = 4)]
-    unsafe public struct INST_INFO {
-        public INST_ID id;
-        uint layerIndex;
-        uint layerCount;
-        uint artIndex;
-        public fixed char name[32];
-        public fixed char category[32];
-    }
-
     [StructLayout(LayoutKind.Sequential, Pack = 1)]
     unsafe public struct CHANNEL_PARAM {
-        public fixed int KeyBoard[128];
+        public fixed byte KeyBoard[128];
         public INST_ID InstId;
         public IntPtr Name;
         public bool Enable;
@@ -100,10 +100,6 @@ namespace Player {
 
         public static readonly int SampleRate = 44100;
         public static readonly double DeltaTime = 1.0 / SampleRate;
-        public static readonly double AttackSpeed = 12.0;
-        public static readonly double DecaySpeed = 12.0;
-        public static readonly double ReleaseSpeed = 12.0;
-
         public static int CHANNEL_COUNT = 16;
         public static int SAMPLER_COUNT = 64;
         public static bool IsFileOutput { get; private set; }

@@ -1,10 +1,11 @@
 #pragma once
+#include "type.h"
 #include <windows.h>
 #include <stdio.h>
 
 #define SAMPLER_COUNT 64
 
-enum struct E_KEY_STATE : unsigned char {
+enum struct E_KEY_STATE : byte {
     FREE,
     RESERVED,
     PURGE,
@@ -15,48 +16,48 @@ enum struct E_KEY_STATE : unsigned char {
 
 #pragma pack(4)
 typedef struct INST_ID {
-    unsigned char isDrum = 0;
-    unsigned char bankMSB = 0;
-    unsigned char bankLSB = 0;
-    unsigned char progNum = 0;
+    byte isDrum = 0;
+    byte bankMSB = 0;
+    byte bankLSB = 0;
+    byte progNum = 0;
 } INST_ID;
 #pragma pack()
 
 #pragma pack(4)
 typedef struct INST_INFO {
     INST_ID id;
-    unsigned int layerIndex = 0;
-    unsigned int layerCount = 0;
-    unsigned int artIndex = 0;
-    char name[32] = { 0 };
-    char category[32] = { 0 };
+    uint layerIndex = 0;
+    uint layerCount = 0;
+    uint artIndex = 0;
+    char *pName = NULL;
+    char *pCategory = NULL;
 } INST_INFO;
 #pragma pack()
 
 #pragma pack(4)
 typedef struct INST_LIST {
-    unsigned int count;
+    uint count;
     INST_INFO** ppData;
 } INST_LIST;
 #pragma pack()
 
 #pragma pack(4)
 typedef struct INST_LAYER {
-    unsigned int regionIndex = 0;
-    unsigned int regionCount = 0;
-    unsigned int artIndex = 0;
+    uint regionIndex = 0;
+    uint regionCount = 0;
+    uint artIndex = 0;
 } INST_LAYER;
 #pragma pack()
 
 #pragma pack(4)
 typedef struct INST_REGION {
-    unsigned char keyLow = 0;
-    unsigned char keyHigh = 127;
-    unsigned char velocityLow = 0;
-    unsigned char velocityHigh = 127;
-    unsigned int waveIndex = 0;
-    unsigned int artIndex = 0;
-    unsigned int wsmpIndex = 0;
+    byte keyLow = 0;
+    byte keyHigh = 127;
+    byte velocityLow = 0;
+    byte velocityHigh = 127;
+    uint waveIndex = 0;
+    uint artIndex = 0;
+    uint wsmpIndex = 0;
 } INST_REGION;
 #pragma pack()
 
@@ -95,13 +96,13 @@ typedef struct INST_ART {
 
 #pragma pack(4)
 typedef struct INST_WAVE {
-    unsigned int offset = 0;
-    unsigned int sampleRate = 44100;
-    unsigned int loopBegin = 0;
-    unsigned int loopLength = 0;
-    unsigned char loopEnable = 0;
-    unsigned char unityNote = 0;
-    unsigned short reserved = 0;
+    uint offset = 0;
+    uint sampleRate = 44100;
+    uint loopBegin = 0;
+    uint loopLength = 0;
+    byte loopEnable = 0;
+    byte unityNote = 0;
+    ushort reserved = 0;
     double pitch = 1.0;
     double gain = 1.0;
 } INST_WAVE;
@@ -110,9 +111,9 @@ typedef struct INST_WAVE {
 #pragma pack(4)
 typedef struct INST_SAMPLER {
     E_KEY_STATE state = E_KEY_STATE::FREE;
-    unsigned char channelNum = 0;
-    unsigned char noteNum = 0;
-    unsigned char reserved1 = 0;
+    byte channelNum = 0;
+    byte noteNum = 0;
+    byte reserved1 = 0;
     short pan = 0;
     short reserved2 = 0;
     double gain = 1.0;
@@ -137,14 +138,13 @@ private:
     INST_LAYER **mppLayerList = NULL;
     INST_REGION **mppRegionList = NULL;
     INST_ART **mppArtList = NULL;
-    short *mpWaveTable = NULL;
+    WAVDAT *mpWaveTable = NULL;
     INST_LIST mInstList;
     WCHAR mWaveTablePath[256] = { 0 };
-    unsigned int mWaveTableSize = 0;
-    unsigned int mWaveCount = 0;
-    unsigned int mLayerCount = 0;
-    unsigned int mRegionCount = 0;
-    unsigned int mArtCount = 0;
+    uint mWaveCount = 0;
+    uint mLayerCount = 0;
+    uint mRegionCount = 0;
+    uint mArtCount = 0;
 
 public:
     InstList(LPWSTR path);
@@ -154,16 +154,16 @@ public:
     INST_LIST *GetInstList();
     INST_INFO *GetInstInfo(INST_ID *id);
     INST_SAMPLER **GetSamplerPtr();
-    short *GetWaveTablePtr();
-    void SetSampler(INST_INFO *pInstInfo, unsigned char  channelNum, unsigned char noteNum, unsigned char velocity);
+    WAVDAT *GetWaveTablePtr();
+    void SetSampler(INST_INFO *pInstInfo, byte channelNum, byte noteNum, byte velocity);
 
 private:
     void loadDls(LPWSTR path);
     void loadDlsWave(DLS *cDls);
     void loadDlsArt(LART *cLart, INST_ART *pArt);
-    unsigned int writeWaveTable8(FILE *fp, unsigned char* pData, unsigned int size);
-    unsigned int writeWaveTable16(FILE *fp, unsigned char* pData, unsigned int size);
-    unsigned int writeWaveTable24(FILE *fp, unsigned char* pData, unsigned int size);
-    unsigned int writeWaveTable32(FILE *fp, unsigned char* pData, unsigned int size);
-    unsigned int writeWaveTableFloat(FILE *fp, unsigned char* pData, unsigned int size);
+    uint writeWaveTable8(FILE *fp, byte* pData, uint size);
+    uint writeWaveTable16(FILE *fp, byte* pData, uint size);
+    uint writeWaveTable24(FILE *fp, byte* pData, uint size);
+    uint writeWaveTable32(FILE *fp, byte* pData, uint size);
+    uint writeWaveTableFloat(FILE *fp, byte* pData, uint size);
 };

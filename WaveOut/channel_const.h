@@ -5,7 +5,7 @@
 #define CHANNEL_COUNT 16
 
 /******************************************************************************/
-enum struct E_KEY_STATE_M : int {
+enum struct E_KEY_STATE_M : unsigned char {
     FREE,
     PRESS,
     HOLD
