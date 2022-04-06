@@ -8,8 +8,7 @@ typedef struct INST_LIST INST_LIST;
 #ifdef __cplusplus
 extern "C" {
 #endif
-    __declspec(dllexport) LPBYTE WINAPI waveout_loadWaveTable(LPWSTR filePath, unsigned int *size);
-    __declspec(dllexport) void WINAPI waveout_systemValues(
+    __declspec(dllexport) LPBYTE WINAPI waveout_systemValues(
         LPWSTR filePath,
         int sampleRate,
         int bits,

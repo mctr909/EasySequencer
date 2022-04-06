@@ -57,38 +57,7 @@ int* WINAPI waveout_getActiveSamplersPtr() {
     return &gActiveCount;
 }
 
-LPBYTE WINAPI waveout_loadWaveTable(LPWSTR filePath, unsigned int *size) {
-    auto inst = new InstList(filePath);
-    delete inst;
-
-    if (NULL == size) {
-        return NULL;
-    }
-    waveOutClose();
-    //
-    if (NULL != gSysValue.pWaveTable) {
-        free(gSysValue.pWaveTable);
-        gSysValue.pWaveTable = NULL;
-    }
-    //
-    FILE *fpWaveTable = NULL;
-    _wfopen_s(&fpWaveTable, filePath, TEXT("rb"));
-    if (NULL != fpWaveTable) {
-        fseek(fpWaveTable, 4, SEEK_SET);
-        fread_s(size, sizeof(*size), sizeof(*size), 1, fpWaveTable);
-        *size -= 8;
-        gSysValue.pWaveTable = (LPBYTE)malloc(*size);
-        if (NULL != gSysValue.pWaveTable) {
-            fseek(fpWaveTable, 12, SEEK_SET);
-            fread_s(gSysValue.pWaveTable, *size, *size, 1, fpWaveTable);
-        }
-        fclose(fpWaveTable);
-    }
-
-    return gSysValue.pWaveTable;
-}
-
-void WINAPI waveout_systemValues(
+LPBYTE WINAPI waveout_systemValues(
     LPWSTR filePath,
     int sampleRate,
     int bits,
@@ -108,6 +77,8 @@ void WINAPI waveout_systemValues(
     //
     effect_create(&gSysValue);
     message_createChannels(&gSysValue);
+
+    return (LPBYTE)gSysValue.cInstList->GetInstList();
 }
 
 void WINAPI waveout_open() {

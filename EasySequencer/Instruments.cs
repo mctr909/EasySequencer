@@ -17,71 +17,28 @@ namespace Instruments {
         public double release;
     };
 
-    [StructLayout(LayoutKind.Sequential, Pack = 8)]
-    public struct ENV_FILTER {
-        public double attack;
-        public double hold;
-        public double decay;
-        public double sustain;
-        public double release;
-        public double rise;
-        public double top;
-        public double fall;
-    };
-
-    [StructLayout(LayoutKind.Sequential, Pack = 8)]
-    public struct ENV_PITCH {
-        public double attack;
-        public double release;
-        public double rise;
-        public double fall;
-    };
-
-    [StructLayout(LayoutKind.Sequential, Pack = 8)]
-    public struct WAVE_INFO {
-        public uint waveOfs;
-        public uint loopBegin;
-        public uint loopLength;
-        public bool loopEnable;
-        public byte unityNote;
-        public ushort reserved;
-        public double gain;
-        public double delta;
-    }
-
     [StructLayout(LayoutKind.Sequential, Pack = 4)]
     public struct INST_ID {
         public byte isDrum;
-        public byte programNo;
         public byte bankMSB;
         public byte bankLSB;
+        public byte progNum;
     };
 
     [StructLayout(LayoutKind.Sequential, Pack = 4)]
-    public struct REGION {
-        public byte keyLo;
-        public byte keyHi;
-        public byte velLo;
-        public byte velHi;
-        public WAVE_INFO waveInfo;
-        public ENV_AMP envAmp;
-        public ENV_FILTER envFilter;
-        public ENV_PITCH envPitch;
+    unsafe public struct INST_LIST {
+        public int count;
+        public INST_INFO** ppData;
     }
 
     [StructLayout(LayoutKind.Sequential, Pack = 4)]
     unsafe public struct INST_INFO {
         public INST_ID id;
-        public int regionCount;
-        public IntPtr pName;
-        public IntPtr pCategory;
-        public REGION** ppRegions;
-    }
-
-    [StructLayout(LayoutKind.Sequential, Pack = 4)]
-    unsafe public struct INST_LIST {
-        public int instCount;
-        public INST_INFO** ppInst;
+        uint layerIndex;
+        uint layerCount;
+        uint artIndex;
+        public fixed char name[32];
+        public fixed char category[32];
     }
 
     [StructLayout(LayoutKind.Sequential, Pack = 1)]

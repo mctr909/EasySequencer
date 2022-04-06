@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Windows.Forms;
 using System.Runtime.InteropServices;
+using System.Text;
 
 using Player;
 using Instruments;
@@ -24,10 +25,15 @@ namespace EasySequencer {
             var selectedInst = 0;
             for (int i = 0; i < mSender.InstCount; i++) {
                 var inst = mSender.Instruments(i);
-                var nam = string.Format("{0} {1}",
-                    inst.id.programNo,
-                    Marshal.PtrToStringAuto(inst.pName));
-                var cat = Marshal.PtrToStringAuto(inst.pCategory);
+                var nam = "";
+                var cat = "";
+                unsafe {
+                    var arr = new byte[32];
+                    Marshal.Copy((IntPtr)inst.name, arr, 0, arr.Length);
+                    nam = string.Format("{0} {1}", inst.id.progNum, Encoding.ASCII.GetString(arr));
+                    Marshal.Copy((IntPtr)inst.category, arr, 0, arr.Length);
+                    //cat = Encoding.ASCII.GetString(arr);
+                }
                 if (!mInstList.ContainsKey(cat)) {
                     mInstList.Add(cat, new Dictionary<INST_ID, string>());
                     cmbCategory.Items.Add(cat);
@@ -37,7 +43,7 @@ namespace EasySequencer {
                 }
                 var chParam = mSender.Channel(mChNum);
                 if (chParam.InstId.isDrum == inst.id.isDrum &&
-                    chParam.InstId.programNo == inst.id.programNo &&
+                    chParam.InstId.progNum == inst.id.progNum &&
                     chParam.InstId.bankMSB == inst.id.bankMSB &&
                     chParam.InstId.bankLSB == inst.id.bankLSB
                 ) {
@@ -72,7 +78,7 @@ namespace EasySequencer {
             var inst = list[(lstInst.SelectedIndex < list.Count()) ? lstInst.SelectedIndex : list.Count() - 1];
             mSender.Send(new Event(mChNum, E_CONTROL.BANK_MSB, inst.Key.bankMSB));
             mSender.Send(new Event(mChNum, E_CONTROL.BANK_LSB, inst.Key.bankLSB));
-            mSender.Send(new Event(mChNum, E_STATUS.PROGRAM, inst.Key.programNo));
+            mSender.Send(new Event(mChNum, E_STATUS.PROGRAM, inst.Key.progNum));
         }
 
         private void btnCommit_Click(object sender, EventArgs e) {

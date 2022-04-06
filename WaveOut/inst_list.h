@@ -34,6 +34,13 @@ typedef struct INST_INFO {
 #pragma pack()
 
 #pragma pack(4)
+typedef struct INST_LIST {
+    unsigned int count;
+    INST_INFO** ppData;
+} INST_LIST;
+#pragma pack()
+
+#pragma pack(4)
 typedef struct INST_LAYER {
     unsigned int regionIndex = 0;
     unsigned int regionCount = 0;
@@ -126,15 +133,14 @@ class InstList {
 private:
     INST_SAMPLER **mppSampler = NULL;
     INST_WAVE **mppWaveList = NULL;
-    INST_INFO **mppInstList = NULL;
     INST_LAYER **mppLayerList = NULL;
     INST_REGION **mppRegionList = NULL;
     INST_ART **mppArtList = NULL;
     short *mpWaveTable = NULL;
+    INST_LIST mInstList;
     WCHAR mWaveTablePath[256] = { 0 };
     unsigned int mWaveTableSize = 0;
     unsigned int mWaveCount = 0;
-    unsigned int mInstCount = 0;
     unsigned int mLayerCount = 0;
     unsigned int mRegionCount = 0;
     unsigned int mArtCount = 0;
@@ -144,6 +150,7 @@ public:
     ~InstList();
 
 public:
+    INST_LIST *GetInstList();
     INST_INFO *GetInstInfo(INST_ID *id);
     INST_SAMPLER **GetSamplerPtr();
     short *GetWaveTablePtr();

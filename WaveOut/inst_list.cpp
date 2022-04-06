@@ -32,11 +32,11 @@ InstList::~InstList() {
         }
         free(mppWaveList);
     }
-    if (NULL != mppInstList) {
-        for (unsigned int i = 0; i < mInstCount; i++) {
-            free(mppInstList[i]);
+    if (NULL != mInstList.ppData) {
+        for (unsigned int i = 0; i < mInstList.count; i++) {
+            free(mInstList.ppData[i]);
         }
-        free(mppInstList);
+        free(mInstList.ppData);
     }
     if (NULL != mppLayerList) {
         for (unsigned int i = 0; i < mLayerCount; i++) {
@@ -61,23 +61,27 @@ InstList::~InstList() {
     }
 }
 
+INST_LIST *InstList::GetInstList() {
+    return &mInstList;
+}
+
 INST_INFO *InstList::GetInstInfo(INST_ID *id) {
-    for (unsigned int i = 0; i < mInstCount; i++) {
-        auto listId = mppInstList[i]->id;
+    for (unsigned int i = 0; i < mInstList.count; i++) {
+        auto listId = mInstList.ppData[i]->id;
         if (listId.isDrum == id->isDrum &&
             listId.bankMSB == id->bankMSB &&
             listId.bankLSB == id->bankLSB &&
             listId.progNum == id->progNum) {
-            return mppInstList[i];
+            return mInstList.ppData[i];
         }
     }
-    for (unsigned int i = 0; i < mInstCount; i++) {
-        auto listId = mppInstList[i]->id;
+    for (unsigned int i = 0; i < mInstList.count; i++) {
+        auto listId = mInstList.ppData[i]->id;
         if (listId.isDrum == id->isDrum &&
             listId.bankMSB == 0 &&
             listId.bankLSB == 0 &&
             listId.progNum == id->progNum) {
-            return mppInstList[i];
+            return mInstList.ppData[i];
         }
     }
     return NULL;
@@ -176,8 +180,8 @@ void InstList::loadDls(LPWSTR path) {
     loadDlsWave(cDls);
 
     /* count layer, region, art */
-    mInstCount = cDls->InstCount;
-    for (unsigned int i = 0; i < mInstCount; i++) {
+    mInstList.count = cDls->InstCount;
+    for (unsigned int i = 0; i < mInstList.count; i++) {
         auto cDlsInst = cDls->cLins->pcInst[i];
         if (NULL != cDlsInst->cLart) {
             mArtCount++;
@@ -200,8 +204,8 @@ void InstList::loadDls(LPWSTR path) {
     unsigned int layerIndex = 0;
     unsigned int regionIndex = 0;
     unsigned int artIndex = 0;
-    mppInstList = (INST_INFO**)malloc(sizeof(INST_INFO*) * mInstCount);
-    memset(mppInstList, 0, sizeof(INST_INFO**));
+    mInstList.ppData = (INST_INFO**)malloc(sizeof(INST_INFO*) * mInstList.count);
+    memset(mInstList.ppData, 0, sizeof(INST_INFO**));
     mppLayerList = (INST_LAYER**)malloc(sizeof(INST_LAYER*) * mLayerCount);
     memset(mppLayerList, 0, sizeof(INST_LAYER**));
     mppRegionList = (INST_REGION**)malloc(sizeof(INST_REGION*) * mRegionCount);
@@ -209,13 +213,13 @@ void InstList::loadDls(LPWSTR path) {
     mppArtList = (INST_ART**)malloc(sizeof(INST_ART*) * mArtCount);
     memset(mppArtList, 0, sizeof(INST_ART**));
 
-    for (unsigned int i = 0; i < mInstCount; i++) {
+    for (unsigned int i = 0; i < mInstList.count; i++) {
         auto cDlsInst = cDls->cLins->pcInst[i];
 
         INST_INFO inst;
-        mppInstList[i] = (INST_INFO*)malloc(sizeof(INST_INFO));
-        memcpy_s(mppInstList[i], sizeof(INST_INFO), &inst, sizeof(INST_INFO));
-        auto pInst = mppInstList[i];
+        mInstList.ppData[i] = (INST_INFO*)malloc(sizeof(INST_INFO));
+        memcpy_s(mInstList.ppData[i], sizeof(INST_INFO), &inst, sizeof(INST_INFO));
+        auto pInst = mInstList.ppData[i];
 
         pInst->id.isDrum = cDlsInst->Header.bankFlags >= 0x80 ? 1 : 0;
         pInst->id.bankMSB = cDlsInst->Header.bankMSB;

@@ -210,81 +210,85 @@ namespace SF2 {
         }
 
         unsafe public void GetInstList(INST_LIST* list) {
-            list->instCount = 0;
-            list->ppInst = (INST_INFO**)Marshal.AllocHGlobal(sizeof(INST_INFO*) * mPdta.PresetList.Count);
+            list->count = 0;
+            list->ppData = (INST_INFO**)Marshal.AllocHGlobal(sizeof(INST_INFO*) * mPdta.PresetList.Count);
             foreach (var preset in mPdta.PresetList) {
-                list->ppInst[list->instCount] = (INST_INFO*)Marshal.AllocHGlobal(Marshal.SizeOf<INST_INFO>());
-                var pInst = list->ppInst[list->instCount];
-                list->instCount++;
+                list->ppData[list->count] = (INST_INFO*)Marshal.AllocHGlobal(Marshal.SizeOf<INST_INFO>());
+                var pInst = list->ppData[list->count];
+                list->count++;
                 //
                 pInst->id.isDrum = (byte)(0 < preset.Key.isDrum ? 1 : 0);
-                pInst->id.programNo = preset.Key.programNo;
+                pInst->id.progNum = preset.Key.progNum;
                 pInst->id.bankMSB = preset.Key.bankMSB;
                 pInst->id.bankLSB = preset.Key.bankLSB;
                 if (string.IsNullOrWhiteSpace(preset.Value.Item1)) {
-                    pInst->pName = Marshal.StringToHGlobalAuto(string.Format(
+                    var strb = Encoding.ASCII.GetBytes(string.Format(
                         "MSB:{0} LSB:{1} PROG:{2}",
                         pInst->id.bankMSB.ToString("000"),
                         pInst->id.bankLSB.ToString("000"),
-                        pInst->id.programNo.ToString("000")
+                        pInst->id.progNum.ToString("000")
                     ));
+                    Marshal.Copy(strb, 0, (IntPtr)pInst->name, 32);
                 } else {
-                    pInst->pName = Marshal.StringToHGlobalAuto(preset.Value.Item1);
+                    var strb = Encoding.ASCII.GetBytes(preset.Value.Item1);
+                    Marshal.Copy(strb, 0, (IntPtr)pInst->name, 32);
                 }
                 if (0 < pInst->id.isDrum) {
-                    pInst->pCategory = Marshal.StringToHGlobalAuto("Drum set");
+                    var strb = Encoding.ASCII.GetBytes("Drum set");
+                    Marshal.Copy(strb, 0, (IntPtr)pInst->category, 32);
                 } else {
-                    pInst->pCategory = Marshal.StringToHGlobalAuto("");
+                    var strb = Encoding.ASCII.GetBytes("");
+                    Marshal.Copy(strb, 0, (IntPtr)pInst->category, 32);
                 }
-                //
-                pInst->regionCount = 0;
-                foreach (var pv in preset.Value.Item2) {
-                    foreach (var iv in mPdta.InstList[pv.instId].Item2) {
-                        pInst->regionCount++;
-                    }
-                }
-                pInst->ppRegions = (REGION**)Marshal.AllocHGlobal(sizeof(REGION*) * pInst->regionCount);
-                //
-                var ppRegions = pInst->ppRegions;
-                var rgnIdx = 0;
-                foreach (var pv in preset.Value.Item2) {
-                    foreach (var iv in mPdta.InstList[pv.instId].Item2) {
-                        ppRegions[rgnIdx] = (REGION*)Marshal.AllocHGlobal(Marshal.SizeOf<REGION>());
-                        var pRegion = ppRegions[rgnIdx];
-                        rgnIdx++;
-                        //
-                        pRegion->keyLo = Math.Max(pv.keyLo, iv.keyLo);
-                        pRegion->keyHi = Math.Min(pv.keyHi, iv.keyHi);
-                        pRegion->velLo = Math.Max(pv.velLo, iv.velLo);
-                        pRegion->velHi = Math.Min(pv.velHi, iv.velHi);
-                        //
-                        var smpl = mPdta.SHDR[iv.sampleId];
-                        var waveBegin = smpl.start + iv.waveBegin;
-                        pRegion->waveInfo.waveOfs = (uint)(mSdta.pData.ToInt64() - mSf2Ptr.ToInt64() + waveBegin * 2);
-                        //
-                        pRegion->waveInfo.loopEnable = iv.loopEnable;
-                        if (pRegion->waveInfo.loopEnable) {
-                            pRegion->waveInfo.loopBegin = smpl.loopstart - waveBegin;
-                            pRegion->waveInfo.loopLength = smpl.loopend - smpl.loopstart;
-                        } else {
-                            var waveEnd = smpl.end + iv.waveEnd;
-                            pRegion->waveInfo.loopBegin = 0;
-                            pRegion->waveInfo.loopLength = waveEnd - waveBegin;
-                        }
-                        //
-                        if (0 <= iv.rootKey) {
-                            pRegion->waveInfo.unityNote = (byte)iv.rootKey;
-                        } else if (0 <= pv.rootKey) {
-                            pRegion->waveInfo.unityNote = (byte)pv.rootKey;
-                        } else {
-                            pRegion->waveInfo.unityNote = smpl.originalKey;
-                        }
-                        //
-                        pRegion->waveInfo.gain = pv.gain * iv.gain / 32768.0;
-                        pRegion->waveInfo.delta = iv.fineTune * iv.coarseTune * smpl.sampleRate / Sender.SampleRate;
-                        pRegion->envAmp = iv.env;
-                    }
-                }
+                ////
+                //pInst->regionCount = 0;
+                //foreach (var pv in preset.Value.Item2) {
+                //    foreach (var iv in mPdta.InstList[pv.instId].Item2) {
+                //        pInst->regionCount++;
+                //    }
+                //}
+                //pInst->ppRegions = (REGION**)Marshal.AllocHGlobal(sizeof(REGION*) * pInst->regionCount);
+                ////
+                //var ppRegions = pInst->ppRegions;
+                //var rgnIdx = 0;
+                //foreach (var pv in preset.Value.Item2) {
+                //    foreach (var iv in mPdta.InstList[pv.instId].Item2) {
+                //        ppRegions[rgnIdx] = (REGION*)Marshal.AllocHGlobal(Marshal.SizeOf<REGION>());
+                //        var pRegion = ppRegions[rgnIdx];
+                //        rgnIdx++;
+                //        //
+                //        pRegion->keyLo = Math.Max(pv.keyLo, iv.keyLo);
+                //        pRegion->keyHi = Math.Min(pv.keyHi, iv.keyHi);
+                //        pRegion->velLo = Math.Max(pv.velLo, iv.velLo);
+                //        pRegion->velHi = Math.Min(pv.velHi, iv.velHi);
+                //        //
+                //        var smpl = mPdta.SHDR[iv.sampleId];
+                //        var waveBegin = smpl.start + iv.waveBegin;
+                //        pRegion->waveInfo.waveOfs = (uint)(mSdta.pData.ToInt64() - mSf2Ptr.ToInt64() + waveBegin * 2);
+                //        //
+                //        pRegion->waveInfo.loopEnable = iv.loopEnable;
+                //        if (pRegion->waveInfo.loopEnable) {
+                //            pRegion->waveInfo.loopBegin = smpl.loopstart - waveBegin;
+                //            pRegion->waveInfo.loopLength = smpl.loopend - smpl.loopstart;
+                //        } else {
+                //            var waveEnd = smpl.end + iv.waveEnd;
+                //            pRegion->waveInfo.loopBegin = 0;
+                //            pRegion->waveInfo.loopLength = waveEnd - waveBegin;
+                //        }
+                //        //
+                //        if (0 <= iv.rootKey) {
+                //            pRegion->waveInfo.unityNote = (byte)iv.rootKey;
+                //        } else if (0 <= pv.rootKey) {
+                //            pRegion->waveInfo.unityNote = (byte)pv.rootKey;
+                //        } else {
+                //            pRegion->waveInfo.unityNote = smpl.originalKey;
+                //        }
+                //        //
+                //        pRegion->waveInfo.gain = pv.gain * iv.gain / 32768.0;
+                //        pRegion->waveInfo.delta = iv.fineTune * iv.coarseTune * smpl.sampleRate / Sender.SampleRate;
+                //        pRegion->envAmp = iv.env;
+                //    }
+                //}
             }
         }
 
@@ -310,7 +314,7 @@ namespace SF2 {
             foreach (var preset in mPdta.PresetList) {
                 sw.Write("{0},{1},\"{2}\n{3}\"",
                     preset.Key.bankMSB,
-                    preset.Key.programNo,
+                    preset.Key.progNum,
                     1 == preset.Key.isDrum ? "Drum" : "Note",
                     preset.Value.Item1
                 );
@@ -527,7 +531,7 @@ namespace SF2 {
                 var pre = new Preset();
                 pre.Id.isDrum = (byte)(0 < (preset.bank & 0x80) ? 1 : 0);
                 pre.Id.bankMSB = (byte)(preset.bank & 0x7F);
-                pre.Id.programNo = (byte)preset.presetno;
+                pre.Id.progNum = (byte)preset.presetno;
                 pre.Name = name.Replace("\0", "").TrimEnd();
                 pre.Layer = list.ToArray();
                 presetList.Add(pre);
@@ -840,11 +844,11 @@ namespace SF2 {
 
         private static readonly Comparison<Preset> Compare = new Comparison<Preset>((a, b) => {
             var av = (long)a.Id.isDrum << 24;
-            av |= (long)a.Id.programNo << 16;
+            av |= (long)a.Id.progNum << 16;
             av |= (long)a.Id.bankMSB << 8;
             av |= a.Id.bankLSB;
             var bv = (long)b.Id.isDrum << 24;
-            bv |= (long)b.Id.programNo << 16;
+            bv |= (long)b.Id.progNum << 16;
             bv |= (long)b.Id.bankMSB << 8;
             bv |= b.Id.bankLSB;
             var dComp = av - bv;

@@ -22,8 +22,6 @@ namespace Player {
         [DllImport("WaveOut.dll")]
         private static extern void waveout_fileOut(
             IntPtr filePath,
-            IntPtr pWaveTable,
-            INST_LIST* list,
             uint sampleRate,
             uint bitRate,
             IntPtr pEvents,
@@ -32,9 +30,7 @@ namespace Player {
         );
 
         [DllImport("WaveOut.dll")]
-        private static extern IntPtr waveout_loadWaveTable(IntPtr filePath, out uint size);
-        [DllImport("WaveOut.dll")]
-        private static extern void waveout_systemValues(
+        private static extern INST_LIST* waveout_systemValues(
             IntPtr filePath,
             int sampleRate,
             int bits,
@@ -65,15 +61,14 @@ namespace Player {
 
         private static IntPtr mpActiveCountPtr = waveout_getActiveSamplersPtr();
 
-        private IntPtr mpWaveTable;
         private INST_LIST* mpInstList;
         private CHANNEL_PARAM** mppChParam;
 
         public int InstCount {
-            get { return mpInstList->instCount; }
+            get { return mpInstList->count; }
         }
         public INST_INFO Instruments(int num) {
-            return *mpInstList->ppInst[num];
+            return *mpInstList->ppData[num];
         }
         public CHANNEL_PARAM Channel(int num) {
             return *mppChParam[num];
@@ -83,15 +78,9 @@ namespace Player {
         }
 
         public Sender(string dlsPath) {
-            uint fileSize = 0;
-            mpWaveTable = waveout_loadWaveTable(Marshal.StringToHGlobalAuto(dlsPath), out fileSize);
-            mpInstList = (INST_LIST*)Marshal.AllocHGlobal(Marshal.SizeOf<INST_LIST>());
-            var dls = new DLS.DLS(mpWaveTable, fileSize);
-            dls.GetInstList(mpInstList);
-
             //var sf2 = new SF2.SF2(dlsPath, mpWaveTable, fileSize);
             //sf2.GetInstList(mpInstList);
-            waveout_systemValues(Marshal.StringToHGlobalAuto(dlsPath), SampleRate, 32, 256, 32);
+            mpInstList = waveout_systemValues(Marshal.StringToHGlobalAuto(dlsPath), SampleRate, 32, 256, 32);
             mppChParam = message_getChannelParamPtr();
             waveout_open();
         }
@@ -117,7 +106,7 @@ namespace Player {
                 }
                 var evArr = ms.ToArray();
                 fixed (byte* evPtr = &evArr[0]) {
-                    waveout_fileOut(Marshal.StringToHGlobalAuto(filePath), mpWaveTable, mpInstList,
+                    waveout_fileOut(Marshal.StringToHGlobalAuto(filePath),
                         44100, 16, (IntPtr)evPtr, (uint)evArr.Length, 960);
                 }
                 IsFileOutput = false;
