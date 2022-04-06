@@ -8,7 +8,7 @@ Channel **gppChannels = NULL;
 CHANNEL_PARAM **gppChParam = NULL;
 
 /******************************************************************************/
-void WINAPI message_createChannels(SYSTEM_VALUE *pSystemValue) {
+void message_createChannels(SYSTEM_VALUE *pSystemValue) {
     if (NULL != gppChannels) {
         for (int c = 0; c < CHANNEL_COUNT; c++) {
             delete gppChannels[c];

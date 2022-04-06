@@ -147,7 +147,7 @@
     <ClCompile Include="synth\effect.cpp" />
     <ClCompile Include="synth\filter.cpp" />
     <ClCompile Include="synth\sampler.cpp" />
-    <ClCompile Include="wave_out.cpp" />
+    <ClCompile Include="waveout.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="fileout.h" />
@@ -167,7 +167,7 @@
     <ClInclude Include="synth\filter.h" />
     <ClInclude Include="synth\sampler.h" />
     <ClInclude Include="type.h" />
-    <ClInclude Include="wave_out.h" />
+    <ClInclude Include="waveout.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

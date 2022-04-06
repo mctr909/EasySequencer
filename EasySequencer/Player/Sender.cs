@@ -71,7 +71,9 @@ namespace Player {
         private static extern void message_send(byte* pMsg);
 
         [DllImport("WaveOut.dll")]
-        private static extern INST_LIST* waveout_systemValues(
+        private static extern IntPtr waveout_getActiveSamplersPtr();
+        [DllImport("WaveOut.dll")]
+        private static extern INST_LIST* waveout_open(
             IntPtr filePath,
             int sampleRate,
             int bits,
@@ -79,17 +81,14 @@ namespace Player {
             int bufferCount
         );
         [DllImport("WaveOut.dll")]
-        private static extern IntPtr waveout_getActiveSamplersPtr();
-        [DllImport("WaveOut.dll")]
-        private static extern void waveout_open();
-        [DllImport("WaveOut.dll")]
         private static extern void waveout_close();
 
         [DllImport("WaveOut.dll")]
-        private static extern IntPtr waveout_getFileOutProgressPtr();
+        private static extern IntPtr fileout_getProgressPtr();
         [DllImport("WaveOut.dll")]
-        private static extern void waveout_fileOut(
-            IntPtr filePath,
+        private static extern void fileout_save(
+            IntPtr waveTablePath,
+            IntPtr savePath,
             uint sampleRate,
             uint bitRate,
             IntPtr pEvents,
@@ -112,6 +111,7 @@ namespace Player {
 
         private INST_LIST* mpInstList;
         private CHANNEL_PARAM** mppChParam;
+        private string mWaveTablePath;
 
         public int InstCount {
             get { return mpInstList->count; }
@@ -126,12 +126,12 @@ namespace Player {
             mppChParam[num]->Enable = !mute;
         }
 
-        public Sender(string dlsPath) {
+        public Sender(string waveTablePath) {
+            mWaveTablePath = waveTablePath;
             //var sf2 = new SF2.SF2(dlsPath, mpWaveTable, fileSize);
             //sf2.GetInstList(mpInstList);
-            mpInstList = waveout_systemValues(Marshal.StringToHGlobalAuto(dlsPath), SampleRate, 32, 256, 32);
+            mpInstList = waveout_open(Marshal.StringToHGlobalAuto(mWaveTablePath), SampleRate, 32, 256, 32);
             mppChParam = message_getChannelParamPtr();
-            waveout_open();
         }
 
         public void Send(Event msg) {
@@ -142,20 +142,35 @@ namespace Player {
 
         public void FileOut(string filePath, SMF smf) {
             IsFileOutput = true;
-            var prog = waveout_getFileOutProgressPtr();
+
+            var ms = new MemoryStream();
+            var bw = new BinaryWriter(ms);
+            foreach (var ev in smf.EventList) {
+                if (((int)ev.Type & 0xF0) == (int)E_STATUS.SYSEX_BEGIN) {
+                    if (null == ev.Meta) {
+                        continue;
+                    }
+                    if (ev.Meta.Type == E_META.TEMPO) {
+                        bw.Write(ev.Tick);
+                        bw.Write(ev.Data);
+                    } else {
+                        continue;
+                    }
+                }
+                bw.Write(ev.Tick);
+                bw.Write(ev.Data);
+            }
+            var evArr = ms.ToArray();
+
+            var prog = fileout_getProgressPtr();
             *(int*)prog = 0;
-            var fm = new StatusWindow(smf.MaxTime, prog);
+            var fm = new StatusWindow((int)ms.Length, prog);
             fm.Show();
             Task.Factory.StartNew(() => {
-                var ms = new MemoryStream();
-                var bw = new BinaryWriter(ms);
-                foreach (var ev in smf.EventList) {
-                    bw.Write(ev.Tick);
-                    bw.Write(ev.Data);
-                }
-                var evArr = ms.ToArray();
                 fixed (byte* evPtr = &evArr[0]) {
-                    waveout_fileOut(Marshal.StringToHGlobalAuto(filePath),
+                    fileout_save(
+                        Marshal.StringToHGlobalAuto(mWaveTablePath),
+                        Marshal.StringToHGlobalAuto(filePath),
                         44100, 16, (IntPtr)evPtr, (uint)evArr.Length, 960);
                 }
                 IsFileOutput = false;

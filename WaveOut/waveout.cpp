@@ -1,4 +1,4 @@
-#include "wave_out.h"
+#include "waveout.h"
 #include "message_reciever.h"
 #include "inst/inst_list.h"
 #include "synth/channel.h"
@@ -57,7 +57,7 @@ int* WINAPI waveout_getActiveSamplersPtr() {
     return &gActiveCount;
 }
 
-LPBYTE WINAPI waveout_systemValues(
+LPBYTE WINAPI waveout_open(
     LPWSTR filePath,
     int sampleRate,
     int bits,
@@ -66,6 +66,9 @@ LPBYTE WINAPI waveout_systemValues(
 ) {
     waveout_close();
     //
+    if (NULL != gSysValue.cInstList) {
+        delete gSysValue.cInstList;
+    }
     gSysValue.cInstList = new InstList(filePath);
     gSysValue.ppSampler = gSysValue.cInstList->GetSamplerPtr();
     gSysValue.pWaveTable = (WAVDAT*)gSysValue.cInstList->GetWaveTablePtr();
@@ -77,11 +80,7 @@ LPBYTE WINAPI waveout_systemValues(
     //
     effect_create(&gSysValue);
     message_createChannels(&gSysValue);
-
-    return (LPBYTE)gSysValue.cInstList->GetInstList();
-}
-
-void WINAPI waveout_open() {
+    //
     switch (gSysValue.bits) {
     case 16:
         waveOutOpen(gSysValue.sampleRate, 16, 2, gSysValue.bufferLength, gSysValue.bufferCount, write16);
@@ -95,6 +94,7 @@ void WINAPI waveout_open() {
     default:
         break;
     }
+    return (LPBYTE)gSysValue.cInstList->GetInstList();
 }
 
 void WINAPI waveout_close() {

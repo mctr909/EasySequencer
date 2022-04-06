@@ -32,33 +32,37 @@ typedef struct {
 #pragma pack(pop)
 
 /******************************************************************************/
-LPBYTE        gpFileOutWaveTable = NULL;
 SYSTEM_VALUE  gFileOutSysValue = { 0 };
 int           gFileOutProgress = 0;
 FMT_          gFmt = { 0 };
 FILE          *gfpFileOut = NULL;
 
 /******************************************************************************/
-uint fileOutSend(Channel **ppCh, LPBYTE msg);
+void fileOutSampler();
+int fileOutSend(Channel **ppCh, LPBYTE msg);
 void fileOutWrite(INST_SAMPLER **ppSmpl, EFFECT **ppCh, LPBYTE outBuffer);
 
 /******************************************************************************/
-int* WINAPI waveout_getFileOutProgressPtr() {
+int* WINAPI fileout_getProgressPtr() {
     return &gFileOutProgress;
 }
 
-void WINAPI waveout_fileOut(
-    LPWSTR filePath,
-    LPBYTE pWaveTable,
+void WINAPI fileout_save(
+    LPWSTR waveTablePath,
+    LPWSTR savePath,
     uint sampleRate,
     uint bitRate,
     LPBYTE pEvents,
     uint eventSize,
     uint baseTick
 ) {
-    gpFileOutWaveTable = pWaveTable;
-
     // set system value
+    if (NULL != gFileOutSysValue.cInstList) {
+        delete gFileOutSysValue.cInstList;
+    }
+    gFileOutSysValue.cInstList = new InstList(waveTablePath);
+    gFileOutSysValue.pWaveTable = gFileOutSysValue.cInstList->GetWaveTablePtr();
+    gFileOutSysValue.ppSampler = gFileOutSysValue.cInstList->GetSamplerPtr();
     gFileOutSysValue.bufferLength = 512;
     gFileOutSysValue.bufferCount = 16;
     gFileOutSysValue.sampleRate = sampleRate;
@@ -98,7 +102,7 @@ void WINAPI waveout_fileOut(
         fclose(gfpFileOut);
         gfpFileOut = NULL;
     }
-    _wfopen_s(&gfpFileOut, filePath, L"wb");
+    _wfopen_s(&gfpFileOut, savePath, L"wb");
     fwrite(&riff, sizeof(riff), 1, gfpFileOut);
     fwrite(&gFmt, sizeof(gFmt), 1, gfpFileOut);
 
@@ -111,24 +115,22 @@ void WINAPI waveout_fileOut(
     double delta_sec = gFileOutSysValue.bufferLength * gFileOutSysValue.deltaTime;
     auto ppSampler = gFileOutSysValue.ppSampler;
     while (curPos < eventSize) {
-        auto evTime = (double)(*(uint*)(pEvents + curPos)) / baseTick;
-        auto evValue = pEvents + curPos + 4;
+        auto evTime = (double)(*(int*)(pEvents + curPos)) / baseTick;
+        curPos += 4;
+        auto evValue = pEvents + curPos;
         while (curTime < evTime) {
             fileOutWrite(ppSampler, gFileOutSysValue.ppEffect, pOutBuffer);
             curTime += bpm * delta_sec / 60.0;
-            gFileOutProgress = (int)curTime;
+            gFileOutProgress = curPos;
         }
         if (E_EVENT_TYPE::META == (E_EVENT_TYPE)evValue[0]) {
             if (E_META_TYPE::TEMPO == (E_META_TYPE)evValue[1]) {
-                bpm = 60000000.0 / ((evValue[6] << 16) | (evValue[7] << 8) | evValue[8]);
+                bpm = 60000000.0 / ((evValue[3] << 16) | (evValue[4] << 8) | evValue[5]);
             }
         }
-        auto readSize = fileOutSend(ppChannels, evValue);
-        if (0 == readSize) {
-            break;
-        }
-        curPos += readSize + 4;
+        curPos += fileOutSend(ppChannels, evValue);
     }
+    gFileOutProgress = eventSize;
 
     // close file
     riff.fileSize = gFmt.dataSize + sizeof(gFmt) + 4;
@@ -148,7 +150,17 @@ void WINAPI waveout_fileOut(
 }
 
 /******************************************************************************/
-uint fileOutSend(Channel **ppCh, LPBYTE msg) {
+void fileOutSampler() {
+    for (int s = 0; s < SAMPLER_COUNT; s++) {
+        auto pSmpl = gFileOutSysValue.ppSampler[s];
+        if (pSmpl->state < E_SAMPLER_STATE::PURGE) {
+            continue;
+        }
+        sampler(&gFileOutSysValue, pSmpl);
+    }
+}
+
+int fileOutSend(Channel **ppCh, LPBYTE msg) {
     auto type = (E_EVENT_TYPE)(*msg & 0xF0);
     auto ch = *msg & 0x0F;
     switch (type) {
@@ -172,21 +184,43 @@ uint fileOutSend(Channel **ppCh, LPBYTE msg) {
         ppCh[ch]->PitchBend(((msg[2] << 7) | msg[1]) - 8192);
         return 3;
     case E_EVENT_TYPE::SYS_EX:
-        if (E_EVENT_TYPE::META == (E_EVENT_TYPE)*msg) {
-            return (msg[2] | (msg[3] << 8) | (msg[4] << 16) | (msg[5] << 24)) + 6;
-        } else {
-            return (msg[1] | (msg[2] << 8) | (msg[3] << 16) | (msg[4] << 24)) + 5;
-        }
+        return 6;
     default:
         return 0;
     }
 }
 
 void fileOutWrite(INST_SAMPLER **ppSmpl, EFFECT **ppCh, LPBYTE outBuffer) {
-    // sampler loop
+    fileOutSampler();
+
     int buffSize = gFileOutSysValue.bufferLength * gFmt.blockAlign;
     memset(outBuffer, 0, buffSize);
+
     // channel loop
+    for (int c = 0; c < CHANNEL_COUNT; c++) {
+        auto pEffect = gFileOutSysValue.ppEffect[c];
+        auto pInputBuff = pEffect->pOutput;
+        auto pInputBuffTerm = pInputBuff + pEffect->pSystemValue->bufferLength;
+        auto pBuff = (short*)outBuffer;
+        for (; pInputBuff < pInputBuffTerm; pInputBuff++, pBuff += 2) {
+            double tempL, tempR;
+            // effect
+            effect(pEffect, pInputBuff, &tempL, &tempR);
+            // output
+            tempL *= 32767.0;
+            tempR *= 32767.0;
+            tempL += *(pBuff + 0);
+            tempR += *(pBuff + 1);
+            if (32767.0 < tempL) tempL = 32767.0;
+            if (tempL < -32767.0) tempL = -32767.0;
+            if (32767.0 < tempR) tempR = 32767.0;
+            if (tempR < -32767.0) tempR = -32767.0;
+            *(pBuff + 0) = (short)tempL;
+            *(pBuff + 1) = (short)tempR;
+            *pInputBuff = 0.0;
+        }
+    }
+
     fwrite(outBuffer, buffSize, 1, gfpFileOut);
     gFmt.dataSize += buffSize;
 }
