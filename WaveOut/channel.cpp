@@ -48,7 +48,7 @@ Channel::AllReset() {
     mNrpnMSB = 0xFF;
 
     Param.InstId.isDrum = Number == 9 ? 1 : 0;
-    Param.InstId.programNo = 0;
+    Param.InstId.progNum = 0;
     Param.InstId.bankMSB = 0;
     Param.InstId.bankLSB = 0;
     ProgramChange(0);
@@ -60,21 +60,21 @@ void
 Channel::NoteOff(byte noteNumber) {
     for (int s = 0; s < SAMPLER_COUNT; ++s) {
         auto pSmpl = mpSystemValue->ppSampler[s];
-        if (pSmpl->state < E_SAMPLER_STATE::PRESS) {
+        if (pSmpl->state < E_KEY_STATE::PRESS) {
             continue;
         }
-        if (pSmpl->channelNumber == Number && pSmpl->noteNumber == noteNumber) {
+        if (pSmpl->channelNum == Number && pSmpl->noteNum == noteNumber) {
             if (Param.Hld < 64) {
-                pSmpl->state = E_SAMPLER_STATE::RELEASE;
+                pSmpl->state = E_KEY_STATE::RELEASE;
             } else {
-                pSmpl->state = E_SAMPLER_STATE::HOLD;
+                pSmpl->state = E_KEY_STATE::HOLD;
             }
         }
     }
     if (Param.Hld < 64) {
-        Param.KeyBoard[noteNumber] = E_KEY_STATE::FREE;
+        Param.KeyBoard[noteNumber] = E_KEY_STATE_M::FREE;
     } else {
-        Param.KeyBoard[noteNumber] = E_KEY_STATE::HOLD;
+        Param.KeyBoard[noteNumber] = E_KEY_STATE_M::HOLD;
     }
 }
 
@@ -84,57 +84,8 @@ Channel::NoteOn(byte noteNumber, byte velocity) {
         NoteOff(noteNumber);
         return;
     }
-
-    for (int s = 0; s < SAMPLER_COUNT; ++s) {
-        auto pSmpl = mpSystemValue->ppSampler[s];
-        if (pSmpl->state < E_SAMPLER_STATE::PRESS) {
-            continue;
-        }
-        if (pSmpl->channelNumber == Number && pSmpl->noteNumber == noteNumber) {
-            pSmpl->state = E_SAMPLER_STATE::PURGE;
-        }
-    }
-
-    for (int rgnIdx = 0; rgnIdx < mRegionCount; rgnIdx++) {
-        auto pRegion = mppRegions[rgnIdx];
-        if (noteNumber < pRegion->keyLo || pRegion->keyHi < noteNumber ||
-            velocity < pRegion->velLo || pRegion->velHi < velocity) {
-            continue;
-        }
-
-        double pitch;
-        auto diffNote = noteNumber - pRegion->waveInfo.unityNote;
-        if (diffNote < 0) {
-            pitch = 1.0 / SemiTone[-diffNote];
-        } else {
-            pitch = SemiTone[diffNote];
-        }
-        pitch *= pRegion->waveInfo.delta;
-
-        for (int s = 0; s < SAMPLER_COUNT; ++s) {
-            auto pSmpl = mpSystemValue->ppSampler[s];
-            if (E_SAMPLER_STATE::FREE == pSmpl->state) {
-                pSmpl->state = E_SAMPLER_STATE::RESERVED;
-                pSmpl->channelNumber = Number;
-                pSmpl->noteNumber = noteNumber;
-                pSmpl->velocity = velocity / 127.0;
-                pSmpl->delta = pitch;
-                pSmpl->index = 0.0;
-                pSmpl->time = 0.0;
-                pSmpl->egAmp = 0.0;
-                pSmpl->egFilter = pRegion->envFilter.rise;
-                pSmpl->egPitch = pRegion->envPitch.rise;
-                pSmpl->pEnvAmp = &pRegion->envAmp;
-                pSmpl->pEnvFilter = &pRegion->envFilter;
-                pSmpl->pEnvPitch = &pRegion->envPitch;
-                pSmpl->pWaveInfo = &pRegion->waveInfo;
-                pSmpl->state = E_SAMPLER_STATE::PRESS;
-                break;
-            }
-        }
-    }
-
-    Param.KeyBoard[noteNumber] = E_KEY_STATE::PRESS;
+    Param.KeyBoard[noteNumber] = E_KEY_STATE_M::PRESS;
+    mpSystemValue->cInstList->SetSampler(mpInst, Number, noteNumber, velocity);
 }
 
 void
@@ -223,21 +174,9 @@ Channel::CtrlChange(byte type, byte b1) {
 
 void
 Channel::ProgramChange(byte value) {
-    Param.InstId.programNo = value;
-    if (NULL == searchInst(Param.InstId)) {
-        Param.InstId.bankMSB = 0;
-        Param.InstId.bankLSB = 0;
-        if (NULL == searchInst(Param.InstId)) {
-            Param.InstId.programNo = 0;
-            if (NULL == searchInst(Param.InstId)) {
-                Param.InstId.isDrum = (byte)(Param.InstId.isDrum == 0 ? 1 : 0);
-            }
-        }
-    }
-    auto tmp = searchInst(Param.InstId);
-    mRegionCount = tmp->regionCount;
-    mppRegions = tmp->ppRegions;
-    Param.Name = tmp->pName;
+    Param.InstId.progNum = value;
+    mpInst = mpSystemValue->cInstList->GetInstInfo(&Param.InstId);
+    Param.Name = (byte*)&mpInst->name;
 }
 
 void
@@ -272,13 +211,13 @@ Channel::setHld(byte value) {
     if (value < 64) {
         for (int s = 0; s < SAMPLER_COUNT; ++s) {
             auto pSmpl = mpSystemValue->ppSampler[s];
-            if (E_SAMPLER_STATE::HOLD == pSmpl->state) {
-                pSmpl->state = E_SAMPLER_STATE::RELEASE;
+            if (E_KEY_STATE::HOLD == pSmpl->state) {
+                pSmpl->state = E_KEY_STATE::RELEASE;
             }
         }
         for (int n = 0; n < 128; ++n) {
-            if (E_KEY_STATE::HOLD == Param.KeyBoard[n]) {
-                Param.KeyBoard[n] = E_KEY_STATE::FREE;
+            if (E_KEY_STATE_M::HOLD == Param.KeyBoard[n]) {
+                Param.KeyBoard[n] = E_KEY_STATE_M::FREE;
             }
         }
     }
@@ -330,19 +269,4 @@ Channel::setNrpn(byte b1) {
     //}
     mNrpnMSB = 0xFF;
     mNrpnLSB = 0xFF;
-}
-
-INST_INFO*
-Channel::searchInst(INST_ID id) {
-    auto pList = mpSystemValue->pInstList;
-    for (int i = 0; i < pList->instCount; i++) {
-        auto listId = pList->ppInst[i]->id;
-        if (id.isDrum == listId.isDrum &&
-            id.bankMSB == listId.bankMSB &&
-            id.bankLSB == listId.bankLSB &&
-            id.programNo == listId.programNo) {
-            return pList->ppInst[i];
-        }
-    }
-    return NULL;
 }

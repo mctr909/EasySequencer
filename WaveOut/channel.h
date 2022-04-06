@@ -1,16 +1,17 @@
 #pragma once
-#include "inst_ck.h"
 #include "channel_const.h"
+#include "inst_list.h"
 #include <windows.h>
 
 /******************************************************************************/
 typedef struct SYSTEM_VALUE SYSTEM_VALUE;
 typedef struct EFFECT_PARAM EFFECT_PARAM;
+typedef struct INST_ID INST_ID;
 
 /******************************************************************************/
 #pragma pack(push, 1)
 typedef struct CHANNEL_PARAM {
-    E_KEY_STATE KeyBoard[128] = { };
+    E_KEY_STATE_M KeyBoard[128] = { };
     INST_ID InstId;
     byte* Name;
     byte Enable;
@@ -43,8 +44,7 @@ public:
 private:
     SYSTEM_VALUE *mpSystemValue = NULL;
     EFFECT_PARAM *mpEffectParam = NULL;
-    REGION** mppRegions = NULL;
-    int mRegionCount = 0;
+    INST_INFO *mpInst = NULL;
 
 private:
     byte mRpnLSB;
@@ -73,5 +73,4 @@ private:
     void setCho(byte value);
     void setRpn(byte b1);
     void setNrpn(byte b1);
-    INST_INFO* searchInst(INST_ID id);
 };

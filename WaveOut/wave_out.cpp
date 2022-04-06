@@ -2,6 +2,7 @@
 #include "sampler.h"
 #include "effect.h"
 #include "channel.h"
+#include "inst_list.h"
 #include "message_reciever.h"
 
 #include <stdio.h>
@@ -34,7 +35,7 @@ int           gActiveCount = 0;
 SYSTEM_VALUE  gSysValue = { 0 };
 
 /******************************************************************************/
-inline void setSampler();
+inline void runSampler();
 void write16(LPSTR pData);
 void write24(LPSTR pData);
 void write32(LPSTR pData);
@@ -57,6 +58,9 @@ int* WINAPI waveout_getActiveSamplersPtr() {
 }
 
 LPBYTE WINAPI waveout_loadWaveTable(LPWSTR filePath, unsigned int *size) {
+    auto inst = new InstList(filePath);
+    delete inst;
+
     if (NULL == size) {
         return NULL;
     }
@@ -66,7 +70,6 @@ LPBYTE WINAPI waveout_loadWaveTable(LPWSTR filePath, unsigned int *size) {
         free(gSysValue.pWaveTable);
         gSysValue.pWaveTable = NULL;
     }
-
     //
     FILE *fpWaveTable = NULL;
     _wfopen_s(&fpWaveTable, filePath, TEXT("rb"));
@@ -86,7 +89,7 @@ LPBYTE WINAPI waveout_loadWaveTable(LPWSTR filePath, unsigned int *size) {
 }
 
 void WINAPI waveout_systemValues(
-    INST_LIST *pList,
+    LPWSTR filePath,
     int sampleRate,
     int bits,
     int bufferLength,
@@ -94,7 +97,9 @@ void WINAPI waveout_systemValues(
 ) {
     waveout_close();
     //
-    gSysValue.pInstList = pList;
+    gSysValue.cInstList = new InstList(filePath);
+    gSysValue.ppSampler = gSysValue.cInstList->GetSamplerPtr();
+    gSysValue.pWaveTable = (byte*)gSysValue.cInstList->GetWaveTablePtr();
     gSysValue.bufferLength = bufferLength;
     gSysValue.bufferCount = bufferCount;
     gSysValue.sampleRate = sampleRate;
@@ -102,7 +107,6 @@ void WINAPI waveout_systemValues(
     gSysValue.deltaTime = 1.0 / sampleRate;
     //
     effect_create(&gSysValue);
-    sampler_create(&gSysValue);
     message_createChannels(&gSysValue);
 }
 
@@ -124,16 +128,19 @@ void WINAPI waveout_open() {
 
 void WINAPI waveout_close() {
     waveOutClose();
+    if (NULL != gSysValue.cInstList) {
+        delete gSysValue.cInstList;
+        gSysValue.cInstList = NULL;
+    }
     effect_dispose(&gSysValue);
-    sampler_dispose(&gSysValue);
 }
 
 /******************************************************************************/
-inline void setSampler() {
+inline void runSampler() {
     int activeCount = 0;
     for (int s = 0; s < SAMPLER_COUNT; s++) {
         auto pSmpl = gSysValue.ppSampler[s];
-        if (pSmpl->state < E_SAMPLER_STATE::PRESS) {
+        if (pSmpl->state < E_KEY_STATE::PURGE) {
             continue;
         }
         if (sampler(&gSysValue, pSmpl)) {
@@ -144,7 +151,7 @@ inline void setSampler() {
 }
 
 void write16(LPSTR pData) {
-    setSampler();
+    runSampler();
     for (int c = 0; c < CHANNEL_COUNT; c++) {
         auto pEffect = gSysValue.ppEffect[c];
         auto pInputBuff = pEffect->pOutput;
@@ -171,7 +178,7 @@ void write16(LPSTR pData) {
 }
 
 void write24(LPSTR pData) {
-    setSampler();
+    runSampler();
     for (int c = 0; c < CHANNEL_COUNT; c++) {
         auto pEffect = gSysValue.ppEffect[c];
         auto pInputBuff = pEffect->pOutput;
@@ -196,7 +203,7 @@ void write24(LPSTR pData) {
 }
 
 void write32(LPSTR pData) {
-    setSampler();
+    runSampler();
     for (int c = 0; c < CHANNEL_COUNT; c++) {
         auto pEffect = gSysValue.ppEffect[c];
         auto pInputBuff = pEffect->pOutput;

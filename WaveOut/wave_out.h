@@ -10,7 +10,7 @@ extern "C" {
 #endif
     __declspec(dllexport) LPBYTE WINAPI waveout_loadWaveTable(LPWSTR filePath, unsigned int *size);
     __declspec(dllexport) void WINAPI waveout_systemValues(
-        INST_LIST *pList,
+        LPWSTR filePath,
         int sampleRate,
         int bits,
         int bufferLength,

@@ -1,9 +1,11 @@
 #pragma once
+#include "type.h"
+
 /******************************************************************************/
 #define CHANNEL_COUNT 16
 
 /******************************************************************************/
-enum struct E_KEY_STATE : int {
+enum struct E_KEY_STATE_M : int {
     FREE,
     PRESS,
     HOLD

@@ -15,6 +15,9 @@ namespace Player {
         private static extern void message_send(byte* pMsg);
 
         [DllImport("WaveOut.dll")]
+        private static extern void waveout_test(IntPtr filePath);
+
+        [DllImport("WaveOut.dll")]
         private static extern IntPtr waveout_getFileOutProgressPtr();
         [DllImport("WaveOut.dll")]
         private static extern void waveout_fileOut(
@@ -32,7 +35,7 @@ namespace Player {
         private static extern IntPtr waveout_loadWaveTable(IntPtr filePath, out uint size);
         [DllImport("WaveOut.dll")]
         private static extern void waveout_systemValues(
-            INST_LIST *pList,
+            IntPtr filePath,
             int sampleRate,
             int bits,
             int bufferLength,
@@ -85,9 +88,10 @@ namespace Player {
             mpInstList = (INST_LIST*)Marshal.AllocHGlobal(Marshal.SizeOf<INST_LIST>());
             var dls = new DLS.DLS(mpWaveTable, fileSize);
             dls.GetInstList(mpInstList);
+
             //var sf2 = new SF2.SF2(dlsPath, mpWaveTable, fileSize);
             //sf2.GetInstList(mpInstList);
-            waveout_systemValues(mpInstList, SampleRate, 32, 256, 32);
+            waveout_systemValues(Marshal.StringToHGlobalAuto(dlsPath), SampleRate, 32, 256, 32);
             mppChParam = message_getChannelParamPtr();
             waveout_open();
         }

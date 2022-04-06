@@ -6,6 +6,8 @@
 #include <stdio.h>
 
 /******************************************************************************/
+typedef struct INST_SAMPLER INST_SAMPLER;
+
 #pragma pack(push, 4)
 typedef struct {
     uint riff;
@@ -38,7 +40,7 @@ FILE          *gfpFileOut = NULL;
 
 /******************************************************************************/
 uint fileOutSend(Channel **ppCh, LPBYTE msg);
-void fileOutWrite(SAMPLER **ppSmpl, EFFECT **ppCh, LPBYTE outBuffer);
+void fileOutWrite(INST_SAMPLER **ppSmpl, EFFECT **ppCh, LPBYTE outBuffer);
 
 /******************************************************************************/
 int* WINAPI waveout_getFileOutProgressPtr() {
@@ -48,7 +50,6 @@ int* WINAPI waveout_getFileOutProgressPtr() {
 void WINAPI waveout_fileOut(
     LPWSTR filePath,
     LPBYTE pWaveTable,
-    INST_LIST *pList,
     uint sampleRate,
     uint bitRate,
     LPBYTE pEvents,
@@ -58,7 +59,6 @@ void WINAPI waveout_fileOut(
     gpFileOutWaveTable = pWaveTable;
 
     // set system value
-    gFileOutSysValue.pInstList = pList;
     gFileOutSysValue.bufferLength = 512;
     gFileOutSysValue.bufferCount = 16;
     gFileOutSysValue.sampleRate = sampleRate;
@@ -83,9 +83,6 @@ void WINAPI waveout_fileOut(
 
     // allocate out buffer
     auto pOutBuffer = (LPBYTE)malloc(gFileOutSysValue.bufferLength * gFmt.blockAlign);
-
-    // allocate samplers
-    sampler_create(&gFileOutSysValue);
 
     // allocate effects
     effect_create(&gFileOutSysValue);
@@ -141,7 +138,6 @@ void WINAPI waveout_fileOut(
     fclose(gfpFileOut);
 
     // dispose
-    sampler_dispose(&gFileOutSysValue);
     effect_dispose(&gFileOutSysValue);
     for (int c = 0; c < CHANNEL_COUNT; c++) {
         delete ppChannels[c];
@@ -186,7 +182,7 @@ uint fileOutSend(Channel **ppCh, LPBYTE msg) {
     }
 }
 
-void fileOutWrite(SAMPLER **ppSmpl, EFFECT **ppCh, LPBYTE outBuffer) {
+void fileOutWrite(INST_SAMPLER **ppSmpl, EFFECT **ppCh, LPBYTE outBuffer) {
     // sampler loop
     int buffSize = gFileOutSysValue.bufferLength * gFmt.blockAlign;
     memset(outBuffer, 0, buffSize);

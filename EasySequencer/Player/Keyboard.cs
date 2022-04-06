@@ -382,7 +382,7 @@ namespace Player {
                     g.FillRectangle(Brushes.Red, MuteButton.X, MuteButton.Y + y_ch, MuteButton.Width, MuteButton.Height);
                 }
                 // InstName
-                g.DrawString(Marshal.PtrToStringAuto(channel.Name), mInstFont, Brushes.Black, InstName.X, InstName.Y + y_ch, mInstFormat);
+                g.DrawString(Marshal.PtrToStringAnsi(channel.Name), mInstFont, Brushes.Black, InstName.X, InstName.Y + y_ch, mInstFormat);
             }
             mBuffer.Render();
         }

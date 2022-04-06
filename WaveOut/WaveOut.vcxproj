@@ -135,9 +135,15 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="channel.cpp" />
+    <ClCompile Include="dls.cpp" />
+    <ClCompile Include="dls_art.cpp" />
+    <ClCompile Include="dls_ins.cpp" />
+    <ClCompile Include="dls_rgn.cpp" />
+    <ClCompile Include="dls_wave.cpp" />
     <ClCompile Include="effect.cpp" />
     <ClCompile Include="fileout.cpp" />
     <ClCompile Include="filter.cpp" />
+    <ClCompile Include="inst_list.cpp" />
     <ClCompile Include="message_reciever.cpp" />
     <ClCompile Include="riff_chunk.cpp" />
     <ClCompile Include="sampler.cpp" />
@@ -146,10 +152,16 @@
   <ItemGroup>
     <ClInclude Include="channel.h" />
     <ClInclude Include="channel_const.h" />
+    <ClInclude Include="dls.h" />
+    <ClInclude Include="dls_art.h" />
+    <ClInclude Include="dls_ins.h" />
+    <ClInclude Include="dls_rgn.h" />
+    <ClInclude Include="dls_struct.h" />
+    <ClInclude Include="dls_wave.h" />
     <ClInclude Include="effect.h" />
     <ClInclude Include="fileout.h" />
     <ClInclude Include="filter.h" />
-    <ClInclude Include="inst_ck.h" />
+    <ClInclude Include="inst_list.h" />
     <ClInclude Include="message_reciever.h" />
     <ClInclude Include="riff_chunk.h" />
     <ClInclude Include="riff_struct.h" />
