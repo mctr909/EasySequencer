@@ -1,6 +1,6 @@
 #include "channel.h"
-#include "synth/sampler.h"
-#include "synth/effect.h"
+#include "sampler.h"
+#include "effect.h"
 #include <math.h>
 
 Channel::Channel(SYSTEM_VALUE *pSystemValue, int number) {

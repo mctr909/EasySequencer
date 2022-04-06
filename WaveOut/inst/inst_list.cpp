@@ -1,6 +1,6 @@
 #include "inst_list.h"
 #include "dls.h"
-#include "../channel.h"
+#include "../synth/channel.h"
 
 /******************************************************************************/
 #define INVALID_INDEX 0xFFFFFFFF

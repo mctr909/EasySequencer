@@ -1,6 +1,6 @@
 #include "sampler.h"
 #include "effect.h"
-#include "../channel_const.h"
+#include "channel_const.h"
 
 #include <stdlib.h>
 #include <string.h>

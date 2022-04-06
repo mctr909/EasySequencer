@@ -1,7 +1,7 @@
 #pragma once
-#include <windows.h>
 #include "channel_const.h"
-#include "inst/inst_list.h"
+#include "../inst/inst_list.h"
+#include <windows.h>
 
 /******************************************************************************/
 typedef struct SYSTEM_VALUE SYSTEM_VALUE;

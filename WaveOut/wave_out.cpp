@@ -1,7 +1,7 @@
 #include "wave_out.h"
 #include "message_reciever.h"
-#include "channel.h"
 #include "inst/inst_list.h"
+#include "synth/channel.h"
 #include "synth/sampler.h"
 #include "synth/effect.h"
 

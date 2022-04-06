@@ -1,6 +1,6 @@
 #pragma once
 #include "fileout.h"
-#include "channel.h"
+#include "synth/channel.h"
 #include "synth/sampler.h"
 #include "synth/effect.h"
 #include <stdio.h>
