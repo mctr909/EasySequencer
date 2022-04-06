@@ -324,7 +324,7 @@ void InstList::loadDlsWave(DLS *cDls) {
     FILE *fpWave = NULL;
     _wfopen_s(&fpWave, mWaveTablePath, TEXT("wb"));
     unsigned int wavePos = 0;
-    for (unsigned int w = 0; w < cDls->WaveCount; w++) {
+    for (int w = 0; w < cDls->WaveCount; w++) {
         mppWaveList[w] = (INST_WAVE*)malloc(sizeof(INST_WAVE));
         auto pWave = mppWaveList[w];
         auto cDlsWave = cDls->cWvpl->pcWave[w];
@@ -374,6 +374,9 @@ void InstList::loadDlsArt(LART *cLart, INST_ART *pArt) {
     INST_ART art;
     memcpy_s(pArt, sizeof(INST_ART), &art, sizeof(INST_ART));
 
+    auto ampA = 0.0;
+    auto cutoffA = 0.0;
+
     for (int c = 0; c < cLart->cArt->Count; c++) {
         auto pConn = cLart->cArt->ppConnection[c];
         switch (pConn->destination) {
@@ -388,7 +391,8 @@ void InstList::loadDlsArt(LART *cLart, INST_ART *pArt) {
             break;
 
         case E_DLS_DST::EG1_ATTACK_TIME:
-            pArt->env.ampA = 1.0 / pConn->getValue();
+            ampA = pConn->getValue();
+            pArt->env.ampA = 1.0 / ampA;
             break;
         case E_DLS_DST::EG1_HOLD_TIME:
             pArt->env.ampH = pConn->getValue();
@@ -404,7 +408,8 @@ void InstList::loadDlsArt(LART *cLart, INST_ART *pArt) {
             break;
 
         case E_DLS_DST::EG2_ATTACK_TIME:
-            pArt->env.cutoffA = 1.0 / pConn->getValue();
+            cutoffA = pConn->getValue();
+            pArt->env.cutoffA = 1.0 / cutoffA;
             break;
         case E_DLS_DST::EG2_HOLD_TIME:
             pArt->env.cutoffH = pConn->getValue();
@@ -424,6 +429,9 @@ void InstList::loadDlsArt(LART *cLart, INST_ART *pArt) {
             break;
         }
     }
+
+    pArt->env.ampH += ampA;
+    pArt->env.cutoffH += cutoffA;
 }
 
 unsigned int InstList::writeWaveTable8(FILE *fp, unsigned char* pData, unsigned int size) {
