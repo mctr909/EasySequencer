@@ -32,6 +32,10 @@ RGN_::RGN_(FILE *fp, long size) : RiffChunk() {
 }
 
 RGN_::~RGN_() {
+    if (NULL != pWaveSmpl) {
+        free(pWaveSmpl);
+        pWaveSmpl = NULL;
+    }
     if (NULL != cLart) {
         delete cLart;
         cLart = NULL;
@@ -48,8 +52,13 @@ void RGN_::LoadChunk(FILE *fp, const char *type, long size) {
         return;
     }
     if (0 == strcmp("wsmp", type)) {
-        fread_s(&WaveSmpl, sizeof(WaveSmpl), sizeof(WaveSmpl), 1, fp);
-        fseek(fp, size - sizeof(WaveSmpl), SEEK_CUR);
+        if (NULL != pWaveSmpl) {
+            free(pWaveSmpl);
+            pWaveSmpl = NULL;
+        }
+        pWaveSmpl = (DLS_WSMP*)malloc(sizeof(DLS_WSMP));
+        fread_s(pWaveSmpl, sizeof(DLS_WSMP), sizeof(DLS_WSMP), 1, fp);
+        fseek(fp, size - sizeof(DLS_WSMP), SEEK_CUR);
         return;
     }
     fseek(fp, size, SEEK_CUR);

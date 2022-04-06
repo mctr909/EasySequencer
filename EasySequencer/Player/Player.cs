@@ -2,8 +2,6 @@
 using System.Threading;
 using System.Threading.Tasks;
 
-using Instruments;
-
 namespace Player {
     public class Player {
         private Sender mSender;

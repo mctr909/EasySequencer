@@ -6,7 +6,6 @@ using System.Threading.Tasks;
 using System.Runtime.InteropServices;
 
 using EasySequencer;
-using Instruments;
 
 namespace Player {
     public class Keyboard {

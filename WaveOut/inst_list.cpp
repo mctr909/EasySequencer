@@ -121,20 +121,15 @@ void InstList::SetSampler(INST_INFO *pInstInfo, unsigned char channelNum, unsign
                         pSmpl->index = 0.0;
                         pSmpl->time = 0.0;
                         pSmpl->pWave = pWave;
-                        auto pitch = 1.0;
-                        auto diffNote = noteNum - pWave->unityNote;
-                        if (diffNote < 0) {
-                            pitch = 1.0 / SemiTone[-diffNote];
-                        } else {
-                            pitch = SemiTone[diffNote];
-                        }
-                        pitch *= pWave->pitch;
-                        pSmpl->gain = pWave->gain * velocity / 127.0 / 32768.0;
+
+                        pSmpl->pitch = 1.0;
+                        pSmpl->gain = velocity / 127.0 / 32768.0;
+
                         if (INVALID_INDEX != pInstInfo->artIndex) {
                             auto pArt = mppArtList[pInstInfo->artIndex];
                             pSmpl->pan += pArt->pan;
                             //pArt->transpose;
-                            pitch *= pArt->pitch;
+                            pSmpl->pitch *= pArt->pitch;
                             pSmpl->gain *= pArt->gain;
                             pSmpl->pEnv = &pArt->env;
                             pSmpl->egAmp = 0.0;
@@ -145,7 +140,7 @@ void InstList::SetSampler(INST_INFO *pInstInfo, unsigned char channelNum, unsign
                             auto pArt = mppArtList[pLayer->artIndex];
                             pSmpl->pan += pArt->pan;
                             //pArt->transpose;
-                            pitch *= pArt->pitch;
+                            pSmpl->pitch *= pArt->pitch;
                             pSmpl->gain *= pArt->gain;
                             pSmpl->pEnv = &pArt->env;
                             pSmpl->egAmp = 0.0;
@@ -156,14 +151,33 @@ void InstList::SetSampler(INST_INFO *pInstInfo, unsigned char channelNum, unsign
                             auto pArt = mppArtList[pRegion->artIndex];
                             pSmpl->pan += pArt->pan;
                             //pArt->transpose;
-                            pitch *= pArt->pitch;
+                            pSmpl->pitch *= pArt->pitch;
                             pSmpl->gain *= pArt->gain;
                             pSmpl->pEnv = &pArt->env;
                             pSmpl->egAmp = 0.0;
                             pSmpl->egCutoff = pArt->env.cutoffRise;
                             pSmpl->egPitch = pArt->env.pitchRise;
                         }
-                        pSmpl->pitch = pitch * pWave->sampleRate;
+
+                        auto diffNote = 0;
+                        if (INVALID_INDEX == pRegion->wsmpIndex) {
+                            diffNote = noteNum - pWave->unityNote;
+                            pSmpl->pitch *= pWave->pitch;
+                            pSmpl->gain *= pWave->gain;
+                        } else {
+                            auto pWsmp = mppWaveList[pRegion->wsmpIndex];
+                            diffNote = noteNum - pWsmp->unityNote;
+                            pSmpl->pitch *= pWsmp->pitch;
+                            pSmpl->gain *= pWsmp->gain;
+                        }
+
+                        if (diffNote < 0) {
+                            pSmpl->pitch *= 1.0 / SemiTone[-diffNote];
+                        } else {
+                            pSmpl->pitch *= SemiTone[diffNote];
+                        }
+
+                        pSmpl->pitch *= pWave->sampleRate;
                         pSmpl->state = E_KEY_STATE::PRESS;
                         break;
                     }
@@ -177,9 +191,9 @@ void InstList::SetSampler(INST_INFO *pInstInfo, unsigned char channelNum, unsign
 /******************************************************************************/
 void InstList::loadDls(LPWSTR path) {
     auto cDls = new DLS(path);
-    loadDlsWave(cDls);
 
     /* count layer, region, art */
+    mWaveCount = cDls->WaveCount;
     mInstList.count = cDls->InstCount;
     for (unsigned int i = 0; i < mInstList.count; i++) {
         auto cDlsInst = cDls->cLins->pcInst[i];
@@ -192,6 +206,9 @@ void InstList::loadDls(LPWSTR path) {
             if (NULL != cDlsRgn->cLart) {
                 mArtCount++;
             }
+            if (NULL != cDlsRgn->pWaveSmpl) {
+                mWaveCount++;
+            }
             if (rgnLayer < cDlsRgn->Header.layer + 1) {
                 rgnLayer = cDlsRgn->Header.layer + 1;
             }
@@ -200,10 +217,10 @@ void InstList::loadDls(LPWSTR path) {
         mLayerCount += rgnLayer;
     }
 
-    /* load inst, layer, region, art */
     unsigned int layerIndex = 0;
     unsigned int regionIndex = 0;
     unsigned int artIndex = 0;
+    unsigned int waveIndex = cDls->WaveCount;
     mInstList.ppData = (INST_INFO**)malloc(sizeof(INST_INFO*) * mInstList.count);
     memset(mInstList.ppData, 0, sizeof(INST_INFO**));
     mppLayerList = (INST_LAYER**)malloc(sizeof(INST_LAYER*) * mLayerCount);
@@ -212,7 +229,18 @@ void InstList::loadDls(LPWSTR path) {
     memset(mppRegionList, 0, sizeof(INST_REGION**));
     mppArtList = (INST_ART**)malloc(sizeof(INST_ART*) * mArtCount);
     memset(mppArtList, 0, sizeof(INST_ART**));
+    mppWaveList = (INST_WAVE**)malloc(sizeof(INST_WAVE*) * mWaveCount);
+    memset(mppWaveList, 0, sizeof(INST_WAVE**));
 
+    /* load wave */
+    loadDlsWave(cDls);
+    mpWaveTable = (short*)malloc(mWaveTableSize);
+    FILE *fp = NULL;
+    _wfopen_s(&fp, mWaveTablePath, TEXT("rb"));
+    fread_s(mpWaveTable, mWaveTableSize, mWaveTableSize, 1, fp);
+    fclose(fp);
+
+    /* load inst, layer, region, art */
     for (unsigned int i = 0; i < mInstList.count; i++) {
         auto cDlsInst = cDls->cLins->pcInst[i];
 
@@ -260,6 +288,20 @@ void InstList::loadDls(LPWSTR path) {
                 artIndex++;
             }
 
+            if (NULL == cDlsRgn->pWaveSmpl) {
+                pRegion->wsmpIndex = INVALID_INDEX;
+            } else {
+                INST_WAVE wave;
+                mppWaveList[waveIndex] = (INST_WAVE*)malloc(sizeof(INST_WAVE));
+                memcpy_s(mppWaveList[waveIndex], sizeof(INST_WAVE), &region, sizeof(INST_WAVE));
+                auto pWave = mppWaveList[waveIndex];
+                pWave->unityNote = (unsigned char)cDlsRgn->pWaveSmpl->unityNote;
+                pWave->pitch = cDlsRgn->pWaveSmpl->getFileTune();
+                pWave->gain = cDlsRgn->pWaveSmpl->getGain();
+                pRegion->wsmpIndex = waveIndex;
+                waveIndex++;
+            }
+
             if (pInst->layerCount < cDlsRgn->Header.layer + 1) {
                 pInst->layerCount = cDlsRgn->Header.layer + 1;
                 INST_LAYER layer;
@@ -275,23 +317,14 @@ void InstList::loadDls(LPWSTR path) {
         layerIndex += pInst->layerCount;
     }
 
-    mpWaveTable = (short*)malloc(mWaveTableSize);
-    FILE *fp = NULL;
-    _wfopen_s(&fp, mWaveTablePath, TEXT("rb"));
-    fread_s(mpWaveTable, mWaveTableSize, mWaveTableSize, 1, fp);
-    fclose(fp);
-
     delete cDls;
 }
 
 void InstList::loadDlsWave(DLS *cDls) {
     FILE *fpWave = NULL;
     _wfopen_s(&fpWave, mWaveTablePath, TEXT("wb"));
-    mWaveCount = cDls->WaveCount;
-    mppWaveList = (INST_WAVE**)malloc(sizeof(INST_WAVE*) * mWaveCount);
-    memset(mppWaveList, 0, sizeof(INST_WAVE**));
     unsigned int wavePos = 0;
-    for (unsigned int w = 0; w < mWaveCount; w++) {
+    for (unsigned int w = 0; w < cDls->WaveCount; w++) {
         mppWaveList[w] = (INST_WAVE*)malloc(sizeof(INST_WAVE));
         auto pWave = mppWaveList[w];
         auto cDlsWave = cDls->cWvpl->pcWave[w];

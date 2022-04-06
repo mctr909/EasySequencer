@@ -6,7 +6,6 @@ using System.Runtime.InteropServices;
 using System.Text;
 
 using Player;
-using Instruments;
 
 namespace EasySequencer {
     public partial class InstList : Form {

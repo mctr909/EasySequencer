@@ -4,7 +4,6 @@ using System.Runtime.InteropServices;
 using System.IO;
 using System.Text;
 using Player;
-using Instruments;
 
 namespace SF2 {
     #region enum
@@ -136,6 +135,15 @@ namespace SF2 {
     public struct GEN {
         public E_OPER genOper;
         public short  genAmount;
+    };
+
+    [StructLayout(LayoutKind.Sequential, Pack = 8)]
+    public struct ENV_AMP {
+        public double attack;
+        public double hold;
+        public double decay;
+        public double sustain;
+        public double release;
     };
 
     public struct Layer {

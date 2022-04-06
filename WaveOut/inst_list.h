@@ -56,6 +56,7 @@ typedef struct INST_REGION {
     unsigned char velocityHigh = 127;
     unsigned int waveIndex = 0;
     unsigned int artIndex = 0;
+    unsigned int wsmpIndex = 0;
 } INST_REGION;
 #pragma pack()
 

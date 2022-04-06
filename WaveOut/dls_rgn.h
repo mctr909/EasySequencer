@@ -22,7 +22,7 @@ class RGN_ : public RiffChunk {
 public:
     DLS_RGNH Header;
     DLS_WLNK WaveLink;
-    DLS_WSMP WaveSmpl;
+    DLS_WSMP *pWaveSmpl = NULL;
     LART *cLart = NULL;
 
 public:
