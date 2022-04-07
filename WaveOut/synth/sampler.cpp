@@ -48,13 +48,13 @@ Bool sampler(SYSTEM_VALUE* pSystemValue, INST_SAMPLER* pSmpl) {
         switch (pSmpl->state) {
         case E_SAMPLER_STATE::PRESS:
             if (pSmpl->time <= pEnv->ampH) {
-                pSmpl->egAmp += (1.0 - pSmpl->egAmp) * pEnv->ampA;
+                pSmpl->egAmp += (1.0 - pSmpl->egAmp) * pSystemValue->deltaTime * pEnv->ampA;
             } else {
-                pSmpl->egAmp += (pEnv->ampS - pSmpl->egAmp) * pEnv->ampD;
+                pSmpl->egAmp += (pEnv->ampS - pSmpl->egAmp) * pSystemValue->deltaTime * pEnv->ampD;
             }
             break;
         case E_SAMPLER_STATE::RELEASE:
-            pSmpl->egAmp -= pSmpl->egAmp * pEnv->ampR;
+            pSmpl->egAmp -= pSmpl->egAmp * pSystemValue->deltaTime * pEnv->ampR;
             break;
         case E_SAMPLER_STATE::HOLD:
             pSmpl->egAmp -= pSmpl->egAmp * pEffectParam->holdDelta;

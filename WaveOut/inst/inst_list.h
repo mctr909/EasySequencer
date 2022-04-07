@@ -64,24 +64,24 @@ typedef struct INST_REGION {
 #pragma pack()
 
 typedef struct INST_ENV {
-    double ampA = 0.5;
+    double ampA = 500.0;
     double ampH = 0.0;
-    double ampD = 0.5;
+    double ampD = 500.0;
     double ampS = 1.0;
-    double ampR = 0.5;
+    double ampR = 100.0;
 
-    double cutoffA = 0.5;
+    double cutoffA = 500.0;
     double cutoffH = 0.0;
-    double cutoffD = 0.5;
+    double cutoffD = 500.0;
     double cutoffS = 1.0;
-    double cutoffR = 0.5;
+    double cutoffR = 100.0;
     double cutoffRise = 1.0;
     double cutoffTop = 1.0;
     double cutoffFall = 1.0;
     double resonance = 0.0;
 
-    double pitchA = 0.5;
-    double pitchR = 0.5;
+    double pitchA = 500.0;
+    double pitchR = 100.0;
     double pitchRise = 1.0;
     double pitchFall = 1.0;
 } INST_ENV;

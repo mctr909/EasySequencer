@@ -202,7 +202,7 @@ void InstList::SetSampler(INST_INFO *pInstInfo, byte channelNum, byte noteNum, b
 void InstList::loadDls(LPWSTR path) {
     auto cDls = new DLS(path);
 
-    /* count layer/region/art */
+    /* count layer/region/art/wave */
     mWaveCount = cDls->WaveCount;
     mInstList.count = cDls->InstCount;
     for (uint idxI = 0; idxI < mInstList.count; idxI++) {
@@ -227,7 +227,7 @@ void InstList::loadDls(LPWSTR path) {
         mLayerCount += rgnLayer;
     }
 
-    /* alocate inst/layer/region/art/wave */
+    /* allocate inst/layer/region/art/wave */
     mInstList.ppData = (INST_INFO**)malloc(sizeof(INST_INFO*) * mInstList.count);
     memset(mInstList.ppData, 0, sizeof(INST_INFO**));
     mppLayerList = (INST_LAYER**)malloc(sizeof(INST_LAYER*) * mLayerCount);
@@ -306,6 +306,17 @@ void InstList::loadDls(LPWSTR path) {
                 pWave->unityNote = (byte)cDlsRgn->pWaveSmpl->unityNote;
                 pWave->pitch = cDlsRgn->pWaveSmpl->getFileTune();
                 pWave->gain = cDlsRgn->pWaveSmpl->getGain();
+                if (0 == cDlsRgn->pWaveSmpl->loopCount) {
+                    auto cDlsWave = cDls->cWvpl->pcWave[pRegion->waveIndex];
+                    pWave->loopEnable = 0;
+                    pWave->loopBegin = 0;
+                    pWave->loopLength = cDlsWave->DataSize * 8 / cDlsWave->Format.bits;
+                } else {
+                    auto pLoop = cDlsRgn->ppWaveLoop[0];
+                    pWave->loopEnable = 1;
+                    pWave->loopBegin = pLoop->start;
+                    pWave->loopLength = pLoop->length;
+                }
                 pRegion->wsmpIndex = waveIndex;
                 waveIndex++;
             }
@@ -389,8 +400,8 @@ void InstList::loadDlsArt(LART *cLart, INST_ART *pArt) {
     INST_ART art;
     memcpy_s(pArt, sizeof(INST_ART), &art, sizeof(INST_ART));
 
-    auto ampA = 0.0;
-    auto cutoffA = 0.0;
+    auto ampA = 0.002;
+    auto cutoffA = 0.002;
 
     for (int idxC = 0; idxC < cLart->cArt->Count; idxC++) {
         auto pConn = cLart->cArt->ppConnection[idxC];
@@ -407,37 +418,37 @@ void InstList::loadDlsArt(LART *cLart, INST_ART *pArt) {
 
         case E_DLS_DST::EG1_ATTACK_TIME:
             ampA = pConn->getValue();
-            pArt->env.ampA = 0.01 / ampA;
+            pArt->env.ampA = 500.0 / ampA;
             break;
         case E_DLS_DST::EG1_HOLD_TIME:
             pArt->env.ampH = pConn->getValue();
             break;
         case E_DLS_DST::EG1_DECAY_TIME:
-            pArt->env.ampD = 0.01 / pConn->getValue();
+            pArt->env.ampD = 500.0 / pConn->getValue();
             break;
         case E_DLS_DST::EG1_SUSTAIN_LEVEL:
             pArt->env.ampS = pConn->getValue();
             break;
         case E_DLS_DST::EG1_RELEASE_TIME:
-            pArt->env.ampR = 0.001 / pConn->getValue();
+            pArt->env.ampR = 500.0 / pConn->getValue();
             break;
 
         case E_DLS_DST::EG2_ATTACK_TIME:
             cutoffA = pConn->getValue();
-            pArt->env.cutoffA = 0.01 / cutoffA;
+            pArt->env.cutoffA = 500.0 / cutoffA;
             break;
         case E_DLS_DST::EG2_HOLD_TIME:
             pArt->env.cutoffH = pConn->getValue();
             break;
         case E_DLS_DST::EG2_DECAY_TIME:
-            pArt->env.cutoffD = 0.01 / pConn->getValue();
+            pArt->env.cutoffD = 500.0 / pConn->getValue();
             break;
         case E_DLS_DST::EG2_SUSTAIN_LEVEL:
             pArt->env.cutoffS = pConn->getValue();
             pArt->env.cutoffFall = pArt->env.cutoffS;
             break;
         case E_DLS_DST::EG2_RELEASE_TIME:
-            pArt->env.cutoffR = 0.001 / pConn->getValue();
+            pArt->env.cutoffR = 500.0 / pConn->getValue();
             break;
 
         default:

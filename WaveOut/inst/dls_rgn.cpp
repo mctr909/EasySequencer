@@ -32,6 +32,13 @@ RGN_::RGN_(FILE *fp, long size) : RiffChunk() {
 }
 
 RGN_::~RGN_() {
+    if (NULL != ppWaveLoop) {
+        for (unsigned int i = 0; i < pWaveSmpl->loopCount; ++i) {
+            free(ppWaveLoop[i]);
+        }
+        free(ppWaveLoop);
+        ppWaveLoop = NULL;
+    }
     if (NULL != pWaveSmpl) {
         free(pWaveSmpl);
         pWaveSmpl = NULL;
@@ -56,9 +63,20 @@ void RGN_::LoadChunk(FILE *fp, const char *type, long size) {
             free(pWaveSmpl);
             pWaveSmpl = NULL;
         }
+        if (NULL != ppWaveLoop) {
+            for (unsigned int i = 0; i < pWaveSmpl->loopCount; ++i) {
+                free(ppWaveLoop[i]);
+            }
+            free(ppWaveLoop);
+            ppWaveLoop = NULL;
+        }
         pWaveSmpl = (DLS_WSMP*)malloc(sizeof(DLS_WSMP));
         fread_s(pWaveSmpl, sizeof(DLS_WSMP), sizeof(DLS_WSMP), 1, fp);
-        fseek(fp, size - sizeof(DLS_WSMP), SEEK_CUR);
+        ppWaveLoop = (DLS_LOOP**)malloc(sizeof(DLS_LOOP*) * pWaveSmpl->loopCount);
+        for (unsigned int i = 0; i < pWaveSmpl->loopCount; ++i) {
+            ppWaveLoop[i] = (DLS_LOOP*)malloc(sizeof(DLS_LOOP));
+            fread_s(ppWaveLoop[i], sizeof(DLS_LOOP), sizeof(DLS_LOOP), 1, fp);
+        }
         return;
     }
     fseek(fp, size, SEEK_CUR);

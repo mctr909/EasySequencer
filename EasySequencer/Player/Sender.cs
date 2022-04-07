@@ -130,7 +130,7 @@ namespace Player {
             mWaveTablePath = waveTablePath;
             //var sf2 = new SF2.SF2(dlsPath, mpWaveTable, fileSize);
             //sf2.GetInstList(mpInstList);
-            mpInstList = waveout_open(Marshal.StringToHGlobalAuto(mWaveTablePath), SampleRate, 32, 256, 32);
+            mpInstList = waveout_open(Marshal.StringToHGlobalAuto(mWaveTablePath), SampleRate, 32, SampleRate / 150, 32);
             mppChParam = message_getChannelParamPtr();
         }
 
@@ -167,7 +167,7 @@ namespace Player {
                     fileout_save(
                         Marshal.StringToHGlobalAuto(mWaveTablePath),
                         Marshal.StringToHGlobalAuto(filePath),
-                        44100, 16, (IntPtr)evPtr, (uint)evArr.Length, 960);
+                        48000, 16, (IntPtr)evPtr, (uint)evArr.Length, 960);
                 }
                 IsFileOutput = false;
             });

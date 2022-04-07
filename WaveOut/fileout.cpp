@@ -63,7 +63,7 @@ void WINAPI fileout_save(
     gFileOutSysValue.cInstList = new InstList(waveTablePath);
     gFileOutSysValue.pWaveTable = gFileOutSysValue.cInstList->GetWaveTablePtr();
     gFileOutSysValue.ppSampler = gFileOutSysValue.cInstList->GetSamplerPtr();
-    gFileOutSysValue.bufferLength = 512;
+    gFileOutSysValue.bufferLength = 256;
     gFileOutSysValue.bufferCount = 16;
     gFileOutSysValue.sampleRate = sampleRate;
     gFileOutSysValue.bits = bitRate;

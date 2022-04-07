@@ -23,6 +23,7 @@ public:
     DLS_RGNH Header;
     DLS_WLNK WaveLink;
     DLS_WSMP *pWaveSmpl = NULL;
+    DLS_LOOP **ppWaveLoop = NULL;
     LART *cLart = NULL;
 
 public:
