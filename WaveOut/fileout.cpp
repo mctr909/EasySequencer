@@ -33,13 +33,12 @@ typedef struct {
 
 /******************************************************************************/
 SYSTEM_VALUE  gFileOutSysValue = { 0 };
-int           gFileOutProgress = 0;
-FMT_          gFmt = { 0 };
 FILE          *gfpFileOut = NULL;
+FMT_          gFmt = { 0 };
+int           gFileOutProgress = 0;
 double        gBpm = 120.0;
 
 /******************************************************************************/
-void fileOutSampler();
 int fileOutSend(Channel **ppCh, LPBYTE msg);
 void fileOutWrite(INST_SAMPLER **ppSmpl, EFFECT **ppCh, LPBYTE outBuffer);
 
@@ -145,16 +144,6 @@ void WINAPI fileout_save(
 }
 
 /******************************************************************************/
-void fileOutSampler() {
-    for (int s = 0; s < SAMPLER_COUNT; s++) {
-        auto pSmpl = gFileOutSysValue.ppSampler[s];
-        if (pSmpl->state < E_SAMPLER_STATE::PURGE) {
-            continue;
-        }
-        sampler(&gFileOutSysValue, pSmpl);
-    }
-}
-
 int fileOutSend(Channel **ppCh, LPBYTE msg) {
     auto type = (E_EVENT_TYPE)(*msg & 0xF0);
     auto ch = *msg & 0x0F;
@@ -199,12 +188,20 @@ int fileOutSend(Channel **ppCh, LPBYTE msg) {
 }
 
 void fileOutWrite(INST_SAMPLER **ppSmpl, EFFECT **ppCh, LPBYTE outBuffer) {
-    fileOutSampler();
+    /* sampler loop */
+    for (int s = 0; s < SAMPLER_COUNT; s++) {
+        auto pSmpl = gFileOutSysValue.ppSampler[s];
+        if (pSmpl->state < E_SAMPLER_STATE::PURGE) {
+            continue;
+        }
+        sampler(&gFileOutSysValue, pSmpl);
+    }
 
+    /* buffer clear */
     int buffSize = gFileOutSysValue.bufferLength * gFmt.blockAlign;
     memset(outBuffer, 0, buffSize);
 
-    // channel loop
+    /* channel loop */
     for (int c = 0; c < CHANNEL_COUNT; c++) {
         auto pEffect = gFileOutSysValue.ppEffect[c];
         auto pInputBuff = pEffect->pOutput;
