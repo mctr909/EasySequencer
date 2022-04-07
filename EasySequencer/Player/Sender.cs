@@ -150,10 +150,13 @@ namespace Player {
                     if (null == ev.Meta) {
                         continue;
                     }
-                    if (ev.Meta.Type == E_META.TEMPO) {
+                    switch (ev.Meta.Type) {
+                    case E_META.TEMPO:
+                    case E_META.EOT:
                         bw.Write(ev.Tick);
                         bw.Write(ev.Data);
-                    } else {
+                        break;
+                    default:
                         continue;
                     }
                 }

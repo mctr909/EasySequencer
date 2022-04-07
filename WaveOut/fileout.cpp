@@ -184,7 +184,18 @@ int fileOutSend(Channel **ppCh, LPBYTE msg) {
         ppCh[ch]->PitchBend(((msg[2] << 7) | msg[1]) - 8192);
         return 3;
     case E_EVENT_TYPE::SYS_EX:
-        return 6;
+        if (0xFF == msg[0]) {
+            switch ((E_META_TYPE)msg[1]) {
+            case E_META_TYPE::TEMPO:
+                return 6;
+            case E_META_TYPE::TRACK_END:
+                return 3;
+            default:
+                return 0;
+            }
+        } else {
+            return 0;
+        }
     default:
         return 0;
     }
