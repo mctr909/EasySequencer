@@ -36,6 +36,7 @@ SYSTEM_VALUE  gFileOutSysValue = { 0 };
 int           gFileOutProgress = 0;
 FMT_          gFmt = { 0 };
 FILE          *gfpFileOut = NULL;
+double        gBpm = 120.0;
 
 /******************************************************************************/
 void fileOutSampler();
@@ -111,7 +112,6 @@ void WINAPI fileout_save(
     //********************************
     uint curPos = 0;
     double curTime = 0.0;
-    double bpm = 120.0;
     double delta_sec = gFileOutSysValue.bufferLength * gFileOutSysValue.deltaTime;
     auto ppSampler = gFileOutSysValue.ppSampler;
     while (curPos < eventSize) {
@@ -120,13 +120,8 @@ void WINAPI fileout_save(
         auto evValue = pEvents + curPos;
         while (curTime < evTime) {
             fileOutWrite(ppSampler, gFileOutSysValue.ppEffect, pOutBuffer);
-            curTime += bpm * delta_sec / 60.0;
+            curTime += gBpm * delta_sec / 60.0;
             gFileOutProgress = curPos;
-        }
-        if (E_EVENT_TYPE::META == (E_EVENT_TYPE)evValue[0]) {
-            if (E_META_TYPE::TEMPO == (E_META_TYPE)evValue[1]) {
-                bpm = 60000000.0 / ((evValue[3] << 16) | (evValue[4] << 8) | evValue[5]);
-            }
         }
         curPos += fileOutSend(ppChannels, evValue);
     }
@@ -185,14 +180,16 @@ int fileOutSend(Channel **ppCh, LPBYTE msg) {
         return 3;
     case E_EVENT_TYPE::SYS_EX:
         if (0xFF == msg[0]) {
-            switch ((E_META_TYPE)msg[1]) {
+            auto type = (E_META_TYPE)msg[1];
+            auto size = msg[2];
+            switch (type) {
             case E_META_TYPE::TEMPO:
-                return 6;
-            case E_META_TYPE::TRACK_END:
-                return 3;
+                gBpm = 60000000.0 / ((msg[3] << 16) | (msg[4] << 8) | msg[5]);
+                break;
             default:
-                return 0;
+                break;
             }
+            return size + 3;
         } else {
             return 0;
         }
