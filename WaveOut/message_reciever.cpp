@@ -9,6 +9,24 @@ CHANNEL_PARAM **gppChParam = NULL;
 
 /******************************************************************************/
 void message_createChannels(SYSTEM_VALUE *pSystemValue) {
+    message_disposeChannels(pSystemValue);
+    //
+    gppChannels = (Channel**)malloc(sizeof(Channel*) * CHANNEL_COUNT);
+    for (int c = 0; c < CHANNEL_COUNT; c++) {
+        gppChannels[c] = new Channel(pSystemValue, c);
+    }
+    //
+    gppChParam = (CHANNEL_PARAM**)malloc(sizeof(CHANNEL_PARAM*) * CHANNEL_COUNT);
+    for (int i = 0; i < CHANNEL_COUNT; i++) {
+        gppChParam[i] = &gppChannels[i]->Param;
+    }
+}
+
+void message_disposeChannels(SYSTEM_VALUE *pSystemValue) {
+    if (NULL != gppChParam) {
+        free(gppChParam);
+        gppChParam = NULL;
+    }
     if (NULL != gppChannels) {
         for (int c = 0; c < CHANNEL_COUNT; c++) {
             delete gppChannels[c];
@@ -16,19 +34,6 @@ void message_createChannels(SYSTEM_VALUE *pSystemValue) {
         }
         free(gppChannels);
         gppChannels = NULL;
-    }
-    gppChannels = (Channel**)malloc(sizeof(Channel*) * CHANNEL_COUNT);
-    for (int c = 0; c < CHANNEL_COUNT; c++) {
-        gppChannels[c] = new Channel(pSystemValue, c);
-    }
-    //
-    if (NULL != gppChParam) {
-        free(gppChParam);
-        gppChParam = NULL;
-    }
-    gppChParam = (CHANNEL_PARAM**)malloc(sizeof(CHANNEL_PARAM*) * CHANNEL_COUNT);
-    for (int i = 0; i < CHANNEL_COUNT; i++) {
-        gppChParam[i] = &gppChannels[i]->Param;
     }
 }
 

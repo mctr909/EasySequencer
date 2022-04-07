@@ -85,6 +85,15 @@ INST_INFO *InstList::GetInstInfo(INST_ID *id) {
             return mInstList.ppData[i];
         }
     }
+    for (uint i = 0; i < mInstList.count; i++) {
+        auto listId = mInstList.ppData[i]->id;
+        if (listId.isDrum == id->isDrum &&
+            listId.bankMSB == 0 &&
+            listId.bankLSB == 0 &&
+            listId.progNum == 0) {
+            return mInstList.ppData[i];
+        }
+    }
     return mInstList.ppData[0];
 }
 
@@ -440,6 +449,7 @@ void InstList::loadDlsArt(LART *cLart, INST_ART *pArt) {
     pArt->env.cutoffH += cutoffA;
 }
 
+/******************************************************************************/
 uint InstList::writeWaveTable8(FILE *fp, byte* pData, uint size) {
     uint samples = size;
     for (uint i = 0; i < samples; i++) {

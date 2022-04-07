@@ -104,6 +104,7 @@ void WINAPI waveout_close() {
         gSysValue.cInstList = NULL;
     }
     effect_dispose(&gSysValue);
+    message_disposeChannels(&gSysValue);
 }
 
 /******************************************************************************/

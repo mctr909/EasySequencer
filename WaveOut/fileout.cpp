@@ -1,9 +1,9 @@
 #pragma once
+#include <stdio.h>
 #include "fileout.h"
 #include "synth/channel.h"
 #include "synth/sampler.h"
 #include "synth/effect.h"
-#include <stdio.h>
 
 /******************************************************************************/
 typedef struct INST_SAMPLER INST_SAMPLER;

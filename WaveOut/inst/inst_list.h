@@ -3,6 +3,7 @@
 #include <windows.h>
 #include <stdio.h>
 
+/******************************************************************************/
 #define SAMPLER_COUNT 64
 
 enum struct E_SAMPLER_STATE : byte {
@@ -14,6 +15,7 @@ enum struct E_SAMPLER_STATE : byte {
     HOLD
 };
 
+/******************************************************************************/
 #pragma pack(4)
 typedef struct INST_ID {
     byte isDrum = 0;
@@ -128,9 +130,11 @@ typedef struct INST_SAMPLER {
 } INST_SAMPLER;
 #pragma pack()
 
+/******************************************************************************/
 class DLS;
 class LART;
 
+/******************************************************************************/
 class InstList {
 private:
     INST_SAMPLER **mppSampler = NULL;

@@ -42,12 +42,14 @@ namespace EasySequencer {
                     selectedInst = mInstList[cat].Count - 1;
                 }
             }
-            cmbCategory.SelectedItem = selectedCategory;
-            lstInst.Items.Clear();
-            foreach (var inst in mInstList[selectedCategory]) {
-                lstInst.Items.Add(inst.Value);
+            if (mInstList.ContainsKey(selectedCategory)) {
+                cmbCategory.SelectedItem = selectedCategory;
+                lstInst.Items.Clear();
+                foreach (var inst in mInstList[selectedCategory]) {
+                    lstInst.Items.Add(inst.Value);
+                }
+                lstInst.SelectedIndex = selectedInst;
             }
-            lstInst.SelectedIndex = selectedInst;
         }
 
         private void cmbCategory_SelectedIndexChanged(object sender, EventArgs e) {
