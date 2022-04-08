@@ -229,10 +229,7 @@ namespace Player {
                     if (k < 0 || 127 < k) {
                         continue;
                     }
-                    E_KEY_STATE keyState;
-                    unsafe {
-                        keyState = (E_KEY_STATE)channel.KeyBoard[n];
-                    }
+                    var keyState = channel.KeyBoard(n);
                     int x_oct;
                     Rectangle key;
                     switch (keyState) {
@@ -381,7 +378,7 @@ namespace Player {
                     g.FillRectangle(Brushes.Red, MuteButton.X, MuteButton.Y + y_ch, MuteButton.Width, MuteButton.Height);
                 }
                 // InstName
-                g.DrawString(Marshal.PtrToStringAnsi(channel.Name), mInstFont, Brushes.Black, InstName.X, InstName.Y + y_ch, mInstFormat);
+                g.DrawString(channel.Name, mInstFont, Brushes.Black, InstName.X, InstName.Y + y_ch, mInstFormat);
             }
             mBuffer.Render();
         }

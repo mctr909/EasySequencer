@@ -57,6 +57,10 @@ int* WINAPI waveout_getActiveSamplersPtr() {
     return &gActiveCount;
 }
 
+CHANNEL_PARAM** WINAPI waveout_getChannelParamPtr() {
+    return gSysValue.ppChannelParam;
+}
+
 LPBYTE WINAPI waveout_open(
     LPWSTR filePath,
     int sampleRate,

@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Windows.Forms;
-using System.Runtime.InteropServices;
 
 using Player;
 
@@ -23,8 +22,8 @@ namespace EasySequencer {
             var selectedInst = 0;
             for (int i = 0; i < mSender.InstCount; i++) {
                 var inst = mSender.Instruments(i);
-                var nam = string.Format("{0} {1}", inst.id.progNum, Marshal.PtrToStringAnsi(inst.pName));
-                var cat = Marshal.PtrToStringAnsi(inst.pCategory);
+                var nam = string.Format("{0} {1}", inst.id.progNum, inst.Name);
+                var cat = inst.Category;
                 if (!mInstList.ContainsKey(cat)) {
                     mInstList.Add(cat, new Dictionary<INST_ID, string>());
                     cmbCategory.Items.Add(cat);
@@ -69,6 +68,7 @@ namespace EasySequencer {
             }
             var list = mInstList[(string)cmbCategory.SelectedItem].ToArray();
             var inst = list[(lstInst.SelectedIndex < list.Count()) ? lstInst.SelectedIndex : list.Count() - 1];
+            mSender.DrumChannel(mChNum, inst.Key.isDrum != 0);
             mSender.Send(new Event(mChNum, E_CONTROL.BANK_MSB, inst.Key.bankMSB));
             mSender.Send(new Event(mChNum, E_CONTROL.BANK_LSB, inst.Key.bankLSB));
             mSender.Send(new Event(mChNum, E_STATUS.PROGRAM, inst.Key.progNum));

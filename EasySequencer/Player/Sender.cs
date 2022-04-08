@@ -27,22 +27,28 @@ namespace Player {
         uint layerIndex;
         uint layerCount;
         uint artIndex;
-        public IntPtr pName;
-        public IntPtr pCategory;
+        IntPtr pName;
+        IntPtr pCategory;
+
+        public string Name {
+            get { return Marshal.PtrToStringAnsi(pName); }
+        }
+        public string Category {
+            get { return Marshal.PtrToStringAnsi(pCategory); }
+        }
     }
 
     [StructLayout(LayoutKind.Sequential, Pack = 4)]
-    unsafe public struct INST_LIST {
+    unsafe struct INST_LIST {
         public int count;
         public INST_INFO** ppData;
     }
 
     [StructLayout(LayoutKind.Sequential, Pack = 1)]
-    unsafe public struct CHANNEL_PARAM {
-        public fixed byte KeyBoard[128];
+    public struct CHANNEL_PARAM {
         public INST_ID InstId;
-        public IntPtr Name;
         public bool Enable;
+        public bool IsDrum;
         public byte Vol;
         public byte Exp;
         public byte Pan;
@@ -60,13 +66,22 @@ namespace Player {
         public byte VibDelay;
         public byte BendRange;
         public int Pitch;
+        IntPtr pName;
+        IntPtr pKeyBoard;
+
+        public string Name {
+            get { return Marshal.PtrToStringAnsi(pName); }
+        }
+        public E_KEY_STATE KeyBoard(int noteNum) {
+            return (E_KEY_STATE)Marshal.PtrToStructure<byte>(pKeyBoard + noteNum);
+        } 
     }
     #endregion
 
     unsafe public class Sender {
         #region WaveOut.dll
         [DllImport("WaveOut.dll")]
-        private static extern CHANNEL_PARAM** message_getChannelParamPtr();
+        private static extern CHANNEL_PARAM** waveout_getChannelParamPtr();
         [DllImport("WaveOut.dll")]
         private static extern void message_send(byte* pMsg);
 
@@ -125,11 +140,17 @@ namespace Player {
         public void MuteChannel(int num, bool mute) {
             mppChParam[num]->Enable = !mute;
         }
+        public void DrumChannel(int num, bool isDrum) {
+            mppChParam[num]->IsDrum = isDrum;
+        }
+        public bool IsDrumChannel(int num) {
+            return mppChParam[num]->IsDrum;
+        }
 
         public Sender(string waveTablePath) {
             mWaveTablePath = waveTablePath;
             mpInstList = waveout_open(Marshal.StringToHGlobalAuto(mWaveTablePath), SampleRate, 32, SampleRate / 150, 32);
-            mppChParam = message_getChannelParamPtr();
+            mppChParam = waveout_getChannelParamPtr();
         }
 
         public void Send(Event msg) {

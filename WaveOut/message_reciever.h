@@ -11,7 +11,6 @@ extern "C" {
 #endif
     void message_createChannels(SYSTEM_VALUE *pSystemValue);
     void message_disposeChannels(SYSTEM_VALUE *pSystemValue);
-    __declspec(dllexport) CHANNEL_PARAM** WINAPI message_getChannelParamPtr();
     __declspec(dllexport) void WINAPI message_send(LPBYTE msg);
 #ifdef __cplusplus
 }

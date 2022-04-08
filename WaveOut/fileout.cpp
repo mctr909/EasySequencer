@@ -39,8 +39,8 @@ int           gFileOutProgress = 0;
 double        gBpm = 120.0;
 
 /******************************************************************************/
-int fileOutSend(Channel **ppCh, LPBYTE msg);
-void fileOutWrite(INST_SAMPLER **ppSmpl, EFFECT **ppCh, LPBYTE outBuffer);
+int fileOutSend(LPBYTE msg);
+void fileOutWrite(INST_SAMPLER **ppSmpl, LPBYTE outBuffer);
 
 /******************************************************************************/
 int* WINAPI fileout_getProgressPtr() {
@@ -92,9 +92,9 @@ void WINAPI fileout_save(
     effect_create(&gFileOutSysValue);
 
     // allocate channels
-    auto **ppChannels = (Channel**)malloc(sizeof(Channel*) * CHANNEL_COUNT);
+    gFileOutSysValue.ppChannels = (Channel**)malloc(sizeof(Channel*) * CHANNEL_COUNT);
     for (int c = 0; c < CHANNEL_COUNT; c++) {
-        ppChannels[c] = new Channel(&gFileOutSysValue, c);
+        gFileOutSysValue.ppChannels[c] = new Channel(&gFileOutSysValue, c);
     }
 
     // open file
@@ -118,11 +118,11 @@ void WINAPI fileout_save(
         curPos += 4;
         auto evValue = pEvents + curPos;
         while (curTime < evTime) {
-            fileOutWrite(ppSampler, gFileOutSysValue.ppEffect, pOutBuffer);
+            fileOutWrite(ppSampler, pOutBuffer);
             curTime += gBpm * delta_sec / 60.0;
             gFileOutProgress = curPos;
         }
-        curPos += fileOutSend(ppChannels, evValue);
+        curPos += fileOutSend(evValue);
     }
     gFileOutProgress = eventSize;
 
@@ -136,36 +136,36 @@ void WINAPI fileout_save(
     // dispose
     effect_dispose(&gFileOutSysValue);
     for (int c = 0; c < CHANNEL_COUNT; c++) {
-        delete ppChannels[c];
-        ppChannels[c] = NULL;
+        delete gFileOutSysValue.ppChannels[c];
+        gFileOutSysValue.ppChannels[c] = NULL;
     }
-    free(ppChannels);
-    ppChannels = NULL;
+    free(gFileOutSysValue.ppChannels);
+    gFileOutSysValue.ppChannels = NULL;
 }
 
 /******************************************************************************/
-int fileOutSend(Channel **ppCh, LPBYTE msg) {
+int fileOutSend(LPBYTE msg) {
     auto type = (E_EVENT_TYPE)(*msg & 0xF0);
     auto ch = *msg & 0x0F;
     switch (type) {
     case E_EVENT_TYPE::NOTE_OFF:
-        ppCh[ch]->NoteOff(msg[1]);
+        gFileOutSysValue.ppChannels[ch]->NoteOff(msg[1]);
         return 3;
     case E_EVENT_TYPE::NOTE_ON:
-        ppCh[ch]->NoteOn(msg[1], msg[2]);
+        gFileOutSysValue.ppChannels[ch]->NoteOn(msg[1], msg[2]);
         return 3;
     case E_EVENT_TYPE::POLY_KEY:
         return 3;
     case E_EVENT_TYPE::CTRL_CHG:
-        ppCh[ch]->CtrlChange(msg[1], msg[2]);
+        gFileOutSysValue.ppChannels[ch]->CtrlChange(msg[1], msg[2]);
         return 3;
     case E_EVENT_TYPE::PROG_CHG:
-        ppCh[ch]->ProgramChange(msg[1]);
+        gFileOutSysValue.ppChannels[ch]->ProgramChange(msg[1]);
         return 2;
     case E_EVENT_TYPE::CH_PRESS:
         return 2;
     case E_EVENT_TYPE::PITCH:
-        ppCh[ch]->PitchBend(((msg[2] << 7) | msg[1]) - 8192);
+        gFileOutSysValue.ppChannels[ch]->PitchBend(((msg[2] << 7) | msg[1]) - 8192);
         return 3;
     case E_EVENT_TYPE::SYS_EX:
         if (0xFF == msg[0]) {
@@ -187,7 +187,7 @@ int fileOutSend(Channel **ppCh, LPBYTE msg) {
     }
 }
 
-void fileOutWrite(INST_SAMPLER **ppSmpl, EFFECT **ppCh, LPBYTE outBuffer) {
+void fileOutWrite(INST_SAMPLER **ppSmpl, LPBYTE outBuffer) {
     /* sampler loop */
     for (int s = 0; s < SAMPLER_COUNT; s++) {
         auto pSmpl = gFileOutSysValue.ppSampler[s];

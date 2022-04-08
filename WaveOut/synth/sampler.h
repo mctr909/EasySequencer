@@ -3,8 +3,10 @@
 
 /******************************************************************************/
 class InstList;
+class Channel;
 typedef struct INST_SAMPLER INST_SAMPLER;
 typedef struct EFFECT EFFECT;
+typedef struct CHANNEL_PARAM CHANNEL_PARAM;
 
 /******************************************************************************/
 #pragma pack(push, 8)
@@ -12,6 +14,8 @@ typedef struct SYSTEM_VALUE {
     InstList *cInstList;
     INST_SAMPLER **ppSampler;
     EFFECT **ppEffect;
+    Channel **ppChannels;
+    CHANNEL_PARAM **ppChannelParam;
     WAVDAT *pWaveTable;
     int bufferLength;
     int bufferCount;

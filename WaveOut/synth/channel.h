@@ -12,10 +12,9 @@ typedef struct INST_INFO INST_INFO;
 /******************************************************************************/
 #pragma pack(push, 1)
 typedef struct CHANNEL_PARAM {
-    E_KEY_STATE KeyBoard[128] = { };
     INST_ID InstId;
-    byte* Name;
     byte Enable;
+    byte IsDrum;
     byte Vol;
     byte Exp;
     byte Pan;
@@ -33,6 +32,8 @@ typedef struct CHANNEL_PARAM {
     byte VibDelay;
     byte BendRange;
     int Pitch;
+    byte* pName = NULL;
+    E_KEY_STATE *pKeyBoard = NULL;
 } CHANNEL_PARAM;
 #pragma pack(pop)
 
@@ -55,6 +56,7 @@ private:
 
 public:
     Channel(SYSTEM_VALUE *pSystemValue, int number);
+    ~Channel();
 
 public:
     void AllReset();

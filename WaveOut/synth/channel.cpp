@@ -7,7 +7,12 @@ Channel::Channel(SYSTEM_VALUE *pSystemValue, int number) {
     mpSystemValue = pSystemValue;
     mpEffectParam = pSystemValue->ppEffect[number]->pParam;
     Number = (byte)number;
+    Param.pKeyBoard = (E_KEY_STATE*)calloc(1, sizeof(E_KEY_STATE) * 128);
     AllReset();
+}
+
+Channel::~Channel() {
+    free(Param.pKeyBoard);
 }
 
 /******************************************************************************/
@@ -47,10 +52,11 @@ Channel::AllReset() {
     mNrpnLSB = 0xFF;
     mNrpnMSB = 0xFF;
 
-    Param.InstId.isDrum = Number == 9 ? 1 : 0;
-    Param.InstId.progNum = 0;
+    Param.IsDrum = Number == 9 ? 1 : 0;
+
     Param.InstId.bankMSB = 0;
     Param.InstId.bankLSB = 0;
+    Param.InstId.progNum = 0;
     ProgramChange(0);
 
     Param.Enable = 1;
@@ -60,7 +66,9 @@ void
 Channel::NoteOff(byte noteNumber) {
     for (int s = 0; s < SAMPLER_COUNT; ++s) {
         auto pSmpl = mpSystemValue->ppSampler[s];
-        if (pSmpl->state < E_SAMPLER_STATE::PRESS) {
+        auto pChParam = mpSystemValue->ppChannelParam[pSmpl->channelNum];
+        if (pSmpl->state < E_SAMPLER_STATE::PRESS ||
+            (pChParam->IsDrum && !pSmpl->pWave->loopEnable)) {
             continue;
         }
         if (pSmpl->channelNum == Number && pSmpl->noteNum == noteNumber) {
@@ -72,9 +80,9 @@ Channel::NoteOff(byte noteNumber) {
         }
     }
     if (Param.Hld < 64) {
-        Param.KeyBoard[noteNumber] = E_KEY_STATE::FREE;
+        Param.pKeyBoard[noteNumber] = E_KEY_STATE::FREE;
     } else {
-        Param.KeyBoard[noteNumber] = E_KEY_STATE::HOLD;
+        Param.pKeyBoard[noteNumber] = E_KEY_STATE::HOLD;
     }
 }
 
@@ -84,7 +92,7 @@ Channel::NoteOn(byte noteNumber, byte velocity) {
         NoteOff(noteNumber);
         return;
     }
-    Param.KeyBoard[noteNumber] = E_KEY_STATE::PRESS;
+    Param.pKeyBoard[noteNumber] = E_KEY_STATE::PRESS;
     mpSystemValue->cInstList->SetSampler(mpInst, Number, noteNumber, velocity);
 }
 
@@ -174,10 +182,11 @@ Channel::CtrlChange(byte type, byte b1) {
 
 void
 Channel::ProgramChange(byte value) {
+    Param.InstId.isDrum = Param.IsDrum;
     Param.InstId.progNum = value;
     mpInst = mpSystemValue->cInstList->GetInstInfo(&Param.InstId);
     memcpy_s(&Param.InstId, sizeof(Param.InstId), &mpInst->id, sizeof(mpInst->id));
-    Param.Name = (byte*)mpInst->pName;
+    Param.pName = (byte*)mpInst->pName;
 }
 
 void
@@ -217,8 +226,8 @@ Channel::setHld(byte value) {
             }
         }
         for (int n = 0; n < 128; ++n) {
-            if (E_KEY_STATE::HOLD == Param.KeyBoard[n]) {
-                Param.KeyBoard[n] = E_KEY_STATE::FREE;
+            if (E_KEY_STATE::HOLD == Param.pKeyBoard[n]) {
+                Param.pKeyBoard[n] = E_KEY_STATE::FREE;
             }
         }
     }
