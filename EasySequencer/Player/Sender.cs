@@ -128,8 +128,6 @@ namespace Player {
 
         public Sender(string waveTablePath) {
             mWaveTablePath = waveTablePath;
-            //var sf2 = new SF2.SF2(dlsPath, mpWaveTable, fileSize);
-            //sf2.GetInstList(mpInstList);
             mpInstList = waveout_open(Marshal.StringToHGlobalAuto(mWaveTablePath), SampleRate, 32, SampleRate / 150, 32);
             mppChParam = message_getChannelParamPtr();
         }
