@@ -68,20 +68,20 @@ typedef struct INST_ENV {
     double ampH = 0.0;
     double ampD = 500.0;
     double ampS = 1.0;
-    double ampR = 100.0;
+    double ampR = 500.0;
 
     double cutoffA = 500.0;
     double cutoffH = 0.0;
     double cutoffD = 500.0;
     double cutoffS = 1.0;
-    double cutoffR = 100.0;
+    double cutoffR = 500.0;
     double cutoffRise = 1.0;
     double cutoffTop = 1.0;
     double cutoffFall = 1.0;
     double resonance = 0.0;
 
     double pitchA = 500.0;
-    double pitchR = 100.0;
+    double pitchR = 500.0;
     double pitchRise = 1.0;
     double pitchFall = 1.0;
 } INST_ENV;

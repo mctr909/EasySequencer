@@ -401,7 +401,6 @@ void InstList::loadDlsArt(LART *cLart, INST_ART *pArt) {
     memcpy_s(pArt, sizeof(INST_ART), &art, sizeof(INST_ART));
 
     auto ampA = 0.002;
-    auto cutoffA = 0.002;
 
     for (int idxC = 0; idxC < cLart->cArt->Count; idxC++) {
         auto pConn = cLart->cArt->ppConnection[idxC];
@@ -418,37 +417,19 @@ void InstList::loadDlsArt(LART *cLart, INST_ART *pArt) {
 
         case E_DLS_DST::EG1_ATTACK_TIME:
             ampA = pConn->getValue();
-            pArt->env.ampA = 500.0 / ampA;
+            pArt->env.ampA = 1.0 / ampA;
             break;
         case E_DLS_DST::EG1_HOLD_TIME:
             pArt->env.ampH = pConn->getValue();
             break;
         case E_DLS_DST::EG1_DECAY_TIME:
-            pArt->env.ampD = 500.0 / pConn->getValue();
+            pArt->env.ampD = 1.0 / pConn->getValue();
             break;
         case E_DLS_DST::EG1_SUSTAIN_LEVEL:
             pArt->env.ampS = pConn->getValue();
             break;
         case E_DLS_DST::EG1_RELEASE_TIME:
-            pArt->env.ampR = 500.0 / pConn->getValue();
-            break;
-
-        case E_DLS_DST::EG2_ATTACK_TIME:
-            cutoffA = pConn->getValue();
-            pArt->env.cutoffA = 500.0 / cutoffA;
-            break;
-        case E_DLS_DST::EG2_HOLD_TIME:
-            pArt->env.cutoffH = pConn->getValue();
-            break;
-        case E_DLS_DST::EG2_DECAY_TIME:
-            pArt->env.cutoffD = 500.0 / pConn->getValue();
-            break;
-        case E_DLS_DST::EG2_SUSTAIN_LEVEL:
-            pArt->env.cutoffS = pConn->getValue();
-            pArt->env.cutoffFall = pArt->env.cutoffS;
-            break;
-        case E_DLS_DST::EG2_RELEASE_TIME:
-            pArt->env.cutoffR = 500.0 / pConn->getValue();
+            pArt->env.ampR = 1.0 / pConn->getValue();
             break;
 
         default:
@@ -457,7 +438,6 @@ void InstList::loadDlsArt(LART *cLart, INST_ART *pArt) {
     }
 
     pArt->env.ampH += ampA;
-    pArt->env.cutoffH += cutoffA;
 }
 
 /******************************************************************************/
