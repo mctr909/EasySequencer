@@ -93,8 +93,10 @@ void WINAPI fileout_save(
 
     // allocate channels
     gFileOutSysValue.ppChannels = (Channel**)malloc(sizeof(Channel*) * CHANNEL_COUNT);
+    gFileOutSysValue.ppChannelParam = (CHANNEL_PARAM**)malloc(sizeof(CHANNEL_PARAM*) * CHANNEL_COUNT);
     for (int c = 0; c < CHANNEL_COUNT; c++) {
         gFileOutSysValue.ppChannels[c] = new Channel(&gFileOutSysValue, c);
+        gFileOutSysValue.ppChannelParam[c] = &gFileOutSysValue.ppChannels[c]->Param;
     }
 
     // open file
@@ -133,14 +135,18 @@ void WINAPI fileout_save(
     fwrite(&gFmt, sizeof(gFmt), 1, gfpFileOut);
     fclose(gfpFileOut);
 
-    // dispose
+    /* dispose effect */
     effect_dispose(&gFileOutSysValue);
+
+    /* dispose channels */
     for (int c = 0; c < CHANNEL_COUNT; c++) {
         delete gFileOutSysValue.ppChannels[c];
         gFileOutSysValue.ppChannels[c] = NULL;
     }
     free(gFileOutSysValue.ppChannels);
     gFileOutSysValue.ppChannels = NULL;
+    free(gFileOutSysValue.ppChannelParam);
+    gFileOutSysValue.ppChannelParam = NULL;
 }
 
 /******************************************************************************/
