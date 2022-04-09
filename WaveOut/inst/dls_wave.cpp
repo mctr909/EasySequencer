@@ -58,7 +58,8 @@ void WAVE::LoadInfo(FILE *fp, const char *type, long size) {
 
 void WAVE::LoadChunk(FILE *fp, const char *type, long size) {
     if (0 == strcmp("fmt ", type)) {
-        fread_s(&Format, sizeof(Format), size, 1, fp);
+        fread_s(&Format, sizeof(Format), sizeof(Format), 1, fp);
+        fseek(fp, size - sizeof(Format), SEEK_CUR);
         return;
     }
     if (0 == strcmp("data", type)) {

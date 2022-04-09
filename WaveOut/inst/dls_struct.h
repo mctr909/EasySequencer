@@ -179,7 +179,7 @@ typedef struct DLS_CONN {
 
         case E_DLS_DST::EG1_SUSTAIN_LEVEL:
         case E_DLS_DST::EG2_SUSTAIN_LEVEL:
-            return pow(2.0, -0.005 * scale / 65536.0);
+            return pow(2.0, -0.0005 * scale / 65536.0);
 
         case E_DLS_DST::PITCH:
         case E_DLS_DST::LFO_FREQUENCY:

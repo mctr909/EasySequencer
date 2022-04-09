@@ -4,7 +4,7 @@
 #include <stdio.h>
 
 /******************************************************************************/
-#define SAMPLER_COUNT 64
+#define SAMPLER_COUNT 128
 
 enum struct E_SAMPLER_STATE : byte {
     FREE,

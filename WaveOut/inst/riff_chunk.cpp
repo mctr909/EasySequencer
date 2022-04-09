@@ -57,9 +57,10 @@ void RiffChunk::infoLoop(FILE *fp, long size) {
     while (pos < size) {
         fread_s(&infoType, 4, 4, 1, fp);
         fread_s(&infoSize, 4, 4, 1, fp);
+
+        infoSize += (0 == infoSize % 2) ? 0 : 1;
         pos += infoSize + 8;
 
         LoadInfo(fp, infoType, infoSize);
-        pos += (unsigned int)(infoSize % 2 == 0 ? 0 : 1);
     } 
 }

@@ -115,7 +115,7 @@ namespace Player {
         public static readonly int SampleRate = 44100;
         public static readonly double DeltaTime = 1.0 / SampleRate;
         public static int CHANNEL_COUNT = 16;
-        public static int SAMPLER_COUNT = 64;
+        public static int SAMPLER_COUNT = 128;
         public static bool IsFileOutput { get; private set; }
 
         public static int ActiveCount {
