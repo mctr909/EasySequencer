@@ -38,24 +38,24 @@ void message_disposeChannels(SYSTEM_VALUE *pSystemValue) {
 }
 
 /******************************************************************************/
-void WINAPI message_send(LPBYTE msg) {
-    auto type = (E_EVENT_TYPE)(*msg & 0xF0);
-    auto ch = *msg & 0x0F;
+void WINAPI message_send(byte *pMsg) {
+    auto type = (E_EVENT_TYPE)(*pMsg & 0xF0);
+    auto ch = *pMsg & 0x0F;
     switch (type) {
     case E_EVENT_TYPE::NOTE_OFF:
-        message_ppChannels[ch]->NoteOff(msg[1]);
+        message_ppChannels[ch]->NoteOff(pMsg[1]);
         break;
     case E_EVENT_TYPE::NOTE_ON:
-        message_ppChannels[ch]->NoteOn(msg[1], msg[2]);
+        message_ppChannels[ch]->NoteOn(pMsg[1], pMsg[2]);
         break;
     case E_EVENT_TYPE::CTRL_CHG:
-        message_ppChannels[ch]->CtrlChange(msg[1], msg[2]);
+        message_ppChannels[ch]->CtrlChange(pMsg[1], pMsg[2]);
         break;
     case E_EVENT_TYPE::PROG_CHG:
-        message_ppChannels[ch]->ProgramChange(msg[1]);
+        message_ppChannels[ch]->ProgramChange(pMsg[1]);
         break;
     case E_EVENT_TYPE::PITCH:
-        message_ppChannels[ch]->PitchBend(((msg[2] << 7) | msg[1]) - 8192);
+        message_ppChannels[ch]->PitchBend(((pMsg[2] << 7) | pMsg[1]) - 8192);
         break;
     }
 }

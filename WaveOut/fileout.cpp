@@ -39,8 +39,8 @@ int           gFileOutProgress = 0;
 double        gBpm = 120.0;
 
 /******************************************************************************/
-int fileOutSend(LPBYTE msg);
-void fileOutWrite(INST_SAMPLER **ppSmpl, LPBYTE outBuffer);
+int fileout_send(byte *pMsg);
+void fileout_write(INST_SAMPLER **ppSmpl, byte *pOutBuffer);
 
 /******************************************************************************/
 int* WINAPI fileout_getProgressPtr() {
@@ -52,7 +52,7 @@ void WINAPI fileout_save(
     LPWSTR savePath,
     uint sampleRate,
     uint bitRate,
-    LPBYTE pEvents,
+    byte *pEvents,
     uint eventSize,
     uint baseTick
 ) {
@@ -86,7 +86,7 @@ void WINAPI fileout_save(
     gFmt.dataSize = 0;
 
     // allocate out buffer
-    auto pOutBuffer = (LPBYTE)malloc(gFileOutSysValue.bufferLength * gFmt.blockAlign);
+    auto pOutBuffer = (byte*)malloc(gFileOutSysValue.bufferLength * gFmt.blockAlign);
 
     // allocate effects
     effect_create(&gFileOutSysValue);
@@ -120,11 +120,11 @@ void WINAPI fileout_save(
         curPos += 4;
         auto evValue = pEvents + curPos;
         while (curTime < evTime) {
-            fileOutWrite(ppSampler, pOutBuffer);
+            fileout_write(ppSampler, pOutBuffer);
             curTime += gBpm * delta_sec / 60.0;
             gFileOutProgress = curPos;
         }
-        curPos += fileOutSend(evValue);
+        curPos += fileout_send(evValue);
     }
     gFileOutProgress = eventSize;
 
@@ -150,36 +150,36 @@ void WINAPI fileout_save(
 }
 
 /******************************************************************************/
-int fileOutSend(LPBYTE msg) {
-    auto type = (E_EVENT_TYPE)(*msg & 0xF0);
-    auto ch = *msg & 0x0F;
+int fileout_send(byte *pMsg) {
+    auto type = (E_EVENT_TYPE)(*pMsg & 0xF0);
+    auto ch = *pMsg & 0x0F;
     switch (type) {
     case E_EVENT_TYPE::NOTE_OFF:
-        gFileOutSysValue.ppChannels[ch]->NoteOff(msg[1]);
+        gFileOutSysValue.ppChannels[ch]->NoteOff(pMsg[1]);
         return 3;
     case E_EVENT_TYPE::NOTE_ON:
-        gFileOutSysValue.ppChannels[ch]->NoteOn(msg[1], msg[2]);
+        gFileOutSysValue.ppChannels[ch]->NoteOn(pMsg[1], pMsg[2]);
         return 3;
     case E_EVENT_TYPE::POLY_KEY:
         return 3;
     case E_EVENT_TYPE::CTRL_CHG:
-        gFileOutSysValue.ppChannels[ch]->CtrlChange(msg[1], msg[2]);
+        gFileOutSysValue.ppChannels[ch]->CtrlChange(pMsg[1], pMsg[2]);
         return 3;
     case E_EVENT_TYPE::PROG_CHG:
-        gFileOutSysValue.ppChannels[ch]->ProgramChange(msg[1]);
+        gFileOutSysValue.ppChannels[ch]->ProgramChange(pMsg[1]);
         return 2;
     case E_EVENT_TYPE::CH_PRESS:
         return 2;
     case E_EVENT_TYPE::PITCH:
-        gFileOutSysValue.ppChannels[ch]->PitchBend(((msg[2] << 7) | msg[1]) - 8192);
+        gFileOutSysValue.ppChannels[ch]->PitchBend(((pMsg[2] << 7) | pMsg[1]) - 8192);
         return 3;
     case E_EVENT_TYPE::SYS_EX:
-        if (0xFF == msg[0]) {
-            auto type = (E_META_TYPE)msg[1];
-            auto size = msg[2];
+        if (0xFF == pMsg[0]) {
+            auto type = (E_META_TYPE)pMsg[1];
+            auto size = pMsg[2];
             switch (type) {
             case E_META_TYPE::TEMPO:
-                gBpm = 60000000.0 / ((msg[3] << 16) | (msg[4] << 8) | msg[5]);
+                gBpm = 60000000.0 / ((pMsg[3] << 16) | (pMsg[4] << 8) | pMsg[5]);
                 break;
             default:
                 break;
@@ -193,7 +193,7 @@ int fileOutSend(LPBYTE msg) {
     }
 }
 
-void fileOutWrite(INST_SAMPLER **ppSmpl, LPBYTE outBuffer) {
+void fileout_write(INST_SAMPLER **ppSmpl, byte *pOutBuffer) {
     /* sampler loop */
     for (int s = 0; s < SAMPLER_COUNT; s++) {
         auto pSmpl = gFileOutSysValue.ppSampler[s];
@@ -205,14 +205,14 @@ void fileOutWrite(INST_SAMPLER **ppSmpl, LPBYTE outBuffer) {
 
     /* buffer clear */
     int buffSize = gFileOutSysValue.bufferLength * gFmt.blockAlign;
-    memset(outBuffer, 0, buffSize);
+    memset(pOutBuffer, 0, buffSize);
 
     /* channel loop */
     for (int c = 0; c < CHANNEL_COUNT; c++) {
         auto pEffect = gFileOutSysValue.ppEffect[c];
         auto pInputBuff = pEffect->pOutput;
         auto pInputBuffTerm = pInputBuff + pEffect->pSystemValue->bufferLength;
-        auto pBuff = (short*)outBuffer;
+        auto pBuff = (short*)pOutBuffer;
         for (; pInputBuff < pInputBuffTerm; pInputBuff++, pBuff += 2) {
             double tempL, tempR;
             // effect
@@ -232,6 +232,6 @@ void fileOutWrite(INST_SAMPLER **ppSmpl, LPBYTE outBuffer) {
         }
     }
 
-    fwrite(outBuffer, buffSize, 1, gfpFileOut);
+    fwrite(pOutBuffer, buffSize, 1, gfpFileOut);
     gFmt.dataSize += buffSize;
 }

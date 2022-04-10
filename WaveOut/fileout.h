@@ -12,7 +12,7 @@ __declspec(dllexport) void WINAPI fileout_save(
     LPWSTR savePath,
     uint sampleRate,
     uint bitRate,
-    LPBYTE ppEvents,
+    byte *pEvents,
     uint eventSize,
     uint baseTick
 );

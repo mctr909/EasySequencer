@@ -61,7 +61,7 @@ CHANNEL_PARAM** WINAPI waveout_getChannelParamPtr() {
     return gSysValue.ppChannelParam;
 }
 
-LPBYTE WINAPI waveout_open(
+byte* WINAPI waveout_open(
     LPWSTR filePath,
     int sampleRate,
     int bits,
@@ -98,7 +98,7 @@ LPBYTE WINAPI waveout_open(
     default:
         break;
     }
-    return (LPBYTE)gSysValue.cInstList->GetInstList();
+    return (byte*)gSysValue.cInstList->GetInstList();
 }
 
 void WINAPI waveout_close() {
