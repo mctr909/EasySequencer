@@ -9,13 +9,13 @@ Channel **message_ppChannels = NULL;
 void message_createChannels(SYSTEM_VALUE *pSystemValue) {
     message_disposeChannels(pSystemValue);
     //
-    pSystemValue->ppChannels = (Channel**)malloc(sizeof(Channel*) * CHANNEL_COUNT);
+    pSystemValue->ppChannels = (Channel**)calloc(CHANNEL_COUNT, sizeof(Channel*));
     message_ppChannels = pSystemValue->ppChannels;
     for (int c = 0; c < CHANNEL_COUNT; c++) {
         pSystemValue->ppChannels[c] = new Channel(pSystemValue, c);
     }
     //
-    pSystemValue->ppChannelParam = (CHANNEL_PARAM**)malloc(sizeof(CHANNEL_PARAM*) * CHANNEL_COUNT);
+    pSystemValue->ppChannelParam = (CHANNEL_PARAM**)calloc(CHANNEL_COUNT, sizeof(CHANNEL_PARAM*));
     for (int i = 0; i < CHANNEL_COUNT; i++) {
         pSystemValue->ppChannelParam[i] = &pSystemValue->ppChannels[i]->Param;
     }

@@ -5,8 +5,7 @@
 
 LINS::LINS(FILE *fp, long size, int count) : RiffChunk() {
     Count = 0;
-    pcInst = (INS_**)malloc(sizeof(INS_*) * count);
-    memset(pcInst, 0, sizeof(INS_*) * count);
+    pcInst = (INS_**)calloc(count, sizeof(INS_*));
     Load(fp, size);
 }
 

@@ -90,14 +90,14 @@ void WINAPI fileout_save(
     gFmt.dataSize = 0;
 
     // allocate out buffer
-    auto pOutBuffer = (byte*)malloc(gFileOutSysValue.bufferLength * gFmt.blockAlign);
+    auto pOutBuffer = (byte*)calloc(gFmt.blockAlign, gFileOutSysValue.bufferLength);
 
     // allocate effects
     effect_create(&gFileOutSysValue);
 
     // allocate channels
-    gFileOutSysValue.ppChannels = (Channel**)malloc(sizeof(Channel*) * CHANNEL_COUNT);
-    gFileOutSysValue.ppChannelParam = (CHANNEL_PARAM**)malloc(sizeof(CHANNEL_PARAM*) * CHANNEL_COUNT);
+    gFileOutSysValue.ppChannels = (Channel**)calloc(CHANNEL_COUNT, sizeof(Channel*));
+    gFileOutSysValue.ppChannelParam = (CHANNEL_PARAM**)calloc(CHANNEL_COUNT, sizeof(CHANNEL_PARAM*));
     for (int c = 0; c < CHANNEL_COUNT; c++) {
         gFileOutSysValue.ppChannels[c] = new Channel(&gFileOutSysValue, c);
         gFileOutSysValue.ppChannelParam[c] = &gFileOutSysValue.ppChannels[c]->Param;

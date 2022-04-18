@@ -3,8 +3,7 @@
 
 WVPL::WVPL(FILE *fp, long size, int count) : RiffChunk() {
     Count = 0;
-    pcWave = (WAVE**)malloc(sizeof(WAVE*) * count);
-    memset(pcWave, 0, sizeof(WAVE*) * count);
+    pcWave = (WAVE**)calloc(count, sizeof(WAVE*));
     Load(fp, size);
 }
 
@@ -71,7 +70,7 @@ void WAVE::LoadChunk(FILE *fp, const char *type, long size) {
     if (0 == strcmp("wsmp", type)) {
         fread_s(&WaveSmpl, sizeof(WaveSmpl), sizeof(WaveSmpl), 1, fp);
         LoopCount = WaveSmpl.loopCount;
-        ppWaveLoop = (DLS_LOOP**)malloc(sizeof(DLS_LOOP*) * LoopCount);
+        ppWaveLoop = (DLS_LOOP**)calloc(LoopCount, sizeof(DLS_LOOP*));
         for (unsigned int i = 0; i < LoopCount; ++i) {
             ppWaveLoop[i] = (DLS_LOOP*)malloc(sizeof(DLS_LOOP));
             fread_s(ppWaveLoop[i], sizeof(DLS_LOOP), sizeof(DLS_LOOP), 1, fp);

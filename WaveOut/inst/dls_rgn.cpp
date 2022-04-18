@@ -4,8 +4,7 @@
 
 LRGN::LRGN(FILE *fp, long size, int count) : RiffChunk() {
     Count = 0;
-    pcRegion = (RGN_**)malloc(sizeof(RGN_*) * count);
-    memset(pcRegion, 0, sizeof(RGN_*) * count);
+    pcRegion = (RGN_**)calloc(count, sizeof(RGN_*));
     Load(fp, size);
 }
 
@@ -72,7 +71,7 @@ void RGN_::LoadChunk(FILE *fp, const char *type, long size) {
         }
         pWaveSmpl = (DLS_WSMP*)malloc(sizeof(DLS_WSMP));
         fread_s(pWaveSmpl, sizeof(DLS_WSMP), sizeof(DLS_WSMP), 1, fp);
-        ppWaveLoop = (DLS_LOOP**)malloc(sizeof(DLS_LOOP*) * pWaveSmpl->loopCount);
+        ppWaveLoop = (DLS_LOOP**)calloc(pWaveSmpl->loopCount, sizeof(DLS_LOOP*));
         for (unsigned int i = 0; i < pWaveSmpl->loopCount; ++i) {
             ppWaveLoop[i] = (DLS_LOOP*)malloc(sizeof(DLS_LOOP));
             fread_s(ppWaveLoop[i], sizeof(DLS_LOOP), sizeof(DLS_LOOP), 1, fp);

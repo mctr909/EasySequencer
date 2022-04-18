@@ -17,28 +17,23 @@
 /******************************************************************************/
 void effect_create(SYSTEM_VALUE* pSystemValue) {
     effect_dispose(pSystemValue);
-    pSystemValue->ppEffect = (EFFECT**)malloc(sizeof(EFFECT*) * CHANNEL_COUNT);
+    pSystemValue->ppEffect = (EFFECT**)calloc(CHANNEL_COUNT, sizeof(EFFECT*));
     for (int c = 0; c < CHANNEL_COUNT; c++) {
-        pSystemValue->ppEffect[c] = (EFFECT*)malloc(sizeof(EFFECT));
-        memset(pSystemValue->ppEffect[c], 0, sizeof(EFFECT));
-
+        pSystemValue->ppEffect[c] = (EFFECT*)calloc(1, sizeof(EFFECT));
         auto pEffect = pSystemValue->ppEffect[c];
+
         pEffect->pSystemValue = pSystemValue;
 
         // allocate output buffer
-        pEffect->pOutput = (double*)malloc(sizeof(double) * pEffect->pSystemValue->bufferLength);
-        memset(pEffect->pOutput, 0, sizeof(double) * pEffect->pSystemValue->bufferLength);
+        pEffect->pOutput = (double*)calloc(pEffect->pSystemValue->bufferLength, sizeof(double));
 
         // allocate effect params
-        pEffect->pParam = (EFFECT_PARAM*)malloc(sizeof(EFFECT_PARAM));
-        memset(pEffect->pParam, 0, sizeof(EFFECT_PARAM));
+        pEffect->pParam = (EFFECT_PARAM*)calloc(1, sizeof(EFFECT_PARAM));
 
         // allocate delay taps
         pEffect->writeIndex = 0;
-        pEffect->pDelTapL = (double*)malloc(sizeof(double) * DELAY_TAPS);
-        pEffect->pDelTapR = (double*)malloc(sizeof(double) * DELAY_TAPS);
-        memset(pEffect->pDelTapL, 0, sizeof(double) * DELAY_TAPS);
-        memset(pEffect->pDelTapR, 0, sizeof(double) * DELAY_TAPS);
+        pEffect->pDelTapL = (double*)calloc(DELAY_TAPS, sizeof(double));
+        pEffect->pDelTapR = (double*)calloc(DELAY_TAPS, sizeof(double));
 
         // initialize chorus
         pEffect->choLfoU = 0.505 + 0.495;

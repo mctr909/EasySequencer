@@ -22,8 +22,7 @@ ART_::ART_(FILE *fp, long size) {
     fseek(fp, 4, SEEK_CUR);
     fread_s(&Count, 4, 4, 1, fp);
 
-    ppConnection = (DLS_CONN**)malloc(sizeof(DLS_CONN*) * Count);
-    memset(ppConnection, 0, sizeof(DLS_CONN*) * Count);
+    ppConnection = (DLS_CONN**)calloc(Count, sizeof(DLS_CONN*));
 
     for (int i = 0; i < Count; i++) {
         ppConnection[i] = (DLS_CONN*)malloc(sizeof(DLS_CONN));

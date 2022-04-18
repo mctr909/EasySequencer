@@ -7,10 +7,10 @@
 
 /******************************************************************************/
 InstList::InstList() {
-    mppSampler = (INST_SAMPLER**)malloc(sizeof(INST_SAMPLER*) * SAMPLER_COUNT);
+    mppSampler = (INST_SAMPLER**)calloc(SAMPLER_COUNT, sizeof(INST_SAMPLER*));
     for (uint i = 0; i < SAMPLER_COUNT; i++) {
         INST_SAMPLER smpl;
-        mppSampler[i] = (INST_SAMPLER*)calloc(1, sizeof(INST_SAMPLER));
+        mppSampler[i] = (INST_SAMPLER*)malloc(sizeof(INST_SAMPLER));
         memcpy_s(mppSampler[i], sizeof(INST_SAMPLER), &smpl, sizeof(INST_SAMPLER));
     }
 }
@@ -276,7 +276,7 @@ E_LOAD_STATUS InstList::loadDls(LPWSTR path) {
             pInst->artIndex = INVALID_INDEX;
         } else {
             pInst->artIndex = artIndex;
-            mppArtList[artIndex] = (INST_ART*)malloc(sizeof(INST_ART));
+            mppArtList[artIndex] = (INST_ART*)calloc(1, sizeof(INST_ART));
             loadDlsArt(cDlsInst->cLart, mppArtList[artIndex]);
             artIndex++;
         }
@@ -297,7 +297,7 @@ E_LOAD_STATUS InstList::loadDls(LPWSTR path) {
             if (NULL == cDlsRgn->cLart) {
                 pRegion->artIndex = INVALID_INDEX;
             } else {
-                mppArtList[artIndex] = (INST_ART*)malloc(sizeof(INST_ART));
+                mppArtList[artIndex] = (INST_ART*)calloc(1, sizeof(INST_ART));
                 loadDlsArt(cDlsRgn->cLart, mppArtList[artIndex]);
                 pRegion->artIndex = artIndex;
                 artIndex++;
@@ -353,7 +353,7 @@ void InstList::loadDlsWave(DLS *cDls) {
     _wfopen_s(&fpWave, mWaveTablePath, TEXT("wb"));
     uint wavePos = 0;
     for (int idxW = 0; idxW < cDls->WaveCount; idxW++) {
-        mppWaveList[idxW] = (INST_WAVE*)malloc(sizeof(INST_WAVE));
+        mppWaveList[idxW] = (INST_WAVE*)calloc(1, sizeof(INST_WAVE));
         auto pWave = mppWaveList[idxW];
         auto cDlsWave = cDls->cWvpl->pcWave[idxW];
 
