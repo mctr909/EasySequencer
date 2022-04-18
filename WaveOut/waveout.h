@@ -1,6 +1,5 @@
 #pragma once
 #include <windows.h>
-#include "type.h"
 
 /******************************************************************************/
 typedef struct INST_LIST INST_LIST;
@@ -12,9 +11,8 @@ extern "C" {
 #endif
     __declspec(dllexport) int* WINAPI waveout_getActiveSamplersPtr();
     __declspec(dllexport) CHANNEL_PARAM** WINAPI waveout_getChannelParamPtr();
-    __declspec(dllexport) E_LOAD_STATUS WINAPI waveout_open(
+    __declspec(dllexport) byte* WINAPI waveout_open(
         LPWSTR filePath,
-        byte *pInstList,
         int sampleRate,
         int bits,
         int bufferLength,

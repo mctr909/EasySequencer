@@ -4,6 +4,7 @@
 #include "synth/channel.h"
 #include "synth/sampler.h"
 #include "synth/effect.h"
+#include "type.h"
 
 #include <stdio.h>
 #include <mmsystem.h>
@@ -61,9 +62,8 @@ CHANNEL_PARAM** WINAPI waveout_getChannelParamPtr() {
     return gSysValue.ppChannelParam;
 }
 
-E_LOAD_STATUS WINAPI waveout_open(
+byte *WINAPI waveout_open(
     LPWSTR filePath,
-    byte* pInstList,
     int sampleRate,
     int bits,
     int bufferLength,
@@ -78,7 +78,16 @@ E_LOAD_STATUS WINAPI waveout_open(
     auto cInst = new InstList();
     auto loadStatus = cInst->Load(filePath);
     if (E_LOAD_STATUS::SUCCESS != loadStatus) {
-        return loadStatus;
+        auto caption = TEXT("ウェーブテーブル読み込み失敗");
+        switch (loadStatus) {
+        case E_LOAD_STATUS::WAVE_TABLE_OPEN_FAILED:
+            MessageBoxW(NULL, TEXT("ウェーブテーブルが開けませんでした。"), caption, 0);
+            break;
+        case E_LOAD_STATUS::WAVE_TABLE_ALLOCATE_FAILED:
+            MessageBoxW(NULL, TEXT("メモリの確保ができませんでした。"), caption, 0);
+            break;
+        }
+        return NULL;
     }
     //
     gSysValue.cInstList = cInst;
@@ -107,9 +116,7 @@ E_LOAD_STATUS WINAPI waveout_open(
         break;
     }
 
-    pInstList = (byte*)gSysValue.cInstList->GetInstList();
-
-    return E_LOAD_STATUS::SUCCESS;
+    return (byte*)gSysValue.cInstList->GetInstList();
 }
 
 void WINAPI waveout_close() {
