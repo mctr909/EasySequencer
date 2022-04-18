@@ -242,7 +242,10 @@ E_LOAD_STATUS InstList::loadDls(LPWSTR path) {
 
     /* load wave */
     swprintf_s(mWaveTablePath, sizeof(mWaveTablePath) / sizeof(mWaveTablePath[0]), TEXT("%s.bin"), path);
-    loadDlsWave(cDls);
+    auto loadWaveState = loadDlsWave(cDls);
+    if (E_LOAD_STATUS::SUCCESS != loadWaveState) {
+        return loadWaveState;
+    }
 
     /* load inst/layer/region/art */
     uint layerIndex = 0;
@@ -343,7 +346,7 @@ E_LOAD_STATUS InstList::loadDls(LPWSTR path) {
     return E_LOAD_STATUS::SUCCESS;
 }
 
-void InstList::loadDlsWave(DLS *cDls) {
+E_LOAD_STATUS InstList::loadDlsWave(DLS *cDls) {
     FILE *fpWave = NULL;
     _wfopen_s(&fpWave, mWaveTablePath, TEXT("wb"));
     uint wavePos = 0;
@@ -393,11 +396,17 @@ void InstList::loadDlsWave(DLS *cDls) {
 
     auto waveTableSize = wavePos * sizeof(WAVDAT);
     mpWaveTable = (WAVDAT*)malloc(waveTableSize);
+    if (NULL == mpWaveTable) {
+        return E_LOAD_STATUS::WAVE_TABLE_ALLOCATE_FAILED;
+    }
+
     fpWave = NULL;
     _wfopen_s(&fpWave, mWaveTablePath, TEXT("rb"));
     fread_s(mpWaveTable, waveTableSize, waveTableSize, 1, fpWave);
     fclose(fpWave);
     _wremove(mWaveTablePath);
+
+    return E_LOAD_STATUS::SUCCESS;
 }
 
 void InstList::loadDlsArt(LART *cLart, INST_ART *pArt) {

@@ -164,7 +164,7 @@ public:
 
 private:
     E_LOAD_STATUS loadDls(LPWSTR path);
-    void loadDlsWave(DLS *cDls);
+    E_LOAD_STATUS loadDlsWave(DLS *cDls);
     void loadDlsArt(LART *cLart, INST_ART *pArt);
     uint writeWaveTable8(FILE *fp, byte* pData, uint size);
     uint writeWaveTable16(FILE *fp, byte* pData, uint size);

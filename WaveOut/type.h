@@ -7,7 +7,8 @@
 
 enum struct E_LOAD_STATUS : int {
     SUCCESS,
-    WAVE_TABLE_OPEN_FAILED
+    WAVE_TABLE_OPEN_FAILED,
+    WAVE_TABLE_ALLOCATE_FAILED
 };
 
 /******************************************************************************/
