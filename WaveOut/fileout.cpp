@@ -40,7 +40,8 @@ double        gBpm = 120.0;
 
 /******************************************************************************/
 int fileout_send(byte *pMsg);
-void fileout_write(INST_SAMPLER **ppSmpl, byte *pOutBuffer);
+inline void fileout_write16(byte* pOutBuffer);
+inline void fileout_write32(byte* pOutBuffer);
 
 /******************************************************************************/
 int* WINAPI fileout_getProgressPtr() {
@@ -118,17 +119,33 @@ void WINAPI fileout_save(
     uint curPos = 0;
     double curTime = 0.0;
     double delta_sec = gFileOutSysValue.bufferLength * gFileOutSysValue.deltaTime;
-    auto ppSampler = gFileOutSysValue.ppSampler;
-    while (curPos < eventSize) {
-        auto evTime = (double)(*(int*)(pEvents + curPos)) / baseTick;
-        curPos += 4;
-        auto evValue = pEvents + curPos;
-        while (curTime < evTime) {
-            fileout_write(ppSampler, pOutBuffer);
-            curTime += gBpm * delta_sec / 60.0;
-            gFileOutProgress = curPos;
+    switch (gFmt.bitPerSample) {
+    case 16:
+        while (curPos < eventSize) {
+            auto evTime = (double)(*(int*)(pEvents + curPos)) / baseTick;
+            curPos += 4;
+            auto evValue = pEvents + curPos;
+            while (curTime < evTime) {
+                fileout_write16(pOutBuffer);
+                curTime += gBpm * delta_sec / 60.0;
+                gFileOutProgress = curPos;
+            }
+            curPos += fileout_send(evValue);
         }
-        curPos += fileout_send(evValue);
+        break;
+    case 32:
+        while (curPos < eventSize) {
+            auto evTime = (double)(*(int*)(pEvents + curPos)) / baseTick;
+            curPos += 4;
+            auto evValue = pEvents + curPos;
+            while (curTime < evTime) {
+                fileout_write32(pOutBuffer);
+                curTime += gBpm * delta_sec / 60.0;
+                gFileOutProgress = curPos;
+            }
+            curPos += fileout_send(evValue);
+        }
+        break;
     }
     gFileOutProgress = eventSize;
 
@@ -197,7 +214,7 @@ int fileout_send(byte *pMsg) {
     }
 }
 
-void fileout_write(INST_SAMPLER **ppSmpl, byte *pOutBuffer) {
+inline void fileout_write16(byte* pOutBuffer) {
     /* sampler loop */
     for (int s = 0; s < SAMPLER_COUNT; s++) {
         auto pSmpl = gFileOutSysValue.ppSampler[s];
@@ -232,6 +249,43 @@ void fileout_write(INST_SAMPLER **ppSmpl, byte *pOutBuffer) {
             if (tempR < -32767.0) tempR = -32767.0;
             *(pBuff + 0) = (short)tempL;
             *(pBuff + 1) = (short)tempR;
+            *pInputBuff = 0.0;
+        }
+    }
+
+    fwrite(pOutBuffer, buffSize, 1, gfpFileOut);
+    gFmt.dataSize += buffSize;
+}
+
+inline void fileout_write32(byte* pOutBuffer) {
+    /* sampler loop */
+    for (int s = 0; s < SAMPLER_COUNT; s++) {
+        auto pSmpl = gFileOutSysValue.ppSampler[s];
+        if (pSmpl->state < E_SAMPLER_STATE::PURGE) {
+            continue;
+        }
+        sampler(&gFileOutSysValue, pSmpl);
+    }
+
+    /* buffer clear */
+    int buffSize = gFileOutSysValue.bufferLength * gFmt.blockAlign;
+    memset(pOutBuffer, 0, buffSize);
+
+    /* channel loop */
+    for (int c = 0; c < CHANNEL_COUNT; c++) {
+        auto pEffect = gFileOutSysValue.ppEffect[c];
+        auto pInputBuff = pEffect->pOutput;
+        auto pInputBuffTerm = pInputBuff + pEffect->pSystemValue->bufferLength;
+        auto pBuff = (float*)pOutBuffer;
+        for (; pInputBuff < pInputBuffTerm; pInputBuff++, pBuff += 2) {
+            double tempL, tempR;
+            // effect
+            effect(pEffect, pInputBuff, &tempL, &tempR);
+            // output
+            tempL += *(pBuff + 0);
+            tempR += *(pBuff + 1);
+            *(pBuff + 0) = (float)tempL;
+            *(pBuff + 1) = (float)tempR;
             *pInputBuff = 0.0;
         }
     }

@@ -184,7 +184,7 @@ namespace Player {
                     fileout_save(
                         Marshal.StringToHGlobalAuto(wavetablePath),
                         Marshal.StringToHGlobalAuto(filePath),
-                        48000, 16, (IntPtr)evPtr, (uint)evArr.Length, 960);
+                        48000, 32, (IntPtr)evPtr, (uint)evArr.Length, 960);
                 }
                 IsFileOutput = false;
             });

@@ -25,4 +25,4 @@ typedef struct SYSTEM_VALUE {
 } SYSTEM_VALUE;
 #pragma pack(pop)
 
-Bool sampler(SYSTEM_VALUE* pSystemValue, INST_SAMPLER* pSmpl);
+extern inline Bool sampler(SYSTEM_VALUE* pSystemValue, INST_SAMPLER* pSmpl);

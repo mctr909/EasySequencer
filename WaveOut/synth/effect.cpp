@@ -78,7 +78,7 @@ void effect_dispose(SYSTEM_VALUE* pSystemValue) {
     pSystemValue->ppEffect = NULL;
 }
 
-void effect(EFFECT* pEffect, double *pInput, double* pOutputL, double* pOutputR) {
+inline void effect(EFFECT* pEffect, double *pInput, double* pOutputL, double* pOutputR) {
     auto pParam = pEffect->pParam;
 
     /*** filter ***/

@@ -48,12 +48,6 @@ typedef struct EFFECT {
 #pragma pack(pop)
 
 /******************************************************************************/
-#ifdef __cplusplus
-extern "C" {
-#endif
-    void effect_create(SYSTEM_VALUE* pSystemValue);
-    void effect_dispose(SYSTEM_VALUE* pSystemValue);
-    void effect(EFFECT* pEffect, double *pInput, double* pOutputL, double* pOutputR);
-#ifdef __cplusplus
-}
-#endif
+void effect_create(SYSTEM_VALUE* pSystemValue);
+void effect_dispose(SYSTEM_VALUE* pSystemValue);
+extern inline void effect(EFFECT* pEffect, double* pInput, double* pOutputL, double* pOutputR);

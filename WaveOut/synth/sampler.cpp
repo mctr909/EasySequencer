@@ -8,7 +8,7 @@
 #define OVER_SAMPLING   4
 
 /******************************************************************************/
-Bool sampler(SYSTEM_VALUE* pSystemValue, INST_SAMPLER* pSmpl) {
+inline Bool sampler(SYSTEM_VALUE* pSystemValue, INST_SAMPLER* pSmpl) {
     auto pEffectParam = pSystemValue->ppEffect[pSmpl->channelNum]->pParam;
     auto pOutput = pSystemValue->ppEffect[pSmpl->channelNum]->pOutput;
     auto pOutputTerm = pOutput + pSystemValue->bufferLength;

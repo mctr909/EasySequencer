@@ -17,10 +17,4 @@ typedef struct FILTER {
 #pragma pack(pop)
 
 /******************************************************************************/
-#ifdef __cplusplus
-extern "C" {
-#endif
-    __declspec(dllexport) inline void filter_lpf(FILTER *pFilter, double input);
-#ifdef __cplusplus
-}
-#endif
+extern inline void filter_lpf(FILTER* pFilter, double input);
