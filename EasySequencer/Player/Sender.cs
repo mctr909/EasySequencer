@@ -66,6 +66,10 @@ namespace Player {
         public byte VibDelay;
         public byte BendRange;
         public int Pitch;
+        public double PeakL;
+        public double PeakR;
+        public double RmsL;
+        public double RmsR;
         IntPtr pName;
         IntPtr pKeyBoard;
 

@@ -147,6 +147,7 @@ inline void runSampler() {
 void write16(LPSTR pData) {
     runSampler();
     for (int c = 0; c < CHANNEL_COUNT; c++) {
+        auto pChParam = gSysValue.ppChannelParam[c];
         auto pEffect = gSysValue.ppEffect[c];
         auto pInputBuff = pEffect->pOutput;
         auto pInputBuffTerm = pInputBuff + pEffect->pSystemValue->bufferLength;
@@ -155,6 +156,15 @@ void write16(LPSTR pData) {
             double tempL, tempR;
             // effect
             effect(pEffect, pInputBuff, &tempL, &tempR);
+            // peak
+            pChParam->PeakL *= 1.0 - 20 * gSysValue.deltaTime;
+            pChParam->PeakR *= 1.0 - 20 * gSysValue.deltaTime;
+            if (pChParam->PeakL < tempL * tempL) {
+                pChParam->PeakL = tempL * tempL;
+            }
+            if (pChParam->PeakR < tempR * tempR) {
+                pChParam->PeakR = tempR * tempR;
+            }
             // output
             tempL *= 32767.0;
             tempR *= 32767.0;
@@ -174,6 +184,7 @@ void write16(LPSTR pData) {
 void write24(LPSTR pData) {
     runSampler();
     for (int c = 0; c < CHANNEL_COUNT; c++) {
+        auto pChParam = gSysValue.ppChannelParam[c];
         auto pEffect = gSysValue.ppEffect[c];
         auto pInputBuff = pEffect->pOutput;
         auto pInputBuffTerm = pInputBuff + pEffect->pSystemValue->bufferLength;
@@ -182,6 +193,15 @@ void write24(LPSTR pData) {
             double tempL, tempR;
             // effect
             effect(pEffect, pInputBuff, &tempL, &tempR);
+            // peak
+            pChParam->PeakL *= 1.0 - 20 * gSysValue.deltaTime;
+            pChParam->PeakR *= 1.0 - 20 * gSysValue.deltaTime;
+            if (pChParam->PeakL < tempL * tempL) {
+                pChParam->PeakL = tempL * tempL;
+            }
+            if (pChParam->PeakR < tempR * tempR) {
+                pChParam->PeakR = tempR * tempR;
+            }
             // output
             tempL += fromInt24(pBuff + 0);
             tempR += fromInt24(pBuff + 1);
@@ -199,6 +219,7 @@ void write24(LPSTR pData) {
 void write32(LPSTR pData) {
     runSampler();
     for (int c = 0; c < CHANNEL_COUNT; c++) {
+        auto pChParam = gSysValue.ppChannelParam[c];
         auto pEffect = gSysValue.ppEffect[c];
         auto pInputBuff = pEffect->pOutput;
         auto pInputBuffTerm = pInputBuff + pEffect->pSystemValue->bufferLength;
@@ -207,6 +228,15 @@ void write32(LPSTR pData) {
             double tempL, tempR;
             // effect
             effect(pEffect, pInputBuff, &tempL, &tempR);
+            // peak
+            pChParam->PeakL *= 1.0 - 20 * gSysValue.deltaTime;
+            pChParam->PeakR *= 1.0 - 20 * gSysValue.deltaTime;
+            if (pChParam->PeakL < tempL * tempL) {
+                pChParam->PeakL = tempL * tempL;
+            }
+            if (pChParam->PeakR < tempR * tempR) {
+                pChParam->PeakR = tempR * tempR;
+            }
             // output
             tempL += *(pBuff + 0);
             tempR += *(pBuff + 1);

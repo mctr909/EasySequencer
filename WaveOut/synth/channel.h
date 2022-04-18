@@ -32,6 +32,10 @@ typedef struct CHANNEL_PARAM {
     byte VibDelay;
     byte BendRange;
     int Pitch;
+    double PeakL;
+    double PeakR;
+    double RmsL;
+    double RmsR;
     byte* pName = NULL;
     E_KEY_STATE *pKeyBoard = NULL;
 } CHANNEL_PARAM;

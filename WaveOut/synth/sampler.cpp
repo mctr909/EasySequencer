@@ -5,7 +5,7 @@
 /******************************************************************************/
 #define PURGE_THRESHOLD 0.0005
 #define PURGE_SPEED     500
-#define OVER_SAMPLING   4
+#define OVER_SAMPLING   8
 
 /******************************************************************************/
 inline Bool sampler(SYSTEM_VALUE* pSystemValue, INST_SAMPLER* pSmpl) {

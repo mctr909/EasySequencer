@@ -206,7 +206,7 @@ void
 Channel::setAmp(byte vol, byte exp) {
     Param.Vol = vol;
     Param.Exp = exp;
-    mpEffectParam->amp = Amp[vol] * Amp[exp];
+    mpEffectParam->amp = vol / 127.0 * exp / 127.0;
 }
 
 void

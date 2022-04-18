@@ -33,8 +33,14 @@ namespace Player {
         private static readonly int ChannelHeight = 40;
         private static readonly float KnobRadius = 11.0f;
 
-        private static readonly Rectangle MuteButton = new Rectangle(857, 8, 13, 18);
-        private static readonly Rectangle InstName = new Rectangle(880, 10, 146, 19);
+        private static readonly Rectangle MuteButton = new Rectangle(542, 8, 13, 18);
+        private static readonly Rectangle InstName = new Rectangle(1007, 10, 146, 19);
+
+        private static readonly Rectangle MeterPosL = new Rectangle(574, 7, 112, 5);
+        private static readonly Rectangle MeterPosR = new Rectangle(574, 17, 112, 5);
+        private static readonly Size MeterCell = new Size(4, 5);
+        private static double MeterMin = -72.0;
+        private static double MeterMax = 12.0;
 
         private static readonly Rectangle[] KeyboardPos = {
             new Rectangle( 5, 20, 6, 10),   // C
@@ -51,28 +57,28 @@ namespace Player {
             new Rectangle(47, 20, 6, 10)    // B
         };
 
-        private static readonly PointF[] KnobPos = {
-            new PointF(552.5f, 15), // Vol.
-            new PointF(585.5f, 15), // Exp.
-            new PointF(618.5f, 15), // Pan.
-            new PointF(657.5f, 15), // Rev.
-            new PointF(690.5f, 15), // Cho.
-            new PointF(723.5f, 15), // Del.
-            new PointF(762.5f, 15), // Fc
-            new PointF(795.5f, 15), // Q
-            new PointF(828.5f, 15)  // Mod.
+        private static readonly Point[] KnobPos = {
+            new Point(707, 14), // Vol.
+            new Point(740, 14), // Exp.
+            new Point(773, 14), // Pan.
+            new Point(812, 14), // Rev.
+            new Point(845, 14), // Cho.
+            new Point(878, 14), // Del.
+            new Point(917, 14), // Fc
+            new Point(950, 14), // Q
+            new Point(983, 14)  // Mod.
         };
 
         private static readonly Point[] KnobValPos = {
-            new Point(544, 11), // Vol.
-            new Point(577, 11), // Exp.
-            new Point(610, 11), // Pan.
-            new Point(649, 11), // Rev.
-            new Point(682, 11), // Cho.
-            new Point(715, 11), // Del.
-            new Point(754, 11), // Fc
-            new Point(787, 11), // Q
-            new Point(820, 11)  // Mod.
+            new Point(699, 11), // Vol.
+            new Point(732, 11), // Exp.
+            new Point(765, 11), // Pan.
+            new Point(804, 11), // Rev.
+            new Point(837, 11), // Cho.
+            new Point(870, 11), // Del.
+            new Point(909, 11), // Fc
+            new Point(942, 11), // Q
+            new Point(975, 11)  // Mod.
         };
 
         private static readonly PointF[] Knob = {
@@ -246,16 +252,66 @@ namespace Player {
                     }
                 }
             }
-            /** Knob **/
+            /** Meter & Knob **/
             for (var ch = 0; ch < 16; ++ch) {
                 var channel = mPlayer.Channel(ch);
                 var y_ch = ChannelHeight * ch;
+
+                // Meter
+                var peakLdb = channel.PeakL;
+                var peakRdb = channel.PeakR;
+                if (peakLdb < 0.000001) {
+                    peakLdb = 0.000001;
+                }
+                if (peakRdb < 0.000001) {
+                    peakRdb = 0.000001;
+                }
+                peakLdb = 20 * Math.Log10(Math.Sqrt(peakLdb));
+                peakRdb = 20 * Math.Log10(Math.Sqrt(peakRdb));
+                peakLdb = Math.Max(MeterMin, peakLdb);
+                peakRdb = Math.Max(MeterMin, peakRdb);
+                peakLdb = Math.Min(MeterMax, peakLdb);
+                peakRdb = Math.Min(MeterMax, peakRdb);
+
+                var peakL = 1.0 - (peakLdb - MeterMax) / MeterMin;
+                var peakR = 1.0 - (peakRdb - MeterMax) / MeterMin;
+                peakL = (int)(peakL * MeterPosL.Width + 1) / MeterCell.Width;
+                peakR = (int)(peakR * MeterPosR.Width + 1) / MeterCell.Width;
+                for (int pk = 0, px = 0; pk < peakL; pk++, px += MeterCell.Width) {
+                    Brush brush;
+                    if (pk < 16) {
+                        brush = Brushes.YellowGreen;
+                    } else if (pk < 24) {
+                        brush = Brushes.Yellow;
+                    } else {
+                        brush = Brushes.Red;
+                    }
+                    g.FillRectangle(brush,
+                        MeterPosL.X + px, MeterPosL.Y + y_ch,
+                        MeterCell.Width - 1, MeterCell.Height
+                    );
+                }
+                for (int pk = 0, px = 0; pk < peakR; pk++, px += MeterCell.Width) {
+                    Brush brush;
+                    if (pk < 16) {
+                        brush = Brushes.YellowGreen;
+                    } else if (pk < 24) {
+                        brush = Brushes.Yellow;
+                    } else {
+                        brush = Brushes.Red;
+                    }
+                    g.FillRectangle(brush,
+                        MeterPosR.X + px, MeterPosR.Y + y_ch,
+                        MeterCell.Width - 1, MeterCell.Height
+                    );
+                }
+
                 // Vol
-                g.FillRectangle(
+                g.FillPie(
                     Brushes.GreenYellow,
                     (KnobRadius * Knob[channel.Vol].X) + KnobPos[0].X,
                     (KnobRadius * Knob[channel.Vol].Y) + KnobPos[0].Y + y_ch,
-                    3, 3
+                    4, 4, 0, 360
                 );
                 g.DrawString(
                     channel.Vol.ToString("000"),
@@ -263,11 +319,11 @@ namespace Player {
                     KnobValPos[0].X, KnobValPos[0].Y + y_ch
                 );
                 // Exp
-                g.FillRectangle(
+                g.FillPie(
                     Brushes.GreenYellow,
                     (KnobRadius * Knob[channel.Exp].X) + KnobPos[1].X,
                     (KnobRadius * Knob[channel.Exp].Y) + KnobPos[1].Y + y_ch,
-                    3, 3
+                    4, 4, 0, 360
                 );
                 g.DrawString(
                     channel.Exp.ToString("000"),
@@ -275,11 +331,11 @@ namespace Player {
                     KnobValPos[1].X, KnobValPos[1].Y + y_ch
                 );
                 // Pan
-                g.FillRectangle(
+                g.FillPie(
                     Brushes.GreenYellow,
                     (KnobRadius * Knob[channel.Pan].X) + KnobPos[2].X,
                     (KnobRadius * Knob[channel.Pan].Y) + KnobPos[2].Y + y_ch,
-                    3, 3
+                    4, 4, 0, 360
                 );
                 var pan = channel.Pan - 64;
                 if (0 == pan) {
@@ -302,11 +358,11 @@ namespace Player {
                     );
                 }
                 // Rev
-                g.FillRectangle(
+                g.FillPie(
                     Brushes.Blue,
                     (KnobRadius * Knob[channel.Rev].X) + KnobPos[3].X,
                     (KnobRadius * Knob[channel.Rev].Y) + KnobPos[3].Y + y_ch,
-                    3, 3
+                    4, 4, 0, 360
                 );
                 g.DrawString(
                     channel.Rev.ToString("000"),
@@ -314,11 +370,11 @@ namespace Player {
                     KnobValPos[3].X, KnobValPos[3].Y + y_ch
                 );
                 // Cho
-                g.FillRectangle(
+                g.FillPie(
                     Brushes.Blue,
                     (KnobRadius * Knob[channel.Cho].X) + KnobPos[4].X,
                     (KnobRadius * Knob[channel.Cho].Y) + KnobPos[4].Y + y_ch,
-                    3, 3
+                    4, 4, 0, 360
                 );
                 g.DrawString(
                     channel.Cho.ToString("000"),
@@ -326,11 +382,11 @@ namespace Player {
                     KnobValPos[4].X, KnobValPos[4].Y + y_ch
                 );
                 // Del
-                g.FillRectangle(
+                g.FillPie(
                     Brushes.Blue,
                     (KnobRadius * Knob[channel.Del].X) + KnobPos[5].X,
                     (KnobRadius * Knob[channel.Del].Y) + KnobPos[5].Y + y_ch,
-                    3, 3
+                    4, 4, 0, 360
                 );
                 g.DrawString(
                     channel.Del.ToString("000"),
@@ -338,11 +394,11 @@ namespace Player {
                     KnobValPos[5].X, KnobValPos[5].Y + y_ch
                 );
                 // Fc
-                g.FillRectangle(
+                g.FillPie(
                     Brushes.Yellow,
                     (KnobRadius * Knob[channel.Fc].X) + KnobPos[6].X,
                     (KnobRadius * Knob[channel.Fc].Y) + KnobPos[6].Y + y_ch,
-                    3, 3
+                    4, 4, 0, 360
                 );
                 g.DrawString(
                     channel.Fc.ToString("000"),
@@ -350,11 +406,11 @@ namespace Player {
                     KnobValPos[6].X, KnobValPos[6].Y + y_ch
                 );
                 // Fq
-                g.FillRectangle(
+                g.FillPie(
                     Brushes.Yellow,
                     (KnobRadius * Knob[channel.Fq].X) + KnobPos[7].X,
                     (KnobRadius * Knob[channel.Fq].Y) + KnobPos[7].Y + y_ch,
-                    3, 3
+                    4, 4, 0, 360
                 );
                 g.DrawString(
                     channel.Fq.ToString("000"),
@@ -362,11 +418,11 @@ namespace Player {
                     KnobValPos[7].X, KnobValPos[7].Y + y_ch
                 );
                 // Mod.
-                g.FillRectangle(
+                g.FillPie(
                     Brushes.Yellow,
                     (KnobRadius * Knob[channel.Mod].X) + KnobPos[8].X,
                     (KnobRadius * Knob[channel.Mod].Y) + KnobPos[8].Y + y_ch,
-                    3, 3
+                    4, 4, 0, 360
                 );
                 g.DrawString(
                     channel.Mod.ToString("000"),
@@ -380,6 +436,7 @@ namespace Player {
                 // InstName
                 g.DrawString(channel.Name, mInstFont, Brushes.Black, InstName.X, InstName.Y + y_ch, mInstFormat);
             }
+            
             mBuffer.Render();
         }
 
