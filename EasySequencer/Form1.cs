@@ -23,7 +23,13 @@ namespace EasySequencer {
         private void Form1_Load(object sender, EventArgs e) {
             //mDlsFilePath = Path.GetDirectoryName(Application.ExecutablePath) + "\\gm.sf2";
             mDlsFilePath = Path.GetDirectoryName(Application.ExecutablePath) + "\\gm.dls";
-            mMidiSender = new Sender(mDlsFilePath);
+
+            mMidiSender = new Sender();
+            if (!mMidiSender.SetUp(mDlsFilePath)) {
+                Close();
+                return;
+            }
+
             mPlayer = new Player.Player(mMidiSender);
             mKeyboard = new Keyboard(picKeyBack, mMidiSender, mPlayer);
 
@@ -71,7 +77,7 @@ namespace EasySequencer {
             saveFileDialog1.ShowDialog();
             var filePath = saveFileDialog1.FileName;
 
-            mMidiSender.FileOut(filePath, mSMF);
+            mMidiSender.FileOut(mDlsFilePath, filePath, mSMF);
         }
 
         private void btnPalyStop_Click(object sender, EventArgs e) {

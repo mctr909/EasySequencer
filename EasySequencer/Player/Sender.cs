@@ -2,6 +2,7 @@
 using System.IO;
 using System.Threading.Tasks;
 using System.Runtime.InteropServices;
+using System.Windows.Forms;
 
 using EasySequencer;
 
@@ -11,6 +12,12 @@ namespace Player {
         FREE,
         PRESS,
         HOLD
+    };
+
+    public enum E_LOAD_STATUS : int {
+        SUCCESS,
+        WAVE_TABLE_OPEN_FAILED,
+        WAVE_TABLE_ALLOCATE_FAILED
     };
 
     [StructLayout(LayoutKind.Sequential, Pack = 4)]
@@ -88,7 +95,7 @@ namespace Player {
         [DllImport("WaveOut.dll")]
         private static extern IntPtr waveout_getActiveSamplersPtr();
         [DllImport("WaveOut.dll")]
-        private static extern int waveout_open(
+        private static extern E_LOAD_STATUS waveout_open(
             IntPtr filePath,
             out INST_LIST* pInstList,
             int sampleRate,
@@ -127,7 +134,6 @@ namespace Player {
 
         private INST_LIST* mpInstList = null;
         private CHANNEL_PARAM** mppChParam;
-        private string mWaveTablePath;
 
         public int InstCount {
             get { return mpInstList->count; }
@@ -148,19 +154,9 @@ namespace Player {
             return mppChParam[num]->IsDrum;
         }
 
-        public Sender(string waveTablePath) {
-            mWaveTablePath = waveTablePath;
-            waveout_open(Marshal.StringToHGlobalAuto(mWaveTablePath), out mpInstList, SampleRate, 32, SampleRate / 150, 32);
-            mppChParam = waveout_getChannelParamPtr();
-        }
+        public Sender() { }
 
-        public void Send(Event msg) {
-            fixed (byte* ptr = &msg.Data[0]) {
-                message_send(ptr);
-            }
-        }
-
-        public void FileOut(string filePath, SMF smf) {
+        public void FileOut(string wavetablePath, string filePath, SMF smf) {
             IsFileOutput = true;
 
             var ms = new MemoryStream();
@@ -185,12 +181,28 @@ namespace Player {
             Task.Factory.StartNew(() => {
                 fixed (byte* evPtr = &evArr[0]) {
                     fileout_save(
-                        Marshal.StringToHGlobalAuto(mWaveTablePath),
+                        Marshal.StringToHGlobalAuto(wavetablePath),
                         Marshal.StringToHGlobalAuto(filePath),
                         48000, 16, (IntPtr)evPtr, (uint)evArr.Length, 960);
                 }
                 IsFileOutput = false;
             });
+        }
+
+        public bool SetUp(string waveTablePath) {
+            var ret = waveout_open(Marshal.StringToHGlobalAuto(waveTablePath), out mpInstList, SampleRate, 32, SampleRate / 150, 32);
+            if (E_LOAD_STATUS.SUCCESS != ret) {
+                MessageBox.Show(ret.ToString());
+                return false;
+            }
+            mppChParam = waveout_getChannelParamPtr();
+            return true;
+        }
+
+        public void Send(Event msg) {
+            fixed (byte* ptr = &msg.Data[0]) {
+                message_send(ptr);
+            }
         }
     }
 }
