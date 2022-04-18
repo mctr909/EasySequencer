@@ -2,7 +2,6 @@
 using System.IO;
 using System.Threading.Tasks;
 using System.Runtime.InteropServices;
-using System.Windows.Forms;
 
 using EasySequencer;
 
@@ -12,12 +11,6 @@ namespace Player {
         FREE,
         PRESS,
         HOLD
-    };
-
-    public enum E_LOAD_STATUS : int {
-        SUCCESS,
-        WAVE_TABLE_OPEN_FAILED,
-        WAVE_TABLE_ALLOCATE_FAILED
     };
 
     [StructLayout(LayoutKind.Sequential, Pack = 4)]
@@ -95,9 +88,8 @@ namespace Player {
         [DllImport("WaveOut.dll")]
         private static extern IntPtr waveout_getActiveSamplersPtr();
         [DllImport("WaveOut.dll")]
-        private static extern E_LOAD_STATUS waveout_open(
+        private static extern INST_LIST* waveout_open(
             IntPtr filePath,
-            out INST_LIST* pInstList,
             int sampleRate,
             int bits,
             int bufferLength,
@@ -156,6 +148,15 @@ namespace Player {
 
         public Sender() { }
 
+        public bool SetUp(string waveTablePath) {
+            mpInstList = waveout_open(Marshal.StringToHGlobalAuto(waveTablePath), SampleRate, 32, SampleRate / 150, 32);
+            if (null == mpInstList) {
+                return false;
+            }
+            mppChParam = waveout_getChannelParamPtr();
+            return true;
+        }
+
         public void FileOut(string wavetablePath, string filePath, SMF smf) {
             IsFileOutput = true;
 
@@ -187,16 +188,6 @@ namespace Player {
                 }
                 IsFileOutput = false;
             });
-        }
-
-        public bool SetUp(string waveTablePath) {
-            var ret = waveout_open(Marshal.StringToHGlobalAuto(waveTablePath), out mpInstList, SampleRate, 32, SampleRate / 150, 32);
-            if (E_LOAD_STATUS.SUCCESS != ret) {
-                MessageBox.Show(ret.ToString());
-                return false;
-            }
-            mppChParam = waveout_getChannelParamPtr();
-            return true;
         }
 
         public void Send(Event msg) {
