@@ -20,8 +20,8 @@ protected:
 
 class RGN_ : public RiffChunk {
 public:
-    DLS_RGNH Header;
-    DLS_WLNK WaveLink;
+    DLS_RGNH Header = { 0 };
+    DLS_WLNK WaveLink = { 0 };
     DLS_WSMP *pWaveSmpl = NULL;
     DLS_LOOP **ppWaveLoop = NULL;
     LART *cLart = NULL;

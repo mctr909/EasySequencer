@@ -235,15 +235,10 @@ E_LOAD_STATUS InstList::loadDls(LPWSTR path) {
 
     /* allocate inst/layer/region/art/wave */
     mInstList.ppData = (INST_INFO**)calloc(mInstList.count, sizeof(INST_INFO*));
-    memset(mInstList.ppData, 0, sizeof(INST_INFO**));
     mppLayerList = (INST_LAYER**)calloc(mLayerCount, sizeof(INST_LAYER*));
-    memset(mppLayerList, 0, sizeof(INST_LAYER**));
     mppRegionList = (INST_REGION**)calloc(mRegionCount, sizeof(INST_REGION*));
-    memset(mppRegionList, 0, sizeof(INST_REGION**));
     mppArtList = (INST_ART**)calloc(mArtCount, sizeof(INST_ART*));
-    memset(mppArtList, 0, sizeof(INST_ART**));
     mppWaveList = (INST_WAVE**)calloc(mWaveCount, sizeof(INST_WAVE*));
-    memset(mppWaveList, 0, sizeof(INST_WAVE**));
 
     /* load wave */
     swprintf_s(mWaveTablePath, sizeof(mWaveTablePath) / sizeof(mWaveTablePath[0]), TEXT("%s.bin"), path);

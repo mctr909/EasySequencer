@@ -90,7 +90,7 @@ namespace Player {
         [DllImport("WaveOut.dll")]
         private static extern int waveout_open(
             IntPtr filePath,
-            INST_LIST* pInstList,
+            out INST_LIST* pInstList,
             int sampleRate,
             int bits,
             int bufferLength,
@@ -125,7 +125,7 @@ namespace Player {
 
         private static IntPtr mpActiveCountPtr = waveout_getActiveSamplersPtr();
 
-        private INST_LIST* mpInstList;
+        private INST_LIST* mpInstList = null;
         private CHANNEL_PARAM** mppChParam;
         private string mWaveTablePath;
 
@@ -150,7 +150,7 @@ namespace Player {
 
         public Sender(string waveTablePath) {
             mWaveTablePath = waveTablePath;
-            waveout_open(Marshal.StringToHGlobalAuto(mWaveTablePath), mpInstList, SampleRate, 32, SampleRate / 150, 32);
+            waveout_open(Marshal.StringToHGlobalAuto(mWaveTablePath), out mpInstList, SampleRate, 32, SampleRate / 150, 32);
             mppChParam = waveout_getChannelParamPtr();
         }
 

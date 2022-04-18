@@ -57,10 +57,21 @@ void effect_dispose(SYSTEM_VALUE* pSystemValue) {
         return;
     }
     for (int c = 0; c < CHANNEL_COUNT; c++) {
-        free(ppEffect[c]->pOutput);
-        free(ppEffect[c]->pParam);
-        free(ppEffect[c]->pDelTapL);
-        free(ppEffect[c]->pDelTapR);
+        if (NULL == ppEffect[c]) {
+            continue;
+        }
+        if (NULL != ppEffect[c]->pOutput) {
+            free(ppEffect[c]->pOutput);
+        }
+        if (NULL != ppEffect[c]->pParam) {
+            free(ppEffect[c]->pParam);
+        }
+        if (NULL != ppEffect[c]->pDelTapL) {
+            free(ppEffect[c]->pDelTapL);
+        }
+        if (NULL != ppEffect[c]->pDelTapR) {
+            free(ppEffect[c]->pDelTapR);
+        }
         free(ppEffect[c]);
     }
     free(pSystemValue->ppEffect);

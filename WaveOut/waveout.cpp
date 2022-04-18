@@ -262,12 +262,11 @@ BOOL waveOutOpen(
     gppWaveHdr = (PWAVEHDR*)calloc(gBufferCount, sizeof(PWAVEHDR));
     for (int n = 0; n < gBufferCount; ++n) {
         gppWaveHdr[n] = (PWAVEHDR)calloc(1, sizeof(WAVEHDR));
-        gppWaveHdr[n]->dwBufferLength = bufferLength * gWaveFmt.nBlockAlign;
+        gppWaveHdr[n]->dwBufferLength = (DWORD)bufferLength * gWaveFmt.nBlockAlign;
         gppWaveHdr[n]->dwFlags = WHDR_BEGINLOOP | WHDR_ENDLOOP;
         gppWaveHdr[n]->dwLoops = 0;
         gppWaveHdr[n]->dwUser = 0;
         gppWaveHdr[n]->lpData = (LPSTR)calloc(bufferLength, gWaveFmt.nBlockAlign);
-        memset(gppWaveHdr[n]->lpData, 0, bufferLength * gWaveFmt.nBlockAlign);
         waveOutPrepareHeader(ghWaveOut, gppWaveHdr[n], sizeof(WAVEHDR));
         waveOutWrite(ghWaveOut, gppWaveHdr[n], sizeof(WAVEHDR));
     }
