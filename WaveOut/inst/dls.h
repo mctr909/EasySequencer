@@ -7,15 +7,15 @@ class DLS : public RiffChunk {
 public:
     LINS *cLins = NULL;
     WVPL *cWvpl = NULL;
-    int InstCount;
-    int WaveCount;
-
-private:
-    DLS() {}
+    int InstCount = 0;
+    int WaveCount = 0;
 
 public:
-    DLS(LPWSTR path);
+    DLS() : RiffChunk() {}
     ~DLS();
+
+public:
+    bool Load(LPWSTR path);
 
 protected:
     bool CheckFileType(const char *type, long size) override;

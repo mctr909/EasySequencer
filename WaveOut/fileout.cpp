@@ -60,7 +60,11 @@ void WINAPI fileout_save(
     if (NULL != gFileOutSysValue.cInstList) {
         delete gFileOutSysValue.cInstList;
     }
-    gFileOutSysValue.cInstList = new InstList(waveTablePath);
+
+    auto cInst = new InstList();
+    cInst->Load(waveTablePath);
+
+    gFileOutSysValue.cInstList = cInst;
     gFileOutSysValue.pWaveTable = gFileOutSysValue.cInstList->GetWaveTablePtr();
     gFileOutSysValue.ppSampler = gFileOutSysValue.cInstList->GetSamplerPtr();
     gFileOutSysValue.bufferLength = 256;

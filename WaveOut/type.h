@@ -1,8 +1,16 @@
 ﻿#pragma once
+
+/******************************************************************************/
 #define true  ((Bool)1)
 #define false ((Bool)0)
 #define WAVMAX 32768.0
 
+enum struct E_LOAD_STATUS : int {
+    SUCCESS,
+    WAVE_TABLE_OPEN_FAILED
+};
+
+/******************************************************************************/
 typedef short          WAVDAT;
 typedef unsigned char  Bool;
 typedef unsigned char  byte;

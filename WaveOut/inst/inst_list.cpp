@@ -6,15 +6,13 @@
 #define INVALID_INDEX 0xFFFFFFFF
 
 /******************************************************************************/
-InstList::InstList(LPWSTR path) {
-    swprintf_s(mWaveTablePath, sizeof(mWaveTablePath) / sizeof(mWaveTablePath[0]), TEXT("%s.bin"), path);
+InstList::InstList() {
     mppSampler = (INST_SAMPLER**)malloc(sizeof(INST_SAMPLER*) * SAMPLER_COUNT);
     for (uint i = 0; i < SAMPLER_COUNT; i++) {
         INST_SAMPLER smpl;
-        mppSampler[i] = (INST_SAMPLER*)malloc(sizeof(INST_SAMPLER));
+        mppSampler[i] = (INST_SAMPLER*)calloc(1, sizeof(INST_SAMPLER));
         memcpy_s(mppSampler[i], sizeof(INST_SAMPLER), &smpl, sizeof(INST_SAMPLER));
     }
-    loadDls(path);
 }
 
 InstList::~InstList() {
@@ -60,6 +58,10 @@ InstList::~InstList() {
     if (NULL != mpWaveTable) {
         free(mpWaveTable);
     }
+}
+
+E_LOAD_STATUS InstList::Load(LPWSTR path) {
+    return loadDls(path);
 }
 
 INST_LIST *InstList::GetInstList() {
@@ -199,8 +201,12 @@ void InstList::SetSampler(INST_INFO *pInstInfo, byte channelNum, byte noteNum, b
 }
 
 /******************************************************************************/
-void InstList::loadDls(LPWSTR path) {
-    auto cDls = new DLS(path);
+E_LOAD_STATUS InstList::loadDls(LPWSTR path) {
+    auto cDls = new DLS();
+
+    if (!cDls->Load(path)) {
+        return E_LOAD_STATUS::WAVE_TABLE_OPEN_FAILED;
+    }
 
     /* count layer/region/art/wave */
     mWaveCount = cDls->WaveCount;
@@ -228,18 +234,19 @@ void InstList::loadDls(LPWSTR path) {
     }
 
     /* allocate inst/layer/region/art/wave */
-    mInstList.ppData = (INST_INFO**)malloc(sizeof(INST_INFO*) * mInstList.count);
+    mInstList.ppData = (INST_INFO**)calloc(mInstList.count, sizeof(INST_INFO*));
     memset(mInstList.ppData, 0, sizeof(INST_INFO**));
-    mppLayerList = (INST_LAYER**)malloc(sizeof(INST_LAYER*) * mLayerCount);
+    mppLayerList = (INST_LAYER**)calloc(mLayerCount, sizeof(INST_LAYER*));
     memset(mppLayerList, 0, sizeof(INST_LAYER**));
-    mppRegionList = (INST_REGION**)malloc(sizeof(INST_REGION*) * mRegionCount);
+    mppRegionList = (INST_REGION**)calloc(mRegionCount, sizeof(INST_REGION*));
     memset(mppRegionList, 0, sizeof(INST_REGION**));
-    mppArtList = (INST_ART**)malloc(sizeof(INST_ART*) * mArtCount);
+    mppArtList = (INST_ART**)calloc(mArtCount, sizeof(INST_ART*));
     memset(mppArtList, 0, sizeof(INST_ART**));
-    mppWaveList = (INST_WAVE**)malloc(sizeof(INST_WAVE*) * mWaveCount);
+    mppWaveList = (INST_WAVE**)calloc(mWaveCount, sizeof(INST_WAVE*));
     memset(mppWaveList, 0, sizeof(INST_WAVE**));
 
     /* load wave */
+    swprintf_s(mWaveTablePath, sizeof(mWaveTablePath) / sizeof(mWaveTablePath[0]), TEXT("%s.bin"), path);
     loadDlsWave(cDls);
 
     /* load inst/layer/region/art */
@@ -337,6 +344,8 @@ void InstList::loadDls(LPWSTR path) {
     }
 
     delete cDls;
+
+    return E_LOAD_STATUS::SUCCESS;
 }
 
 void InstList::loadDlsWave(DLS *cDls) {

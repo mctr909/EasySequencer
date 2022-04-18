@@ -8,7 +8,7 @@ public:
 
 protected:
     void Load(FILE *fp, long size);
-    void Load(LPWSTR path, long offset);
+    bool Load(LPWSTR path, long offset);
     virtual bool CheckFileType(const char *type, long size) { return false; }
     virtual void LoadChunk(FILE *fp, const char *type, long size) { fseek(fp, size, SEEK_CUR); }
     virtual void LoadList(FILE *fp, const char *type, long size) { fseek(fp, size, SEEK_CUR); }

@@ -151,10 +151,11 @@ private:
     uint mArtCount = 0;
 
 public:
-    InstList(LPWSTR path);
+    InstList();
     ~InstList();
 
 public:
+    E_LOAD_STATUS Load(LPWSTR path);
     INST_LIST *GetInstList();
     INST_INFO *GetInstInfo(INST_ID *id);
     INST_SAMPLER **GetSamplerPtr();
@@ -162,7 +163,7 @@ public:
     void SetSampler(INST_INFO *pInstInfo, byte channelNum, byte noteNum, byte velocity);
 
 private:
-    void loadDls(LPWSTR path);
+    E_LOAD_STATUS loadDls(LPWSTR path);
     void loadDlsWave(DLS *cDls);
     void loadDlsArt(LART *cLart, INST_ART *pArt);
     uint writeWaveTable8(FILE *fp, byte* pData, uint size);

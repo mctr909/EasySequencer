@@ -61,8 +61,9 @@ CHANNEL_PARAM** WINAPI waveout_getChannelParamPtr() {
     return gSysValue.ppChannelParam;
 }
 
-byte* WINAPI waveout_open(
+E_LOAD_STATUS WINAPI waveout_open(
     LPWSTR filePath,
+    byte* pInstList,
     int sampleRate,
     int bits,
     int bufferLength,
@@ -73,7 +74,14 @@ byte* WINAPI waveout_open(
     if (NULL != gSysValue.cInstList) {
         delete gSysValue.cInstList;
     }
-    gSysValue.cInstList = new InstList(filePath);
+    //
+    auto cInst = new InstList();
+    auto loadStatus = cInst->Load(filePath);
+    if (E_LOAD_STATUS::SUCCESS != loadStatus) {
+        return loadStatus;
+    }
+    //
+    gSysValue.cInstList = cInst;
     gSysValue.ppSampler = gSysValue.cInstList->GetSamplerPtr();
     gSysValue.pWaveTable = (WAVDAT*)gSysValue.cInstList->GetWaveTablePtr();
     gSysValue.bufferLength = bufferLength;
@@ -98,7 +106,10 @@ byte* WINAPI waveout_open(
     default:
         break;
     }
-    return (byte*)gSysValue.cInstList->GetInstList();
+
+    pInstList = (byte*)gSysValue.cInstList->GetInstList();
+
+    return E_LOAD_STATUS::SUCCESS;
 }
 
 void WINAPI waveout_close() {

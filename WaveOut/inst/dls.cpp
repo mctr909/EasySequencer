@@ -1,10 +1,6 @@
 #include "dls.h"
 #include <string.h>
 
-DLS::DLS(LPWSTR path) : RiffChunk() {
-    Load(path, 0);
-}
-
 DLS::~DLS() {
     if (NULL != cLins) {
         delete cLins;
@@ -14,6 +10,10 @@ DLS::~DLS() {
         delete cWvpl;
         cWvpl = NULL;
     }
+}
+
+bool DLS::Load(LPWSTR path) {
+    return RiffChunk::Load(path, 0);
 }
 
 bool DLS::CheckFileType(const char *type, long size) {

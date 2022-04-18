@@ -5,9 +5,13 @@ void RiffChunk::Load(FILE *fp, long size) {
     loop(fp, size);
 }
 
-void RiffChunk::Load(LPWSTR path, long offset) {
+bool RiffChunk::Load(LPWSTR path, long offset) {
     FILE *fp = NULL;
     _wfopen_s(&fp, path, TEXT("rb"));
+    if (NULL == fp) {
+        return false;
+    }
+
     fseek(fp, offset, SEEK_SET);
 
     char riffId[5] = { 0 };
@@ -23,6 +27,8 @@ void RiffChunk::Load(LPWSTR path, long offset) {
     }
 
     fclose(fp);
+
+    return true;
 }
 
 void RiffChunk::loop(FILE *fp, long size) {
