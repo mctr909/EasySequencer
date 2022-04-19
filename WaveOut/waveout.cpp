@@ -78,19 +78,21 @@ byte *WINAPI waveout_open(
     auto cInst = new InstList();
     auto loadStatus = cInst->Load(filePath);
     if (E_LOAD_STATUS::SUCCESS != loadStatus) {
-        auto caption = TEXT("ウェーブテーブル読み込み失敗");
-        switch (loadStatus) {
-        case E_LOAD_STATUS::WAVE_TABLE_OPEN_FAILED:
-            MessageBoxW(NULL, TEXT("ウェーブテーブルが開けませんでした。"), caption, 0);
-            break;
-        case E_LOAD_STATUS::WAVE_TABLE_ALLOCATE_FAILED:
-            MessageBoxW(NULL, TEXT("メモリの確保ができませんでした。"), caption, 0);
-            break;
-        case E_LOAD_STATUS::WAVE_TABLE_UNKNOWN_FILE:
-            MessageBoxW(NULL, TEXT("対応していないウェーブテーブルです。"), caption, 0);
-            break;
-        }
+        delete cInst;
+    }
+    auto captionErr = L"ウェーブテーブル読み込み失敗";
+    switch (loadStatus) {
+    case E_LOAD_STATUS::WAVE_TABLE_OPEN_FAILED:
+        MessageBoxW(NULL, L"ファイルが開けませんでした。", captionErr, 0);
         return NULL;
+    case E_LOAD_STATUS::WAVE_TABLE_ALLOCATE_FAILED:
+        MessageBoxW(NULL, L"メモリの確保ができませんでした。", captionErr, 0);
+        return NULL;
+    case E_LOAD_STATUS::WAVE_TABLE_UNKNOWN_FILE:
+        MessageBoxW(NULL, L"対応していない形式です。", captionErr, 0);
+        return NULL;
+    default:
+        break;
     }
     //
     gSysValue.cInstList = cInst;

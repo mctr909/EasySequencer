@@ -241,7 +241,7 @@ E_LOAD_STATUS InstList::loadDls(LPWSTR path) {
     mppWaveList = (INST_WAVE**)calloc(mWaveCount, sizeof(INST_WAVE*));
 
     /* load wave */
-    swprintf_s(mWaveTablePath, sizeof(mWaveTablePath) / sizeof(mWaveTablePath[0]), TEXT("%s.bin"), path);
+    swprintf_s(mWaveTablePath, sizeof(mWaveTablePath) / sizeof(mWaveTablePath[0]), L"%s.bin", path);
     auto loadWaveState = loadDlsWave(cDls);
     if (E_LOAD_STATUS::SUCCESS != loadWaveState) {
         return loadWaveState;
@@ -348,7 +348,7 @@ E_LOAD_STATUS InstList::loadDls(LPWSTR path) {
 
 E_LOAD_STATUS InstList::loadDlsWave(DLS *cDls) {
     FILE *fpWave = NULL;
-    _wfopen_s(&fpWave, mWaveTablePath, TEXT("wb"));
+    _wfopen_s(&fpWave, mWaveTablePath, L"wb");
     uint wavePos = 0;
     for (int idxW = 0; idxW < cDls->WaveCount; idxW++) {
         mppWaveList[idxW] = (INST_WAVE*)calloc(1, sizeof(INST_WAVE));
@@ -401,7 +401,7 @@ E_LOAD_STATUS InstList::loadDlsWave(DLS *cDls) {
     }
 
     fpWave = NULL;
-    _wfopen_s(&fpWave, mWaveTablePath, TEXT("rb"));
+    _wfopen_s(&fpWave, mWaveTablePath, L"rb");
     fread_s(mpWaveTable, waveTableSize, waveTableSize, 1, fpWave);
     fclose(fpWave);
     _wremove(mWaveTablePath);

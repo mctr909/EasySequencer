@@ -7,7 +7,7 @@ void RiffChunk::Load(FILE *fp, long size) {
 
 E_LOAD_STATUS RiffChunk::Load(LPWSTR path, long offset) {
     FILE *fp = NULL;
-    _wfopen_s(&fp, path, TEXT("rb"));
+    _wfopen_s(&fp, path, L"rb");
     if (NULL == fp) {
         return E_LOAD_STATUS::WAVE_TABLE_OPEN_FAILED;
     }
