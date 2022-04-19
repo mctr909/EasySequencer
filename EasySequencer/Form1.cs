@@ -114,16 +114,9 @@ namespace EasySequencer {
             mIsSeek = false;
         }
 
-        private void Form1_SizeChanged(object sender, EventArgs e) {
-            setSize();
-        }
-
         private void setSize() {
-            tabControl1.Width = Width - tabControl1.Location.X - 20;
-            tabControl1.Height = Height - tabControl1.Location.Y - 48;
-            pnlKeyboard.Width = tabControl1.Width - 16;
-            pnlKeyboard.Height = tabControl1.Height - 38;
-
+            MaximumSize = new Size(picKeyBack.Width + 16, menuStrip1.Height + pnlPlayer.Height + picKeyBack.Height + 48);
+            MinimumSize = MaximumSize;
             btnPalyStop.Top = 2;
             btnPalyStop.Left = 2;
             numKey.Top = 2;
@@ -148,9 +141,6 @@ namespace EasySequencer {
             hsbSeek.Top = numKey.Bottom + 2;
             hsbSeek.Left = 0;
             pnlPlayer.Width = hsbSeek.Width + 4;
-
-            Width = Properties.Resources.Keyboard.Width + 50;
-            Height = Properties.Resources.Keyboard.Height + pnlPlayer.Height + 122;
         }
 
         private void timer1_Tick(object sender, EventArgs e) {
