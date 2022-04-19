@@ -86,6 +86,9 @@ byte *WINAPI waveout_open(
         case E_LOAD_STATUS::WAVE_TABLE_ALLOCATE_FAILED:
             MessageBoxW(NULL, TEXT("メモリの確保ができませんでした。"), caption, 0);
             break;
+        case E_LOAD_STATUS::WAVE_TABLE_UNKNOWN_FILE:
+            MessageBoxW(NULL, TEXT("対応していないウェーブテーブルです。"), caption, 0);
+            break;
         }
         return NULL;
     }

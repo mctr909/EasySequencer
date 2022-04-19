@@ -12,7 +12,7 @@ DLS::~DLS() {
     }
 }
 
-bool DLS::Load(LPWSTR path) {
+E_LOAD_STATUS DLS::Load(LPWSTR path) {
     return RiffChunk::Load(path, 0);
 }
 

@@ -203,9 +203,9 @@ void InstList::SetSampler(INST_INFO *pInstInfo, byte channelNum, byte noteNum, b
 /******************************************************************************/
 E_LOAD_STATUS InstList::loadDls(LPWSTR path) {
     auto cDls = new DLS();
-
-    if (!cDls->Load(path)) {
-        return E_LOAD_STATUS::WAVE_TABLE_OPEN_FAILED;
+    auto loadState = cDls->Load(path);
+    if (E_LOAD_STATUS::SUCCESS != loadState) {
+        return loadState;
     }
 
     /* count layer/region/art/wave */

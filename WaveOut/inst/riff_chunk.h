@@ -1,6 +1,7 @@
 #pragma once
 #include <stdio.h>
 #include <windows.h>
+#include "../type.h"
 
 class RiffChunk {
 public:
@@ -8,7 +9,7 @@ public:
 
 protected:
     void Load(FILE *fp, long size);
-    bool Load(LPWSTR path, long offset);
+    E_LOAD_STATUS Load(LPWSTR path, long offset);
     virtual bool CheckFileType(const char *type, long size) { return false; }
     virtual void LoadChunk(FILE *fp, const char *type, long size) { fseek(fp, size, SEEK_CUR); }
     virtual void LoadList(FILE *fp, const char *type, long size) { fseek(fp, size, SEEK_CUR); }
