@@ -132,7 +132,7 @@ namespace EasySequencer {
             lblTempoPercent.Width = 100;
             lblTempoPercent.Top = 3;
             lblTempoPercent.Left = lblTempo.Right;
-            picActive.Width = 150;
+            picActive.Width = 120;
             picActive.Height = 24;
             picActive.Top = 2;
             picActive.Left = lblTempoPercent.Right;

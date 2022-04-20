@@ -110,7 +110,10 @@
     <None Include="App.config" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="Keyboard.png" />
+    <None Include="Resources\Keyboard.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\Meter.png" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <PropertyGroup>

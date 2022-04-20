@@ -29,7 +29,6 @@
 		private void InitializeComponent()
 		{
             this.components = new System.ComponentModel.Container();
-            System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(Form1));
             this.lblPosition = new System.Windows.Forms.Label();
             this.lblTempo = new System.Windows.Forms.Label();
             this.hsbSeek = new System.Windows.Forms.HScrollBar();
@@ -265,7 +264,7 @@
             // picKeyBack
             // 
             this.picKeyBack.BackColor = System.Drawing.Color.Transparent;
-            this.picKeyBack.BackgroundImage = ((System.Drawing.Image)(resources.GetObject("picKeyBack.BackgroundImage")));
+            this.picKeyBack.BackgroundImage = global::EasySequencer.Properties.Resources.Keyboard;
             this.picKeyBack.BackgroundImageLayout = System.Windows.Forms.ImageLayout.None;
             this.picKeyBack.InitialImage = null;
             this.picKeyBack.Location = new System.Drawing.Point(0, 86);
@@ -283,7 +282,7 @@
             this.Controls.Add(this.pnlPlayer);
             this.Controls.Add(this.menuStrip1);
             this.DoubleBuffered = true;
-            this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.FixedSingle;
+            this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.FixedToolWindow;
             this.MainMenuStrip = this.menuStrip1;
             this.Name = "Form1";
             this.Text = "Form1";
