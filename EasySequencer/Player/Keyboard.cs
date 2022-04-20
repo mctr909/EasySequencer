@@ -36,7 +36,7 @@ namespace Player {
         };
 
         private static readonly int ChannelHeight = 40;
-        private static readonly float KnobRadius = 12.0f;
+        private static readonly float KnobRadius = 11.0f;
 
         private static readonly Rectangle MuteButton = new Rectangle(542, 8, 13, 18);
         private static readonly Rectangle InstName = new Rectangle(1007, 10, 146, 19);
