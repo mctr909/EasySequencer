@@ -9,7 +9,8 @@
 
 /******************************************************************************/
 inline Bool sampler(SYSTEM_VALUE* pSystemValue, INST_SAMPLER* pSmpl) {
-    auto pOutput = pSystemValue->ppChannels[pSmpl->channelNum]->pInput;
+    auto pCh = pSystemValue->ppChannels[pSmpl->channelNum];
+    auto pOutput = pCh->pInput;
     auto pWaveInfo = pSmpl->pWave;
     auto pEnv = pSmpl->pEnv;
     auto pWaveData = pSystemValue->pWaveTable + pWaveInfo->offset;
@@ -21,7 +22,7 @@ inline Bool sampler(SYSTEM_VALUE* pSystemValue, INST_SAMPLER* pSmpl) {
         // generate wave
         //*******************************
         double smoothedWave = 0.0;
-        double delta = pitch;
+        double delta = pitch * pCh->pitch;
         for (int o = 0; o < OVER_SAMPLING; o++) {
             int index = (int)pSmpl->index;
             double di = pSmpl->index - index;
@@ -55,7 +56,7 @@ inline Bool sampler(SYSTEM_VALUE* pSystemValue, INST_SAMPLER* pSmpl) {
             pSmpl->egAmp -= pSmpl->egAmp * pSystemValue->deltaTime * pEnv->ampR;
             break;
         case E_SAMPLER_STATE::HOLD:
-            pSmpl->egAmp -= pSmpl->egAmp * pSystemValue->deltaTime * pEnv->ampR;
+            pSmpl->egAmp -= pSmpl->egAmp * pSystemValue->deltaTime;
             break;
         case E_SAMPLER_STATE::PURGE:
             pSmpl->egAmp -= pSmpl->egAmp * pSystemValue->deltaTime * PURGE_SPEED;

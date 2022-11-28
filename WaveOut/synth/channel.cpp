@@ -96,6 +96,8 @@ Channel::setRpn() {
     default:
         break;
     }
+    mRpnLSB = 0xFF;
+    mRpnMSB = 0xFF;
 }
 
 void
@@ -104,6 +106,8 @@ Channel::setNrpn() {
     //default:
     //    break;
     //}
+    mNrpnLSB = 0xFF;
+    mNrpnMSB = 0xFF;
 }
 
 /******************************************************************************/
@@ -115,11 +119,10 @@ Channel::AllInit() {
     setHld(0);
 
     Param.Rev = 0;
-
     Param.Cho = 0;
     chorus.send = Param.Cho / 127.0;
-    chorus.pan_a = (1.0 - 127 / 127.0) / 3.0;
-    chorus.pan_b = (1.0 + 127 / 127.0) / 3.0;
+    chorus.pan_a = (1.0 - Param.Rev / 127.0) / 3.0;
+    chorus.pan_b = (1.0 + Param.Rev / 127.0) / 3.0;
     chorus.depth = 20 * 0.001;
     chorus.rate = 10 * 0.06283 / 1.732 * mpSystemValue->deltaTime;
     
@@ -258,6 +261,8 @@ Channel::CtrlChange(byte type, byte b1) {
 
     case E_CTRL_TYPE::REVERB:
         Param.Rev = b1;
+        chorus.pan_a = (1.0 - b1 / 127.0) / 3.0;
+        chorus.pan_b = (1.0 + b1 / 127.0) / 3.0;
         break;
     case E_CTRL_TYPE::CHORUS:
         Param.Cho = b1;
@@ -305,9 +310,9 @@ Channel::PitchBend(short pitch) {
     auto temp = Param.Pitch * Param.BendRange;
     if (temp < 0) {
         temp = -temp;
-        pitch = 1.0 / (SemiTone[temp >> 13] * PitchMSB[(temp >> 7) % 64] * PitchLSB[temp % 128]);
+        this->pitch = 1.0 / (SemiTone[temp >> 13] * PitchMSB[(temp >> 7) % 64] * PitchLSB[temp % 128]);
     } else {
-        pitch = SemiTone[temp >> 13] * PitchMSB[(temp >> 7) % 64] * PitchLSB[temp % 128];
+        this->pitch = SemiTone[temp >> 13] * PitchMSB[(temp >> 7) % 64] * PitchLSB[temp % 128];
     }
 }
 
