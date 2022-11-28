@@ -1,5 +1,5 @@
 #include "sampler.h"
-#include "effect.h"
+#include "channel.h"
 #include "../inst/inst_list.h"
 
 /******************************************************************************/
@@ -9,21 +9,19 @@
 
 /******************************************************************************/
 inline Bool sampler(SYSTEM_VALUE* pSystemValue, INST_SAMPLER* pSmpl) {
-    auto pEffectParam = pSystemValue->ppEffect[pSmpl->channelNum]->pParam;
-    auto pOutput = pSystemValue->ppEffect[pSmpl->channelNum]->pOutput;
-    auto pOutputTerm = pOutput + pSystemValue->bufferLength;
+    auto pOutput = pSystemValue->ppChannels[pSmpl->channelNum]->pInput;
     auto pWaveInfo = pSmpl->pWave;
     auto pEnv = pSmpl->pEnv;
     auto pWaveData = pSystemValue->pWaveTable + pWaveInfo->offset;
     long loopEnd = (long)pWaveInfo->loopBegin + pWaveInfo->loopLength;
     auto pitch = pSmpl->pitch / pSystemValue->sampleRate / OVER_SAMPLING;
 
-    for (; pOutput < pOutputTerm; pOutput++) {
+    for (int i = 0; i < pSystemValue->bufferLength; i++) {
         //*******************************
         // generate wave
         //*******************************
         double smoothedWave = 0.0;
-        double delta = pitch * pEffectParam->pitch;
+        double delta = pitch;
         for (int o = 0; o < OVER_SAMPLING; o++) {
             int index = (int)pSmpl->index;
             double di = pSmpl->index - index;
@@ -40,7 +38,7 @@ inline Bool sampler(SYSTEM_VALUE* pSystemValue, INST_SAMPLER* pSmpl) {
         }
 
         /*** output ***/
-        *pOutput += smoothedWave * pSmpl->gain * pSmpl->egAmp / OVER_SAMPLING;
+        pOutput[i] += smoothedWave * pSmpl->gain * pSmpl->egAmp / OVER_SAMPLING;
 
         //*******************************
         // generate envelope
@@ -57,7 +55,7 @@ inline Bool sampler(SYSTEM_VALUE* pSystemValue, INST_SAMPLER* pSmpl) {
             pSmpl->egAmp -= pSmpl->egAmp * pSystemValue->deltaTime * pEnv->ampR;
             break;
         case E_SAMPLER_STATE::HOLD:
-            pSmpl->egAmp -= pSmpl->egAmp * pEffectParam->holdDelta;
+            pSmpl->egAmp -= pSmpl->egAmp * pSystemValue->deltaTime * pEnv->ampR;
             break;
         case E_SAMPLER_STATE::PURGE:
             pSmpl->egAmp -= pSmpl->egAmp * pSystemValue->deltaTime * PURGE_SPEED;

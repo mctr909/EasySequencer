@@ -5,7 +5,6 @@
 #include "synth/channel_const.h"
 #include "synth/channel_params.h"
 #include "synth/sampler.h"
-#include "synth/effect.h"
 #include "type.h"
 
 #include <math.h>
@@ -39,13 +38,10 @@ int           gActiveCount = 0;
 SYSTEM_VALUE  gSysValue = { 0 };
 
 /******************************************************************************/
-inline void runSampler();
-void write32(LPSTR pData);
+void write_buffer(LPSTR pData);
 
 BOOL waveOutOpen(
     int sampleRate,
-    int bits,
-    int channelCount,
     int bufferLength,
     int bufferCount,
     void(*fpWriteBufferProc)(LPSTR)
@@ -66,7 +62,6 @@ CHANNEL_PARAM** WINAPI waveout_getChannelParamPtr() {
 byte *WINAPI waveout_open(
     LPWSTR filePath,
     int sampleRate,
-    int bits,
     int bufferLength,
     int bufferCount
 ) {
@@ -102,20 +97,12 @@ byte *WINAPI waveout_open(
     gSysValue.bufferLength = bufferLength;
     gSysValue.bufferCount = bufferCount;
     gSysValue.sampleRate = sampleRate;
-    gSysValue.bits = bits;
     gSysValue.deltaTime = 1.0 / sampleRate;
     //
-    effect_create(&gSysValue);
     message_createChannels(&gSysValue);
     //
-    switch (gSysValue.bits) {
-    case 32:
-        waveOutOpen(gSysValue.sampleRate, 32, 2, gSysValue.bufferLength, gSysValue.bufferCount, write32);
-        break;
-    default:
-        break;
-    }
-
+    waveOutOpen(gSysValue.sampleRate, gSysValue.bufferLength, gSysValue.bufferCount, write_buffer);
+    //
     return (byte*)gSysValue.cInstList->GetInstList();
 }
 
@@ -125,12 +112,11 @@ void WINAPI waveout_close() {
         delete gSysValue.cInstList;
         gSysValue.cInstList = NULL;
     }
-    effect_dispose(&gSysValue);
     message_disposeChannels(&gSysValue);
 }
 
 /******************************************************************************/
-inline void runSampler() {
+void write_buffer(LPSTR pData) {
     int activeCount = 0;
     for (int s = 0; s < SAMPLER_COUNT; s++) {
         auto pSmpl = gSysValue.ppSampler[s];
@@ -142,20 +128,17 @@ inline void runSampler() {
         }
     }
     gActiveCount = activeCount;
-}
 
-void write32(LPSTR pData) {
-    runSampler();
     for (int c = 0; c < CHANNEL_COUNT; c++) {
+        auto pCh = gSysValue.ppChannels[c];
         auto pChParam = gSysValue.ppChannelParam[c];
-        auto pEffect = gSysValue.ppEffect[c];
-        auto pInputBuff = pEffect->pOutput;
-        auto pInputBuffTerm = pInputBuff + pEffect->pSystemValue->bufferLength;
-        auto pBuff = (float*)pData;
+        auto pInputBuff = pCh->pInput;
+        auto pInputBuffTerm = pInputBuff + gSysValue.bufferLength;
+        auto pBuff = (short*)pData;
         for (; pInputBuff < pInputBuffTerm; pInputBuff++, pBuff += 2) {
-            double tempL, tempR;
+            double tempL = 0.0, tempR = 0.0;
             // effect
-            effect(pEffect, pInputBuff, &tempL, &tempR);
+            pCh->Step(&tempL, &tempR);
             // peak
             pChParam->PeakL *= 1.0 - 4.6 * gSysValue.deltaTime;
             pChParam->PeakR *= 1.0 - 4.6 * gSysValue.deltaTime;
@@ -164,12 +147,13 @@ void write32(LPSTR pData) {
             // output
             tempL += *(pBuff + 0);
             tempR += *(pBuff + 1);
-            if (1.0 < tempL) tempL = 1.0;
-            if (tempL < -1.0) tempL = -1.0;
-            if (1.0 < tempR) tempR = 1.0;
-            if (tempR < -1.0) tempR = -1.0;
-            *(pBuff + 0) = (float)tempL;
-            *(pBuff + 1) = (float)tempR;
+            if (32767.0 < tempL) tempL = 32767.0;
+            if (tempL < -32767.0) tempL = -32767.0;
+            if (32767.0 < tempR) tempR = 32767.0;
+            if (tempR < -32767.0) tempR = -32767.0;
+
+            *(pBuff + 0) = (short)(tempL);
+            *(pBuff + 1) = (short)(tempR);
             *pInputBuff = 0.0;
         }
     }
@@ -177,8 +161,6 @@ void write32(LPSTR pData) {
 
 BOOL waveOutOpen(
     int sampleRate,
-    int bits,
-    int channelCount,
     int bufferLength,
     int bufferCount,
     void(*fpWriteBufferProc)(LPSTR)
@@ -199,9 +181,9 @@ BOOL waveOutOpen(
     gBufferLength = bufferLength;
     gfpWriteBuffer = fpWriteBufferProc;
     //
-    gWaveFmt.wFormatTag = 32 == bits ? 3 : 1;
-    gWaveFmt.nChannels = channelCount;
-    gWaveFmt.wBitsPerSample = (WORD)bits;
+    gWaveFmt.wFormatTag = 1;
+    gWaveFmt.nChannels = 2;
+    gWaveFmt.wBitsPerSample = (WORD)16;
     gWaveFmt.nSamplesPerSec = (DWORD)sampleRate;
     gWaveFmt.nBlockAlign = gWaveFmt.nChannels * gWaveFmt.wBitsPerSample / 8;
     gWaveFmt.nAvgBytesPerSec = gWaveFmt.nSamplesPerSec * gWaveFmt.nBlockAlign;

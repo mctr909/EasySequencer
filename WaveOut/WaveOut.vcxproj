@@ -154,7 +154,6 @@
     <ClCompile Include="inst\riff_chunk.cpp" />
     <ClCompile Include="message_reciever.cpp" />
     <ClCompile Include="synth\channel.cpp" />
-    <ClCompile Include="synth\effect.cpp" />
     <ClCompile Include="synth\filter.cpp" />
     <ClCompile Include="synth\sampler.cpp" />
     <ClCompile Include="waveout.cpp" />
@@ -174,7 +173,6 @@
     <ClInclude Include="synth\channel.h" />
     <ClInclude Include="synth\channel_const.h" />
     <ClInclude Include="synth\channel_params.h" />
-    <ClInclude Include="synth\effect.h" />
     <ClInclude Include="synth\filter.h" />
     <ClInclude Include="synth\sampler.h" />
     <ClInclude Include="type.h" />

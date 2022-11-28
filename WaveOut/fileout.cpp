@@ -5,7 +5,6 @@
 #include "synth/channel_const.h"
 #include "synth/channel_params.h"
 #include "synth/sampler.h"
-#include "synth/effect.h"
 #include "inst/inst_list.h"
 
 /******************************************************************************/
@@ -44,7 +43,6 @@ double        gBpm = 120.0;
 /******************************************************************************/
 int fileout_send(byte *pMsg);
 inline void fileout_write16(byte* pOutBuffer);
-inline void fileout_write32(byte* pOutBuffer);
 
 /******************************************************************************/
 int* WINAPI fileout_getProgressPtr() {
@@ -55,7 +53,6 @@ void WINAPI fileout_save(
     LPWSTR waveTablePath,
     LPWSTR savePath,
     uint sampleRate,
-    uint bitRate,
     byte *pEvents,
     uint eventSize,
     uint baseTick
@@ -74,7 +71,6 @@ void WINAPI fileout_save(
     gFileOutSysValue.bufferLength = 256;
     gFileOutSysValue.bufferCount = 16;
     gFileOutSysValue.sampleRate = sampleRate;
-    gFileOutSysValue.bits = bitRate;
     gFileOutSysValue.deltaTime = 1.0 / gFileOutSysValue.sampleRate;
 
     // riff wave format
@@ -84,10 +80,10 @@ void WINAPI fileout_save(
     riff.dataId = 0x45564157;
     gFmt.chunkId = 0x20746D66;
     gFmt.chunkSize = 16;
-    gFmt.formatId = 32 == bitRate ? 3 : 1;
+    gFmt.formatId = 1;
     gFmt.channels = 2;
     gFmt.sampleRate = gFileOutSysValue.sampleRate;
-    gFmt.bitPerSample = (ushort)bitRate;
+    gFmt.bitPerSample = (ushort)16;
     gFmt.blockAlign = gFmt.channels * gFmt.bitPerSample >> 3;
     gFmt.bytePerSec = gFmt.sampleRate * gFmt.blockAlign;
     gFmt.dataId = 0x61746164;
@@ -95,9 +91,6 @@ void WINAPI fileout_save(
 
     // allocate out buffer
     auto pOutBuffer = (byte*)calloc(gFmt.blockAlign, gFileOutSysValue.bufferLength);
-
-    // allocate effects
-    effect_create(&gFileOutSysValue);
 
     // allocate channels
     gFileOutSysValue.ppChannels = (Channel**)calloc(CHANNEL_COUNT, sizeof(Channel*));
@@ -122,33 +115,16 @@ void WINAPI fileout_save(
     uint curPos = 0;
     double curTime = 0.0;
     double delta_sec = gFileOutSysValue.bufferLength * gFileOutSysValue.deltaTime;
-    switch (gFmt.bitPerSample) {
-    case 16:
-        while (curPos < eventSize) {
-            auto evTime = (double)(*(int*)(pEvents + curPos)) / baseTick;
-            curPos += 4;
-            auto evValue = pEvents + curPos;
-            while (curTime < evTime) {
-                fileout_write16(pOutBuffer);
-                curTime += gBpm * delta_sec / 60.0;
-                gFileOutProgress = curPos;
-            }
-            curPos += fileout_send(evValue);
+    while (curPos < eventSize) {
+        auto evTime = (double)(*(int*)(pEvents + curPos)) / baseTick;
+        curPos += 4;
+        auto evValue = pEvents + curPos;
+        while (curTime < evTime) {
+            fileout_write16(pOutBuffer);
+            curTime += gBpm * delta_sec / 60.0;
+            gFileOutProgress = curPos;
         }
-        break;
-    case 32:
-        while (curPos < eventSize) {
-            auto evTime = (double)(*(int*)(pEvents + curPos)) / baseTick;
-            curPos += 4;
-            auto evValue = pEvents + curPos;
-            while (curTime < evTime) {
-                fileout_write32(pOutBuffer);
-                curTime += gBpm * delta_sec / 60.0;
-                gFileOutProgress = curPos;
-            }
-            curPos += fileout_send(evValue);
-        }
-        break;
+        curPos += fileout_send(evValue);
     }
     gFileOutProgress = eventSize;
 
@@ -158,9 +134,6 @@ void WINAPI fileout_save(
     fwrite(&riff, sizeof(riff), 1, gfpFileOut);
     fwrite(&gFmt, sizeof(gFmt), 1, gfpFileOut);
     fclose(gfpFileOut);
-
-    /* dispose effect */
-    effect_dispose(&gFileOutSysValue);
 
     /* dispose channels */
     for (int c = 0; c < CHANNEL_COUNT; c++) {
@@ -233,14 +206,14 @@ inline void fileout_write16(byte* pOutBuffer) {
 
     /* channel loop */
     for (int c = 0; c < CHANNEL_COUNT; c++) {
-        auto pEffect = gFileOutSysValue.ppEffect[c];
-        auto pInputBuff = pEffect->pOutput;
-        auto pInputBuffTerm = pInputBuff + pEffect->pSystemValue->bufferLength;
+        auto pCh = gFileOutSysValue.ppChannels[c];
+        auto pInputBuff = pCh->pInput;
+        auto pInputBuffTerm = pInputBuff + gFileOutSysValue.bufferLength;
         auto pBuff = (short*)pOutBuffer;
         for (; pInputBuff < pInputBuffTerm; pInputBuff++, pBuff += 2) {
-            double tempL, tempR;
+            double tempL = 0.0, tempR = 0.0;
             // effect
-            effect(pEffect, pInputBuff, &tempL, &tempR);
+            pCh->Step(&tempL, &tempR);
             // output
             tempL *= 32767.0;
             tempR *= 32767.0;
@@ -252,43 +225,6 @@ inline void fileout_write16(byte* pOutBuffer) {
             if (tempR < -32767.0) tempR = -32767.0;
             *(pBuff + 0) = (short)tempL;
             *(pBuff + 1) = (short)tempR;
-            *pInputBuff = 0.0;
-        }
-    }
-
-    fwrite(pOutBuffer, buffSize, 1, gfpFileOut);
-    gFmt.dataSize += buffSize;
-}
-
-inline void fileout_write32(byte* pOutBuffer) {
-    /* sampler loop */
-    for (int s = 0; s < SAMPLER_COUNT; s++) {
-        auto pSmpl = gFileOutSysValue.ppSampler[s];
-        if (pSmpl->state < E_SAMPLER_STATE::PURGE) {
-            continue;
-        }
-        sampler(&gFileOutSysValue, pSmpl);
-    }
-
-    /* buffer clear */
-    int buffSize = gFileOutSysValue.bufferLength * gFmt.blockAlign;
-    memset(pOutBuffer, 0, buffSize);
-
-    /* channel loop */
-    for (int c = 0; c < CHANNEL_COUNT; c++) {
-        auto pEffect = gFileOutSysValue.ppEffect[c];
-        auto pInputBuff = pEffect->pOutput;
-        auto pInputBuffTerm = pInputBuff + pEffect->pSystemValue->bufferLength;
-        auto pBuff = (float*)pOutBuffer;
-        for (; pInputBuff < pInputBuffTerm; pInputBuff++, pBuff += 2) {
-            double tempL, tempR;
-            // effect
-            effect(pEffect, pInputBuff, &tempL, &tempR);
-            // output
-            tempL += *(pBuff + 0);
-            tempR += *(pBuff + 1);
-            *(pBuff + 0) = (float)tempL;
-            *(pBuff + 1) = (float)tempR;
             *pInputBuff = 0.0;
         }
     }

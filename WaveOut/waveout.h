@@ -14,7 +14,6 @@ extern "C" {
     __declspec(dllexport) byte* WINAPI waveout_open(
         LPWSTR filePath,
         int sampleRate,
-        int bits,
         int bufferLength,
         int bufferCount
     );

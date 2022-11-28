@@ -2,16 +2,17 @@
 #include "channel_const.h"
 #include "channel_params.h"
 #include "sampler.h"
-#include "effect.h"
+#include "filter.h"
 #include "../inst/inst_list.h"
 
 #include <math.h>
 
 Channel::Channel(SYSTEM_VALUE *pSystemValue, int number) {
     mpSystemValue = pSystemValue;
-    mpEffectParam = pSystemValue->ppEffect[number]->pParam;
     Number = (byte)number;
     Param.pKeyBoard = (byte*)calloc(1, sizeof(byte) * 128);
+
+    pInput = (double*)calloc(pSystemValue->bufferLength, sizeof(double));
 
     delay.write_index = 0;
     delay.tap_length = pSystemValue->sampleRate;
@@ -28,6 +29,10 @@ Channel::Channel(SYSTEM_VALUE *pSystemValue, int number) {
 }
 
 Channel::~Channel() {
+    if (NULL != pInput) {
+        free(pInput);
+        pInput = NULL;
+    }
     if (NULL != delay.pTap_l) {
         free(delay.pTap_l);
         delay.pTap_l = NULL;
@@ -61,15 +66,15 @@ Channel::AllInit() {
     Param.VibDepth = 64;
     Param.VibDelay = 64;
 
-    mpEffectParam->chorusRate = 0.5;
-    mpEffectParam->chorusDepth = 0.005;
-    mpEffectParam->delayTime = 0.2;
-    mpEffectParam->delayCross = 0.375;
-    mpEffectParam->holdDelta = mpSystemValue->deltaTime;
+    mEffectParam.chorusRate = 0.5;
+    mEffectParam.chorusDepth = 0.005;
+    mEffectParam.delayTime = 0.2;
+    mEffectParam.delayCross = 0.375;
+    mEffectParam.holdDelta = mpSystemValue->deltaTime;
 
     Param.BendRange = 2;
     Param.Pitch = 0;
-    mpEffectParam->pitch = 1.0;
+    mEffectParam.pitch = 1.0;
 
     mRpnLSB = 0xFF;
     mRpnMSB = 0xFF;
@@ -92,7 +97,7 @@ Channel::AllReset() {
     setHld(0);
 
     Param.Pitch = 0;
-    mpEffectParam->pitch = 1.0;
+    mEffectParam.pitch = 1.0;
 
     mRpnLSB = 0xFF;
     mRpnMSB = 0xFF;
@@ -232,15 +237,18 @@ Channel::PitchBend(short pitch) {
     auto temp = Param.Pitch * Param.BendRange;
     if (temp < 0) {
         temp = -temp;
-        mpEffectParam->pitch = 1.0 / (SemiTone[temp >> 13] * PitchMSB[(temp >> 7) % 64] * PitchLSB[temp % 128]);
+        mEffectParam.pitch = 1.0 / (SemiTone[temp >> 13] * PitchMSB[(temp >> 7) % 64] * PitchLSB[temp % 128]);
     } else {
-        mpEffectParam->pitch = SemiTone[temp >> 13] * PitchMSB[(temp >> 7) % 64] * PitchLSB[temp % 128];
+        mEffectParam.pitch = SemiTone[temp >> 13] * PitchMSB[(temp >> 7) % 64] * PitchLSB[temp % 128];
     }
 }
 
 void
 Channel::Step(double* pOutputL, double* pOutputR) {
-
+    for (int i = 0; i < mpSystemValue->bufferLength; i++) {
+        //pOutputL[i] = pInput[i];
+        //pOutputR[i] = pInput[i];
+    }
 }
 
 /******************************************************************************/
@@ -248,14 +256,14 @@ void
 Channel::setAmp(byte vol, byte exp) {
     Param.Vol = vol;
     Param.Exp = exp;
-    mpEffectParam->amp = vol * vol * exp * exp / 260144641.0;
+    mEffectParam.amp = vol * vol * exp * exp / 260144641.0;
 }
 
 void
 Channel::setPan(byte value) {
     Param.Pan = value;
-    mpEffectParam->panLeft = Cos[value];
-    mpEffectParam->panRight = Sin[value];
+    mEffectParam.panLeft = Cos[value];
+    mEffectParam.panRight = Sin[value];
 }
 
 void
@@ -279,25 +287,25 @@ Channel::setHld(byte value) {
 void
 Channel::setRes(byte value) {
     Param.Fq = value;
-    mpEffectParam->resonance = (value < 64) ? 0.0 : ((value - 64) / 64.0);
+    mEffectParam.resonance = (value < 64) ? 0.0 : ((value - 64) / 64.0);
 }
 
 void
 Channel::setCut(byte value) {
     Param.Fc = value;
-    mpEffectParam->cutoff = (value < 64) ? Level[(int)(2.0 * value)] : 1.0;
+    mEffectParam.cutoff = (value < 64) ? Level[(int)(2.0 * value)] : 1.0;
 }
 
 void
 Channel::setDel(byte value) {
     Param.Del = value;
-    mpEffectParam->delaySend = 0.8 * FeedBack[value];
+    mEffectParam.delaySend = 0.8 * FeedBack[value];
 }
 
 void
 Channel::setCho(byte value) {
     Param.Cho = value;
-    mpEffectParam->chorusSend = 3.0 * FeedBack[value];
+    mEffectParam.chorusSend = 3.0 * FeedBack[value];
 }
 
 void

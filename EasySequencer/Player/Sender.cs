@@ -94,7 +94,6 @@ namespace Player {
         private static extern INST_LIST* waveout_open(
             IntPtr filePath,
             int sampleRate,
-            int bits,
             int bufferLength,
             int bufferCount
         );
@@ -108,7 +107,6 @@ namespace Player {
             IntPtr waveTablePath,
             IntPtr savePath,
             uint sampleRate,
-            uint bitRate,
             IntPtr pEvents,
             uint eventSize,
             uint baseTick
@@ -152,7 +150,7 @@ namespace Player {
         public Sender() { }
 
         public bool SetUp(string waveTablePath) {
-            mpInstList = waveout_open(Marshal.StringToHGlobalAuto(waveTablePath), SampleRate, 32, SampleRate / 150, 32);
+            mpInstList = waveout_open(Marshal.StringToHGlobalAuto(waveTablePath), SampleRate, SampleRate / 150, 32);
             if (null == mpInstList) {
                 return false;
             }
@@ -187,7 +185,7 @@ namespace Player {
                     fileout_save(
                         Marshal.StringToHGlobalAuto(wavetablePath),
                         Marshal.StringToHGlobalAuto(filePath),
-                        48000, 32, (IntPtr)evPtr, (uint)evArr.Length, 960);
+                        48000, (IntPtr)evPtr, (uint)evArr.Length, 960);
                 }
                 IsFileOutput = false;
             });
