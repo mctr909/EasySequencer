@@ -44,8 +44,8 @@ namespace Player {
         private static readonly Rectangle MeterPosL = new Rectangle(574, 7, 112, 5);
         private static readonly Rectangle MeterPosR = new Rectangle(574, 17, 112, 5);
         private static readonly Size MeterCell = new Size(4, 5);
-        private static double MeterMin = -72.0;
-        private static double MeterMax = 12.0;
+        private static double MeterMin = -36.0;
+        private static double MeterMax = 6.0;
 
         private static readonly Rectangle[] KeyboardPos = {
             new Rectangle( 5, 20, 6, 10),   // C

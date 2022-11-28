@@ -6,6 +6,7 @@
 #include "synth/effect.h"
 #include "type.h"
 
+#include <math.h>
 #include <stdio.h>
 #include <mmsystem.h>
 
@@ -37,8 +38,6 @@ SYSTEM_VALUE  gSysValue = { 0 };
 
 /******************************************************************************/
 inline void runSampler();
-void write16(LPSTR pData);
-void write24(LPSTR pData);
 void write32(LPSTR pData);
 
 BOOL waveOutOpen(
@@ -108,12 +107,6 @@ byte *WINAPI waveout_open(
     message_createChannels(&gSysValue);
     //
     switch (gSysValue.bits) {
-    case 16:
-        waveOutOpen(gSysValue.sampleRate, 16, 2, gSysValue.bufferLength, gSysValue.bufferCount, write16);
-        break;
-    case 24:
-        waveOutOpen(gSysValue.sampleRate, 24, 2, gSysValue.bufferLength, gSysValue.bufferCount, write24);
-        break;
     case 32:
         waveOutOpen(gSysValue.sampleRate, 32, 2, gSysValue.bufferLength, gSysValue.bufferCount, write32);
         break;
@@ -149,78 +142,6 @@ inline void runSampler() {
     gActiveCount = activeCount;
 }
 
-void write16(LPSTR pData) {
-    runSampler();
-    for (int c = 0; c < CHANNEL_COUNT; c++) {
-        auto pChParam = gSysValue.ppChannelParam[c];
-        auto pEffect = gSysValue.ppEffect[c];
-        auto pInputBuff = pEffect->pOutput;
-        auto pInputBuffTerm = pInputBuff + pEffect->pSystemValue->bufferLength;
-        auto pBuff = (short*)pData;
-        for (; pInputBuff < pInputBuffTerm; pInputBuff++, pBuff += 2) {
-            double tempL, tempR;
-            // effect
-            effect(pEffect, pInputBuff, &tempL, &tempR);
-            // peak
-            pChParam->PeakL *= 1.0 - 20 * gSysValue.deltaTime;
-            pChParam->PeakR *= 1.0 - 20 * gSysValue.deltaTime;
-            if (pChParam->PeakL < tempL * tempL) {
-                pChParam->PeakL = tempL * tempL;
-            }
-            if (pChParam->PeakR < tempR * tempR) {
-                pChParam->PeakR = tempR * tempR;
-            }
-            // output
-            tempL *= 32767.0;
-            tempR *= 32767.0;
-            tempL += *(pBuff + 0);
-            tempR += *(pBuff + 1);
-            if (32767.0 < tempL) tempL = 32767.0;
-            if (tempL < -32767.0) tempL = -32767.0;
-            if (32767.0 < tempR) tempR = 32767.0;
-            if (tempR < -32767.0) tempR = -32767.0;
-            *(pBuff + 0) = (short)tempL;
-            *(pBuff + 1) = (short)tempR;
-            *pInputBuff = 0.0;
-        }
-    }
-}
-
-void write24(LPSTR pData) {
-    runSampler();
-    for (int c = 0; c < CHANNEL_COUNT; c++) {
-        auto pChParam = gSysValue.ppChannelParam[c];
-        auto pEffect = gSysValue.ppEffect[c];
-        auto pInputBuff = pEffect->pOutput;
-        auto pInputBuffTerm = pInputBuff + pEffect->pSystemValue->bufferLength;
-        auto pBuff = (int24*)pData;
-        for (; pInputBuff < pInputBuffTerm; pInputBuff++, pBuff += 2) {
-            double tempL, tempR;
-            // effect
-            effect(pEffect, pInputBuff, &tempL, &tempR);
-            // peak
-            pChParam->PeakL *= 1.0 - 20 * gSysValue.deltaTime;
-            pChParam->PeakR *= 1.0 - 20 * gSysValue.deltaTime;
-            if (pChParam->PeakL < tempL * tempL) {
-                pChParam->PeakL = tempL * tempL;
-            }
-            if (pChParam->PeakR < tempR * tempR) {
-                pChParam->PeakR = tempR * tempR;
-            }
-            // output
-            tempL += fromInt24(pBuff + 0);
-            tempR += fromInt24(pBuff + 1);
-            if (1.0 < tempL) tempL = 1.0;
-            if (tempL < -1.0) tempL = -1.0;
-            if (1.0 < tempR) tempR = 1.0;
-            if (tempR < -1.0) tempR = -1.0;
-            setInt24(pBuff + 0, tempL);
-            setInt24(pBuff + 1, tempR);
-            *pInputBuff = 0.0;
-        }
-    }
-}
-
 void write32(LPSTR pData) {
     runSampler();
     for (int c = 0; c < CHANNEL_COUNT; c++) {
@@ -234,14 +155,10 @@ void write32(LPSTR pData) {
             // effect
             effect(pEffect, pInputBuff, &tempL, &tempR);
             // peak
-            pChParam->PeakL *= 1.0 - 20 * gSysValue.deltaTime;
-            pChParam->PeakR *= 1.0 - 20 * gSysValue.deltaTime;
-            if (pChParam->PeakL < tempL * tempL) {
-                pChParam->PeakL = tempL * tempL;
-            }
-            if (pChParam->PeakR < tempR * tempR) {
-                pChParam->PeakR = tempR * tempR;
-            }
+            pChParam->PeakL *= 1.0 - 4.6 * gSysValue.deltaTime;
+            pChParam->PeakR *= 1.0 - 4.6 * gSysValue.deltaTime;
+            pChParam->PeakL = fmax(pChParam->PeakL, fabs(tempL));
+            pChParam->PeakR = fmax(pChParam->PeakR, fabs(tempR));
             // output
             tempL += *(pBuff + 0);
             tempR += *(pBuff + 1);
