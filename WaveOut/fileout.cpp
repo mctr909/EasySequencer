@@ -2,8 +2,11 @@
 #include <stdio.h>
 #include "fileout.h"
 #include "synth/channel.h"
+#include "synth/channel_const.h"
+#include "synth/channel_params.h"
 #include "synth/sampler.h"
 #include "synth/effect.h"
+#include "inst/inst_list.h"
 
 /******************************************************************************/
 typedef struct INST_SAMPLER INST_SAMPLER;

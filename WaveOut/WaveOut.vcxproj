@@ -173,6 +173,7 @@
     <ClInclude Include="message_reciever.h" />
     <ClInclude Include="synth\channel.h" />
     <ClInclude Include="synth\channel_const.h" />
+    <ClInclude Include="synth\channel_params.h" />
     <ClInclude Include="synth\effect.h" />
     <ClInclude Include="synth\filter.h" />
     <ClInclude Include="synth\sampler.h" />

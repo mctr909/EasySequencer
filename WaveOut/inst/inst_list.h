@@ -157,7 +157,7 @@ public:
 public:
     E_LOAD_STATUS Load(LPWSTR path);
     INST_LIST *GetInstList();
-    INST_INFO *GetInstInfo(INST_ID *id);
+    INST_INFO *GetInstInfo(byte is_drum, byte bank_lsb, byte bank_msb, byte prog_num);
     INST_SAMPLER **GetSamplerPtr();
     WAVDAT *GetWaveTablePtr();
     void SetSampler(INST_INFO *pInstInfo, byte channelNum, byte noteNum, byte velocity);

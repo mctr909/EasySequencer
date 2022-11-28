@@ -1,6 +1,7 @@
 #include "inst_list.h"
 #include "dls.h"
 #include "../synth/channel.h"
+#include "../synth/channel_const.h"
 
 /******************************************************************************/
 #define INVALID_INDEX 0xFFFFFFFF
@@ -68,28 +69,28 @@ INST_LIST *InstList::GetInstList() {
     return &mInstList;
 }
 
-INST_INFO *InstList::GetInstInfo(INST_ID *id) {
+INST_INFO *InstList::GetInstInfo(byte is_drum, byte bank_lsb, byte bank_msb, byte prog_num) {
     for (uint i = 0; i < mInstList.count; i++) {
         auto listId = mInstList.ppData[i]->id;
-        if (listId.isDrum == id->isDrum &&
-            listId.bankMSB == id->bankMSB &&
-            listId.bankLSB == id->bankLSB &&
-            listId.progNum == id->progNum) {
+        if (listId.isDrum == is_drum &&
+            listId.bankMSB == bank_msb &&
+            listId.bankLSB == bank_lsb &&
+            listId.progNum == prog_num) {
             return mInstList.ppData[i];
         }
     }
     for (uint i = 0; i < mInstList.count; i++) {
         auto listId = mInstList.ppData[i]->id;
-        if (listId.isDrum == id->isDrum &&
+        if (listId.isDrum == is_drum &&
             listId.bankMSB == 0 &&
             listId.bankLSB == 0 &&
-            listId.progNum == id->progNum) {
+            listId.progNum == prog_num) {
             return mInstList.ppData[i];
         }
     }
     for (uint i = 0; i < mInstList.count; i++) {
         auto listId = mInstList.ppData[i]->id;
-        if (listId.isDrum == id->isDrum &&
+        if (listId.isDrum == is_drum &&
             listId.bankMSB == 0 &&
             listId.bankLSB == 0 &&
             listId.progNum == 0) {

@@ -1,50 +1,41 @@
-#pragma once
-#include "channel_const.h"
-#include "../inst/inst_list.h"
+#ifndef __CHANNEL_H__
+#define __CHANNEL_H__
+
+#include "../type.h"
+#include "channel_params.h"
 #include <windows.h>
 
 /******************************************************************************/
 typedef struct SYSTEM_VALUE SYSTEM_VALUE;
 typedef struct EFFECT_PARAM EFFECT_PARAM;
-typedef struct INST_ID INST_ID;
 typedef struct INST_INFO INST_INFO;
 
 /******************************************************************************/
-#pragma pack(push, 1)
-typedef struct CHANNEL_PARAM {
-    INST_ID InstId;
-    byte Enable;
-    byte Vol;
-    byte Exp;
-    byte Pan;
-    byte Rev;
-    byte Del;
-    byte Cho;
-    byte Mod;
-    byte Hld;
-    byte Fc;
-    byte Fq;
-    byte Atk;
-    byte Rel;
-    byte VibRate;
-    byte VibDepth;
-    byte VibDelay;
-    byte BendRange;
-    int Pitch;
-    double PeakL;
-    double PeakR;
-    double RmsL;
-    double RmsR;
-    byte* pName = NULL;
-    E_KEY_STATE *pKeyBoard = NULL;
-} CHANNEL_PARAM;
-#pragma pack(pop)
-
-/******************************************************************************/
 class Channel {
+private:
+    struct DELAY {
+        uint write_index;
+        uint time;
+        uint tap_length;
+        double send;
+        double cross;
+        double* pTap_l;
+        double* pTap_r;
+    };
+    struct CHORUS {
+        double send;
+        double depth;
+        double rate;
+        double pan_a;
+        double pan_b;
+        double lfo_u;
+        double lfo_v;
+        double lfo_w;
+    };
+
 public:
     byte Number;
-    CHANNEL_PARAM Param = { };
+    CHANNEL_PARAM Param = { 0 };
 
 private:
     SYSTEM_VALUE *mpSystemValue = NULL;
@@ -58,6 +49,14 @@ private:
     byte mNrpnMSB;
     byte mDataLSB;
     byte mDataMSB;
+    double current_amp;
+    double current_pan_re;
+    double current_pan_im;
+    double target_amp;
+    double target_pan_re;
+    double target_pan_im;
+    DELAY delay = { 0 };
+    CHORUS chorus = { 0 };
 
 public:
     Channel(SYSTEM_VALUE *pSystemValue, int number);
@@ -71,6 +70,7 @@ public:
     void CtrlChange(byte type, byte b1);
     void ProgramChange(byte value);
     void PitchBend(short pitch);
+    void Step(double* pOutputL, double* pOutputR);
 
 private:
     void setAmp(byte vol, byte exp);
@@ -83,3 +83,5 @@ private:
     void setRpn();
     void setNrpn();
 };
+
+#endif /* __CHANNEL_H__ */

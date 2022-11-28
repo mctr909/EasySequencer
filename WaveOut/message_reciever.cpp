@@ -1,6 +1,9 @@
 #include "message_reciever.h"
 #include "synth/channel.h"
+#include "synth/channel_const.h"
+#include "synth/channel_params.h"
 #include "synth/sampler.h"
+
 #include <stdio.h>
 
 Channel **message_ppChannels = NULL;

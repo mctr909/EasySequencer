@@ -2,6 +2,8 @@
 #include "message_reciever.h"
 #include "inst/inst_list.h"
 #include "synth/channel.h"
+#include "synth/channel_const.h"
+#include "synth/channel_params.h"
 #include "synth/sampler.h"
 #include "synth/effect.h"
 #include "type.h"
