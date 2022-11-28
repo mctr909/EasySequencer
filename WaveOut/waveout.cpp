@@ -98,6 +98,8 @@ byte *WINAPI waveout_open(
     gSysValue.bufferCount = bufferCount;
     gSysValue.sampleRate = sampleRate;
     gSysValue.deltaTime = 1.0 / sampleRate;
+    gSysValue.pBufferL = (double*)calloc(bufferLength, sizeof(double));
+    gSysValue.pBufferR = (double*)calloc(bufferLength, sizeof(double));
     //
     message_createChannels(&gSysValue);
     //
@@ -112,14 +114,22 @@ void WINAPI waveout_close() {
         delete gSysValue.cInstList;
         gSysValue.cInstList = NULL;
     }
+    if (NULL != gSysValue.pBufferL) {
+        free(gSysValue.pBufferL);
+        gSysValue.pBufferL = NULL;
+    }
+    if (NULL != gSysValue.pBufferR) {
+        free(gSysValue.pBufferR);
+        gSysValue.pBufferR = NULL;
+    }
     message_disposeChannels(&gSysValue);
 }
 
 /******************************************************************************/
 void write_buffer(LPSTR pData) {
     int activeCount = 0;
-    for (int s = 0; s < SAMPLER_COUNT; s++) {
-        auto pSmpl = gSysValue.ppSampler[s];
+    for (int i = 0; i < SAMPLER_COUNT; i++) {
+        auto pSmpl = gSysValue.ppSampler[i];
         if (pSmpl->state < E_SAMPLER_STATE::PURGE) {
             continue;
         }
@@ -128,34 +138,30 @@ void write_buffer(LPSTR pData) {
         }
     }
     gActiveCount = activeCount;
-
-    for (int c = 0; c < CHANNEL_COUNT; c++) {
-        auto pCh = gSysValue.ppChannels[c];
-        auto pChParam = gSysValue.ppChannelParam[c];
-        auto pInputBuff = pCh->pInput;
-        auto pInputBuffTerm = pInputBuff + gSysValue.bufferLength;
-        auto pBuff = (short*)pData;
-        for (; pInputBuff < pInputBuffTerm; pInputBuff++, pBuff += 2) {
-            double tempL = 0.0, tempR = 0.0;
-            // effect
-            pCh->Step(&tempL, &tempR);
-            // peak
-            pChParam->PeakL *= 1.0 - 4.6 * gSysValue.deltaTime;
-            pChParam->PeakR *= 1.0 - 4.6 * gSysValue.deltaTime;
-            pChParam->PeakL = fmax(pChParam->PeakL, fabs(tempL));
-            pChParam->PeakR = fmax(pChParam->PeakR, fabs(tempR));
-            // output
-            tempL += *(pBuff + 0);
-            tempR += *(pBuff + 1);
-            if (32767.0 < tempL) tempL = 32767.0;
-            if (tempL < -32767.0) tempL = -32767.0;
-            if (32767.0 < tempR) tempR = 32767.0;
-            if (tempR < -32767.0) tempR = -32767.0;
-
-            *(pBuff + 0) = (short)(tempL);
-            *(pBuff + 1) = (short)(tempR);
-            *pInputBuff = 0.0;
+    for (int i = 0; i < CHANNEL_COUNT; i++) {
+        auto pCh = gSysValue.ppChannels[i];
+        pCh->Step(gSysValue.pBufferL, gSysValue.pBufferR);
+    }
+    auto pOutput = (short*)pData;
+    for (int i = 0, j = 0; i < gSysValue.bufferLength; i++, j += 2) {
+        auto pL = &gSysValue.pBufferL[i];
+        auto pR = &gSysValue.pBufferR[i];
+        if (*pL < -1.0) {
+            *pL = -1.0;
         }
+        if (1.0 < *pL) {
+            *pL = 1.0;
+        }
+        if (*pR < -1.0) {
+            *pR = -1.0;
+        }
+        if (1.0 < *pR) {
+            *pR = 1.0;
+        }
+        pOutput[j] = (short)(*pL * 32767);
+        pOutput[j + 1] = (short)(*pR * 32767);
+        *pL = 0.0;
+        *pR = 0.0;
     }
 }
 

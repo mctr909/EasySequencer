@@ -20,6 +20,8 @@ typedef struct SYSTEM_VALUE {
     int bufferCount;
     int sampleRate;
     double deltaTime;
+    double* pBufferL;
+    double* pBufferR;
 } SYSTEM_VALUE;
 #pragma pack(pop)
 

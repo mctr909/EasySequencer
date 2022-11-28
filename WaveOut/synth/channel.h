@@ -33,47 +33,12 @@ private:
         double lfo_v;
         double lfo_w;
     };
-    typedef struct EFFECT_PARAM {
-        double amp;
-        double pitch;
-        double holdDelta;
-        double panLeft;
-        double panRight;
-        double cutoff;
-        double resonance;
-        double delaySend;
-        double delayTime;
-        double delayCross;
-        double chorusSend;
-        double chorusRate;
-        double chorusDepth;
-    };
-    typedef struct EFFECT {
-        int writeIndex;
-        double amp;
-        double panL;
-        double panR;
-        double choLfoU;
-        double choLfoV;
-        double choLfoW;
-        double choPanUL;
-        double choPanUR;
-        double choPanVL;
-        double choPanVR;
-        double choPanWL;
-        double choPanWR;
-        double* pDelTapL;
-        double* pDelTapR;
-        EFFECT_PARAM* pParam;
-        SYSTEM_VALUE* pSystemValue;
-        FILTER filter;
-    };
 
 public:
     byte Number;
     CHANNEL_PARAM Param = { 0 };
     double* pInput = 0;
-    EFFECT_PARAM mEffectParam = { 0 };
+    double pitch = 1.0;
 
 private:
     SYSTEM_VALUE *mpSystemValue = NULL;
@@ -115,8 +80,6 @@ private:
     void setHld(byte value);
     void setRes(byte value);
     void setCut(byte value);
-    void setDel(byte value);
-    void setCho(byte value);
     void setRpn();
     void setNrpn();
 };
