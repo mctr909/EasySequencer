@@ -8,7 +8,7 @@ Channel::Channel(SYSTEM_VALUE *pSystemValue, int number) {
     mpEffectParam = pSystemValue->ppEffect[number]->pParam;
     Number = (byte)number;
     Param.pKeyBoard = (E_KEY_STATE*)calloc(1, sizeof(E_KEY_STATE) * 128);
-    AllReset();
+    AllInit();
 }
 
 Channel::~Channel() {
@@ -17,7 +17,7 @@ Channel::~Channel() {
 
 /******************************************************************************/
 void
-Channel::AllReset() {
+Channel::AllInit() {
     setAmp(100, 100);
     setPan(64);
 
@@ -52,8 +52,7 @@ Channel::AllReset() {
     mNrpnLSB = 0xFF;
     mNrpnMSB = 0xFF;
 
-    Param.IsDrum = Number == 9 ? 1 : 0;
-
+    Param.InstId.isDrum = Number == 9 ? 1 : 0;
     Param.InstId.bankMSB = 0;
     Param.InstId.bankLSB = 0;
     Param.InstId.progNum = 0;
@@ -63,12 +62,27 @@ Channel::AllReset() {
 }
 
 void
+Channel::AllReset() {
+    setAmp(Param.Vol, 100);
+    setPan(64);
+    setHld(0);
+
+    Param.Pitch = 0;
+    mpEffectParam->pitch = 1.0;
+
+    mRpnLSB = 0xFF;
+    mRpnMSB = 0xFF;
+    mNrpnLSB = 0xFF;
+    mNrpnMSB = 0xFF;
+}
+
+void
 Channel::NoteOff(byte noteNumber) {
     for (int s = 0; s < SAMPLER_COUNT; ++s) {
         auto pSmpl = mpSystemValue->ppSampler[s];
         auto pChParam = mpSystemValue->ppChannelParam[pSmpl->channelNum];
         if (pSmpl->state < E_SAMPLER_STATE::PRESS ||
-            (pChParam->IsDrum && !pSmpl->pWave->loopEnable)) {
+            (pChParam->InstId.isDrum && !pSmpl->pWave->loopEnable)) {
             continue;
         }
         if (pSmpl->channelNum == Number && pSmpl->noteNum == noteNumber) {
@@ -170,8 +184,9 @@ Channel::CtrlChange(byte type, byte b1) {
         mRpnMSB = b1;
         break;
     case E_CTRL_TYPE::DATA_MSB:
-        setRpn(b1);
-        setNrpn(b1);
+        mDataMSB = b1;
+        setRpn();
+        setNrpn();
         break;
 
     case E_CTRL_TYPE::ALL_RESET:
@@ -182,7 +197,6 @@ Channel::CtrlChange(byte type, byte b1) {
 
 void
 Channel::ProgramChange(byte value) {
-    Param.InstId.isDrum = Param.IsDrum;
     Param.InstId.progNum = value;
     mpInst = mpSystemValue->cInstList->GetInstInfo(&Param.InstId);
     memcpy_s(&Param.InstId, sizeof(Param.InstId), &mpInst->id, sizeof(mpInst->id));
@@ -206,7 +220,7 @@ void
 Channel::setAmp(byte vol, byte exp) {
     Param.Vol = vol;
     Param.Exp = exp;
-    mpEffectParam->amp = vol / 127.0 * exp / 127.0;
+    mpEffectParam->amp = vol * vol * exp * exp / 260144641.0;
 }
 
 void
@@ -259,24 +273,20 @@ Channel::setCho(byte value) {
 }
 
 void
-Channel::setRpn(byte b1) {
+Channel::setRpn() {
     switch (mRpnLSB | mRpnMSB << 8) {
     case 0x0000:
-        Param.BendRange = b1;
+        Param.BendRange = mDataMSB;
         break;
     default:
         break;
     }
-    mRpnMSB = 0xFF;
-    mRpnLSB = 0xFF;
 }
 
 void
-Channel::setNrpn(byte b1) {
+Channel::setNrpn() {
     //switch (mNrpnLSB | mNrpnMSB << 8) {
     //default:
     //    break;
     //}
-    mNrpnMSB = 0xFF;
-    mNrpnLSB = 0xFF;
 }

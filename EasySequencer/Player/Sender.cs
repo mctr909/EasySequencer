@@ -48,7 +48,6 @@ namespace Player {
     public struct CHANNEL_PARAM {
         public INST_ID InstId;
         public bool Enable;
-        public bool IsDrum;
         public byte Vol;
         public byte Exp;
         public byte Pan;
@@ -144,10 +143,10 @@ namespace Player {
             mppChParam[num]->Enable = !mute;
         }
         public void DrumChannel(int num, bool isDrum) {
-            mppChParam[num]->IsDrum = isDrum;
+            mppChParam[num]->InstId.isDrum = (byte)(isDrum ? 1 : 0);
         }
         public bool IsDrumChannel(int num) {
-            return mppChParam[num]->IsDrum;
+            return mppChParam[num]->InstId.isDrum == 1;
         }
 
         public Sender() { }

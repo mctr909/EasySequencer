@@ -14,7 +14,6 @@ typedef struct INST_INFO INST_INFO;
 typedef struct CHANNEL_PARAM {
     INST_ID InstId;
     byte Enable;
-    byte IsDrum;
     byte Vol;
     byte Exp;
     byte Pan;
@@ -57,12 +56,15 @@ private:
     byte mRpnMSB;
     byte mNrpnLSB;
     byte mNrpnMSB;
+    byte mDataLSB;
+    byte mDataMSB;
 
 public:
     Channel(SYSTEM_VALUE *pSystemValue, int number);
     ~Channel();
 
 public:
+    void AllInit();
     void AllReset();
     void NoteOff(byte noteNumber);
     void NoteOn(byte noteNumber, byte velocity);
@@ -78,6 +80,6 @@ private:
     void setCut(byte value);
     void setDel(byte value);
     void setCho(byte value);
-    void setRpn(byte b1);
-    void setNrpn(byte b1);
+    void setRpn();
+    void setNrpn();
 };
