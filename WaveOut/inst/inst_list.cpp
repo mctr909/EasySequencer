@@ -1,29 +1,8 @@
 #include "inst_list.h"
 #include "dls.h"
-#include "../synth/sampler.h"
-#include "../synth/channel.h"
-#include "../synth/channel_const.h"
 
 /******************************************************************************/
-#define INVALID_INDEX 0xFFFFFFFF
-
-/******************************************************************************/
-InstList::InstList() {
-    mppSampler = (INST_SAMPLER**)calloc(SAMPLER_COUNT, sizeof(INST_SAMPLER*));
-    for (uint32 i = 0; i < SAMPLER_COUNT; i++) {
-        INST_SAMPLER smpl;
-        mppSampler[i] = (INST_SAMPLER*)malloc(sizeof(INST_SAMPLER));
-        memcpy_s(mppSampler[i], sizeof(INST_SAMPLER), &smpl, sizeof(INST_SAMPLER));
-    }
-}
-
 InstList::~InstList() {
-    if (NULL != mppSampler) {
-        for (uint32 i = 0; i < SAMPLER_COUNT; i++) {
-            free(mppSampler[i]);
-        }
-        free(mppSampler);
-    }
     if (NULL != mppWaveList) {
         for (uint32 i = 0; i < mWaveCount; i++) {
             free(mppWaveList[i]);
@@ -101,105 +80,8 @@ INST_INFO *InstList::GetInstInfo(byte is_drum, byte bank_lsb, byte bank_msb, byt
     return mInstList.ppData[0];
 }
 
-INST_SAMPLER **InstList::GetSamplerPtr() {
-    return mppSampler;
-}
-
 WAVDAT *InstList::GetWaveTablePtr() {
     return mpWaveTable;
-}
-
-void InstList::SetSampler(INST_INFO *pInstInfo, byte channelNum, byte noteNum, byte velocity) {
-    for (uint32 idxS = 0; idxS < SAMPLER_COUNT; idxS++) {
-        auto pSmpl = mppSampler[idxS];
-        if (pSmpl->channel_num == channelNum && pSmpl->note_num == noteNum &&
-            E_SAMPLER_STATE::PRESS <= pSmpl->state) {
-            pSmpl->state = E_SAMPLER_STATE::PURGE;
-        }
-    }
-    auto ppLayer = mppLayerList + pInstInfo->layerIndex;
-    for (uint32 idxL = 0; idxL < pInstInfo->layerCount; idxL++) {
-        auto pLayer = ppLayer[idxL];
-        auto ppRegion = mppRegionList + pLayer->regionIndex;
-        for (uint32 idxR = 0; idxR < pLayer->regionCount; idxR++) {
-            auto pRegion = ppRegion[idxR];
-            if (pRegion->keyLow <= noteNum && noteNum <= pRegion->keyHigh &&
-                pRegion->velocityLow <= velocity && velocity <= pRegion->velocityHigh) {
-                auto pWave = mppWaveList[pRegion->waveIndex];
-                for (uint32 idxS = 0; idxS < SAMPLER_COUNT; idxS++) {
-                    auto pSmpl = mppSampler[idxS];
-                    if (E_SAMPLER_STATE::FREE == pSmpl->state) {
-                        pSmpl->state = E_SAMPLER_STATE::RESERVED;
-                        pSmpl->channel_num = channelNum;
-                        pSmpl->note_num = noteNum;
-                        pSmpl->index = 0.0;
-                        pSmpl->time = 0.0;
-                        pSmpl->pWave = pWave;
-
-                        pSmpl->pitch = 1.0;
-                        pSmpl->gain = velocity / 127.0 / 32768.0;
-
-                        if (INVALID_INDEX != pInstInfo->artIndex) {
-                            auto pArt = mppArtList[pInstInfo->artIndex];
-                            pSmpl->pan += pArt->pan;
-                            //pArt->transpose;
-                            pSmpl->pitch *= pArt->pitch;
-                            pSmpl->gain *= pArt->gain;
-                            pSmpl->pEnv = &pArt->env;
-                            pSmpl->eg_amp = 0.0;
-                            pSmpl->eg_cutoff = pArt->env.cutoffRise;
-                            pSmpl->eg_pitch = pArt->env.pitchRise;
-                        }
-                        if (INVALID_INDEX != pLayer->artIndex) {
-                            auto pArt = mppArtList[pLayer->artIndex];
-                            pSmpl->pan += pArt->pan;
-                            //pArt->transpose;
-                            pSmpl->pitch *= pArt->pitch;
-                            pSmpl->gain *= pArt->gain;
-                            pSmpl->pEnv = &pArt->env;
-                            pSmpl->eg_amp = 0.0;
-                            pSmpl->eg_cutoff = pArt->env.cutoffRise;
-                            pSmpl->eg_pitch = pArt->env.pitchRise;
-                        }
-                        if (INVALID_INDEX != pRegion->artIndex) {
-                            auto pArt = mppArtList[pRegion->artIndex];
-                            pSmpl->pan += pArt->pan;
-                            //pArt->transpose;
-                            pSmpl->pitch *= pArt->pitch;
-                            pSmpl->gain *= pArt->gain;
-                            pSmpl->pEnv = &pArt->env;
-                            pSmpl->eg_amp = 0.0;
-                            pSmpl->eg_cutoff = pArt->env.cutoffRise;
-                            pSmpl->eg_pitch = pArt->env.pitchRise;
-                        }
-
-                        auto diffNote = 0;
-                        if (INVALID_INDEX == pRegion->wsmpIndex) {
-                            diffNote = noteNum - pWave->unityNote;
-                            pSmpl->pitch *= pWave->pitch;
-                            pSmpl->gain *= pWave->gain;
-                        } else {
-                            auto pWsmp = mppWaveList[pRegion->wsmpIndex];
-                            diffNote = noteNum - pWsmp->unityNote;
-                            pSmpl->pitch *= pWsmp->pitch;
-                            pSmpl->gain *= pWsmp->gain;
-                        }
-
-                        if (diffNote < 0) {
-                            pSmpl->pitch *= 1.0 / SemiTone[-diffNote];
-                        } else {
-                            pSmpl->pitch *= SemiTone[diffNote];
-                        }
-
-                        pSmpl->pitch *= pWave->sampleRate;
-                        pSmpl->state = E_SAMPLER_STATE::PRESS;
-                        break;
-                    }
-                }
-                break;
-            }
-        }
-    }
 }
 
 /******************************************************************************/
@@ -273,7 +155,7 @@ E_LOAD_STATUS InstList::loadDls(LPWSTR path) {
         memcpy_s(pInst->pCategory, sizeof(cDlsInst->Category), cDlsInst->Category, sizeof(cDlsInst->Category));
 
         if (NULL == cDlsInst->cLart) {
-            pInst->artIndex = INVALID_INDEX;
+            pInst->artIndex = UINT_MAX;
         } else {
             pInst->artIndex = artIndex;
             mppArtList[artIndex] = (INST_ART*)calloc(1, sizeof(INST_ART));
@@ -295,7 +177,7 @@ E_LOAD_STATUS InstList::loadDls(LPWSTR path) {
             pRegion->waveIndex = cDlsRgn->WaveLink.tableIndex;
 
             if (NULL == cDlsRgn->cLart) {
-                pRegion->artIndex = INVALID_INDEX;
+                pRegion->artIndex = UINT_MAX;
             } else {
                 mppArtList[artIndex] = (INST_ART*)calloc(1, sizeof(INST_ART));
                 loadDlsArt(cDlsRgn->cLart, mppArtList[artIndex]);
@@ -304,7 +186,7 @@ E_LOAD_STATUS InstList::loadDls(LPWSTR path) {
             }
 
             if (NULL == cDlsRgn->pWaveSmpl) {
-                pRegion->wsmpIndex = INVALID_INDEX;
+                pRegion->wsmpIndex = UINT_MAX;
             } else {
                 INST_WAVE wave;
                 mppWaveList[waveIndex] = (INST_WAVE*)malloc(sizeof(INST_WAVE));
@@ -335,7 +217,7 @@ E_LOAD_STATUS InstList::loadDls(LPWSTR path) {
                 memcpy_s(mppLayerList[layerIndex], sizeof(INST_LAYER), &layer, sizeof(INST_LAYER));
                 pLayer = mppLayerList[layerIndex];
                 pLayer->regionIndex = regionIndex;
-                pLayer->artIndex = INVALID_INDEX;
+                pLayer->artIndex = UINT_MAX;
             }
             pLayer->regionCount++;
             regionIndex++;

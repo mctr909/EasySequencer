@@ -68,7 +68,12 @@ void WINAPI fileout_save(
 
     gFileOutSysValue.cInst_list = cInst;
     gFileOutSysValue.pWave_table = gFileOutSysValue.cInst_list->GetWaveTablePtr();
-    gFileOutSysValue.ppSampler = gFileOutSysValue.cInst_list->GetSamplerPtr();
+    gFileOutSysValue.ppSampler = (INST_SAMPLER**)calloc(SAMPLER_COUNT, sizeof(INST_SAMPLER*));
+    for (uint32 i = 0; i < SAMPLER_COUNT; i++) {
+        INST_SAMPLER smpl;
+        gFileOutSysValue.ppSampler[i] = (INST_SAMPLER*)malloc(sizeof(INST_SAMPLER));
+        memcpy_s(gFileOutSysValue.ppSampler[i], sizeof(INST_SAMPLER), &smpl, sizeof(INST_SAMPLER));
+    }
     gFileOutSysValue.buffer_length = 256;
     gFileOutSysValue.buffer_count = 16;
     gFileOutSysValue.sample_rate = sampleRate;
@@ -150,6 +155,13 @@ void WINAPI fileout_save(
     if (NULL != gFileOutSysValue.pBuffer_r) {
         free(gFileOutSysValue.pBuffer_r);
         gFileOutSysValue.pBuffer_r = NULL;
+    }
+    if (NULL != gFileOutSysValue.ppSampler) {
+        for (uint32 i = 0; i < SAMPLER_COUNT; i++) {
+            free(gFileOutSysValue.ppSampler[i]);
+        }
+        free(gFileOutSysValue.ppSampler);
+        gFileOutSysValue.ppSampler = NULL;
     }
     free(gFileOutSysValue.ppChannels);
     gFileOutSysValue.ppChannels = NULL;

@@ -106,12 +106,6 @@ typedef struct INST_SAMPLER INST_SAMPLER;
 /******************************************************************************/
 class InstList {
 private:
-    INST_SAMPLER **mppSampler = NULL;
-    INST_WAVE **mppWaveList = NULL;
-    INST_LAYER **mppLayerList = NULL;
-    INST_REGION **mppRegionList = NULL;
-    INST_ART **mppArtList = NULL;
-    WAVDAT *mpWaveTable = NULL;
     INST_LIST mInstList;
     WCHAR mWaveTablePath[256] = { 0 };
     uint32 mWaveCount = 0;
@@ -120,16 +114,21 @@ private:
     uint32 mArtCount = 0;
 
 public:
-    InstList();
+    INST_WAVE** mppWaveList = NULL;
+    INST_LAYER** mppLayerList = NULL;
+    INST_REGION** mppRegionList = NULL;
+    INST_ART** mppArtList = NULL;
+    WAVDAT* mpWaveTable = NULL;
+
+public:
+    InstList() {}
     ~InstList();
 
 public:
     E_LOAD_STATUS Load(LPWSTR path);
     INST_LIST *GetInstList();
     INST_INFO *GetInstInfo(byte is_drum, byte bank_lsb, byte bank_msb, byte prog_num);
-    INST_SAMPLER **GetSamplerPtr();
     WAVDAT *GetWaveTablePtr();
-    void SetSampler(INST_INFO *pInstInfo, byte channelNum, byte noteNum, byte velocity);
 
 private:
     E_LOAD_STATUS loadDls(LPWSTR path);

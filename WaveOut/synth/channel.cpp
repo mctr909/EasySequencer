@@ -214,7 +214,7 @@ Channel::note_on(byte note_num, byte velocity) {
         return;
     }
     param.pKeyboard[note_num] = (byte)E_KEY_STATE::PRESS;
-    mpSystem_value->cInst_list->SetSampler(mpInst, number, note_num, velocity);
+    message_set_sampler(mpSystem_value, mpInst, number, note_num, velocity);
 }
 
 void

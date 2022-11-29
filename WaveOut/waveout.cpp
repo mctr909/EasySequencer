@@ -92,8 +92,13 @@ byte *WINAPI waveout_open(
     }
     //
     gSysValue.cInst_list = cInst;
-    gSysValue.ppSampler = gSysValue.cInst_list->GetSamplerPtr();
     gSysValue.pWave_table = (WAVDAT*)gSysValue.cInst_list->GetWaveTablePtr();
+    gSysValue.ppSampler = (INST_SAMPLER**)calloc(SAMPLER_COUNT, sizeof(INST_SAMPLER*));
+    for (uint32 i = 0; i < SAMPLER_COUNT; i++) {
+        INST_SAMPLER smpl;
+        gSysValue.ppSampler[i] = (INST_SAMPLER*)malloc(sizeof(INST_SAMPLER));
+        memcpy_s(gSysValue.ppSampler[i], sizeof(INST_SAMPLER), &smpl, sizeof(INST_SAMPLER));
+    }
     gSysValue.buffer_length = bufferLength;
     gSysValue.buffer_count = bufferCount;
     gSysValue.sample_rate = sampleRate;
@@ -121,6 +126,13 @@ void WINAPI waveout_close() {
     if (NULL != gSysValue.pBuffer_r) {
         free(gSysValue.pBuffer_r);
         gSysValue.pBuffer_r = NULL;
+    }
+    if (NULL != gSysValue.ppSampler) {
+        for (uint32 i = 0; i < SAMPLER_COUNT; i++) {
+            free(gSysValue.ppSampler[i]);
+        }
+        free(gSysValue.ppSampler);
+        gSysValue.ppSampler = NULL;
     }
     message_disposeChannels(&gSysValue);
 }

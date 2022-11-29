@@ -6,6 +6,7 @@
 typedef struct SYSTEM_VALUE SYSTEM_VALUE;
 typedef struct CHANNEL_PARAM CHANNEL_PARAM;
 typedef struct INST_SAMPLER INST_SAMPLER;
+struct INST_INFO;
 class InstList;
 class Channel;
 
@@ -67,6 +68,7 @@ extern "C" {
 #endif
     void message_createChannels(SYSTEM_VALUE *pSystemValue);
     void message_disposeChannels(SYSTEM_VALUE *pSystemValue);
+    void message_set_sampler(SYSTEM_VALUE* pSystemValue, INST_INFO* pInstInfo, byte channelNum, byte noteNum, byte velocity);
     __declspec(dllexport) void WINAPI message_send(byte *pMsg);
 #ifdef __cplusplus
 }
