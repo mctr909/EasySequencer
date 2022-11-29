@@ -46,19 +46,19 @@ void WINAPI message_send(byte *pMsg) {
     auto ch = *pMsg & 0x0F;
     switch (type) {
     case E_EVENT_TYPE::NOTE_OFF:
-        message_ppChannels[ch]->NoteOff(pMsg[1]);
+        message_ppChannels[ch]->note_off(pMsg[1]);
         break;
     case E_EVENT_TYPE::NOTE_ON:
-        message_ppChannels[ch]->NoteOn(pMsg[1], pMsg[2]);
+        message_ppChannels[ch]->note_on(pMsg[1], pMsg[2]);
         break;
     case E_EVENT_TYPE::CTRL_CHG:
-        message_ppChannels[ch]->CtrlChange(pMsg[1], pMsg[2]);
+        message_ppChannels[ch]->ctrl_change(pMsg[1], pMsg[2]);
         break;
     case E_EVENT_TYPE::PROG_CHG:
-        message_ppChannels[ch]->ProgramChange(pMsg[1]);
+        message_ppChannels[ch]->program_change(pMsg[1]);
         break;
     case E_EVENT_TYPE::PITCH:
-        message_ppChannels[ch]->PitchBend(((pMsg[2] << 7) | pMsg[1]) - 8192);
+        message_ppChannels[ch]->pitch_bend(((pMsg[2] << 7) | pMsg[1]) - 8192);
         break;
     }
 }

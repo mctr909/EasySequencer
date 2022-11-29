@@ -14,6 +14,39 @@ typedef struct INST_INFO INST_INFO;
 /******************************************************************************/
 class Channel {
 private:
+    enum struct E_CTRL_TYPE : byte {
+        BANK_MSB = 0,
+        MODULATION = 1,
+        PORTA_TIME = 5,
+        DATA_MSB = 6,
+        VOLUME = 7,
+        PAN = 10,
+        EXPRESSION = 11,
+        BANK_LSB = 32,
+        HOLD = 64,
+        PORTAMENTO = 65,
+        RESONANCE = 71,
+        RELEACE = 72,
+        ATTACK = 73,
+        CUTOFF = 74,
+        VIB_RATE = 76,
+        VIB_DEPTH = 77,
+        VIB_DELAY = 78,
+        REVERB = 91,
+        CHORUS = 93,
+        DELAY = 94,
+        NRPN_LSB = 98,
+        NRPN_MSB = 99,
+        RPN_LSB = 100,
+        RPN_MSB = 101,
+        ALL_RESET = 121,
+        INVALID = 255
+    };
+    enum struct E_KEY_STATE : byte {
+        FREE,
+        PRESS,
+        HOLD
+    };
     struct DELAY {
         uint write_index;
         uint time;
@@ -65,23 +98,23 @@ public:
     ~Channel();
 
 public:
-    void AllInit();
-    void AllReset();
-    void NoteOff(byte noteNumber);
-    void NoteOn(byte noteNumber, byte velocity);
-    void CtrlChange(byte type, byte b1);
-    void ProgramChange(byte value);
-    void PitchBend(short pitch);
-    void Step(double* pOutputL, double* pOutputR);
+    void init_ctrl();
+    void all_reset();
+    void note_off(byte noteNumber);
+    void note_on(byte noteNumber, byte velocity);
+    void ctrl_change(byte type, byte b1);
+    void program_change(byte value);
+    void pitch_bend(short pitch);
+    void step(double* pOutputL, double* pOutputR);
 
 private:
-    void setAmp(byte vol, byte exp);
-    void setPan(byte value);
-    void setHld(byte value);
-    void setRes(byte value);
-    void setCut(byte value);
-    void setRpn();
-    void setNrpn();
+    void set_amp(byte vol, byte exp);
+    void set_pan(byte value);
+    void set_hold(byte value);
+    void set_res(byte value);
+    void set_cut(byte value);
+    void set_rpn();
+    void set_nrpn();
 };
 
 #endif /* __CHANNEL_H__ */

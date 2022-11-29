@@ -25,7 +25,7 @@ Channel::Channel(SYSTEM_VALUE *pSystemValue, int number) {
     current_pan_re = 1.0;
     current_pan_im = 0.0;
 
-    AllInit();
+    init_ctrl();
 }
 
 Channel::~Channel() {
@@ -46,21 +46,21 @@ Channel::~Channel() {
 
 /******************************************************************************/
 void
-Channel::setAmp(byte vol, byte exp) {
+Channel::set_amp(byte vol, byte exp) {
     Param.Vol = vol;
     Param.Exp = exp;
     current_amp = vol * vol * exp * exp / 260144641.0;
 }
 
 void
-Channel::setPan(byte value) {
+Channel::set_pan(byte value) {
     Param.Pan = value;
     current_pan_re = Cos[value];
     current_pan_im = Sin[value];
 }
 
 void
-Channel::setHld(byte value) {
+Channel::set_hold(byte value) {
     if (value < 64) {
         for (int s = 0; s < SAMPLER_COUNT; ++s) {
             auto pSmpl = mpSystemValue->ppSampler[s];
@@ -78,17 +78,17 @@ Channel::setHld(byte value) {
 }
 
 void
-Channel::setRes(byte value) {
+Channel::set_res(byte value) {
     Param.Fq = value;
 }
 
 void
-Channel::setCut(byte value) {
+Channel::set_cut(byte value) {
     Param.Fc = value;
 }
 
 void
-Channel::setRpn() {
+Channel::set_rpn() {
     switch (mRpnLSB | mRpnMSB << 8) {
     case 0x0000:
         Param.BendRange = mDataMSB;
@@ -101,7 +101,7 @@ Channel::setRpn() {
 }
 
 void
-Channel::setNrpn() {
+Channel::set_nrpn() {
     //switch (mNrpnLSB | mNrpnMSB << 8) {
     //default:
     //    break;
@@ -112,11 +112,11 @@ Channel::setNrpn() {
 
 /******************************************************************************/
 void
-Channel::AllInit() {
-    setAmp(100, 100);
-    setPan(64);
+Channel::init_ctrl() {
+    set_amp(100, 100);
+    set_pan(64);
 
-    setHld(0);
+    set_hold(0);
 
     Param.Rev = 0;
     Param.Cho = 0;
@@ -131,8 +131,8 @@ Channel::AllInit() {
     delay.cross = 64 / 127.0;
     delay.time = static_cast<long>(mpSystemValue->sampleRate * 200 * 0.001);
     
-    setRes(64);
-    setCut(64);
+    set_res(64);
+    set_cut(64);
 
     Param.Rel = 64;
     Param.Atk = 64;
@@ -154,16 +154,16 @@ Channel::AllInit() {
     Param.bankMSB = 0;
     Param.bankLSB = 0;
     Param.progNum = 0;
-    ProgramChange(0);
+    program_change(0);
 
     Param.Enable = 1;
 }
 
 void
-Channel::AllReset() {
-    setAmp(Param.Vol, 100);
-    setPan(64);
-    setHld(0);
+Channel::all_reset() {
+    set_amp(Param.Vol, 100);
+    set_pan(64);
+    set_hold(0);
 
     Param.Pitch = 0;
     pitch = 1.0;
@@ -175,7 +175,7 @@ Channel::AllReset() {
 }
 
 void
-Channel::NoteOff(byte noteNumber) {
+Channel::note_off(byte noteNumber) {
     for (int s = 0; s < SAMPLER_COUNT; ++s) {
         auto pSmpl = mpSystemValue->ppSampler[s];
         auto pChParam = mpSystemValue->ppChannelParam[pSmpl->channelNum];
@@ -199,9 +199,9 @@ Channel::NoteOff(byte noteNumber) {
 }
 
 void
-Channel::NoteOn(byte noteNumber, byte velocity) {
+Channel::note_on(byte noteNumber, byte velocity) {
     if (0 == velocity) {
-        NoteOff(noteNumber);
+        note_off(noteNumber);
         return;
     }
     Param.pKeyBoard[noteNumber] = (byte)E_KEY_STATE::PRESS;
@@ -209,7 +209,7 @@ Channel::NoteOn(byte noteNumber, byte velocity) {
 }
 
 void
-Channel::CtrlChange(byte type, byte b1) {
+Channel::ctrl_change(byte type, byte b1) {
     switch ((E_CTRL_TYPE)type) {
     case E_CTRL_TYPE::BANK_MSB:
         Param.bankMSB = b1;
@@ -219,13 +219,13 @@ Channel::CtrlChange(byte type, byte b1) {
         break;
 
     case E_CTRL_TYPE::VOLUME:
-        setAmp(b1, Param.Exp);
+        set_amp(b1, Param.Exp);
         break;
     case E_CTRL_TYPE::PAN:
-        setPan(b1);
+        set_pan(b1);
         break;
     case E_CTRL_TYPE::EXPRESSION:
-        setAmp(Param.Vol, b1);
+        set_amp(Param.Vol, b1);
         break;
 
     case E_CTRL_TYPE::MODULATION:
@@ -233,7 +233,7 @@ Channel::CtrlChange(byte type, byte b1) {
         break;
 
     case E_CTRL_TYPE::HOLD:
-        setHld(b1);
+        set_hold(b1);
         break;
     case E_CTRL_TYPE::RELEACE:
         Param.Rel = b1;
@@ -243,10 +243,10 @@ Channel::CtrlChange(byte type, byte b1) {
         break;
 
     case E_CTRL_TYPE::RESONANCE:
-        setRes(b1);
+        set_res(b1);
         break;
     case E_CTRL_TYPE::CUTOFF:
-        setCut(b1);
+        set_cut(b1);
         break;
 
     case E_CTRL_TYPE::VIB_RATE:
@@ -287,25 +287,25 @@ Channel::CtrlChange(byte type, byte b1) {
         break;
     case E_CTRL_TYPE::DATA_MSB:
         mDataMSB = b1;
-        setRpn();
-        setNrpn();
+        set_rpn();
+        set_nrpn();
         break;
 
     case E_CTRL_TYPE::ALL_RESET:
-        AllReset();
+        all_reset();
         break;
     }
 }
 
 void
-Channel::ProgramChange(byte value) {
+Channel::program_change(byte value) {
     Param.progNum = value;
     mpInst = mpSystemValue->cInstList->GetInstInfo(Param.isDrum, Param.bankLSB, Param.bankMSB, Param.progNum);
     Param.pName = (byte*)mpInst->pName;
 }
 
 void
-Channel::PitchBend(short pitch) {
+Channel::pitch_bend(short pitch) {
     Param.Pitch = pitch;
     auto temp = Param.Pitch * Param.BendRange;
     if (temp < 0) {
@@ -317,7 +317,7 @@ Channel::PitchBend(short pitch) {
 }
 
 void
-Channel::Step(double* pOutputL, double* pOutputR) {
+Channel::step(double* pOutputL, double* pOutputR) {
     for (int i = 0; i < mpSystemValue->bufferLength; i++) {
         auto output_l = pInput[i] * current_amp * current_pan_re;
         auto output_r = pInput[i] * current_amp * current_pan_im;

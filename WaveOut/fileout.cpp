@@ -6,6 +6,7 @@
 #include "synth/channel_params.h"
 #include "synth/sampler.h"
 #include "inst/inst_list.h"
+#include "message_reciever.h"
 
 /******************************************************************************/
 typedef struct INST_SAMPLER INST_SAMPLER;
@@ -152,23 +153,23 @@ int fileout_send(byte *pMsg) {
     auto ch = *pMsg & 0x0F;
     switch (type) {
     case E_EVENT_TYPE::NOTE_OFF:
-        gFileOutSysValue.ppChannels[ch]->NoteOff(pMsg[1]);
+        gFileOutSysValue.ppChannels[ch]->note_off(pMsg[1]);
         return 3;
     case E_EVENT_TYPE::NOTE_ON:
-        gFileOutSysValue.ppChannels[ch]->NoteOn(pMsg[1], pMsg[2]);
+        gFileOutSysValue.ppChannels[ch]->note_on(pMsg[1], pMsg[2]);
         return 3;
     case E_EVENT_TYPE::POLY_KEY:
         return 3;
     case E_EVENT_TYPE::CTRL_CHG:
-        gFileOutSysValue.ppChannels[ch]->CtrlChange(pMsg[1], pMsg[2]);
+        gFileOutSysValue.ppChannels[ch]->ctrl_change(pMsg[1], pMsg[2]);
         return 3;
     case E_EVENT_TYPE::PROG_CHG:
-        gFileOutSysValue.ppChannels[ch]->ProgramChange(pMsg[1]);
+        gFileOutSysValue.ppChannels[ch]->program_change(pMsg[1]);
         return 2;
     case E_EVENT_TYPE::CH_PRESS:
         return 2;
     case E_EVENT_TYPE::PITCH:
-        gFileOutSysValue.ppChannels[ch]->PitchBend(((pMsg[2] << 7) | pMsg[1]) - 8192);
+        gFileOutSysValue.ppChannels[ch]->pitch_bend(((pMsg[2] << 7) | pMsg[1]) - 8192);
         return 3;
     case E_EVENT_TYPE::SYS_EX:
         if (0xFF == pMsg[0]) {
@@ -213,7 +214,7 @@ inline void fileout_write16(byte* pOutBuffer) {
         for (; pInputBuff < pInputBuffTerm; pInputBuff++, pBuff += 2) {
             double tempL = 0.0, tempR = 0.0;
             // effect
-            pCh->Step(&tempL, &tempR);
+            pCh->step(&tempL, &tempR);
             // output
             tempL *= 32767.0;
             tempR *= 32767.0;

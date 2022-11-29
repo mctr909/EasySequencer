@@ -140,7 +140,7 @@ void write_buffer(LPSTR pData) {
     gActiveCount = activeCount;
     for (int i = 0; i < CHANNEL_COUNT; i++) {
         auto pCh = gSysValue.ppChannels[i];
-        pCh->Step(gSysValue.pBufferL, gSysValue.pBufferR);
+        pCh->step(gSysValue.pBufferL, gSysValue.pBufferR);
     }
     auto pOutput = (short*)pData;
     for (int i = 0, j = 0; i < gSysValue.bufferLength; i++, j += 2) {
