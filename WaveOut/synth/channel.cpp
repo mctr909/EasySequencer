@@ -7,15 +7,16 @@
 
 #include <math.h>
 
-Channel::Channel(SYSTEM_VALUE *pSystemValue, int number) {
-    mpSystemValue = pSystemValue;
-    Number = (byte)number;
-    Param.pKeyBoard = (byte*)calloc(1, sizeof(byte) * 128);
+Channel::Channel(SYSTEM_VALUE *pSystem_value, int number) {
+    mpSystem_value = pSystem_value;
+    this->number = (byte)number;
+    param.pKeyBoard = (byte*)calloc(1, sizeof(byte) * 128);
 
-    pInput = (double*)calloc(pSystemValue->bufferLength, sizeof(double));
+    pInput_l = (double*)calloc(pSystem_value->bufferLength, sizeof(double));
+    pInput_r = (double*)calloc(pSystem_value->bufferLength, sizeof(double));
 
     delay.write_index = 0;
-    delay.tap_length = pSystemValue->sampleRate;
+    delay.tap_length = pSystem_value->sampleRate;
     delay.pTap_l = (double*)calloc(delay.tap_length, sizeof(double));
     delay.pTap_r = (double*)calloc(delay.tap_length, sizeof(double));
     chorus.lfo_u = 1.0;
@@ -29,9 +30,13 @@ Channel::Channel(SYSTEM_VALUE *pSystemValue, int number) {
 }
 
 Channel::~Channel() {
-    if (NULL != pInput) {
-        free(pInput);
-        pInput = NULL;
+    if (NULL != pInput_l) {
+        free(pInput_l);
+        pInput_l = NULL;
+    }
+    if (NULL != pInput_r) {
+        free(pInput_r);
+        pInput_r = NULL;
     }
     if (NULL != delay.pTap_l) {
         free(delay.pTap_l);
@@ -41,63 +46,66 @@ Channel::~Channel() {
         free(delay.pTap_r);
         delay.pTap_r = NULL;
     }
-    free(Param.pKeyBoard);
+    if (NULL != param.pKeyBoard) {
+        free(param.pKeyBoard);
+        param.pKeyBoard = NULL;
+    }
 }
 
 /******************************************************************************/
 void
 Channel::set_amp(byte vol, byte exp) {
-    Param.Vol = vol;
-    Param.Exp = exp;
-    current_amp = vol * vol * exp * exp / 260144641.0;
+    param.Vol = vol;
+    param.Exp = exp;
+    target_amp = vol * vol * exp * exp / 260144641.0;
 }
 
 void
 Channel::set_pan(byte value) {
-    Param.Pan = value;
-    current_pan_re = Cos[value];
-    current_pan_im = Sin[value];
+    param.Pan = value;
+    target_pan_re = cos((value - 64) * 1.570796 / 127.0);
+    target_pan_im = sin((value - 64) * 1.570796 / 127.0);
 }
 
 void
 Channel::set_hold(byte value) {
     if (value < 64) {
         for (int s = 0; s < SAMPLER_COUNT; ++s) {
-            auto pSmpl = mpSystemValue->ppSampler[s];
+            auto pSmpl = mpSystem_value->ppSampler[s];
             if (E_SAMPLER_STATE::HOLD == pSmpl->state) {
                 pSmpl->state = E_SAMPLER_STATE::RELEASE;
             }
         }
         for (int n = 0; n < 128; ++n) {
-            if ((byte)E_KEY_STATE::HOLD == Param.pKeyBoard[n]) {
-                Param.pKeyBoard[n] = (byte)E_KEY_STATE::FREE;
+            if ((byte)E_KEY_STATE::HOLD == param.pKeyBoard[n]) {
+                param.pKeyBoard[n] = (byte)E_KEY_STATE::FREE;
             }
         }
     }
-    Param.Hld = value;
+    param.Hld = value;
 }
 
 void
 Channel::set_res(byte value) {
-    Param.Fq = value;
+    param.Fq = value;
 }
 
 void
 Channel::set_cut(byte value) {
-    Param.Fc = value;
+    param.Fc = value;
 }
 
 void
 Channel::set_rpn() {
-    switch (mRpnLSB | mRpnMSB << 8) {
+    switch (rpn_lsb | rpn_msb << 8) {
     case 0x0000:
-        Param.BendRange = mDataMSB;
+        param.BendRange = data_msb;
         break;
     default:
         break;
     }
-    mRpnLSB = 0xFF;
-    mRpnMSB = 0xFF;
+    rpn_lsb = 0xFF;
+    rpn_msb = 0xFF;
 }
 
 void
@@ -106,8 +114,8 @@ Channel::set_nrpn() {
     //default:
     //    break;
     //}
-    mNrpnLSB = 0xFF;
-    mNrpnMSB = 0xFF;
+    nrpn_lsb = 0xFF;
+    nrpn_msb = 0xFF;
 }
 
 /******************************************************************************/
@@ -118,128 +126,128 @@ Channel::init_ctrl() {
 
     set_hold(0);
 
-    Param.Rev = 0;
-    Param.Cho = 0;
-    chorus.send = Param.Cho / 127.0;
-    chorus.pan_a = (1.0 - Param.Rev / 127.0) / 3.0;
-    chorus.pan_b = (1.0 + Param.Rev / 127.0) / 3.0;
+    param.Rev = 0;
+    param.Cho = 0;
+    chorus.send = param.Cho / 127.0;
+    chorus.pan_a = (1.0 - param.Rev / 127.0) / 3.0;
+    chorus.pan_b = (1.0 + param.Rev / 127.0) / 3.0;
     chorus.depth = 20 * 0.001;
-    chorus.rate = 10 * 0.06283 / 1.732 * mpSystemValue->deltaTime;
+    chorus.rate = 10 * 0.06283 / 1.732 * mpSystem_value->deltaTime;
     
-    Param.Del = 0;
-    delay.send = Param.Del / 128.0;
+    param.Del = 0;
+    delay.send = param.Del / 128.0;
     delay.cross = 64 / 127.0;
-    delay.time = static_cast<long>(mpSystemValue->sampleRate * 200 * 0.001);
+    delay.time = static_cast<long>(mpSystem_value->sampleRate * 200 * 0.001);
     
     set_res(64);
     set_cut(64);
 
-    Param.Rel = 64;
-    Param.Atk = 64;
+    param.Rel = 64;
+    param.Atk = 64;
 
-    Param.VibRate = 64;
-    Param.VibDepth = 64;
-    Param.VibDelay = 64;
+    param.VibRate = 64;
+    param.VibDepth = 64;
+    param.VibDelay = 64;
 
-    Param.BendRange = 2;
-    Param.Pitch = 0;
+    param.BendRange = 2;
+    param.Pitch = 0;
     pitch = 1.0;
 
-    mRpnLSB = 0xFF;
-    mRpnMSB = 0xFF;
-    mNrpnLSB = 0xFF;
-    mNrpnMSB = 0xFF;
+    rpn_lsb = 0xFF;
+    rpn_msb = 0xFF;
+    nrpn_lsb = 0xFF;
+    nrpn_msb = 0xFF;
 
-    Param.isDrum = Number == 9 ? 1 : 0;
-    Param.bankMSB = 0;
-    Param.bankLSB = 0;
-    Param.progNum = 0;
+    param.isDrum = number == 9 ? 1 : 0;
+    param.bankMSB = 0;
+    param.bankLSB = 0;
+    param.progNum = 0;
     program_change(0);
 
-    Param.Enable = 1;
+    param.Enable = 1;
 }
 
 void
 Channel::all_reset() {
-    set_amp(Param.Vol, 100);
+    set_amp(param.Vol, 100);
     set_pan(64);
     set_hold(0);
 
-    Param.Pitch = 0;
+    param.Pitch = 0;
     pitch = 1.0;
 
-    mRpnLSB = 0xFF;
-    mRpnMSB = 0xFF;
-    mNrpnLSB = 0xFF;
-    mNrpnMSB = 0xFF;
+    rpn_lsb = 0xFF;
+    rpn_msb = 0xFF;
+    nrpn_lsb = 0xFF;
+    nrpn_msb = 0xFF;
 }
 
 void
-Channel::note_off(byte noteNumber) {
+Channel::note_off(byte note_num) {
     for (int s = 0; s < SAMPLER_COUNT; ++s) {
-        auto pSmpl = mpSystemValue->ppSampler[s];
-        auto pChParam = mpSystemValue->ppChannelParam[pSmpl->channelNum];
+        auto pSmpl = mpSystem_value->ppSampler[s];
+        auto pChParam = mpSystem_value->ppChannelParam[pSmpl->channelNum];
         if (pSmpl->state < E_SAMPLER_STATE::PRESS ||
             (pChParam->isDrum && !pSmpl->pWave->loopEnable)) {
             continue;
         }
-        if (pSmpl->channelNum == Number && pSmpl->noteNum == noteNumber) {
-            if (Param.Hld < 64) {
+        if (pSmpl->channelNum == number && pSmpl->noteNum == note_num) {
+            if (param.Hld < 64) {
                 pSmpl->state = E_SAMPLER_STATE::RELEASE;
             } else {
                 pSmpl->state = E_SAMPLER_STATE::HOLD;
             }
         }
     }
-    if (Param.Hld < 64) {
-        Param.pKeyBoard[noteNumber] = (byte)E_KEY_STATE::FREE;
+    if (param.Hld < 64) {
+        param.pKeyBoard[note_num] = (byte)E_KEY_STATE::FREE;
     } else {
-        Param.pKeyBoard[noteNumber] = (byte)E_KEY_STATE::HOLD;
+        param.pKeyBoard[note_num] = (byte)E_KEY_STATE::HOLD;
     }
 }
 
 void
-Channel::note_on(byte noteNumber, byte velocity) {
+Channel::note_on(byte note_num, byte velocity) {
     if (0 == velocity) {
-        note_off(noteNumber);
+        note_off(note_num);
         return;
     }
-    Param.pKeyBoard[noteNumber] = (byte)E_KEY_STATE::PRESS;
-    mpSystemValue->cInstList->SetSampler(mpInst, Number, noteNumber, velocity);
+    param.pKeyBoard[note_num] = (byte)E_KEY_STATE::PRESS;
+    mpSystem_value->cInstList->SetSampler(mpInst, number, note_num, velocity);
 }
 
 void
 Channel::ctrl_change(byte type, byte b1) {
     switch ((E_CTRL_TYPE)type) {
     case E_CTRL_TYPE::BANK_MSB:
-        Param.bankMSB = b1;
+        param.bankMSB = b1;
         break;
     case E_CTRL_TYPE::BANK_LSB:
-        Param.bankLSB = b1;
+        param.bankLSB = b1;
         break;
 
     case E_CTRL_TYPE::VOLUME:
-        set_amp(b1, Param.Exp);
+        set_amp(b1, param.Exp);
         break;
     case E_CTRL_TYPE::PAN:
         set_pan(b1);
         break;
     case E_CTRL_TYPE::EXPRESSION:
-        set_amp(Param.Vol, b1);
+        set_amp(param.Vol, b1);
         break;
 
     case E_CTRL_TYPE::MODULATION:
-        Param.Mod = b1;
+        param.Mod = b1;
         break;
 
     case E_CTRL_TYPE::HOLD:
         set_hold(b1);
         break;
     case E_CTRL_TYPE::RELEACE:
-        Param.Rel = b1;
+        param.Rel = b1;
         break;
     case E_CTRL_TYPE::ATTACK:
-        Param.Atk = b1;
+        param.Atk = b1;
         break;
 
     case E_CTRL_TYPE::RESONANCE:
@@ -250,43 +258,43 @@ Channel::ctrl_change(byte type, byte b1) {
         break;
 
     case E_CTRL_TYPE::VIB_RATE:
-        Param.VibRate = b1;
+        param.VibRate = b1;
         break;
     case E_CTRL_TYPE::VIB_DEPTH:
-        Param.VibDepth = b1;
+        param.VibDepth = b1;
         break;
     case E_CTRL_TYPE::VIB_DELAY:
-        Param.VibDelay = b1;
+        param.VibDelay = b1;
         break;
 
     case E_CTRL_TYPE::REVERB:
-        Param.Rev = b1;
+        param.Rev = b1;
         chorus.pan_a = (1.0 - b1 / 127.0) / 3.0;
         chorus.pan_b = (1.0 + b1 / 127.0) / 3.0;
         break;
     case E_CTRL_TYPE::CHORUS:
-        Param.Cho = b1;
+        param.Cho = b1;
         chorus.send = b1 / 128.0;
         break;
     case E_CTRL_TYPE::DELAY:
-        Param.Del = b1;
+        param.Del = b1;
         delay.send = b1 / 127.0;
         break;
 
     case E_CTRL_TYPE::NRPN_LSB:
-        mNrpnLSB = b1;
+        nrpn_lsb = b1;
         break;
     case E_CTRL_TYPE::NRPN_MSB:
-        mNrpnMSB = b1;
+        nrpn_msb = b1;
         break;
     case E_CTRL_TYPE::RPN_LSB:
-        mRpnLSB = b1;
+        rpn_lsb = b1;
         break;
     case E_CTRL_TYPE::RPN_MSB:
-        mRpnMSB = b1;
+        rpn_msb = b1;
         break;
     case E_CTRL_TYPE::DATA_MSB:
-        mDataMSB = b1;
+        data_msb = b1;
         set_rpn();
         set_nrpn();
         break;
@@ -299,15 +307,15 @@ Channel::ctrl_change(byte type, byte b1) {
 
 void
 Channel::program_change(byte value) {
-    Param.progNum = value;
-    mpInst = mpSystemValue->cInstList->GetInstInfo(Param.isDrum, Param.bankLSB, Param.bankMSB, Param.progNum);
-    Param.pName = (byte*)mpInst->pName;
+    param.progNum = value;
+    mpInst = mpSystem_value->cInstList->GetInstInfo(param.isDrum, param.bankLSB, param.bankMSB, param.progNum);
+    param.pName = (byte*)mpInst->pName;
 }
 
 void
 Channel::pitch_bend(short pitch) {
-    Param.Pitch = pitch;
-    auto temp = Param.Pitch * Param.BendRange;
+    param.Pitch = pitch;
+    auto temp = param.Pitch * param.BendRange;
     if (temp < 0) {
         temp = -temp;
         this->pitch = 1.0 / (SemiTone[temp >> 13] * PitchMSB[(temp >> 7) % 64] * PitchLSB[temp % 128]);
@@ -317,11 +325,17 @@ Channel::pitch_bend(short pitch) {
 }
 
 void
-Channel::step(double* pOutputL, double* pOutputR) {
-    for (int i = 0; i < mpSystemValue->bufferLength; i++) {
-        auto output_l = pInput[i] * current_amp * current_pan_re;
-        auto output_r = pInput[i] * current_amp * current_pan_im;
-        pInput[i] = 0.0;
+Channel::step(double* pOutput_l, double* pOutput_r) {
+    for (int i = 0; i < mpSystem_value->bufferLength; i++) {
+        auto output_l = pInput_l[i] * current_pan_re - pInput_r[i] * current_pan_im;
+        auto output_r = pInput_l[i] * current_pan_im + pInput_r[i] * current_pan_re;
+        output_l *= current_amp;
+        output_r *= current_amp;
+        current_amp += (target_amp - current_amp) * 0.02;
+        current_pan_re += (target_pan_re - current_pan_re) * 0.02;
+        current_pan_im += (target_pan_im - current_pan_im) * 0.02;
+        pInput_l[i] = 0.0;
+        pInput_r[i] = 0.0;
 
         /* delay */
         {
@@ -346,13 +360,13 @@ Channel::step(double* pOutputL, double* pOutputR) {
         /* chorus */
         {
             auto idx_u = static_cast<long>(delay.write_index) - static_cast<long>(
-                ((0.5 + 0.5 * chorus.lfo_u) * chorus.depth * 0.99 + 0.01) * mpSystemValue->sampleRate
+                ((0.5 + 0.5 * chorus.lfo_u) * chorus.depth * 0.99 + 0.01) * mpSystem_value->sampleRate
             );
             auto idx_v = static_cast<long>(delay.write_index) - static_cast<long>(
-                ((0.5 + 0.5 * chorus.lfo_v) * chorus.depth * 0.99 + 0.01) * mpSystemValue->sampleRate
+                ((0.5 + 0.5 * chorus.lfo_v) * chorus.depth * 0.99 + 0.01) * mpSystem_value->sampleRate
             );
             auto idx_w = static_cast<long>(delay.write_index) - static_cast<long>(
-                ((0.5 + 0.5 * chorus.lfo_w) * chorus.depth * 0.99 + 0.01) * mpSystemValue->sampleRate
+                ((0.5 + 0.5 * chorus.lfo_w) * chorus.depth * 0.99 + 0.01) * mpSystem_value->sampleRate
             );
             if (idx_u < 0) {
                 idx_u += delay.tap_length;
@@ -380,20 +394,20 @@ Channel::step(double* pOutputL, double* pOutputR) {
 
         /* meter */
         {
-            auto delta = RMS_ATTENUTE * mpSystemValue->deltaTime;
+            auto delta = RMS_ATTENUTE * mpSystem_value->deltaTime;
             auto attenute = 1.0 - delta;
-            auto rms_l = Param.RmsL * attenute;
-            auto rms_r = Param.RmsR * attenute;
-            Param.RmsL = rms_l + output_l * output_l * delta;
-            Param.RmsR = rms_r + output_r * output_r * delta;
-            attenute = 1.0 - PEAK_ATTENUTE * mpSystemValue->deltaTime;
-            auto peak_l = Param.PeakL * attenute;
-            auto peak_r = Param.PeakR * attenute;
-            Param.PeakL = fmax(peak_l, fabs(output_l));
-            Param.PeakR = fmax(peak_r, fabs(output_r));
+            auto rms_l = param.RmsL * attenute;
+            auto rms_r = param.RmsR * attenute;
+            param.RmsL = rms_l + output_l * output_l * delta;
+            param.RmsR = rms_r + output_r * output_r * delta;
+            attenute = 1.0 - PEAK_ATTENUTE * mpSystem_value->deltaTime;
+            auto peak_l = param.PeakL * attenute;
+            auto peak_r = param.PeakR * attenute;
+            param.PeakL = fmax(peak_l, fabs(output_l));
+            param.PeakR = fmax(peak_r, fabs(output_r));
         }
 
-        pOutputL[i] += output_l;
-        pOutputR[i] += output_r;
+        pOutput_l[i] += output_l;
+        pOutput_r[i] += output_r;
     }
 }

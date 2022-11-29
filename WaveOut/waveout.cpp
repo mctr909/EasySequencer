@@ -127,6 +127,7 @@ void WINAPI waveout_close() {
 
 /******************************************************************************/
 void write_buffer(LPSTR pData) {
+    /* sampler loop */
     int activeCount = 0;
     for (int i = 0; i < SAMPLER_COUNT; i++) {
         auto pSmpl = gSysValue.ppSampler[i];
@@ -138,10 +139,12 @@ void write_buffer(LPSTR pData) {
         }
     }
     gActiveCount = activeCount;
+    /* channel loop */
     for (int i = 0; i < CHANNEL_COUNT; i++) {
         auto pCh = gSysValue.ppChannels[i];
         pCh->step(gSysValue.pBufferL, gSysValue.pBufferR);
     }
+    /* write buffer */
     auto pOutput = (short*)pData;
     for (int i = 0, j = 0; i < gSysValue.bufferLength; i++, j += 2) {
         auto pL = &gSysValue.pBufferL[i];

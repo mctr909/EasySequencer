@@ -68,22 +68,22 @@ private:
     };
 
 public:
-    byte Number;
-    CHANNEL_PARAM Param = { 0 };
-    double* pInput = 0;
+    byte number;
+    CHANNEL_PARAM param = { 0 };
     double pitch = 1.0;
+    double* pInput_l = 0;
+    double* pInput_r = 0;
 
 private:
-    SYSTEM_VALUE *mpSystemValue = NULL;
+    SYSTEM_VALUE *mpSystem_value = NULL;
     INST_INFO *mpInst = NULL;
 
-private:
-    byte mRpnLSB;
-    byte mRpnMSB;
-    byte mNrpnLSB;
-    byte mNrpnMSB;
-    byte mDataLSB;
-    byte mDataMSB;
+    byte rpn_lsb;
+    byte rpn_msb;
+    byte nrpn_lsb;
+    byte nrpn_msb;
+    byte data_lsb;
+    byte data_msb;
     double current_amp;
     double current_pan_re;
     double current_pan_im;
@@ -94,18 +94,18 @@ private:
     CHORUS chorus = { 0 };
 
 public:
-    Channel(SYSTEM_VALUE *pSystemValue, int number);
+    Channel(SYSTEM_VALUE *pSystem_value, int number);
     ~Channel();
 
 public:
     void init_ctrl();
     void all_reset();
-    void note_off(byte noteNumber);
-    void note_on(byte noteNumber, byte velocity);
+    void note_off(byte note_num);
+    void note_on(byte note_num, byte velocity);
     void ctrl_change(byte type, byte b1);
     void program_change(byte value);
     void pitch_bend(short pitch);
-    void step(double* pOutputL, double* pOutputR);
+    void step(double* pOutput_l, double* pOutput_r);
 
 private:
     void set_amp(byte vol, byte exp);

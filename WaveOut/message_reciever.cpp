@@ -20,7 +20,7 @@ void message_createChannels(SYSTEM_VALUE *pSystemValue) {
     //
     pSystemValue->ppChannelParam = (CHANNEL_PARAM**)calloc(CHANNEL_COUNT, sizeof(CHANNEL_PARAM*));
     for (int i = 0; i < CHANNEL_COUNT; i++) {
-        pSystemValue->ppChannelParam[i] = &pSystemValue->ppChannels[i]->Param;
+        pSystemValue->ppChannelParam[i] = &pSystemValue->ppChannels[i]->param;
     }
 }
 

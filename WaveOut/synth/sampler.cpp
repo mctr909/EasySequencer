@@ -10,7 +10,8 @@
 /******************************************************************************/
 inline Bool sampler(SYSTEM_VALUE* pSystemValue, INST_SAMPLER* pSmpl) {
     auto pCh = pSystemValue->ppChannels[pSmpl->channelNum];
-    auto pOutput = pCh->pInput;
+    auto pOutput_l = pCh->pInput_l;
+    auto pOutput_r = pCh->pInput_r;
     auto pWaveInfo = pSmpl->pWave;
     auto pEnv = pSmpl->pEnv;
     auto pWaveData = pSystemValue->pWaveTable + pWaveInfo->offset;
@@ -39,7 +40,9 @@ inline Bool sampler(SYSTEM_VALUE* pSystemValue, INST_SAMPLER* pSmpl) {
         }
 
         /*** output ***/
-        pOutput[i] += smoothedWave * pSmpl->gain * pSmpl->egAmp / OVER_SAMPLING;
+        auto wave = smoothedWave * pSmpl->gain * pSmpl->egAmp / OVER_SAMPLING;
+        pOutput_l[i] += wave;
+        pOutput_r[i] += wave;
 
         //*******************************
         // generate envelope

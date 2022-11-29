@@ -43,7 +43,7 @@ double        gBpm = 120.0;
 
 /******************************************************************************/
 int fileout_send(byte *pMsg);
-inline void fileout_write16(byte* pOutBuffer);
+void fileout_write(byte* pOutBuffer);
 
 /******************************************************************************/
 int* WINAPI fileout_getProgressPtr() {
@@ -73,6 +73,8 @@ void WINAPI fileout_save(
     gFileOutSysValue.bufferCount = 16;
     gFileOutSysValue.sampleRate = sampleRate;
     gFileOutSysValue.deltaTime = 1.0 / gFileOutSysValue.sampleRate;
+    gFileOutSysValue.pBufferL = (double*)calloc(gFileOutSysValue.bufferLength, sizeof(double));
+    gFileOutSysValue.pBufferR = (double*)calloc(gFileOutSysValue.bufferLength, sizeof(double));
 
     // riff wave format
     RIFF riff;
@@ -98,7 +100,7 @@ void WINAPI fileout_save(
     gFileOutSysValue.ppChannelParam = (CHANNEL_PARAM**)calloc(CHANNEL_COUNT, sizeof(CHANNEL_PARAM*));
     for (int c = 0; c < CHANNEL_COUNT; c++) {
         gFileOutSysValue.ppChannels[c] = new Channel(&gFileOutSysValue, c);
-        gFileOutSysValue.ppChannelParam[c] = &gFileOutSysValue.ppChannels[c]->Param;
+        gFileOutSysValue.ppChannelParam[c] = &gFileOutSysValue.ppChannels[c]->param;
     }
 
     // open file
@@ -121,7 +123,7 @@ void WINAPI fileout_save(
         curPos += 4;
         auto evValue = pEvents + curPos;
         while (curTime < evTime) {
-            fileout_write16(pOutBuffer);
+            fileout_write(pOutBuffer);
             curTime += gBpm * delta_sec / 60.0;
             gFileOutProgress = curPos;
         }
@@ -140,6 +142,14 @@ void WINAPI fileout_save(
     for (int c = 0; c < CHANNEL_COUNT; c++) {
         delete gFileOutSysValue.ppChannels[c];
         gFileOutSysValue.ppChannels[c] = NULL;
+    }
+    if (NULL != gFileOutSysValue.pBufferL) {
+        free(gFileOutSysValue.pBufferL);
+        gFileOutSysValue.pBufferL = NULL;
+    }
+    if (NULL != gFileOutSysValue.pBufferR) {
+        free(gFileOutSysValue.pBufferR);
+        gFileOutSysValue.pBufferR = NULL;
     }
     free(gFileOutSysValue.ppChannels);
     gFileOutSysValue.ppChannels = NULL;
@@ -191,45 +201,43 @@ int fileout_send(byte *pMsg) {
     }
 }
 
-inline void fileout_write16(byte* pOutBuffer) {
+void fileout_write(byte* pOutBuffer) {
     /* sampler loop */
-    for (int s = 0; s < SAMPLER_COUNT; s++) {
-        auto pSmpl = gFileOutSysValue.ppSampler[s];
+    for (int i = 0; i < SAMPLER_COUNT; i++) {
+        auto pSmpl = gFileOutSysValue.ppSampler[i];
         if (pSmpl->state < E_SAMPLER_STATE::PURGE) {
             continue;
         }
         sampler(&gFileOutSysValue, pSmpl);
-    }
-
-    /* buffer clear */
-    int buffSize = gFileOutSysValue.bufferLength * gFmt.blockAlign;
-    memset(pOutBuffer, 0, buffSize);
-
+    }   
     /* channel loop */
-    for (int c = 0; c < CHANNEL_COUNT; c++) {
-        auto pCh = gFileOutSysValue.ppChannels[c];
-        auto pInputBuff = pCh->pInput;
-        auto pInputBuffTerm = pInputBuff + gFileOutSysValue.bufferLength;
-        auto pBuff = (short*)pOutBuffer;
-        for (; pInputBuff < pInputBuffTerm; pInputBuff++, pBuff += 2) {
-            double tempL = 0.0, tempR = 0.0;
-            // effect
-            pCh->step(&tempL, &tempR);
-            // output
-            tempL *= 32767.0;
-            tempR *= 32767.0;
-            tempL += *(pBuff + 0);
-            tempR += *(pBuff + 1);
-            if (32767.0 < tempL) tempL = 32767.0;
-            if (tempL < -32767.0) tempL = -32767.0;
-            if (32767.0 < tempR) tempR = 32767.0;
-            if (tempR < -32767.0) tempR = -32767.0;
-            *(pBuff + 0) = (short)tempL;
-            *(pBuff + 1) = (short)tempR;
-            *pInputBuff = 0.0;
-        }
+    for (int i = 0; i < CHANNEL_COUNT; i++) {
+        auto pCh = gFileOutSysValue.ppChannels[i];
+        pCh->step(gFileOutSysValue.pBufferL, gFileOutSysValue.pBufferR);
     }
-
+    /* write buffer */
+    auto pBuff = (short*)pOutBuffer;
+    for (int i = 0, j = 0; i < gFileOutSysValue.bufferLength; i++, j += 2) {
+        auto pL = &gFileOutSysValue.pBufferL[i];
+        auto pR = &gFileOutSysValue.pBufferR[i];
+        if (*pL < -1.0) {
+            *pL = -1.0;
+        }
+        if (1.0 < *pL) {
+            *pL = 1.0;
+        }
+        if (*pR < -1.0) {
+            *pR = -1.0;
+        }
+        if (1.0 < *pR) {
+            *pR = 1.0;
+        }
+        pBuff[j] = (short)(*pL * 32767);
+        pBuff[j + 1] = (short)(*pR * 32767);
+        *pL = 0.0;
+        *pR = 0.0;
+    }
+    int buffSize = gFileOutSysValue.bufferLength * gFmt.blockAlign;
     fwrite(pOutBuffer, buffSize, 1, gfpFileOut);
     gFmt.dataSize += buffSize;
 }
