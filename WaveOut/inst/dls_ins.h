@@ -11,10 +11,10 @@ class LART;
 class LINS : public RiffChunk {
 public:
     INS_ **pcInst = NULL;
-    int Count;
+    int32 Count;
 
 public:
-    LINS(FILE *fp, long size, int count);
+    LINS(FILE *fp, long size, int32 count);
     ~LINS();
 
 protected:

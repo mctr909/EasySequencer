@@ -2,14 +2,14 @@
 #include "dls_art.h"
 #include <string.h>
 
-LRGN::LRGN(FILE *fp, long size, int count) : RiffChunk() {
+LRGN::LRGN(FILE *fp, long size, int32 count) : RiffChunk() {
     Count = 0;
     pcRegion = (RGN_**)calloc(count, sizeof(RGN_*));
     Load(fp, size);
 }
 
 LRGN::~LRGN() {
-    for (int i = 0; i < Count; i++) {
+    for (int32 i = 0; i < Count; i++) {
         if (NULL != pcRegion[i]) {
             delete pcRegion[i];
         }
@@ -32,7 +32,7 @@ RGN_::RGN_(FILE *fp, long size) : RiffChunk() {
 
 RGN_::~RGN_() {
     if (NULL != ppWaveLoop) {
-        for (unsigned int i = 0; i < pWaveSmpl->loopCount; ++i) {
+        for (uint32 i = 0; i < pWaveSmpl->loopCount; ++i) {
             free(ppWaveLoop[i]);
         }
         free(ppWaveLoop);
@@ -63,7 +63,7 @@ void RGN_::LoadChunk(FILE *fp, const char *type, long size) {
             pWaveSmpl = NULL;
         }
         if (NULL != ppWaveLoop) {
-            for (unsigned int i = 0; i < pWaveSmpl->loopCount; ++i) {
+            for (uint32 i = 0; i < pWaveSmpl->loopCount; ++i) {
                 free(ppWaveLoop[i]);
             }
             free(ppWaveLoop);
@@ -72,7 +72,7 @@ void RGN_::LoadChunk(FILE *fp, const char *type, long size) {
         pWaveSmpl = (DLS_WSMP*)malloc(sizeof(DLS_WSMP));
         fread_s(pWaveSmpl, sizeof(DLS_WSMP), sizeof(DLS_WSMP), 1, fp);
         ppWaveLoop = (DLS_LOOP**)calloc(pWaveSmpl->loopCount, sizeof(DLS_LOOP*));
-        for (unsigned int i = 0; i < pWaveSmpl->loopCount; ++i) {
+        for (uint32 i = 0; i < pWaveSmpl->loopCount; ++i) {
             ppWaveLoop[i] = (DLS_LOOP*)malloc(sizeof(DLS_LOOP));
             fread_s(ppWaveLoop[i], sizeof(DLS_LOOP), sizeof(DLS_LOOP), 1, fp);
         }

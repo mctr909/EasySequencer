@@ -18,7 +18,7 @@ protected:
 
 class ART_ {
 public:
-    int Count = 0;
+    uint32 Count = 0;
     DLS_CONN **ppConnection;
 
 public:

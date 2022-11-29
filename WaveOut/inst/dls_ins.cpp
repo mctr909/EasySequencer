@@ -3,14 +3,14 @@
 #include "dls_art.h"
 #include <string.h>
 
-LINS::LINS(FILE *fp, long size, int count) : RiffChunk() {
+LINS::LINS(FILE *fp, long size, int32 count) : RiffChunk() {
     Count = 0;
     pcInst = (INS_**)calloc(count, sizeof(INS_*));
     Load(fp, size);
 }
 
 LINS::~LINS() {
-    for (int i = 0; i < Count; i++) {
+    for (int32 i = 0; i < Count; i++) {
         if (NULL != pcInst[i]) {
             delete pcInst[i];
         }

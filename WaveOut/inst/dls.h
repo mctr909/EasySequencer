@@ -7,8 +7,8 @@ class DLS : public RiffChunk {
 public:
     LINS *cLins = NULL;
     WVPL *cWvpl = NULL;
-    int InstCount = 0;
-    int WaveCount = 0;
+    uint32 InstCount = 0;
+    uint32 WaveCount = 0;
 
 public:
     DLS() : RiffChunk() {}

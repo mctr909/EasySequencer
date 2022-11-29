@@ -14,23 +14,23 @@ void message_createChannels(SYSTEM_VALUE *pSystemValue) {
     //
     pSystemValue->ppChannels = (Channel**)calloc(CHANNEL_COUNT, sizeof(Channel*));
     message_ppChannels = pSystemValue->ppChannels;
-    for (int c = 0; c < CHANNEL_COUNT; c++) {
+    for (int32 c = 0; c < CHANNEL_COUNT; c++) {
         pSystemValue->ppChannels[c] = new Channel(pSystemValue, c);
     }
     //
-    pSystemValue->ppChannelParam = (CHANNEL_PARAM**)calloc(CHANNEL_COUNT, sizeof(CHANNEL_PARAM*));
-    for (int i = 0; i < CHANNEL_COUNT; i++) {
-        pSystemValue->ppChannelParam[i] = &pSystemValue->ppChannels[i]->param;
+    pSystemValue->ppChannel_params = (CHANNEL_PARAM**)calloc(CHANNEL_COUNT, sizeof(CHANNEL_PARAM*));
+    for (int32 i = 0; i < CHANNEL_COUNT; i++) {
+        pSystemValue->ppChannel_params[i] = &pSystemValue->ppChannels[i]->param;
     }
 }
 
 void message_disposeChannels(SYSTEM_VALUE *pSystemValue) {
-    if (NULL != pSystemValue->ppChannelParam) {
-        free(pSystemValue->ppChannelParam);
-        pSystemValue->ppChannelParam = NULL;
+    if (NULL != pSystemValue->ppChannel_params) {
+        free(pSystemValue->ppChannel_params);
+        pSystemValue->ppChannel_params = NULL;
     }
     if (NULL != pSystemValue->ppChannels) {
-        for (int c = 0; c < CHANNEL_COUNT; c++) {
+        for (int32 c = 0; c < CHANNEL_COUNT; c++) {
             delete pSystemValue->ppChannels[c];
             pSystemValue->ppChannels[c] = NULL;
         }

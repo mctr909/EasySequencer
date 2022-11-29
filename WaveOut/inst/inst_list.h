@@ -4,18 +4,6 @@
 #include <stdio.h>
 
 /******************************************************************************/
-#define SAMPLER_COUNT 128
-
-enum struct E_SAMPLER_STATE : byte {
-    FREE,
-    RESERVED,
-    PURGE,
-    PRESS,
-    RELEASE,
-    HOLD
-};
-
-/******************************************************************************/
 #pragma pack(4)
 typedef struct INST_ID {
     byte isDrum = 0;
@@ -28,9 +16,9 @@ typedef struct INST_ID {
 #pragma pack(4)
 typedef struct INST_INFO {
     INST_ID id;
-    uint layerIndex = 0;
-    uint layerCount = 0;
-    uint artIndex = 0;
+    uint32 layerIndex = 0;
+    uint32 layerCount = 0;
+    uint32 artIndex = 0;
     char *pName = NULL;
     char *pCategory = NULL;
 } INST_INFO;
@@ -38,16 +26,16 @@ typedef struct INST_INFO {
 
 #pragma pack(4)
 typedef struct INST_LIST {
-    uint count;
+    uint32 count;
     INST_INFO** ppData;
 } INST_LIST;
 #pragma pack()
 
 #pragma pack(4)
 typedef struct INST_LAYER {
-    uint regionIndex = 0;
-    uint regionCount = 0;
-    uint artIndex = 0;
+    uint32 regionIndex = 0;
+    uint32 regionCount = 0;
+    uint32 artIndex = 0;
 } INST_LAYER;
 #pragma pack()
 
@@ -57,9 +45,9 @@ typedef struct INST_REGION {
     byte keyHigh = 127;
     byte velocityLow = 0;
     byte velocityHigh = 127;
-    uint waveIndex = 0;
-    uint artIndex = 0;
-    uint wsmpIndex = 0;
+    uint32 waveIndex = 0;
+    uint32 artIndex = 0;
+    uint32 wsmpIndex = 0;
 } INST_REGION;
 #pragma pack()
 
@@ -88,8 +76,8 @@ typedef struct INST_ENV {
 
 #pragma pack(4)
 typedef struct INST_ART {
-    short transpose = 0;
-    short pan = 0;
+    int16 transpose = 0;
+    int16 pan = 0;
     double gain = 1.0;
     double pitch = 1.0;
     INST_ENV env;
@@ -98,41 +86,22 @@ typedef struct INST_ART {
 
 #pragma pack(4)
 typedef struct INST_WAVE {
-    uint offset = 0;
-    uint sampleRate = 44100;
-    uint loopBegin = 0;
-    uint loopLength = 0;
+    uint32 offset = 0;
+    uint32 sampleRate = 44100;
+    uint32 loopBegin = 0;
+    uint32 loopLength = 0;
     byte loopEnable = 0;
     byte unityNote = 0;
-    ushort reserved = 0;
+    uint16 reserved = 0;
     double pitch = 1.0;
     double gain = 1.0;
 } INST_WAVE;
 #pragma pack()
 
-#pragma pack(4)
-typedef struct INST_SAMPLER {
-    E_SAMPLER_STATE state = E_SAMPLER_STATE::FREE;
-    byte channelNum = 0;
-    byte noteNum = 0;
-    byte reserved1 = 0;
-    short pan = 0;
-    short reserved2 = 0;
-    double gain = 1.0;
-    double index = 0.0;
-    double time = 0.0;
-    double pitch = 1.0;
-    double egAmp = 0.0;
-    double egCutoff = 1.0;
-    double egPitch = 1.0;
-    INST_ENV *pEnv = NULL;
-    INST_WAVE *pWave = NULL;
-} INST_SAMPLER;
-#pragma pack()
-
 /******************************************************************************/
 class DLS;
 class LART;
+typedef struct INST_SAMPLER INST_SAMPLER;
 
 /******************************************************************************/
 class InstList {
@@ -145,10 +114,10 @@ private:
     WAVDAT *mpWaveTable = NULL;
     INST_LIST mInstList;
     WCHAR mWaveTablePath[256] = { 0 };
-    uint mWaveCount = 0;
-    uint mLayerCount = 0;
-    uint mRegionCount = 0;
-    uint mArtCount = 0;
+    uint32 mWaveCount = 0;
+    uint32 mLayerCount = 0;
+    uint32 mRegionCount = 0;
+    uint32 mArtCount = 0;
 
 public:
     InstList();
@@ -166,9 +135,9 @@ private:
     E_LOAD_STATUS loadDls(LPWSTR path);
     E_LOAD_STATUS loadDlsWave(DLS *cDls);
     void loadDlsArt(LART *cLart, INST_ART *pArt);
-    uint writeWaveTable8(FILE *fp, byte* pData, uint size);
-    uint writeWaveTable16(FILE *fp, byte* pData, uint size);
-    uint writeWaveTable24(FILE *fp, byte* pData, uint size);
-    uint writeWaveTable32(FILE *fp, byte* pData, uint size);
-    uint writeWaveTableFloat(FILE *fp, byte* pData, uint size);
+    uint32 writeWaveTable8(FILE *fp, byte* pData, uint32 size);
+    uint32 writeWaveTable16(FILE *fp, byte* pData, uint32 size);
+    uint32 writeWaveTable24(FILE *fp, byte* pData, uint32 size);
+    uint32 writeWaveTable32(FILE *fp, byte* pData, uint32 size);
+    uint32 writeWaveTableFloat(FILE *fp, byte* pData, uint32 size);
 };

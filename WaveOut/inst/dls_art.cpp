@@ -24,14 +24,14 @@ ART_::ART_(FILE *fp, long size) {
 
     ppConnection = (DLS_CONN**)calloc(Count, sizeof(DLS_CONN*));
 
-    for (int i = 0; i < Count; i++) {
+    for (uint32 i = 0; i < Count; i++) {
         ppConnection[i] = (DLS_CONN*)malloc(sizeof(DLS_CONN));
         fread_s(ppConnection[i], sizeof(DLS_CONN), sizeof(DLS_CONN), 1, fp);
     }
 }
 
 ART_::~ART_() {
-    for (int i = 0; i < Count; i++) {
+    for (uint32 i = 0; i < Count; i++) {
         free(ppConnection[i]);
     }
     free(ppConnection);

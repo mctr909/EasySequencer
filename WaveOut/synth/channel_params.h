@@ -6,34 +6,34 @@
 /******************************************************************************/
 #pragma pack(push, 1)
 typedef struct CHANNEL_PARAM {
-    byte isDrum = 0;
-    byte bankMSB = 0;
-    byte bankLSB = 0;
-    byte progNum = 0;
-    byte Enable;
-    byte Vol;
-    byte Exp;
-    byte Pan;
-    byte Rev;
-    byte Del;
-    byte Cho;
-    byte Mod;
-    byte Hld;
-    byte Fc;
-    byte Fq;
-    byte Atk;
-    byte Rel;
-    byte VibRate;
-    byte VibDepth;
-    byte VibDelay;
-    byte BendRange;
-    int Pitch;
-    double PeakL;
-    double PeakR;
-    double RmsL;
-    double RmsR;
+    byte is_drum = 0;
+    byte bank_msb = 0;
+    byte bank_lsb = 0;
+    byte prog_num = 0;
+    byte enable;
+    byte vol;
+    byte exp;
+    byte pan;
+    byte rev_send;
+    byte del_send;
+    byte cho_send;
+    byte mod;
+    byte damper;
+    byte cutoff;
+    byte resonance;
+    byte attack;
+    byte release;
+    byte vib_rate;
+    byte vib_depth;
+    byte vib_delay;
+    byte bend_range;
+    int32 pitch;
+    double peak_l;
+    double peak_r;
+    double rms_l;
+    double rms_r;
     byte* pName = 0;
-    byte* pKeyBoard = 0;
+    byte* pKeyboard = 0;
 } CHANNEL_PARAM;
 #pragma pack(pop)
 

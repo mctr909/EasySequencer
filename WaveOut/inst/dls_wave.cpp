@@ -1,14 +1,14 @@
 #include "dls_wave.h"
 #include <string.h>
 
-WVPL::WVPL(FILE *fp, long size, int count) : RiffChunk() {
+WVPL::WVPL(FILE *fp, long size, int32 count) : RiffChunk() {
     Count = 0;
     pcWave = (WAVE**)calloc(count, sizeof(WAVE*));
     Load(fp, size);
 }
 
 WVPL::~WVPL() {
-    for (int i = 0; i < Count; i++) {
+    for (int32 i = 0; i < Count; i++) {
         if (NULL != pcWave[i]) {
             delete pcWave[i];
         }
@@ -35,7 +35,7 @@ WAVE::~WAVE() {
         pData = NULL;
     }
     if (NULL != ppWaveLoop) {
-        for (unsigned int i = 0; i < WaveSmpl.loopCount; ++i) {
+        for (uint32 i = 0; i < WaveSmpl.loopCount; ++i) {
             free(ppWaveLoop[i]);
         }
         free(ppWaveLoop);
@@ -62,7 +62,7 @@ void WAVE::LoadChunk(FILE *fp, const char *type, long size) {
         return;
     }
     if (0 == strcmp("data", type)) {
-        DataSize = (unsigned int)size;
+        DataSize = (uint32)size;
         pData = (byte*)malloc(size);
         fread_s(pData, size, size, 1, fp);
         return;
@@ -71,7 +71,7 @@ void WAVE::LoadChunk(FILE *fp, const char *type, long size) {
         fread_s(&WaveSmpl, sizeof(WaveSmpl), sizeof(WaveSmpl), 1, fp);
         LoopCount = WaveSmpl.loopCount;
         ppWaveLoop = (DLS_LOOP**)calloc(LoopCount, sizeof(DLS_LOOP*));
-        for (unsigned int i = 0; i < LoopCount; ++i) {
+        for (uint32 i = 0; i < LoopCount; ++i) {
             ppWaveLoop[i] = (DLS_LOOP*)malloc(sizeof(DLS_LOOP));
             fread_s(ppWaveLoop[i], sizeof(DLS_LOOP), sizeof(DLS_LOOP), 1, fp);
         }

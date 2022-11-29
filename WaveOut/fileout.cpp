@@ -13,24 +13,24 @@ typedef struct INST_SAMPLER INST_SAMPLER;
 
 #pragma pack(push, 4)
 typedef struct {
-    uint riff;
-    uint fileSize;
-    uint dataId;
+    uint32 riff;
+    uint32 fileSize;
+    uint32 dataId;
 } RIFF;
 #pragma pack(pop)
 
 #pragma pack(push, 4)
 typedef struct {
-    uint chunkId;
-    uint chunkSize;
-    ushort formatId;
-    ushort channels;
-    uint sampleRate;
-    uint bytePerSec;
-    ushort blockAlign;
-    ushort bitPerSample;
-    uint dataId;
-    uint dataSize;
+    uint32 chunkId;
+    uint32 chunkSize;
+    uint16 formatId;
+    uint16 channels;
+    uint32 sampleRate;
+    uint32 bytePerSec;
+    uint16 blockAlign;
+    uint16 bitPerSample;
+    uint32 dataId;
+    uint32 dataSize;
 } FMT_;
 #pragma pack(pop)
 
@@ -38,43 +38,43 @@ typedef struct {
 SYSTEM_VALUE  gFileOutSysValue = { 0 };
 FILE          *gfpFileOut = NULL;
 FMT_          gFmt = { 0 };
-int           gFileOutProgress = 0;
+int32         gFileOutProgress = 0;
 double        gBpm = 120.0;
 
 /******************************************************************************/
-int fileout_send(byte *pMsg);
+int32 fileout_send(byte *pMsg);
 void fileout_write(byte* pOutBuffer);
 
 /******************************************************************************/
-int* WINAPI fileout_getProgressPtr() {
+int32* WINAPI fileout_getProgressPtr() {
     return &gFileOutProgress;
 }
 
 void WINAPI fileout_save(
     LPWSTR waveTablePath,
     LPWSTR savePath,
-    uint sampleRate,
+    uint32 sampleRate,
     byte *pEvents,
-    uint eventSize,
-    uint baseTick
+    uint32 eventSize,
+    uint32 baseTick
 ) {
     // set system value
-    if (NULL != gFileOutSysValue.cInstList) {
-        delete gFileOutSysValue.cInstList;
+    if (NULL != gFileOutSysValue.cInst_list) {
+        delete gFileOutSysValue.cInst_list;
     }
 
     auto cInst = new InstList();
     cInst->Load(waveTablePath);
 
-    gFileOutSysValue.cInstList = cInst;
-    gFileOutSysValue.pWaveTable = gFileOutSysValue.cInstList->GetWaveTablePtr();
-    gFileOutSysValue.ppSampler = gFileOutSysValue.cInstList->GetSamplerPtr();
-    gFileOutSysValue.bufferLength = 256;
-    gFileOutSysValue.bufferCount = 16;
-    gFileOutSysValue.sampleRate = sampleRate;
-    gFileOutSysValue.deltaTime = 1.0 / gFileOutSysValue.sampleRate;
-    gFileOutSysValue.pBufferL = (double*)calloc(gFileOutSysValue.bufferLength, sizeof(double));
-    gFileOutSysValue.pBufferR = (double*)calloc(gFileOutSysValue.bufferLength, sizeof(double));
+    gFileOutSysValue.cInst_list = cInst;
+    gFileOutSysValue.pWave_table = gFileOutSysValue.cInst_list->GetWaveTablePtr();
+    gFileOutSysValue.ppSampler = gFileOutSysValue.cInst_list->GetSamplerPtr();
+    gFileOutSysValue.buffer_length = 256;
+    gFileOutSysValue.buffer_count = 16;
+    gFileOutSysValue.sample_rate = sampleRate;
+    gFileOutSysValue.delta_time = 1.0 / gFileOutSysValue.sample_rate;
+    gFileOutSysValue.pBuffer_l = (double*)calloc(gFileOutSysValue.buffer_length, sizeof(double));
+    gFileOutSysValue.pBuffer_r = (double*)calloc(gFileOutSysValue.buffer_length, sizeof(double));
 
     // riff wave format
     RIFF riff;
@@ -85,22 +85,22 @@ void WINAPI fileout_save(
     gFmt.chunkSize = 16;
     gFmt.formatId = 1;
     gFmt.channels = 2;
-    gFmt.sampleRate = gFileOutSysValue.sampleRate;
-    gFmt.bitPerSample = (ushort)16;
+    gFmt.sampleRate = gFileOutSysValue.sample_rate;
+    gFmt.bitPerSample = (uint16)16;
     gFmt.blockAlign = gFmt.channels * gFmt.bitPerSample >> 3;
     gFmt.bytePerSec = gFmt.sampleRate * gFmt.blockAlign;
     gFmt.dataId = 0x61746164;
     gFmt.dataSize = 0;
 
     // allocate out buffer
-    auto pOutBuffer = (byte*)calloc(gFmt.blockAlign, gFileOutSysValue.bufferLength);
+    auto pOutBuffer = (byte*)calloc(gFmt.blockAlign, gFileOutSysValue.buffer_length);
 
     // allocate channels
     gFileOutSysValue.ppChannels = (Channel**)calloc(CHANNEL_COUNT, sizeof(Channel*));
-    gFileOutSysValue.ppChannelParam = (CHANNEL_PARAM**)calloc(CHANNEL_COUNT, sizeof(CHANNEL_PARAM*));
-    for (int c = 0; c < CHANNEL_COUNT; c++) {
+    gFileOutSysValue.ppChannel_params = (CHANNEL_PARAM**)calloc(CHANNEL_COUNT, sizeof(CHANNEL_PARAM*));
+    for (int32 c = 0; c < CHANNEL_COUNT; c++) {
         gFileOutSysValue.ppChannels[c] = new Channel(&gFileOutSysValue, c);
-        gFileOutSysValue.ppChannelParam[c] = &gFileOutSysValue.ppChannels[c]->param;
+        gFileOutSysValue.ppChannel_params[c] = &gFileOutSysValue.ppChannels[c]->param;
     }
 
     // open file
@@ -115,11 +115,11 @@ void WINAPI fileout_save(
     //********************************
     // output wave
     //********************************
-    uint curPos = 0;
+    uint32 curPos = 0;
     double curTime = 0.0;
-    double delta_sec = gFileOutSysValue.bufferLength * gFileOutSysValue.deltaTime;
+    double delta_sec = gFileOutSysValue.buffer_length * gFileOutSysValue.delta_time;
     while (curPos < eventSize) {
-        auto evTime = (double)(*(int*)(pEvents + curPos)) / baseTick;
+        auto evTime = (double)(*(int32*)(pEvents + curPos)) / baseTick;
         curPos += 4;
         auto evValue = pEvents + curPos;
         while (curTime < evTime) {
@@ -139,26 +139,26 @@ void WINAPI fileout_save(
     fclose(gfpFileOut);
 
     /* dispose channels */
-    for (int c = 0; c < CHANNEL_COUNT; c++) {
+    for (int32 c = 0; c < CHANNEL_COUNT; c++) {
         delete gFileOutSysValue.ppChannels[c];
         gFileOutSysValue.ppChannels[c] = NULL;
     }
-    if (NULL != gFileOutSysValue.pBufferL) {
-        free(gFileOutSysValue.pBufferL);
-        gFileOutSysValue.pBufferL = NULL;
+    if (NULL != gFileOutSysValue.pBuffer_l) {
+        free(gFileOutSysValue.pBuffer_l);
+        gFileOutSysValue.pBuffer_l = NULL;
     }
-    if (NULL != gFileOutSysValue.pBufferR) {
-        free(gFileOutSysValue.pBufferR);
-        gFileOutSysValue.pBufferR = NULL;
+    if (NULL != gFileOutSysValue.pBuffer_r) {
+        free(gFileOutSysValue.pBuffer_r);
+        gFileOutSysValue.pBuffer_r = NULL;
     }
     free(gFileOutSysValue.ppChannels);
     gFileOutSysValue.ppChannels = NULL;
-    free(gFileOutSysValue.ppChannelParam);
-    gFileOutSysValue.ppChannelParam = NULL;
+    free(gFileOutSysValue.ppChannel_params);
+    gFileOutSysValue.ppChannel_params = NULL;
 }
 
 /******************************************************************************/
-int fileout_send(byte *pMsg) {
+int32 fileout_send(byte *pMsg) {
     auto type = (E_EVENT_TYPE)(*pMsg & 0xF0);
     auto ch = *pMsg & 0x0F;
     switch (type) {
@@ -203,7 +203,7 @@ int fileout_send(byte *pMsg) {
 
 void fileout_write(byte* pOutBuffer) {
     /* sampler loop */
-    for (int i = 0; i < SAMPLER_COUNT; i++) {
+    for (int32 i = 0; i < SAMPLER_COUNT; i++) {
         auto pSmpl = gFileOutSysValue.ppSampler[i];
         if (pSmpl->state < E_SAMPLER_STATE::PURGE) {
             continue;
@@ -211,15 +211,15 @@ void fileout_write(byte* pOutBuffer) {
         sampler(&gFileOutSysValue, pSmpl);
     }   
     /* channel loop */
-    for (int i = 0; i < CHANNEL_COUNT; i++) {
+    for (int32 i = 0; i < CHANNEL_COUNT; i++) {
         auto pCh = gFileOutSysValue.ppChannels[i];
-        pCh->step(gFileOutSysValue.pBufferL, gFileOutSysValue.pBufferR);
+        pCh->step(gFileOutSysValue.pBuffer_l, gFileOutSysValue.pBuffer_r);
     }
     /* write buffer */
     auto pBuff = (short*)pOutBuffer;
-    for (int i = 0, j = 0; i < gFileOutSysValue.bufferLength; i++, j += 2) {
-        auto pL = &gFileOutSysValue.pBufferL[i];
-        auto pR = &gFileOutSysValue.pBufferR[i];
+    for (int32 i = 0, j = 0; i < gFileOutSysValue.buffer_length; i++, j += 2) {
+        auto pL = &gFileOutSysValue.pBuffer_l[i];
+        auto pR = &gFileOutSysValue.pBuffer_r[i];
         if (*pL < -1.0) {
             *pL = -1.0;
         }
@@ -237,7 +237,7 @@ void fileout_write(byte* pOutBuffer) {
         *pL = 0.0;
         *pR = 0.0;
     }
-    int buffSize = gFileOutSysValue.bufferLength * gFmt.blockAlign;
+    int32 buffSize = gFileOutSysValue.buffer_length * gFmt.blockAlign;
     fwrite(pOutBuffer, buffSize, 1, gfpFileOut);
     gFmt.dataSize += buffSize;
 }

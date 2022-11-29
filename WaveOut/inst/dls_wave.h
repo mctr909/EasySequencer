@@ -8,10 +8,10 @@ class LART;
 class WVPL : public RiffChunk {
 public:
     WAVE **pcWave = NULL;
-    int Count;
+    int32 Count;
 
 public:
-    WVPL(FILE *fp, long size, int count);
+    WVPL(FILE *fp, long size, int32 count);
     ~WVPL();
 
 protected:
@@ -23,9 +23,9 @@ public:
     WAVE_FMT Format;
     DLS_WSMP WaveSmpl;
     DLS_LOOP **ppWaveLoop = NULL;
-    unsigned int LoopCount = 0;
-    unsigned char *pData = NULL;
-    unsigned int DataSize = 0;
+    uint32 LoopCount = 0;
+    byte *pData = NULL;
+    uint32 DataSize = 0;
     char Name[32] = { 0 };
     char Category[32] = { 0 };
 

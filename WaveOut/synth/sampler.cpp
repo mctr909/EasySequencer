@@ -1,5 +1,6 @@
 #include "sampler.h"
 #include "channel.h"
+#include "../message_reciever.h"
 #include "../inst/inst_list.h"
 
 /******************************************************************************/
@@ -9,23 +10,23 @@
 
 /******************************************************************************/
 inline Bool sampler(SYSTEM_VALUE* pSystemValue, INST_SAMPLER* pSmpl) {
-    auto pCh = pSystemValue->ppChannels[pSmpl->channelNum];
+    auto pCh = pSystemValue->ppChannels[pSmpl->channel_num];
     auto pOutput_l = pCh->pInput_l;
     auto pOutput_r = pCh->pInput_r;
     auto pWaveInfo = pSmpl->pWave;
     auto pEnv = pSmpl->pEnv;
-    auto pWaveData = pSystemValue->pWaveTable + pWaveInfo->offset;
+    auto pWaveData = pSystemValue->pWave_table + pWaveInfo->offset;
     long loopEnd = (long)pWaveInfo->loopBegin + pWaveInfo->loopLength;
-    auto pitch = pSmpl->pitch / pSystemValue->sampleRate / OVER_SAMPLING;
+    auto pitch = pSmpl->pitch / pSystemValue->sample_rate / OVER_SAMPLING;
 
-    for (int i = 0; i < pSystemValue->bufferLength; i++) {
+    for (int32 i = 0; i < pSystemValue->buffer_length; i++) {
         //*******************************
         // generate wave
         //*******************************
         double smoothedWave = 0.0;
         double delta = pitch * pCh->pitch;
-        for (int o = 0; o < OVER_SAMPLING; o++) {
-            int index = (int)pSmpl->index;
+        for (int32 o = 0; o < OVER_SAMPLING; o++) {
+            auto index = (int32)pSmpl->index;
             double di = pSmpl->index - index;
             smoothedWave += pWaveData[index - 1] * (1.0 - di) + pWaveData[index] * di;
             pSmpl->index += delta;
@@ -40,7 +41,7 @@ inline Bool sampler(SYSTEM_VALUE* pSystemValue, INST_SAMPLER* pSmpl) {
         }
 
         /*** output ***/
-        auto wave = smoothedWave * pSmpl->gain * pSmpl->egAmp / OVER_SAMPLING;
+        auto wave = smoothedWave * pSmpl->gain * pSmpl->eg_amp / OVER_SAMPLING;
         pOutput_l[i] += wave;
         pOutput_r[i] += wave;
 
@@ -50,27 +51,27 @@ inline Bool sampler(SYSTEM_VALUE* pSystemValue, INST_SAMPLER* pSmpl) {
         switch (pSmpl->state) {
         case E_SAMPLER_STATE::PRESS:
             if (pSmpl->time <= pEnv->ampH) {
-                pSmpl->egAmp += (1.0 - pSmpl->egAmp) * pSystemValue->deltaTime * pEnv->ampA;
+                pSmpl->eg_amp += (1.0 - pSmpl->eg_amp) * pSystemValue->delta_time * pEnv->ampA;
             } else {
-                pSmpl->egAmp += (pEnv->ampS - pSmpl->egAmp) * pSystemValue->deltaTime * pEnv->ampD;
+                pSmpl->eg_amp += (pEnv->ampS - pSmpl->eg_amp) * pSystemValue->delta_time * pEnv->ampD;
             }
             break;
         case E_SAMPLER_STATE::RELEASE:
-            pSmpl->egAmp -= pSmpl->egAmp * pSystemValue->deltaTime * pEnv->ampR;
+            pSmpl->eg_amp -= pSmpl->eg_amp * pSystemValue->delta_time * pEnv->ampR;
             break;
         case E_SAMPLER_STATE::HOLD:
-            pSmpl->egAmp -= pSmpl->egAmp * pSystemValue->deltaTime;
+            pSmpl->eg_amp -= pSmpl->eg_amp * pSystemValue->delta_time;
             break;
         case E_SAMPLER_STATE::PURGE:
-            pSmpl->egAmp -= pSmpl->egAmp * pSystemValue->deltaTime * PURGE_SPEED;
+            pSmpl->eg_amp -= pSmpl->eg_amp * pSystemValue->delta_time * PURGE_SPEED;
             break;
         }
-        pSmpl->time += pSystemValue->deltaTime;
+        pSmpl->time += pSystemValue->delta_time;
 
         //*******************************
         // free condition
         //*******************************
-        if (pEnv->ampH < pSmpl->time && pSmpl->egAmp < PURGE_THRESHOLD) {
+        if (pEnv->ampH < pSmpl->time && pSmpl->eg_amp < PURGE_THRESHOLD) {
             pSmpl->state = E_SAMPLER_STATE::FREE;
             return false;
         }

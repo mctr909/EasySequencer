@@ -8,10 +8,10 @@ class LART;
 class LRGN : public RiffChunk {
 public:
     RGN_ **pcRegion = NULL;
-    int Count;
+    int32 Count;
 
 public:
-    LRGN(FILE *fp, long size, int count);
+    LRGN(FILE *fp, long size, int32 count);
     ~LRGN();
 
 protected:

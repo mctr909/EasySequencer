@@ -48,9 +48,9 @@ private:
         HOLD
     };
     struct DELAY {
-        uint write_index;
-        uint time;
-        uint tap_length;
+        uint32 write_index;
+        uint32 time;
+        uint32 tap_length;
         double send;
         double cross;
         double* pTap_l;
@@ -94,7 +94,7 @@ private:
     CHORUS chorus = { 0 };
 
 public:
-    Channel(SYSTEM_VALUE *pSystem_value, int number);
+    Channel(SYSTEM_VALUE *pSystem_value, int32 number);
     ~Channel();
 
 public:
@@ -104,13 +104,13 @@ public:
     void note_on(byte note_num, byte velocity);
     void ctrl_change(byte type, byte b1);
     void program_change(byte value);
-    void pitch_bend(short pitch);
+    void pitch_bend(int16 pitch);
     void step(double* pOutput_l, double* pOutput_r);
 
 private:
     void set_amp(byte vol, byte exp);
     void set_pan(byte value);
-    void set_hold(byte value);
+    void set_damper(byte value);
     void set_res(byte value);
     void set_cut(byte value);
     void set_rpn();

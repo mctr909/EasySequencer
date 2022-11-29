@@ -1,43 +1,44 @@
 #pragma once
 #include <math.h>
+#include "../type.h"
 #include "riff_struct.h"
 
 typedef struct DLS_INSH {
-    unsigned int regions;
-    unsigned char bankLSB;
-    unsigned char bankMSB;
-    unsigned char reserve1;
-    unsigned char bankFlags;
-    unsigned char progNum;
-    unsigned char reserve2;
-    unsigned char reserve3;
-    unsigned char reserve4;
+    uint32 regions;
+    byte bankLSB;
+    byte bankMSB;
+    byte reserve1;
+    byte bankFlags;
+    byte progNum;
+    byte reserve2;
+    byte reserve3;
+    byte reserve4;
 } DLS_INSH;
 
 typedef struct DLS_RGNH {
-    unsigned short keyLow;
-    unsigned short keyHigh;
-    unsigned short velocityLow;
-    unsigned short velocityHigh;
-    unsigned short options;
-    unsigned short keyGroup;
-    unsigned short layer;
+    uint16 keyLow;
+    uint16 keyHigh;
+    uint16 velocityLow;
+    uint16 velocityHigh;
+    uint16 options;
+    uint16 keyGroup;
+    uint16 layer;
 } DLS_RGNH;
 
 typedef struct DLS_WLNK {
-    unsigned short options;
-    unsigned short phaseGroup;
-    unsigned int channel;
-    unsigned int tableIndex;
+    uint16 options;
+    uint16 phaseGroup;
+    uint32 channel;
+    uint32 tableIndex;
 } DLS_WLNK;
 
 typedef struct DLS_WSMP {
-    unsigned int size;
-    unsigned short unityNote;
-    short fineTune;
-    int gainInt;
-    unsigned int options;
-    unsigned int loopCount;
+    uint32 size;
+    uint16 unityNote;
+    int16 fineTune;
+    int32 gainInt;
+    uint32 options;
+    uint32 loopCount;
 
     double getFileTune() {
         return pow(2.0, fineTune / 1200.0);
@@ -48,13 +49,13 @@ typedef struct DLS_WSMP {
 } DLS_WSMP;
 
 typedef struct DLS_LOOP {
-    unsigned int size;
-    unsigned int type;
-    unsigned int start;
-    unsigned int length;
+    uint32 size;
+    uint32 type;
+    uint32 start;
+    uint32 length;
 } DLS_LOOP;
 
-enum struct E_DLS_SRC : unsigned short {
+enum struct E_DLS_SRC : uint16 {
     // MODULATOR SOURCES
     NONE = 0x0000,
     LFO = 0x0001,
@@ -81,7 +82,7 @@ enum struct E_DLS_SRC : unsigned short {
     RPN2 = 0x0102
 };
 
-enum struct E_DLS_DST : unsigned short {
+enum struct E_DLS_DST : uint16 {
     // GENERIC DESTINATIONS
     NONE = 0x0000,
     ATTENUATION = 0x0001,
@@ -132,7 +133,7 @@ enum struct E_DLS_DST : unsigned short {
     FILTER_Q = 0x0501
 };
 
-enum struct E_DLS_TRN : unsigned short {
+enum struct E_DLS_TRN : uint16 {
     NONE = 0x0000,
     CONCAVE = 0x0001,
     CONVEX = 0x0002,
@@ -144,7 +145,7 @@ typedef struct DLS_CONN {
     E_DLS_SRC control;
     E_DLS_DST destination;
     E_DLS_TRN transform;
-    int scale;
+    int32 scale;
 
     double getValue() {
         switch (destination) {

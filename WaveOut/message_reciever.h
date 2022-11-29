@@ -1,9 +1,13 @@
 #pragma once
+#include "type.h"
 #include <windows.h>
 
 /******************************************************************************/
 typedef struct SYSTEM_VALUE SYSTEM_VALUE;
 typedef struct CHANNEL_PARAM CHANNEL_PARAM;
+typedef struct INST_SAMPLER INST_SAMPLER;
+class InstList;
+class Channel;
 
 /******************************************************************************/
 enum struct E_EVENT_TYPE : byte {
@@ -39,6 +43,23 @@ enum struct E_META_TYPE : byte {
     META = 0x7F,
     INVALID = 0xFF
 };
+
+/******************************************************************************/
+#pragma pack(push, 8)
+struct SYSTEM_VALUE {
+    InstList* cInst_list;
+    INST_SAMPLER** ppSampler;
+    Channel** ppChannels;
+    CHANNEL_PARAM** ppChannel_params;
+    WAVDAT* pWave_table;
+    int32 buffer_length;
+    int32 buffer_count;
+    int32 sample_rate;
+    double delta_time;
+    double* pBuffer_l = 0;
+    double* pBuffer_r = 0;
+};
+#pragma pack(pop)
 
 /******************************************************************************/
 #ifdef __cplusplus

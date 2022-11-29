@@ -16,9 +16,11 @@ enum struct E_LOAD_STATUS : int {
 typedef short          WAVDAT;
 typedef unsigned char  Bool;
 typedef unsigned char  byte;
+typedef unsigned short uint16;
+typedef unsigned int   uint32;
 typedef signed   char  sbyte;
-typedef unsigned short ushort;
-typedef unsigned int   uint;
+typedef signed   short int16;
+typedef signed   int   int32;
 
 #pragma pack(push, 1)
 typedef struct {
