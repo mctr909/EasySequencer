@@ -39,12 +39,12 @@ namespace Player {
         private static readonly float KnobRadius = 11.0f;
 
         private static readonly Rectangle MuteButton = new Rectangle(542, 8, 13, 18);
-        private static readonly Rectangle InstName = new Rectangle(1007, 10, 146, 19);
+        private static readonly Rectangle InstName = new Rectangle(1014, 10, 146, 19);
 
-        private static readonly Rectangle MeterPosL = new Rectangle(574, 7, 112, 5);
-        private static readonly Rectangle MeterPosR = new Rectangle(574, 17, 112, 5);
+        private static readonly Rectangle MeterPosL = new Rectangle(574, 7, 120, 5);
+        private static readonly Rectangle MeterPosR = new Rectangle(574, 17, 120, 5);
         private static readonly Size MeterCell = new Size(4, 5);
-        private static double MeterMin = -36.0;
+        private static double MeterMin = -24.0;
         private static double MeterMax = 6.0;
 
         private static readonly Rectangle[] KeyboardPos = {
@@ -65,27 +65,27 @@ namespace Player {
         private static readonly int OctWidth = (KeyboardPos[0].Width + 1) * 7;
 
         private static readonly Point[] KnobPos = {
-            new Point(709, 16), // Vol.
-            new Point(742, 16), // Exp.
-            new Point(775, 16), // Pan.
-            new Point(814, 16), // Rev.
-            new Point(847, 16), // Cho.
-            new Point(880, 16), // Del.
-            new Point(919, 16), // Fc
-            new Point(952, 16), // Q
-            new Point(985, 16)  // Mod.
+            new Point(716, 16), // Vol.
+            new Point(749, 16), // Exp.
+            new Point(782, 16), // Pan.
+            new Point(821, 16), // Rev.
+            new Point(854, 16), // Cho.
+            new Point(887, 16), // Del.
+            new Point(926, 16), // Fc
+            new Point(959, 16), // Q
+            new Point(992, 16)  // Mod.
         };
 
         private static readonly Point[] KnobValPos = {
-            new Point(699, 11), // Vol.
-            new Point(732, 11), // Exp.
-            new Point(765, 11), // Pan.
-            new Point(804, 11), // Rev.
-            new Point(837, 11), // Cho.
-            new Point(870, 11), // Del.
-            new Point(909, 11), // Fc
-            new Point(942, 11), // Q
-            new Point(975, 11)  // Mod.
+            new Point(706, 11), // Vol.
+            new Point(739, 11), // Exp.
+            new Point(772, 11), // Pan.
+            new Point(811, 11), // Rev.
+            new Point(844, 11), // Cho.
+            new Point(877, 11), // Del.
+            new Point(916, 11), // Fc
+            new Point(949, 11), // Q
+            new Point(982, 11)  // Mod.
         };
 
         private static readonly PointF[] Knob = {
