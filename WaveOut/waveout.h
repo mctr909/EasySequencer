@@ -3,10 +3,6 @@
 #include <windows.h>
 
 /******************************************************************************/
-typedef struct INST_LIST INST_LIST;
-typedef struct CHANNEL_PARAM CHANNEL_PARAM;
-
-/******************************************************************************/
 #ifdef __cplusplus
 extern "C" {
 #endif
