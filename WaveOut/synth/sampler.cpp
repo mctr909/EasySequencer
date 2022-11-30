@@ -22,7 +22,7 @@ Sampler::note_on(Channel* pChannel, INST_LAYER* pLayer, INST_REGION* pRegion, by
     channel_num = pChannel->number;
     this->note_num = note_num;
 
-    auto cInstList = mpSystemValue->cInst_list;
+    auto cInstList = mpSystemValue->pInst_list;
     auto pInstInfo = pChannel->mpInst;
 
     auto pWave = cInstList->mppWaveList[pRegion->waveIndex];

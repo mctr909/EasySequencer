@@ -13,70 +13,79 @@ SYSTEM_VALUE gSysValue = { 0 };
 
 /******************************************************************************/
 void
-synth_create(InstList* pInst_list, int32 sample_rate, int32 buffer_length, int32 buffer_count) {
-    synth_dispose();
-    gSysValue.active_count = 0;
-    gSysValue.buffer_length = buffer_length;
-    gSysValue.buffer_count = buffer_count;
-    gSysValue.sample_rate = sample_rate;
-    gSysValue.delta_time = 1.0 / sample_rate;
-    gSysValue.bpm = 120.0;
+waveout_create(InstList* pInst_list, int32 sample_rate, int32 buffer_length) {
+    synth_create(&gSysValue, pInst_list, sample_rate, buffer_length);
+}
+
+void
+waveout_dispose() {
+    synth_dispose(&gSysValue);
+}
+
+void
+synth_create(SYSTEM_VALUE* pSystemValue, InstList* pInst_list, int32 sample_rate, int32 buffer_length) {
+    synth_dispose(pSystemValue);
+    pSystemValue->sample_rate = sample_rate;
+    pSystemValue->delta_time = 1.0 / sample_rate;
+    pSystemValue->buffer_length = buffer_length;
+    pSystemValue->active_count = 0;
+    pSystemValue->bpm = 120.0;
     /* inst wave */
-    gSysValue.cInst_list = pInst_list;
-    gSysValue.pWave_table = (WAVDAT*)gSysValue.cInst_list->GetWaveTablePtr();
+    pSystemValue->pInst_list = pInst_list;
+    pSystemValue->pWave_table = (WAVDAT*)pSystemValue->pInst_list->GetWaveTablePtr();
     /* allocate output buffer */
-    gSysValue.pBuffer_l = (double*)calloc(buffer_length, sizeof(double));
-    gSysValue.pBuffer_r = (double*)calloc(buffer_length, sizeof(double));
+    pSystemValue->pBuffer_l = (double*)calloc(buffer_length, sizeof(double));
+    pSystemValue->pBuffer_r = (double*)calloc(buffer_length, sizeof(double));
     /* allocate samplers */
-    gSysValue.ppSampler = (Sampler**)calloc(SAMPLER_COUNT, sizeof(Sampler*));
+    pSystemValue->ppSampler = (Sampler**)calloc(SAMPLER_COUNT, sizeof(Sampler*));
     for (uint32 i = 0; i < SAMPLER_COUNT; i++) {
-        gSysValue.ppSampler[i] = new Sampler(&gSysValue);
+        pSystemValue->ppSampler[i] = new Sampler(pSystemValue);
     }
     /* allocate channels */
-    gSysValue.ppChannels = (Channel**)calloc(CHANNEL_COUNT, sizeof(Channel*));
-    gSysValue.ppChannel_params = (CHANNEL_PARAM**)calloc(CHANNEL_COUNT, sizeof(CHANNEL_PARAM*));
+    pSystemValue->ppChannels = (Channel**)calloc(CHANNEL_COUNT, sizeof(Channel*));
+    pSystemValue->ppChannel_params = (CHANNEL_PARAM**)calloc(CHANNEL_COUNT, sizeof(CHANNEL_PARAM*));
     for (int32 i = 0; i < CHANNEL_COUNT; i++) {
-        gSysValue.ppChannels[i] = new Channel(&gSysValue, i);
-        gSysValue.ppChannel_params[i] = &gSysValue.ppChannels[i]->param;
+        pSystemValue->ppChannels[i] = new Channel(pSystemValue, i);
+        pSystemValue->ppChannel_params[i] = &pSystemValue->ppChannels[i]->param;
     }
 }
 
 void
-synth_dispose() {
+synth_dispose(SYSTEM_VALUE* pSystemValue) {
     /* dispose inst wave */
-    if (NULL != gSysValue.cInst_list) {
-        delete gSysValue.cInst_list;
-        gSysValue.cInst_list = NULL;
+    if (NULL != pSystemValue->pInst_list) {
+        delete pSystemValue->pInst_list;
+        pSystemValue->pInst_list = NULL;
     }
     /* dispose output buffer */
-    if (NULL != gSysValue.pBuffer_l) {
-        free(gSysValue.pBuffer_l);
-        gSysValue.pBuffer_l = NULL;
+    if (NULL != pSystemValue->pBuffer_l) {
+        free(pSystemValue->pBuffer_l);
+        pSystemValue->pBuffer_l = NULL;
     }
-    if (NULL != gSysValue.pBuffer_r) {
-        free(gSysValue.pBuffer_r);
-        gSysValue.pBuffer_r = NULL;
+    if (NULL != pSystemValue->pBuffer_r) {
+        free(pSystemValue->pBuffer_r);
+        pSystemValue->pBuffer_r = NULL;
     }
     /* dispose samplers */
-    if (NULL != gSysValue.ppSampler) {
+    if (NULL != pSystemValue->ppSampler) {
         for (uint32 i = 0; i < SAMPLER_COUNT; i++) {
-            delete gSysValue.ppSampler[i];
+            delete pSystemValue->ppSampler[i];
         }
-        free(gSysValue.ppSampler);
-        gSysValue.ppSampler = NULL;
+        free(pSystemValue->ppSampler);
+        pSystemValue->ppSampler = NULL;
     }
     /* dispose channels */
-    if (NULL != gSysValue.ppChannels) {
+    if (NULL != pSystemValue->ppChannels) {
         for (int32 c = 0; c < CHANNEL_COUNT; c++) {
-            delete gSysValue.ppChannels[c];
-            gSysValue.ppChannels[c] = NULL;
+            delete pSystemValue->ppChannels[c];
+            pSystemValue->ppChannels[c] = NULL;
         }
-        free(gSysValue.ppChannels);
-        gSysValue.ppChannels = NULL;
+        free(pSystemValue->ppChannels);
+        pSystemValue->ppChannels = NULL;
     }
-    if (NULL != gSysValue.ppChannel_params) {
-        free(gSysValue.ppChannel_params);
-        gSysValue.ppChannel_params = NULL;
+    if (NULL != pSystemValue->ppChannel_params) {
+        free(pSystemValue->ppChannel_params);
+        pSystemValue->ppChannel_params = NULL;
     }
 }
 
@@ -175,7 +184,7 @@ message_perform(SYSTEM_VALUE *pSystemValue, byte* pMsg) {
 /******************************************************************************/
 byte* WINAPI
 synth_inst_list_ptr() {
-    return (byte*)gSysValue.cInst_list->GetInstList();
+    return (byte*)gSysValue.pInst_list->GetInstList();
 }
 
 CHANNEL_PARAM** WINAPI

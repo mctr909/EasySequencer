@@ -46,19 +46,18 @@ enum struct E_META_TYPE : byte {
 /******************************************************************************/
 #pragma pack(push, 8)
 struct SYSTEM_VALUE {
-    InstList* cInst_list;
-    Sampler** ppSampler;
-    Channel** ppChannels;
-    CHANNEL_PARAM** ppChannel_params;
-    WAVDAT* pWave_table;
     int32 active_count;
     int32 buffer_length;
-    int32 buffer_count;
     int32 sample_rate;
     double delta_time;
     double bpm;
     double* pBuffer_l = 0;
     double* pBuffer_r = 0;
+    InstList* pInst_list;
+    WAVDAT* pWave_table;
+    Sampler** ppSampler;
+    Channel** ppChannels;
+    CHANNEL_PARAM** ppChannel_params;
 };
 #pragma pack(pop)
 
@@ -66,8 +65,10 @@ struct SYSTEM_VALUE {
 #ifdef __cplusplus
 extern "C" {
 #endif
-    void synth_create(InstList* pInst_list, int32 sample_rate, int32 buffer_length, int32 buffer_count);
-    void synth_dispose();
+    void waveout_create(InstList* pInst_list, int32 sample_rate, int32 buffer_length);
+    void waveout_dispose();
+    void synth_create(SYSTEM_VALUE* pSystemValue, InstList* pInst_list, int32 sample_rate, int32 buffer_length);
+    void synth_dispose(SYSTEM_VALUE* pSystemValue);
     void synth_write_buffer(LPSTR pData);
     void synth_write_buffer_perform(SYSTEM_VALUE* pSystemValue, LPSTR pData);
     int32 message_perform(SYSTEM_VALUE* pSystemValue, byte* pMsg);

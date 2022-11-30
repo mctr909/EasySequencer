@@ -222,7 +222,7 @@ Channel::note_on(byte note_num, byte velocity) {
             pSmpl->state = Sampler::E_STATE::PURGE;
         }
     }
-    auto cInst = mpSystem_value->cInst_list;
+    auto cInst = mpSystem_value->pInst_list;
     auto ppLayer = cInst->mppLayerList + mpInst->layerIndex;
     for (uint32 idxL = 0; idxL < mpInst->layerCount; idxL++) {
         auto pLayer = ppLayer[idxL];
@@ -337,7 +337,7 @@ Channel::ctrl_change(byte type, byte b1) {
 void
 Channel::program_change(byte value) {
     param.prog_num = value;
-    mpInst = mpSystem_value->cInst_list->GetInstInfo(param.is_drum, param.bank_lsb, param.bank_msb, param.prog_num);
+    mpInst = mpSystem_value->pInst_list->GetInstInfo(param.is_drum, param.bank_lsb, param.bank_msb, param.prog_num);
     param.pName = (byte*)mpInst->pName;
 }
 

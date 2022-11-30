@@ -1,46 +1,37 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-#include "synth/channel.h"
-#include "synth/channel_const.h"
-#include "synth/channel_params.h"
-#include "synth/sampler.h"
 #include "inst/inst_list.h"
 #include "message_reciever.h"
 
 #include "fileout.h"
 
 /******************************************************************************/
-typedef struct INST_SAMPLER INST_SAMPLER;
-
-/******************************************************************************/
 #pragma pack(push, 4)
 typedef struct {
     uint32 riff;
-    uint32 fileSize;
-    uint32 dataId;
+    uint32 file_size;
+    uint32 id;
 } RIFF;
 #pragma pack(pop)
 
 #pragma pack(push, 4)
 typedef struct {
-    uint32 chunkId;
-    uint32 chunkSize;
-    uint16 formatId;
+    uint32 chunk_id;
+    uint32 chunk_size;
+    uint16 format_id;
     uint16 channels;
-    uint32 sampleRate;
-    uint32 bytePerSec;
-    uint16 blockAlign;
-    uint16 bitPerSample;
-    uint32 dataId;
-    uint32 dataSize;
+    uint32 sample_rate;
+    uint32 byte_per_sec;
+    uint16 block_align;
+    uint16 bit_per_sample;
+    uint32 data_id;
+    uint32 data_size;
 } FMT_;
 #pragma pack(pop)
 
 /******************************************************************************/
 SYSTEM_VALUE  gFileOutSysValue = { 0 };
-FILE          *gfpFileOut = NULL;
-FMT_          gFmt = { 0 };
 int32         gFileOutProgress = 0;
 
 /******************************************************************************/
@@ -80,55 +71,33 @@ fileout_save(
     }
 
     /* set system value */
-    gFileOutSysValue.cInst_list = cInst;
-    gFileOutSysValue.pWave_table = gFileOutSysValue.cInst_list->GetWaveTablePtr();
-    gFileOutSysValue.buffer_length = 256;
-    gFileOutSysValue.buffer_count = 16;
-    gFileOutSysValue.sample_rate = sampleRate;
-    gFileOutSysValue.delta_time = 1.0 / gFileOutSysValue.sample_rate;
-    gFileOutSysValue.bpm = 120.0;
-    /* allocate output buffer */
-    gFileOutSysValue.pBuffer_l = (double*)calloc(gFileOutSysValue.buffer_length, sizeof(double));
-    gFileOutSysValue.pBuffer_r = (double*)calloc(gFileOutSysValue.buffer_length, sizeof(double));
-    /* allocate samplers */
-    gFileOutSysValue.ppSampler = (Sampler**)calloc(SAMPLER_COUNT, sizeof(Sampler*));
-    for (uint32 i = 0; i < SAMPLER_COUNT; i++) {
-        gFileOutSysValue.ppSampler[i] = new Sampler(&gFileOutSysValue);
-    }
-    /* allocate channels */
-    gFileOutSysValue.ppChannels = (Channel**)calloc(CHANNEL_COUNT, sizeof(Channel*));
-    gFileOutSysValue.ppChannel_params = (CHANNEL_PARAM**)calloc(CHANNEL_COUNT, sizeof(CHANNEL_PARAM*));
-    for (int32 i = 0; i < CHANNEL_COUNT; i++) {
-        gFileOutSysValue.ppChannels[i] = new Channel(&gFileOutSysValue, i);
-        gFileOutSysValue.ppChannel_params[i] = &gFileOutSysValue.ppChannels[i]->param;
-    }
-    /* allocate pcm buffer */
-    auto pPcmBuffer = (LPSTR)calloc(gFileOutSysValue.buffer_length, gFmt.blockAlign);
+    synth_create(&gFileOutSysValue, cInst, sampleRate, 256);
 
     /* riff wave format */
     RIFF riff;
     riff.riff = 0x46464952;
-    riff.fileSize = 0;
-    riff.dataId = 0x45564157;
-    gFmt.chunkId = 0x20746D66;
-    gFmt.chunkSize = 16;
-    gFmt.formatId = 1;
-    gFmt.channels = 2;
-    gFmt.sampleRate = gFileOutSysValue.sample_rate;
-    gFmt.bitPerSample = (uint16)16;
-    gFmt.blockAlign = gFmt.channels * gFmt.bitPerSample >> 3;
-    gFmt.bytePerSec = gFmt.sampleRate * gFmt.blockAlign;
-    gFmt.dataId = 0x61746164;
-    gFmt.dataSize = 0;
+    riff.file_size = 0;
+    riff.id = 0x45564157;
+    FMT_ fmt;
+    fmt.chunk_id = 0x20746D66;
+    fmt.chunk_size = 16;
+    fmt.format_id = 1;
+    fmt.channels = 2;
+    fmt.sample_rate = gFileOutSysValue.sample_rate;
+    fmt.bit_per_sample = (uint16)16;
+    fmt.block_align = fmt.channels * fmt.bit_per_sample >> 3;
+    fmt.byte_per_sec = fmt.sample_rate * fmt.block_align;
+    fmt.data_id = 0x61746164;
+    fmt.data_size = 0;
+
+    /* allocate pcm buffer */
+    auto pPcm_buffer = (LPSTR)calloc(gFileOutSysValue.buffer_length, fmt.block_align);
 
     /* open file */
-    if (NULL != gfpFileOut) {
-        fclose(gfpFileOut);
-        gfpFileOut = NULL;
-    }
-    _wfopen_s(&gfpFileOut, savePath, L"wb");
-    fwrite(&riff, sizeof(riff), 1, gfpFileOut);
-    fwrite(&gFmt, sizeof(gFmt), 1, gfpFileOut);
+    FILE* fp_out = NULL;
+    _wfopen_s(&fp_out, savePath, L"wb");
+    fwrite(&riff, sizeof(riff), 1, fp_out);
+    fwrite(&fmt, sizeof(fmt), 1, fp_out);
 
     //********************************
     // output wave
@@ -136,60 +105,36 @@ fileout_save(
     uint32 cur_pos = 0;
     double cur_time = 0.0;
     double delta_sec = gFileOutSysValue.buffer_length * gFileOutSysValue.delta_time;
-    int32 buff_size = gFileOutSysValue.buffer_length * gFmt.blockAlign;
+    int32 buff_size = gFileOutSysValue.buffer_length * fmt.block_align;
     while (cur_pos < eventSize) {
-        auto evTime = (double)(*(int32*)(pEvents + cur_pos)) / baseTick;
+        auto ev_time = (double)(*(int32*)(pEvents + cur_pos)) / baseTick;
         cur_pos += 4;
-        auto evValue = pEvents + cur_pos;
-        while (cur_time < evTime) {
-            synth_write_buffer_perform(&gFileOutSysValue, pPcmBuffer);
-            fwrite(pPcmBuffer, buff_size, 1, gfpFileOut);
-            gFmt.dataSize += buff_size;
+        auto ev_value = pEvents + cur_pos;
+        while (cur_time < ev_time) {
+            synth_write_buffer_perform(&gFileOutSysValue, pPcm_buffer);
+            fwrite(pPcm_buffer, buff_size, 1, fp_out);
+            fmt.data_size += buff_size;
 
             cur_time += gFileOutSysValue.bpm * delta_sec / 60.0;
             gFileOutProgress = cur_pos;
         }
-        cur_pos += message_perform(&gFileOutSysValue, evValue);
+        cur_pos += message_perform(&gFileOutSysValue, ev_value);
     }
     gFileOutProgress = eventSize;
 
     /* close file */
-    riff.fileSize = gFmt.dataSize + sizeof(gFmt) + 4;
-    fseek(gfpFileOut, 0, SEEK_SET);
-    fwrite(&riff, sizeof(riff), 1, gfpFileOut);
-    fwrite(&gFmt, sizeof(gFmt), 1, gfpFileOut);
-    fclose(gfpFileOut);
+    riff.file_size = fmt.data_size + sizeof(fmt) + 4;
+    fseek(fp_out, 0, SEEK_SET);
+    fwrite(&riff, sizeof(riff), 1, fp_out);
+    fwrite(&fmt, sizeof(fmt), 1, fp_out);
+    fclose(fp_out);
+
+    /* dispose system value */
+    synth_dispose(&gFileOutSysValue);
 
     /* dispose pcm buffer */
-    if (NULL != pPcmBuffer) {
-        free(pPcmBuffer);
-        pPcmBuffer = NULL;
+    if (NULL != pPcm_buffer) {
+        free(pPcm_buffer);
+        pPcm_buffer = NULL;
     }
-    /* dispose output buffer */
-    if (NULL != gFileOutSysValue.pBuffer_l) {
-        free(gFileOutSysValue.pBuffer_l);
-        gFileOutSysValue.pBuffer_l = NULL;
-    }
-    if (NULL != gFileOutSysValue.pBuffer_r) {
-        free(gFileOutSysValue.pBuffer_r);
-        gFileOutSysValue.pBuffer_r = NULL;
-    }
-    /* dispose samplers */
-    if (NULL != gFileOutSysValue.ppSampler) {
-        for (uint32 i = 0; i < SAMPLER_COUNT; i++) {
-            delete gFileOutSysValue.ppSampler[i];
-        }
-        free(gFileOutSysValue.ppSampler);
-        gFileOutSysValue.ppSampler = NULL;
-    }
-    /* dispose channels */
-    if (NULL != gFileOutSysValue.ppChannels) {
-        for (int32 i = 0; i < CHANNEL_COUNT; i++) {
-            delete gFileOutSysValue.ppChannels[i];
-        }
-        free(gFileOutSysValue.ppChannels);
-        gFileOutSysValue.ppChannels = NULL;
-    }
-    free(gFileOutSysValue.ppChannel_params);
-    gFileOutSysValue.ppChannel_params = NULL;
 }

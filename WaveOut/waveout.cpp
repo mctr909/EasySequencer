@@ -72,7 +72,7 @@ waveout_open(
         return;
     }
     //
-    synth_create(cInst, sampleRate, bufferLength, bufferCount);
+    waveout_create(cInst, sampleRate, bufferLength);
     //
     waveOutOpen(sampleRate, bufferLength, bufferCount, synth_write_buffer);
 }
@@ -80,7 +80,7 @@ waveout_open(
 void WINAPI
 waveout_close() {
     waveOutClose();
-    synth_dispose();
+    waveout_dispose();
 }
 
 /******************************************************************************/
