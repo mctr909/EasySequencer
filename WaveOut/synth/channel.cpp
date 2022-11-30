@@ -73,8 +73,8 @@ Channel::set_damper(byte value) {
     if (value < 64) {
         for (int32 s = 0; s < SAMPLER_COUNT; ++s) {
             auto pSmpl = mpSystem_value->ppSampler[s];
-            if (E_SAMPLER_STATE::HOLD == pSmpl->state) {
-                pSmpl->state = E_SAMPLER_STATE::RELEASE;
+            if (Sampler::E_STATE::HOLD == pSmpl->state) {
+                pSmpl->state = Sampler::E_STATE::RELEASE;
             }
         }
         for (int32 n = 0; n < 128; ++n) {
@@ -188,15 +188,15 @@ Channel::note_off(byte note_num) {
     for (int32 s = 0; s < SAMPLER_COUNT; ++s) {
         auto pSmpl = mpSystem_value->ppSampler[s];
         auto pChParam = mpSystem_value->ppChannel_params[pSmpl->channel_num];
-        if (pSmpl->state < E_SAMPLER_STATE::PRESS ||
-            (pChParam->is_drum && !pSmpl->pWave->loopEnable)) {
+        if (pSmpl->state < Sampler::E_STATE::PRESS ||
+            (pChParam->is_drum && !pSmpl->loop_enable)) {
             continue;
         }
         if (pSmpl->channel_num == number && pSmpl->note_num == note_num) {
             if (param.damper < 64) {
-                pSmpl->state = E_SAMPLER_STATE::RELEASE;
+                pSmpl->state = Sampler::E_STATE::RELEASE;
             } else {
-                pSmpl->state = E_SAMPLER_STATE::HOLD;
+                pSmpl->state = Sampler::E_STATE::HOLD;
             }
         }
     }
@@ -214,7 +214,34 @@ Channel::note_on(byte note_num, byte velocity) {
         return;
     }
     param.pKeyboard[note_num] = (byte)E_KEY_STATE::PRESS;
-    message_set_sampler(mpSystem_value, mpInst, number, note_num, velocity);
+    for (uint32 idxS = 0; idxS < SAMPLER_COUNT; idxS++) {
+        auto pSmpl = mpSystem_value->ppSampler[idxS];
+        if (pSmpl->channel_num == number && pSmpl->note_num == note_num &&
+            Sampler::E_STATE::PRESS <= pSmpl->state) {
+            pSmpl->state = Sampler::E_STATE::PURGE;
+        }
+    }
+    auto cInst = mpSystem_value->cInst_list;
+    auto ppLayer = cInst->mppLayerList + mpInst->layerIndex;
+    for (uint32 idxL = 0; idxL < mpInst->layerCount; idxL++) {
+        auto pLayer = ppLayer[idxL];
+        auto ppRegion = cInst->mppRegionList + pLayer->regionIndex;
+        for (uint32 idxR = 0; idxR < pLayer->regionCount; idxR++) {
+            auto pRegion = ppRegion[idxR];
+            if (pRegion->keyLow <= note_num && note_num <= pRegion->keyHigh &&
+                pRegion->velocityLow <= velocity && velocity <= pRegion->velocityHigh) {
+                auto pWave = cInst->mppWaveList[pRegion->waveIndex];
+                for (uint32 idxS = 0; idxS < SAMPLER_COUNT; idxS++) {
+                    auto pSmpl = mpSystem_value->ppSampler[idxS];
+                    if (Sampler::E_STATE::FREE == pSmpl->state) {
+                        pSmpl->note_on(this, pLayer, pRegion, note_num, velocity);
+                        break;
+                    }
+                }
+                break;
+            }
+        }
+    }
 }
 
 void

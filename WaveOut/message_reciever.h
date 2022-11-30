@@ -3,12 +3,10 @@
 #include <windows.h>
 
 /******************************************************************************/
-typedef struct SYSTEM_VALUE SYSTEM_VALUE;
 typedef struct CHANNEL_PARAM CHANNEL_PARAM;
-typedef struct INST_SAMPLER INST_SAMPLER;
-struct INST_INFO;
 class InstList;
 class Channel;
+class Sampler;
 
 /******************************************************************************/
 enum struct E_EVENT_TYPE : byte {
@@ -49,7 +47,7 @@ enum struct E_META_TYPE : byte {
 #pragma pack(push, 8)
 struct SYSTEM_VALUE {
     InstList* cInst_list;
-    INST_SAMPLER** ppSampler;
+    Sampler** ppSampler;
     Channel** ppChannels;
     CHANNEL_PARAM** ppChannel_params;
     WAVDAT* pWave_table;
@@ -57,6 +55,7 @@ struct SYSTEM_VALUE {
     int32 buffer_count;
     int32 sample_rate;
     double delta_time;
+    double bpm;
     double* pBuffer_l = 0;
     double* pBuffer_r = 0;
 };
@@ -68,7 +67,7 @@ extern "C" {
 #endif
     void message_createChannels(SYSTEM_VALUE *pSystemValue);
     void message_disposeChannels(SYSTEM_VALUE *pSystemValue);
-    void message_set_sampler(SYSTEM_VALUE* pSystemValue, INST_INFO* pInstInfo, byte channelNum, byte noteNum, byte velocity);
+    int32 message_perform(SYSTEM_VALUE* pSystemValue, byte* pMsg);
     __declspec(dllexport) void WINAPI message_send(byte *pMsg);
 #ifdef __cplusplus
 }

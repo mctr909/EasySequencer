@@ -71,12 +71,12 @@ public:
     byte number;
     CHANNEL_PARAM param = { 0 };
     double pitch = 1.0;
-    double* pInput_l = 0;
-    double* pInput_r = 0;
+    double* pInput_l = NULL;
+    double* pInput_r = NULL;
+    INST_INFO* mpInst = NULL;
 
 private:
     SYSTEM_VALUE *mpSystem_value = NULL;
-    INST_INFO *mpInst = NULL;
 
     byte rpn_lsb;
     byte rpn_msb;

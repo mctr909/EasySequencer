@@ -93,16 +93,15 @@ byte *WINAPI waveout_open(
     //
     gSysValue.cInst_list = cInst;
     gSysValue.pWave_table = (WAVDAT*)gSysValue.cInst_list->GetWaveTablePtr();
-    gSysValue.ppSampler = (INST_SAMPLER**)calloc(SAMPLER_COUNT, sizeof(INST_SAMPLER*));
+    gSysValue.ppSampler = (Sampler**)calloc(SAMPLER_COUNT, sizeof(Sampler*));
     for (uint32 i = 0; i < SAMPLER_COUNT; i++) {
-        INST_SAMPLER smpl;
-        gSysValue.ppSampler[i] = (INST_SAMPLER*)malloc(sizeof(INST_SAMPLER));
-        memcpy_s(gSysValue.ppSampler[i], sizeof(INST_SAMPLER), &smpl, sizeof(INST_SAMPLER));
+        gSysValue.ppSampler[i] = new Sampler(&gSysValue);
     }
     gSysValue.buffer_length = bufferLength;
     gSysValue.buffer_count = bufferCount;
     gSysValue.sample_rate = sampleRate;
     gSysValue.delta_time = 1.0 / sampleRate;
+    gSysValue.bpm = 120.0;
     gSysValue.pBuffer_l = (double*)calloc(bufferLength, sizeof(double));
     gSysValue.pBuffer_r = (double*)calloc(bufferLength, sizeof(double));
     //
@@ -129,7 +128,7 @@ void WINAPI waveout_close() {
     }
     if (NULL != gSysValue.ppSampler) {
         for (uint32 i = 0; i < SAMPLER_COUNT; i++) {
-            free(gSysValue.ppSampler[i]);
+            delete gSysValue.ppSampler[i];
         }
         free(gSysValue.ppSampler);
         gSysValue.ppSampler = NULL;
@@ -143,10 +142,10 @@ void write_buffer(LPSTR pData) {
     int32 activeCount = 0;
     for (int32 i = 0; i < SAMPLER_COUNT; i++) {
         auto pSmpl = gSysValue.ppSampler[i];
-        if (pSmpl->state < E_SAMPLER_STATE::PURGE) {
+        if (pSmpl->state < Sampler::E_STATE::PURGE) {
             continue;
         }
-        if (sampler(&gSysValue, pSmpl)) {
+        if (pSmpl->step()) {
             activeCount++;
         }
     }

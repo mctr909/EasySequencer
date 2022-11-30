@@ -39,10 +39,8 @@ SYSTEM_VALUE  gFileOutSysValue = { 0 };
 FILE          *gfpFileOut = NULL;
 FMT_          gFmt = { 0 };
 int32         gFileOutProgress = 0;
-double        gBpm = 120.0;
 
 /******************************************************************************/
-int32 fileout_send(byte *pMsg);
 void fileout_write(byte* pOutBuffer);
 
 /******************************************************************************/
@@ -68,16 +66,15 @@ void WINAPI fileout_save(
 
     gFileOutSysValue.cInst_list = cInst;
     gFileOutSysValue.pWave_table = gFileOutSysValue.cInst_list->GetWaveTablePtr();
-    gFileOutSysValue.ppSampler = (INST_SAMPLER**)calloc(SAMPLER_COUNT, sizeof(INST_SAMPLER*));
+    gFileOutSysValue.ppSampler = (Sampler**)calloc(SAMPLER_COUNT, sizeof(Sampler*));
     for (uint32 i = 0; i < SAMPLER_COUNT; i++) {
-        INST_SAMPLER smpl;
-        gFileOutSysValue.ppSampler[i] = (INST_SAMPLER*)malloc(sizeof(INST_SAMPLER));
-        memcpy_s(gFileOutSysValue.ppSampler[i], sizeof(INST_SAMPLER), &smpl, sizeof(INST_SAMPLER));
+        gFileOutSysValue.ppSampler[i] = new Sampler(&gFileOutSysValue);
     }
     gFileOutSysValue.buffer_length = 256;
     gFileOutSysValue.buffer_count = 16;
     gFileOutSysValue.sample_rate = sampleRate;
     gFileOutSysValue.delta_time = 1.0 / gFileOutSysValue.sample_rate;
+    gFileOutSysValue.bpm = 120.0;
     gFileOutSysValue.pBuffer_l = (double*)calloc(gFileOutSysValue.buffer_length, sizeof(double));
     gFileOutSysValue.pBuffer_r = (double*)calloc(gFileOutSysValue.buffer_length, sizeof(double));
 
@@ -129,10 +126,10 @@ void WINAPI fileout_save(
         auto evValue = pEvents + curPos;
         while (curTime < evTime) {
             fileout_write(pOutBuffer);
-            curTime += gBpm * delta_sec / 60.0;
+            curTime += gFileOutSysValue.bpm * delta_sec / 60.0;
             gFileOutProgress = curPos;
         }
-        curPos += fileout_send(evValue);
+        curPos += message_perform(&gFileOutSysValue, evValue);
     }
     gFileOutProgress = eventSize;
 
@@ -158,7 +155,7 @@ void WINAPI fileout_save(
     }
     if (NULL != gFileOutSysValue.ppSampler) {
         for (uint32 i = 0; i < SAMPLER_COUNT; i++) {
-            free(gFileOutSysValue.ppSampler[i]);
+            delete gFileOutSysValue.ppSampler[i];
         }
         free(gFileOutSysValue.ppSampler);
         gFileOutSysValue.ppSampler = NULL;
@@ -170,57 +167,14 @@ void WINAPI fileout_save(
 }
 
 /******************************************************************************/
-int32 fileout_send(byte *pMsg) {
-    auto type = (E_EVENT_TYPE)(*pMsg & 0xF0);
-    auto ch = *pMsg & 0x0F;
-    switch (type) {
-    case E_EVENT_TYPE::NOTE_OFF:
-        gFileOutSysValue.ppChannels[ch]->note_off(pMsg[1]);
-        return 3;
-    case E_EVENT_TYPE::NOTE_ON:
-        gFileOutSysValue.ppChannels[ch]->note_on(pMsg[1], pMsg[2]);
-        return 3;
-    case E_EVENT_TYPE::POLY_KEY:
-        return 3;
-    case E_EVENT_TYPE::CTRL_CHG:
-        gFileOutSysValue.ppChannels[ch]->ctrl_change(pMsg[1], pMsg[2]);
-        return 3;
-    case E_EVENT_TYPE::PROG_CHG:
-        gFileOutSysValue.ppChannels[ch]->program_change(pMsg[1]);
-        return 2;
-    case E_EVENT_TYPE::CH_PRESS:
-        return 2;
-    case E_EVENT_TYPE::PITCH:
-        gFileOutSysValue.ppChannels[ch]->pitch_bend(((pMsg[2] << 7) | pMsg[1]) - 8192);
-        return 3;
-    case E_EVENT_TYPE::SYS_EX:
-        if (0xFF == pMsg[0]) {
-            auto type = (E_META_TYPE)pMsg[1];
-            auto size = pMsg[2];
-            switch (type) {
-            case E_META_TYPE::TEMPO:
-                gBpm = 60000000.0 / ((pMsg[3] << 16) | (pMsg[4] << 8) | pMsg[5]);
-                break;
-            default:
-                break;
-            }
-            return size + 3;
-        } else {
-            return 0;
-        }
-    default:
-        return 0;
-    }
-}
-
 void fileout_write(byte* pOutBuffer) {
     /* sampler loop */
     for (int32 i = 0; i < SAMPLER_COUNT; i++) {
         auto pSmpl = gFileOutSysValue.ppSampler[i];
-        if (pSmpl->state < E_SAMPLER_STATE::PURGE) {
+        if (pSmpl->state < Sampler::E_STATE::PURGE) {
             continue;
         }
-        sampler(&gFileOutSysValue, pSmpl);
+        pSmpl->step();
     }   
     /* channel loop */
     for (int32 i = 0; i < CHANNEL_COUNT; i++) {
