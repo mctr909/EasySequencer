@@ -28,36 +28,29 @@ HWAVEOUT     ghWaveOut = NULL;
 WAVEFORMATEX gWaveFmt = { 0 };
 WAVEHDR      **gppWaveHdr = NULL;
 
-void (*gfpWriteBuffer)(LPSTR) = NULL;
 Synth* gpSynth = { 0 };
 
 /******************************************************************************/
 BOOL waveOutOpen(
     int32 sampleRate,
     int32 bufferLength,
-    int32 bufferCount,
-    void(*fpWriteBufferProc)(LPSTR)
+    int32 bufferCount
 );
 BOOL waveOutClose();
 void CALLBACK waveOutProc(HWAVEOUT hwo, UINT uMsg, DWORD_PTR dwInstance, DWORD dwParam1, DWORD dwParam);
 DWORD writeBufferTask(LPVOID *param);
-void waveout_write_buffer(LPSTR pData) { gpSynth->write_buffer(pData); }
 
 /******************************************************************************/
 BOOL
 waveOutOpen(
     int32 sampleRate,
     int32 bufferLength,
-    int32 bufferCount,
-    void(*fpWriteBufferProc)(LPSTR)
+    int32 bufferCount
 ) {
     if (NULL != ghWaveOut) {
         if (!waveOutClose()) {
             return FALSE;
         }
-    }
-    if (NULL == fpWriteBufferProc) {
-        return FALSE;
     }
     //
     gWriteCount = 0;
@@ -65,7 +58,6 @@ waveOutOpen(
     gReadIndex = 0;
     gBufferCount = bufferCount;
     gBufferLength = bufferLength;
-    gfpWriteBuffer = fpWriteBufferProc;
     //
     gWaveFmt.wFormatTag = 1;
     gWaveFmt.nChannels = 2;
@@ -189,7 +181,7 @@ writeBufferTask(LPVOID* param) {
         {
             LPSTR pBuff = gppWaveHdr[gWriteIndex]->lpData;
             memset(pBuff, 0, gWaveFmt.nBlockAlign * gBufferLength);
-            gfpWriteBuffer(pBuff);
+            gpSynth->write_buffer(pBuff);
             gWriteIndex = (gWriteIndex + 1) % gBufferCount;
             gWriteCount++;
         }
@@ -231,7 +223,7 @@ waveout_open(
     //
     gpSynth = new Synth(cInst, sampleRate, bufferLength);
     //
-    waveOutOpen(sampleRate, bufferLength, bufferCount, waveout_write_buffer);
+    waveOutOpen(sampleRate, bufferLength, bufferCount);
 }
 
 void WINAPI

@@ -5,6 +5,9 @@
 #define false ((Bool)0)
 #define WAVMAX 32767.0
 
+/******************************************************************************/
+typedef short WAVDAT;
+
 enum struct E_LOAD_STATUS : int {
     SUCCESS,
     WAVE_TABLE_OPEN_FAILED,
@@ -13,7 +16,6 @@ enum struct E_LOAD_STATUS : int {
 };
 
 /******************************************************************************/
-typedef short          WAVDAT;
 typedef unsigned char  Bool;
 typedef unsigned char  byte;
 typedef unsigned short uint16;
