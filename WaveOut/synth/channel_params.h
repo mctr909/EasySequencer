@@ -5,7 +5,7 @@
 
 /******************************************************************************/
 #pragma pack(push, 1)
-typedef struct CHANNEL_PARAM {
+struct CHANNEL_PARAM {
     byte is_drum = 0;
     byte bank_msb = 0;
     byte bank_lsb = 0;
@@ -34,7 +34,7 @@ typedef struct CHANNEL_PARAM {
     double rms_r;
     byte* pName = 0;
     byte* pKeyboard = 0;
-} CHANNEL_PARAM;
+};
 #pragma pack(pop)
 
 #endif /* __CHANNEL_PARAMS_H__ */

@@ -84,13 +84,13 @@ namespace Player {
     unsafe public class Sender {
         #region WaveOut.dll
         [DllImport("WaveOut.dll")]
-        private static extern INST_LIST* synth_inst_list_ptr();
+        private static extern INST_LIST* ptr_inst_list();
         [DllImport("WaveOut.dll")]
-        private static extern CHANNEL_PARAM** synth_channel_params_ptr();
+        private static extern CHANNEL_PARAM** ptr_channel_params();
         [DllImport("WaveOut.dll")]
-        private static extern IntPtr synth_active_counter_ptr();
+        private static extern IntPtr ptr_active_counter();
         [DllImport("WaveOut.dll")]
-        private static extern void message_send(byte* pMsg);
+        private static extern void send_message(byte* pMsg);
 
         [DllImport("WaveOut.dll")]
         private static extern void waveout_open(
@@ -125,7 +125,7 @@ namespace Player {
             get { return Marshal.PtrToStructure<int>(mpActiveCountPtr); }
         }
 
-        private static IntPtr mpActiveCountPtr = synth_active_counter_ptr();
+        private static IntPtr mpActiveCountPtr;
 
         private INST_LIST* mpInstList = null;
         private CHANNEL_PARAM** mppChParam;
@@ -153,11 +153,12 @@ namespace Player {
 
         public bool SetUp(string waveTablePath) {
             waveout_open(Marshal.StringToHGlobalAuto(waveTablePath), SampleRate, SampleRate / 150, 32);
-            mpInstList = synth_inst_list_ptr();
+            mpInstList = ptr_inst_list();
             if (null == mpInstList) {
                 return false;
             }
-            mppChParam = synth_channel_params_ptr();
+            mppChParam = ptr_channel_params();
+            mpActiveCountPtr = ptr_active_counter();
             return true;
         }
 
@@ -196,7 +197,7 @@ namespace Player {
 
         public void Send(Event msg) {
             fixed (byte* ptr = &msg.Data[0]) {
-                message_send(ptr);
+                send_message(ptr);
             }
         }
     }

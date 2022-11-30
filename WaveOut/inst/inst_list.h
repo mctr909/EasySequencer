@@ -128,7 +128,6 @@ public:
     E_LOAD_STATUS Load(LPWSTR path);
     INST_LIST *GetInstList();
     INST_INFO *GetInstInfo(byte is_drum, byte bank_lsb, byte bank_msb, byte prog_num);
-    WAVDAT *GetWaveTablePtr();
 
 private:
     E_LOAD_STATUS loadDls(LPWSTR path);

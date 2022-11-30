@@ -3,7 +3,7 @@
 /******************************************************************************/
 #define true  ((Bool)1)
 #define false ((Bool)0)
-#define WAVMAX 32768.0
+#define WAVMAX 32767.0
 
 enum struct E_LOAD_STATUS : int {
     SUCCESS,

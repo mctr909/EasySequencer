@@ -2,7 +2,7 @@
 #include <stdlib.h>
 
 #include "inst/inst_list.h"
-#include "message_reciever.h"
+#include "synth/synth.h"
 
 #include "fileout.h"
 
@@ -31,8 +31,7 @@ typedef struct {
 #pragma pack(pop)
 
 /******************************************************************************/
-SYSTEM_VALUE  gFileOutSysValue = { 0 };
-int32         gFileOutProgress = 0;
+int32  gFileOutProgress = 0;
 
 /******************************************************************************/
 int32* WINAPI
@@ -42,15 +41,15 @@ fileout_progress_ptr() {
 
 void WINAPI
 fileout_save(
-    LPWSTR waveTablePath,
-    LPWSTR savePath,
-    uint32 sampleRate,
-    byte *pEvents,
-    uint32 eventSize,
-    uint32 baseTick
+    LPWSTR wave_table_path,
+    LPWSTR save_path,
+    uint32 sample_rate,
+    byte* pEvents,
+    uint32 event_size,
+    uint32 base_tick
 ) {
-    auto cInst = new InstList();
-    auto load_status = cInst->Load(waveTablePath);
+    auto pInst_list = new InstList();
+    auto load_status = pInst_list->Load(wave_table_path);
     auto caption_err = L"ウェーブテーブル読み込み失敗";
     switch (load_status) {
     case E_LOAD_STATUS::WAVE_TABLE_OPEN_FAILED:
@@ -66,12 +65,12 @@ fileout_save(
         break;
     }
     if (E_LOAD_STATUS::SUCCESS != load_status) {
-        delete cInst;
+        delete pInst_list;
         return;
     }
 
     /* set system value */
-    synth_create(&gFileOutSysValue, cInst, sampleRate, 256);
+    auto pSynth = new Synth(pInst_list, sample_rate, 256);
 
     /* riff wave format */
     RIFF riff;
@@ -83,44 +82,55 @@ fileout_save(
     fmt.chunk_size = 16;
     fmt.format_id = 1;
     fmt.channels = 2;
-    fmt.sample_rate = gFileOutSysValue.sample_rate;
-    fmt.bit_per_sample = (uint16)16;
+    fmt.sample_rate = sample_rate;
+    fmt.bit_per_sample = (uint16)(sizeof(WAVDAT) << 3);
     fmt.block_align = fmt.channels * fmt.bit_per_sample >> 3;
     fmt.byte_per_sec = fmt.sample_rate * fmt.block_align;
     fmt.data_id = 0x61746164;
     fmt.data_size = 0;
 
     /* allocate pcm buffer */
-    auto pPcm_buffer = (LPSTR)calloc(gFileOutSysValue.buffer_length, fmt.block_align);
+    auto pPcm_buffer = (LPSTR)calloc(pSynth->buffer_length, fmt.block_align);
+    if (NULL == pPcm_buffer) {
+        delete pSynth;
+        delete pInst_list;
+        return;
+    }
 
     /* open file */
     FILE* fp_out = NULL;
-    _wfopen_s(&fp_out, savePath, L"wb");
+    _wfopen_s(&fp_out, save_path, L"wb");
+    if (NULL == fp_out) {
+        delete pSynth;
+        delete pInst_list;
+        free(pPcm_buffer);
+        MessageBoxW(NULL, L"wavファイルが作成できませんでした。", L"wavファイル出力エラー", 0);
+        return;
+    }
     fwrite(&riff, sizeof(riff), 1, fp_out);
     fwrite(&fmt, sizeof(fmt), 1, fp_out);
 
     //********************************
     // output wave
     //********************************
-    uint32 cur_pos = 0;
-    double cur_time = 0.0;
-    double delta_sec = gFileOutSysValue.buffer_length * gFileOutSysValue.delta_time;
-    int32 buff_size = gFileOutSysValue.buffer_length * fmt.block_align;
-    while (cur_pos < eventSize) {
-        auto ev_time = (double)(*(int32*)(pEvents + cur_pos)) / baseTick;
-        cur_pos += 4;
-        auto ev_value = pEvents + cur_pos;
-        while (cur_time < ev_time) {
-            synth_write_buffer_perform(&gFileOutSysValue, pPcm_buffer);
+    const int32 buff_size = pSynth->buffer_length * fmt.block_align;
+    const double delta_sec = pSynth->buffer_length * pSynth->delta_time;
+    uint32 event_pos = 0;
+    double time = 0.0;
+    while (event_pos < event_size) {
+        auto ev_time = (double)(*(int32*)(pEvents + event_pos)) / base_tick;
+        event_pos += 4;
+        auto ev_value = pEvents + event_pos;
+        while (time < ev_time) {
+            pSynth->write_buffer(pPcm_buffer);
             fwrite(pPcm_buffer, buff_size, 1, fp_out);
             fmt.data_size += buff_size;
-
-            cur_time += gFileOutSysValue.bpm * delta_sec / 60.0;
-            gFileOutProgress = cur_pos;
+            time += pSynth->bpm * delta_sec / 60.0;
+            gFileOutProgress = event_pos;
         }
-        cur_pos += message_perform(&gFileOutSysValue, ev_value);
+        event_pos += pSynth->send_message(ev_value);
     }
-    gFileOutProgress = eventSize;
+    gFileOutProgress = event_size;
 
     /* close file */
     riff.file_size = fmt.data_size + sizeof(fmt) + 4;
@@ -130,8 +140,9 @@ fileout_save(
     fclose(fp_out);
 
     /* dispose system value */
-    synth_dispose(&gFileOutSysValue);
-
+    delete pSynth;
+    /* dispose inst list */
+    delete pInst_list;
     /* dispose pcm buffer */
     if (NULL != pPcm_buffer) {
         free(pPcm_buffer);

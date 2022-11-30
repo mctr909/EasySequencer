@@ -13,6 +13,10 @@ extern "C" {
         int32 bufferCount
     );
     __declspec(dllexport) void WINAPI waveout_close();
+    __declspec(dllexport) byte* WINAPI ptr_inst_list();
+    __declspec(dllexport) CHANNEL_PARAM** WINAPI ptr_channel_params();
+    __declspec(dllexport) int32* WINAPI ptr_active_counter();
+    __declspec(dllexport) void WINAPI send_message(byte* pMsg);
 #ifdef __cplusplus
 }
 #endif

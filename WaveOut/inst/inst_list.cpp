@@ -80,10 +80,6 @@ INST_INFO *InstList::GetInstInfo(byte is_drum, byte bank_lsb, byte bank_msb, byt
     return mInstList.ppData[0];
 }
 
-WAVDAT *InstList::GetWaveTablePtr() {
-    return mpWaveTable;
-}
-
 /******************************************************************************/
 E_LOAD_STATUS InstList::loadDls(LPWSTR path) {
     auto cDls = new DLS();
@@ -109,7 +105,7 @@ E_LOAD_STATUS InstList::loadDls(LPWSTR path) {
             if (NULL != cDlsRgn->pWaveSmpl) {
                 mWaveCount++;
             }
-            if (rgnLayer < cDlsRgn->Header.layer + 1) {
+            if (rgnLayer < static_cast<uint32>(cDlsRgn->Header.layer + 1)) {
                 rgnLayer = cDlsRgn->Header.layer + 1;
             }
             mRegionCount++;
@@ -210,7 +206,7 @@ E_LOAD_STATUS InstList::loadDls(LPWSTR path) {
                 waveIndex++;
             }
 
-            if (pInst->layerCount < cDlsRgn->Header.layer + 1) {
+            if (pInst->layerCount < static_cast<uint32>(cDlsRgn->Header.layer + 1)) {
                 pInst->layerCount = cDlsRgn->Header.layer + 1;
                 INST_LAYER layer;
                 mppLayerList[layerIndex] = (INST_LAYER*)malloc(sizeof(INST_LAYER));

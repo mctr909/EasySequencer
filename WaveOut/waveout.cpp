@@ -3,7 +3,7 @@
 #include <stdlib.h>
 
 #include "inst/inst_list.h"
-#include "message_reciever.h"
+#include "synth/synth.h"
 
 #include "waveout.h"
 
@@ -29,6 +29,7 @@ WAVEFORMATEX gWaveFmt = { 0 };
 WAVEHDR      **gppWaveHdr = NULL;
 
 void (*gfpWriteBuffer)(LPSTR) = NULL;
+Synth* gpSynth = { 0 };
 
 /******************************************************************************/
 BOOL waveOutOpen(
@@ -40,48 +41,7 @@ BOOL waveOutOpen(
 BOOL waveOutClose();
 void CALLBACK waveOutProc(HWAVEOUT hwo, UINT uMsg, DWORD_PTR dwInstance, DWORD dwParam1, DWORD dwParam);
 DWORD writeBufferTask(LPVOID *param);
-
-/******************************************************************************/
-void WINAPI
-waveout_open(
-    LPWSTR filePath,
-    int32 sampleRate,
-    int32 bufferLength,
-    int32 bufferCount
-) {
-    waveout_close();
-    //
-    auto cInst = new InstList();
-    auto load_status = cInst->Load(filePath);
-    auto caption_err = L"ウェーブテーブル読み込み失敗";
-    switch (load_status) {
-    case E_LOAD_STATUS::WAVE_TABLE_OPEN_FAILED:
-        MessageBoxW(NULL, L"ファイルが開けませんでした。", caption_err, 0);
-        return;
-    case E_LOAD_STATUS::WAVE_TABLE_ALLOCATE_FAILED:
-        MessageBoxW(NULL, L"メモリの確保ができませんでした。", caption_err, 0);
-        return;
-    case E_LOAD_STATUS::WAVE_TABLE_UNKNOWN_FILE:
-        MessageBoxW(NULL, L"対応していない形式です。", caption_err, 0);
-        return;
-    default:
-        break;
-    }
-    if (E_LOAD_STATUS::SUCCESS != load_status) {
-        delete cInst;
-        return;
-    }
-    //
-    waveout_create(cInst, sampleRate, bufferLength);
-    //
-    waveOutOpen(sampleRate, bufferLength, bufferCount, synth_write_buffer);
-}
-
-void WINAPI
-waveout_close() {
-    waveOutClose();
-    waveout_dispose();
-}
+void waveout_write_buffer(LPSTR pData) { gpSynth->write_buffer(pData); }
 
 /******************************************************************************/
 BOOL
@@ -109,7 +69,7 @@ waveOutOpen(
     //
     gWaveFmt.wFormatTag = 1;
     gWaveFmt.nChannels = 2;
-    gWaveFmt.wBitsPerSample = (WORD)16;
+    gWaveFmt.wBitsPerSample = (WORD)(sizeof(WAVDAT) << 3);
     gWaveFmt.nSamplesPerSec = (DWORD)sampleRate;
     gWaveFmt.nBlockAlign = gWaveFmt.nChannels * gWaveFmt.wBitsPerSample / 8;
     gWaveFmt.nAvgBytesPerSec = gWaveFmt.nSamplesPerSec * gWaveFmt.nBlockAlign;
@@ -210,7 +170,7 @@ waveOutProc(HWAVEOUT hwo, UINT uMsg, DWORD_PTR dwInstance, DWORD dwParam1, DWORD
 }
 
 DWORD
-writeBufferTask(LPVOID *param) {
+writeBufferTask(LPVOID* param) {
     while (TRUE) {
         if (gDoStop) {
             gThreadStopped = TRUE;
@@ -236,4 +196,67 @@ writeBufferTask(LPVOID *param) {
         LeaveCriticalSection((LPCRITICAL_SECTION)&gcsBufferLock);
     }
     return 0;
+}
+
+/******************************************************************************/
+void WINAPI
+waveout_open(
+    LPWSTR filePath,
+    int32 sampleRate,
+    int32 bufferLength,
+    int32 bufferCount
+) {
+    waveout_close();
+    //
+    auto cInst = new InstList();
+    auto load_status = cInst->Load(filePath);
+    auto caption_err = L"ウェーブテーブル読み込み失敗";
+    switch (load_status) {
+    case E_LOAD_STATUS::WAVE_TABLE_OPEN_FAILED:
+        MessageBoxW(NULL, L"ファイルが開けませんでした。", caption_err, 0);
+        return;
+    case E_LOAD_STATUS::WAVE_TABLE_ALLOCATE_FAILED:
+        MessageBoxW(NULL, L"メモリの確保ができませんでした。", caption_err, 0);
+        return;
+    case E_LOAD_STATUS::WAVE_TABLE_UNKNOWN_FILE:
+        MessageBoxW(NULL, L"対応していない形式です。", caption_err, 0);
+        return;
+    default:
+        break;
+    }
+    if (E_LOAD_STATUS::SUCCESS != load_status) {
+        delete cInst;
+        return;
+    }
+    //
+    gpSynth = new Synth(cInst, sampleRate, bufferLength);
+    //
+    waveOutOpen(sampleRate, bufferLength, bufferCount, waveout_write_buffer);
+}
+
+void WINAPI
+waveout_close() {
+    waveOutClose();
+    delete gpSynth;
+    gpSynth = NULL;
+}
+
+byte* WINAPI
+ptr_inst_list() {
+    return (byte*)gpSynth->pInst_list->GetInstList();
+}
+
+CHANNEL_PARAM** WINAPI
+ptr_channel_params() {
+    return gpSynth->ppChannel_params;
+}
+
+int32* WINAPI
+ptr_active_counter() {
+    return &gpSynth->active_count;
+}
+
+void WINAPI
+send_message(byte* pMsg) {
+    gpSynth->send_message(pMsg);
 }

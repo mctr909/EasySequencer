@@ -2,7 +2,7 @@
 
 /******************************************************************************/
 #pragma pack(push, 8)
-typedef struct FILTER {
+struct FILTER {
     double cut;
     double res;
     double a00;
@@ -13,7 +13,7 @@ typedef struct FILTER {
     double b10;
     double a11;
     double b11;
-} FILTER;
+};
 #pragma pack(pop)
 
 /******************************************************************************/

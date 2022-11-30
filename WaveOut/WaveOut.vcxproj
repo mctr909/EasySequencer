@@ -152,10 +152,10 @@
     <ClCompile Include="inst\dls_wave.cpp" />
     <ClCompile Include="inst\inst_list.cpp" />
     <ClCompile Include="inst\riff_chunk.cpp" />
-    <ClCompile Include="message_reciever.cpp" />
     <ClCompile Include="synth\channel.cpp" />
     <ClCompile Include="synth\filter.cpp" />
     <ClCompile Include="synth\sampler.cpp" />
+    <ClCompile Include="synth\synth.cpp" />
     <ClCompile Include="waveout.cpp" />
   </ItemGroup>
   <ItemGroup>
@@ -169,12 +169,11 @@
     <ClInclude Include="inst\inst_list.h" />
     <ClInclude Include="inst\riff_chunk.h" />
     <ClInclude Include="inst\riff_struct.h" />
-    <ClInclude Include="message_reciever.h" />
     <ClInclude Include="synth\channel.h" />
-    <ClInclude Include="synth\channel_const.h" />
     <ClInclude Include="synth\channel_params.h" />
     <ClInclude Include="synth\filter.h" />
     <ClInclude Include="synth\sampler.h" />
+    <ClInclude Include="synth\synth.h" />
     <ClInclude Include="type.h" />
     <ClInclude Include="waveout.h" />
   </ItemGroup>

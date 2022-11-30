@@ -1,24 +1,23 @@
 #include <math.h>
 
-#include "channel_const.h"
 #include "channel_params.h"
-#include "sampler.h"
 #include "filter.h"
+#include "sampler.h"
+#include "synth.h"
 #include "../inst/inst_list.h"
-#include "../message_reciever.h"
 
 #include "channel.h"
 
-Channel::Channel(SYSTEM_VALUE *pSystem_value, int32 number) {
-    mpSystem_value = pSystem_value;
+Channel::Channel(Synth* pSynth, int32 number) {
+    mpSynth = pSynth;
     this->number = (byte)number;
     param.pKeyboard = (byte*)calloc(1, sizeof(byte) * 128);
 
-    pInput_l = (double*)calloc(pSystem_value->buffer_length, sizeof(double));
-    pInput_r = (double*)calloc(pSystem_value->buffer_length, sizeof(double));
+    pInput_l = (double*)calloc(pSynth->buffer_length, sizeof(double));
+    pInput_r = (double*)calloc(pSynth->buffer_length, sizeof(double));
 
     delay.write_index = 0;
-    delay.tap_length = pSystem_value->sample_rate;
+    delay.tap_length = pSynth->sample_rate;
     delay.pTap_l = (double*)calloc(delay.tap_length, sizeof(double));
     delay.pTap_r = (double*)calloc(delay.tap_length, sizeof(double));
     chorus.lfo_u = 1.0;
@@ -73,7 +72,7 @@ void
 Channel::set_damper(byte value) {
     if (value < 64) {
         for (int32 s = 0; s < SAMPLER_COUNT; ++s) {
-            auto pSmpl = mpSystem_value->ppSampler[s];
+            auto pSmpl = mpSynth->ppSampler[s];
             if (Sampler::E_STATE::HOLD == pSmpl->state) {
                 pSmpl->state = Sampler::E_STATE::RELEASE;
             }
@@ -134,12 +133,12 @@ Channel::init_ctrl() {
     chorus.pan_a = (1.0 - param.rev_send / 127.0) / 3.0;
     chorus.pan_b = (1.0 + param.rev_send / 127.0) / 3.0;
     chorus.depth = 20 * 0.001;
-    chorus.rate = 10 * 0.06283 / 1.732 * mpSystem_value->delta_time;
+    chorus.rate = 10 * 0.06283 / 1.732 * mpSynth->delta_time;
     
     param.del_send = 0;
     delay.send = param.del_send / 128.0;
     delay.cross = 64 / 127.0;
-    delay.time = static_cast<long>(mpSystem_value->sample_rate * 200 * 0.001);
+    delay.time = static_cast<long>(mpSynth->sample_rate * 200 * 0.001);
     
     set_res(64);
     set_cut(64);
@@ -187,8 +186,8 @@ Channel::all_reset() {
 void
 Channel::note_off(byte note_num) {
     for (int32 s = 0; s < SAMPLER_COUNT; ++s) {
-        auto pSmpl = mpSystem_value->ppSampler[s];
-        auto pChParam = mpSystem_value->ppChannel_params[pSmpl->channel_num];
+        auto pSmpl = mpSynth->ppSampler[s];
+        auto pChParam = mpSynth->ppChannel_params[pSmpl->channel_num];
         if (pSmpl->state < Sampler::E_STATE::PRESS ||
             (pChParam->is_drum && !pSmpl->loop_enable)) {
             continue;
@@ -216,13 +215,13 @@ Channel::note_on(byte note_num, byte velocity) {
     }
     param.pKeyboard[note_num] = (byte)E_KEY_STATE::PRESS;
     for (uint32 idxS = 0; idxS < SAMPLER_COUNT; idxS++) {
-        auto pSmpl = mpSystem_value->ppSampler[idxS];
+        auto pSmpl = mpSynth->ppSampler[idxS];
         if (pSmpl->channel_num == number && pSmpl->note_num == note_num &&
             Sampler::E_STATE::PRESS <= pSmpl->state) {
             pSmpl->state = Sampler::E_STATE::PURGE;
         }
     }
-    auto cInst = mpSystem_value->pInst_list;
+    auto cInst = mpSynth->pInst_list;
     auto ppLayer = cInst->mppLayerList + mpInst->layerIndex;
     for (uint32 idxL = 0; idxL < mpInst->layerCount; idxL++) {
         auto pLayer = ppLayer[idxL];
@@ -233,7 +232,7 @@ Channel::note_on(byte note_num, byte velocity) {
                 pRegion->velocityLow <= velocity && velocity <= pRegion->velocityHigh) {
                 auto pWave = cInst->mppWaveList[pRegion->waveIndex];
                 for (uint32 idxS = 0; idxS < SAMPLER_COUNT; idxS++) {
-                    auto pSmpl = mpSystem_value->ppSampler[idxS];
+                    auto pSmpl = mpSynth->ppSampler[idxS];
                     if (Sampler::E_STATE::FREE == pSmpl->state) {
                         pSmpl->note_on(this, pLayer, pRegion, note_num, velocity);
                         break;
@@ -337,7 +336,7 @@ Channel::ctrl_change(byte type, byte b1) {
 void
 Channel::program_change(byte value) {
     param.prog_num = value;
-    mpInst = mpSystem_value->pInst_list->GetInstInfo(param.is_drum, param.bank_lsb, param.bank_msb, param.prog_num);
+    mpInst = mpSynth->pInst_list->GetInstInfo(param.is_drum, param.bank_lsb, param.bank_msb, param.prog_num);
     param.pName = (byte*)mpInst->pName;
 }
 
@@ -355,7 +354,7 @@ Channel::pitch_bend(int16 pitch) {
 
 void
 Channel::step(double* pOutput_l, double* pOutput_r) {
-    for (int32 i = 0; i < mpSystem_value->buffer_length; i++) {
+    for (int32 i = 0; i < mpSynth->buffer_length; i++) {
         auto output_l = pInput_l[i] * current_pan_re - pInput_r[i] * current_pan_im;
         auto output_r = pInput_l[i] * current_pan_im + pInput_r[i] * current_pan_re;
         output_l *= current_amp;
@@ -389,13 +388,13 @@ Channel::step(double* pOutput_l, double* pOutput_r) {
         /* chorus */
         {
             auto idx_u = static_cast<long>(delay.write_index) - static_cast<long>(
-                ((0.5 + 0.5 * chorus.lfo_u) * chorus.depth * 0.99 + 0.01) * mpSystem_value->sample_rate
+                ((0.5 + 0.5 * chorus.lfo_u) * chorus.depth * 0.99 + 0.01) * mpSynth->sample_rate
             );
             auto idx_v = static_cast<long>(delay.write_index) - static_cast<long>(
-                ((0.5 + 0.5 * chorus.lfo_v) * chorus.depth * 0.99 + 0.01) * mpSystem_value->sample_rate
+                ((0.5 + 0.5 * chorus.lfo_v) * chorus.depth * 0.99 + 0.01) * mpSynth->sample_rate
             );
             auto idx_w = static_cast<long>(delay.write_index) - static_cast<long>(
-                ((0.5 + 0.5 * chorus.lfo_w) * chorus.depth * 0.99 + 0.01) * mpSystem_value->sample_rate
+                ((0.5 + 0.5 * chorus.lfo_w) * chorus.depth * 0.99 + 0.01) * mpSynth->sample_rate
             );
             if (idx_u < 0) {
                 idx_u += delay.tap_length;
@@ -423,13 +422,13 @@ Channel::step(double* pOutput_l, double* pOutput_r) {
 
         /* meter */
         {
-            auto delta = RMS_ATTENUTE * mpSystem_value->delta_time;
+            auto delta = RMS_ATTENUTE * mpSynth->delta_time;
             auto attenute = 1.0 - delta;
             auto rms_l = param.rms_l * attenute;
             auto rms_r = param.rms_r * attenute;
             param.rms_l = rms_l + output_l * output_l * delta;
             param.rms_r = rms_r + output_r * output_r * delta;
-            attenute = 1.0 - PEAK_ATTENUTE * mpSystem_value->delta_time;
+            attenute = 1.0 - PEAK_ATTENUTE * mpSynth->delta_time;
             auto peak_l = param.peak_l * attenute;
             auto peak_r = param.peak_r * attenute;
             param.peak_l = fmax(peak_l, fabs(output_l));
