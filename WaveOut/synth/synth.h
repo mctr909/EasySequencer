@@ -54,19 +54,21 @@ public:
     int32 sample_rate;
     double delta_time;
     double bpm;
-    double* pBuffer_l = 0;
-    double* pBuffer_r = 0;
-    InstList* pInst_list;
-    WAVDAT* pWave_table;
-    Sampler** ppSampler;
-    Channel** ppChannels;
-    CHANNEL_PARAM** ppChannel_params;
+    InstList* mpInst_list;
+    WAVDAT* mpWave_table;
+    Sampler** mppSampler;
+    Channel** mppChannels;
+    CHANNEL_PARAM** mppChannel_params;
+
+private:
+    double* mpBuffer_l = 0;
+    double* mpBuffer_r = 0;
 
 public:
     Synth(InstList* pInst_list, int32 sample_rate, int32 buffer_length);
     ~Synth();
     void write_buffer(LPSTR pData);
-    int32 send_message(byte* pMsg);
+    int32 send_message(byte port, byte* pMsg);
 };
 
 #endif /* __SYNTH_H__ */

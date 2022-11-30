@@ -21,14 +21,14 @@ Sampler::note_on(Channel* pChannel, INST_LAYER* pLayer, INST_REGION* pRegion, by
     channel_num = pChannel->number;
     this->note_num = note_num;
 
-    auto cInst_list = mpSynth->pInst_list;
+    auto pInst_list = mpSynth->mpInst_list;
     auto pInst_info = pChannel->mpInst;
 
-    auto pWave = cInst_list->mppWaveList[pRegion->waveIndex];
+    auto pWave = pInst_list->mppWaveList[pRegion->waveIndex];
     loop_enable = 1 == pWave->loopEnable;
     loop_length = pWave->loopLength;
     loop_end = (long)pWave->loopBegin + pWave->loopLength;
-    mpWave_data = mpSynth->pWave_table + pWave->offset;
+    mpWave_data = mpSynth->mpWave_table + pWave->offset;
 
     index = 0.0;
     time = 0.0;
@@ -36,7 +36,7 @@ Sampler::note_on(Channel* pChannel, INST_LAYER* pLayer, INST_REGION* pRegion, by
     gain = velocity * velocity / 16129.0 / 32768.0;
     
     if (UINT_MAX != pInst_info->artIndex) {
-        auto pArt = cInst_list->mppArtList[pInst_info->artIndex];
+        auto pArt = pInst_list->mppArtList[pInst_info->artIndex];
         pan += pArt->pan;
         //pArt->transpose;
         pitch *= pArt->pitch;
@@ -47,7 +47,7 @@ Sampler::note_on(Channel* pChannel, INST_LAYER* pLayer, INST_REGION* pRegion, by
         eg_cutoff = pArt->env.cutoffRise;
     }
     if (UINT_MAX != pLayer->artIndex) {
-        auto pArt = cInst_list->mppArtList[pLayer->artIndex];
+        auto pArt = pInst_list->mppArtList[pLayer->artIndex];
         pan += pArt->pan;
         //pArt->transpose;
         pitch *= pArt->pitch;
@@ -58,7 +58,7 @@ Sampler::note_on(Channel* pChannel, INST_LAYER* pLayer, INST_REGION* pRegion, by
         eg_cutoff = pArt->env.cutoffRise;
     }
     if (UINT_MAX != pRegion->artIndex) {
-        auto pArt = cInst_list->mppArtList[pRegion->artIndex];
+        auto pArt = pInst_list->mppArtList[pRegion->artIndex];
         pan += pArt->pan;
         //pArt->transpose;
         pitch *= pArt->pitch;
@@ -75,7 +75,7 @@ Sampler::note_on(Channel* pChannel, INST_LAYER* pLayer, INST_REGION* pRegion, by
         pitch *= pWave->pitch;
         gain *= pWave->gain;
     } else {
-        auto pWsmp = cInst_list->mppWaveList[pRegion->wsmpIndex];
+        auto pWsmp = pInst_list->mppWaveList[pRegion->wsmpIndex];
         diff_note = note_num - pWsmp->unityNote;
         pitch *= pWsmp->pitch;
         gain *= pWsmp->gain;
@@ -138,7 +138,7 @@ Sampler::step() {
         }
         time += mpSynth->delta_time;
         /*** purge threshold ***/
-        if (pEg->ampH < time && eg_amp < PURGE_THRESHOLD) {
+        if (E_STATE::PRESS != state && eg_amp < PURGE_THRESHOLD) {
             state = E_STATE::FREE;
             return;
         }

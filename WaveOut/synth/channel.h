@@ -8,7 +8,7 @@
 #include <windows.h>
 
 /******************************************************************************/
-#define CHANNEL_COUNT 16
+#define CHANNEL_COUNT 256
 #define RMS_ATTENUTE  4.62 /* -20db/sec * -0.2310 */
 #define PEAK_ATTENUTE 2.31 /* -20db/sec * -0.1155 */
 
@@ -68,6 +68,13 @@ typedef struct INST_INFO INST_INFO;
 
 /******************************************************************************/
 class Channel {
+public:
+    enum struct E_STATE {
+        FREE,
+        STANDBY,
+        ACTIVE
+    };
+
 private:
     enum struct E_CTRL_TYPE : byte {
         BANK_MSB = 0,
@@ -123,6 +130,7 @@ private:
     };
 
 public:
+    E_STATE state;
     byte number;
     CHANNEL_PARAM param = { 0 };
     double pitch = 1.0;
@@ -131,6 +139,9 @@ public:
     INST_INFO* mpInst = NULL;
 
 private:
+    const double STOP_AMP = 1 / 32768.0; /* -90db */
+    const double START_AMP = 1 / 1024.0; /* -60db */
+
     Synth* mpSynth = NULL;
     byte rpn_lsb;
     byte rpn_msb;

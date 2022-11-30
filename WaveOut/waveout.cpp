@@ -11,150 +11,55 @@
 #pragma comment (lib, "winmm.lib")
 
 /******************************************************************************/
-DWORD            gThreadId;
-CRITICAL_SECTION gcsBufferLock;
+HWAVEOUT     waveout_handle = NULL;
+WAVEFORMATEX waveout_fmt = { 0 };
+WAVEHDR*     waveout_hdr = NULL;
 
-BOOL   gDoStop = TRUE;
-BOOL   gWaveOutStopped = TRUE;
-BOOL   gThreadStopped = TRUE;
+HANDLE           waveout_thread = NULL;
+DWORD            waveout_thread_id = 0;
+CRITICAL_SECTION waveout_buffer_lock = { 0 };
 
-int32  gWriteCount = 0;
-int32  gWriteIndex = 0;
-int32  gReadIndex = 0;
-int32  gBufferCount = 0;
-int32  gBufferLength = 0;
+bool waveout_dostop = true;
+bool waveout_stopped = true;
+bool waveout_thread_stopped = true;
 
-HWAVEOUT     ghWaveOut = NULL;
-WAVEFORMATEX gWaveFmt = { 0 };
-WAVEHDR      **gppWaveHdr = NULL;
+int32  waveout_write_count = 0;
+int32  waveout_write_index = 0;
+int32  waveout_read_index = 0;
+int32  waveout_buffer_count = 0;
+int32  waveout_buffer_length = 0;
 
-Synth* gpSynth = { 0 };
-
-/******************************************************************************/
-BOOL waveOutOpen(
-    int32 sampleRate,
-    int32 bufferLength,
-    int32 bufferCount
-);
-BOOL waveOutClose();
-void CALLBACK waveOutProc(HWAVEOUT hwo, UINT uMsg, DWORD_PTR dwInstance, DWORD dwParam1, DWORD dwParam);
-DWORD writeBufferTask(LPVOID *param);
+Synth* waveout_synth = NULL;
 
 /******************************************************************************/
-BOOL
-waveOutOpen(
-    int32 sampleRate,
-    int32 bufferLength,
-    int32 bufferCount
-) {
-    if (NULL != ghWaveOut) {
-        if (!waveOutClose()) {
-            return FALSE;
-        }
-    }
-    //
-    gWriteCount = 0;
-    gWriteIndex = 0;
-    gReadIndex = 0;
-    gBufferCount = bufferCount;
-    gBufferLength = bufferLength;
-    //
-    gWaveFmt.wFormatTag = 1;
-    gWaveFmt.nChannels = 2;
-    gWaveFmt.wBitsPerSample = (WORD)(sizeof(WAVDAT) << 3);
-    gWaveFmt.nSamplesPerSec = (DWORD)sampleRate;
-    gWaveFmt.nBlockAlign = gWaveFmt.nChannels * gWaveFmt.wBitsPerSample / 8;
-    gWaveFmt.nAvgBytesPerSec = gWaveFmt.nSamplesPerSec * gWaveFmt.nBlockAlign;
-    //
-    if (MMSYSERR_NOERROR != waveOutOpen(
-        &ghWaveOut,
-        WAVE_MAPPER,
-        &gWaveFmt,
-        (DWORD_PTR)waveOutProc,
-        (DWORD_PTR)gppWaveHdr,
-        CALLBACK_FUNCTION
-    )) {
-        return FALSE;
-    }
-    //
-    gDoStop = FALSE;
-    InitializeCriticalSection((LPCRITICAL_SECTION)&gcsBufferLock);
-    //
-    gppWaveHdr = (PWAVEHDR*)calloc(gBufferCount, sizeof(PWAVEHDR));
-    for (int32 n = 0; n < gBufferCount; ++n) {
-        gppWaveHdr[n] = (PWAVEHDR)calloc(1, sizeof(WAVEHDR));
-        gppWaveHdr[n]->dwBufferLength = (DWORD)bufferLength * gWaveFmt.nBlockAlign;
-        gppWaveHdr[n]->dwFlags = WHDR_BEGINLOOP | WHDR_ENDLOOP;
-        gppWaveHdr[n]->dwLoops = 0;
-        gppWaveHdr[n]->dwUser = 0;
-        gppWaveHdr[n]->lpData = (LPSTR)calloc(bufferLength, gWaveFmt.nBlockAlign);
-        waveOutPrepareHeader(ghWaveOut, gppWaveHdr[n], sizeof(WAVEHDR));
-        waveOutWrite(ghWaveOut, gppWaveHdr[n], sizeof(WAVEHDR));
-    }
-    //
-    auto hThread = CreateThread(NULL, 0, (LPTHREAD_START_ROUTINE)writeBufferTask, NULL, 0, &gThreadId);
-    SetThreadPriority(hThread, THREAD_PRIORITY_HIGHEST);
-    return TRUE;
-}
-
-BOOL
-waveOutClose() {
-    if (NULL == ghWaveOut) {
-        return TRUE;
-    }
-    //
-    gDoStop = TRUE;
-    long elapsedTime = 0;
-    while (!gWaveOutStopped || !gThreadStopped) {
-        Sleep(100);
-        elapsedTime++;
-        if (10 < elapsedTime) {
-            return FALSE;
-        }
-    }
-    //
-    for (int32 n = 0; n < gBufferCount; ++n) {
-        waveOutUnprepareHeader(ghWaveOut, gppWaveHdr[n], sizeof(WAVEHDR));
-    }
-    waveOutReset(ghWaveOut);
-    waveOutClose(ghWaveOut);
-    return TRUE;
-}
-
 void CALLBACK
-waveOutProc(HWAVEOUT hwo, UINT uMsg, DWORD_PTR dwInstance, DWORD dwParam1, DWORD dwParam) {
+waveout_callback(HWAVEOUT hwo, UINT uMsg, DWORD_PTR dwInstance, DWORD dwParam1, DWORD dwParam) {
     switch (uMsg) {
     case MM_WOM_OPEN:
+        waveout_dostop = false;
+        waveout_stopped = false;
+        waveout_thread_stopped = false;
         break;
     case MM_WOM_CLOSE:
-        gDoStop = TRUE;
-        while (!gWaveOutStopped || !gThreadStopped) {
-            Sleep(100);
-        }
-        gDoStop = FALSE;
-        for (int32 b = 0; b < gBufferCount; ++b) {
-            free(gppWaveHdr[b]->lpData);
-            gppWaveHdr[b]->lpData = NULL;
-        }
         break;
     case MM_WOM_DONE:
-        if (gDoStop) {
-            gWaveOutStopped = TRUE;
+        if (waveout_dostop) {
+            waveout_stopped = true;
             break;
         }
-        gWaveOutStopped = FALSE;
-        EnterCriticalSection((LPCRITICAL_SECTION)&gcsBufferLock);
-        if (gWriteCount < gBufferCount / 4) {
-            waveOutWrite(ghWaveOut, gppWaveHdr[gReadIndex], sizeof(WAVEHDR));
-            LeaveCriticalSection((LPCRITICAL_SECTION)&gcsBufferLock);
-            return;
+        EnterCriticalSection((LPCRITICAL_SECTION)&waveout_buffer_lock);
+        if (waveout_write_count < 1) {
+            /*** Buffer empty ***/
+            waveOutWrite(waveout_handle, &waveout_hdr[waveout_read_index], sizeof(WAVEHDR));
+            LeaveCriticalSection((LPCRITICAL_SECTION)&waveout_buffer_lock);
+            break;
+        } else {
+            /*** Output wave ***/
+            waveOutWrite(waveout_handle, &waveout_hdr[waveout_read_index], sizeof(WAVEHDR));
+            waveout_read_index = (waveout_read_index + 1) % waveout_buffer_count;
+            waveout_write_count--;
         }
-        {
-            waveOutWrite(ghWaveOut, gppWaveHdr[gReadIndex], sizeof(WAVEHDR));
-            gReadIndex = (gReadIndex + 1) % gBufferCount;
-            gWriteCount--;
-        }
-        LeaveCriticalSection((LPCRITICAL_SECTION)&gcsBufferLock);
+        LeaveCriticalSection((LPCRITICAL_SECTION)&waveout_buffer_lock);
         break;
     default:
         break;
@@ -162,32 +67,102 @@ waveOutProc(HWAVEOUT hwo, UINT uMsg, DWORD_PTR dwInstance, DWORD dwParam1, DWORD
 }
 
 DWORD
-writeBufferTask(LPVOID* param) {
-    while (TRUE) {
-        if (gDoStop) {
-            gThreadStopped = TRUE;
+waveout_buffer_writing_task(LPVOID* param) {
+    while (true) {
+        if (waveout_dostop) {
+            waveout_thread_stopped = true;
             break;
         }
-        gThreadStopped = FALSE;
-        if (NULL == gppWaveHdr || NULL == gppWaveHdr[0] || NULL == gppWaveHdr[0]->lpData) {
-            Sleep(100);
+        EnterCriticalSection((LPCRITICAL_SECTION)&waveout_buffer_lock);
+        if (waveout_buffer_count <= waveout_write_count + 1) {
+            /*** Buffer full ***/
+            LeaveCriticalSection((LPCRITICAL_SECTION)&waveout_buffer_lock);
+            Sleep(1);
             continue;
+        } else {
+            /*** Write Buffer ***/
+            auto pBuff = waveout_hdr[waveout_write_index].lpData;
+            memset(pBuff, 0, waveout_fmt.nBlockAlign * waveout_buffer_length);
+            waveout_synth->write_buffer(pBuff);
+            waveout_write_index = (waveout_write_index + 1) % waveout_buffer_count;
+            waveout_write_count++;
         }
-        EnterCriticalSection((LPCRITICAL_SECTION)&gcsBufferLock);
-        if (gBufferCount <= gWriteCount + 1) {
-            LeaveCriticalSection((LPCRITICAL_SECTION)&gcsBufferLock);
-            continue;
-        }
-        {
-            LPSTR pBuff = gppWaveHdr[gWriteIndex]->lpData;
-            memset(pBuff, 0, gWaveFmt.nBlockAlign * gBufferLength);
-            gpSynth->write_buffer(pBuff);
-            gWriteIndex = (gWriteIndex + 1) % gBufferCount;
-            gWriteCount++;
-        }
-        LeaveCriticalSection((LPCRITICAL_SECTION)&gcsBufferLock);
+        LeaveCriticalSection((LPCRITICAL_SECTION)&waveout_buffer_lock);
     }
     return 0;
+}
+
+void
+waveout_init(
+    int32 sampleRate,
+    int32 bufferLength,
+    int32 bufferCount
+) {
+    /*** Init buffer counter ***/
+    waveout_write_count = 0;
+    waveout_write_index = 0;
+    waveout_read_index = 0;
+    waveout_buffer_count = bufferCount;
+    waveout_buffer_length = bufferLength;
+    /*** Set wave fmt ***/
+    waveout_fmt.wFormatTag = 1;
+    waveout_fmt.nChannels = 2;
+    waveout_fmt.wBitsPerSample = (WORD)(sizeof(WAVDAT) << 3);
+    waveout_fmt.nSamplesPerSec = (DWORD)sampleRate;
+    waveout_fmt.nBlockAlign = waveout_fmt.nChannels * waveout_fmt.wBitsPerSample / 8;
+    waveout_fmt.nAvgBytesPerSec = waveout_fmt.nSamplesPerSec * waveout_fmt.nBlockAlign;
+    /*** Open waveout ***/
+    if (MMSYSERR_NOERROR != waveOutOpen(
+        &waveout_handle,
+        WAVE_MAPPER,
+        &waveout_fmt,
+        (DWORD_PTR)waveout_callback,
+        (DWORD_PTR)waveout_hdr,
+        CALLBACK_FUNCTION
+    )) {
+        return;
+    }
+    /*** Allocate wave header ***/
+    waveout_hdr = (WAVEHDR*)calloc(waveout_buffer_count, sizeof(WAVEHDR));
+    if (NULL == waveout_hdr) {
+        return;
+    }
+    for (int32 i = 0; i < waveout_buffer_count; ++i) {
+        auto pWaveHdr = &waveout_hdr[i];
+        pWaveHdr->dwBufferLength = (DWORD)bufferLength * waveout_fmt.nBlockAlign;
+        pWaveHdr->dwFlags = WHDR_BEGINLOOP | WHDR_ENDLOOP;
+        pWaveHdr->dwLoops = 0;
+        pWaveHdr->dwUser = 0;
+        pWaveHdr->lpData = (LPSTR)calloc(bufferLength, waveout_fmt.nBlockAlign);
+    }
+    /*** Prepare wave header ***/
+    for (int32 i = 0; i < waveout_buffer_count; ++i) {
+        waveOutPrepareHeader(waveout_handle, &waveout_hdr[i], sizeof(WAVEHDR));
+        waveOutWrite(waveout_handle, &waveout_hdr[i], sizeof(WAVEHDR));
+    }
+    /*** Create buffer writing proc thread ***/
+    InitializeCriticalSection((LPCRITICAL_SECTION)&waveout_buffer_lock);
+    waveout_thread = CreateThread(
+        NULL,
+        0,
+        (LPTHREAD_START_ROUTINE)waveout_buffer_writing_task,
+        NULL,
+        0,
+        &waveout_thread_id
+    );
+    if (NULL == waveout_thread) {
+        waveout_close();
+        return;
+    }
+    SetThreadPriority(waveout_thread, THREAD_PRIORITY_HIGHEST);
+}
+
+void
+waveout_stop() {
+    waveout_dostop = true;
+    while (!waveout_stopped || !waveout_thread_stopped) {
+        Sleep(100);
+    }
 }
 
 /******************************************************************************/
@@ -199,7 +174,6 @@ waveout_open(
     int32 bufferCount
 ) {
     waveout_close();
-    //
     auto cInst = new InstList();
     auto load_status = cInst->Load(filePath);
     auto caption_err = L"ウェーブテーブル読み込み失敗";
@@ -220,35 +194,52 @@ waveout_open(
         delete cInst;
         return;
     }
-    //
-    gpSynth = new Synth(cInst, sampleRate, bufferLength);
-    //
-    waveOutOpen(sampleRate, bufferLength, bufferCount);
+    waveout_synth = new Synth(cInst, sampleRate, bufferLength);
+    waveout_init(sampleRate, bufferLength, bufferCount);
 }
 
 void WINAPI
 waveout_close() {
-    waveOutClose();
-    delete gpSynth;
-    gpSynth = NULL;
+    if (NULL == waveout_handle) {
+        return;
+    }
+    waveout_stop();
+    /*** Unprepare wave header ***/
+    for (int32 i = 0; i < waveout_buffer_count; ++i) {
+        waveOutUnprepareHeader(waveout_handle, &waveout_hdr[i], sizeof(WAVEHDR));
+    }
+    waveOutReset(waveout_handle);
+    waveOutClose(waveout_handle);
+    waveout_handle = NULL;
+    /*** Release wave header ***/
+    for (int32 i = 0; i < waveout_buffer_count; ++i) {
+        free(waveout_hdr[i].lpData);
+    }
+    free(waveout_hdr);
+    waveout_hdr = NULL;
+    /*** Release system value ***/
+    if (NULL != waveout_synth) {
+        delete waveout_synth;
+        waveout_synth = NULL;
+    }
 }
 
 byte* WINAPI
 ptr_inst_list() {
-    return (byte*)gpSynth->pInst_list->GetInstList();
+    return (byte*)waveout_synth->mpInst_list->GetInstList();
 }
 
 CHANNEL_PARAM** WINAPI
 ptr_channel_params() {
-    return gpSynth->ppChannel_params;
+    return waveout_synth->mppChannel_params;
 }
 
 int32* WINAPI
 ptr_active_counter() {
-    return &gpSynth->active_count;
+    return &waveout_synth->active_count;
 }
 
 void WINAPI
-send_message(byte* pMsg) {
-    gpSynth->send_message(pMsg);
+send_message(byte port, byte* pMsg) {
+    waveout_synth->send_message(port, pMsg);
 }

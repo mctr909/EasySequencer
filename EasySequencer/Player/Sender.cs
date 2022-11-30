@@ -90,7 +90,7 @@ namespace Player {
         [DllImport("WaveOut.dll")]
         private static extern IntPtr ptr_active_counter();
         [DllImport("WaveOut.dll")]
-        private static extern void send_message(byte* pMsg);
+        private static extern void send_message(byte port, byte* pMsg);
 
         [DllImport("WaveOut.dll")]
         private static extern void waveout_open(
@@ -152,7 +152,7 @@ namespace Player {
         public Sender() { }
 
         public bool SetUp(string waveTablePath) {
-            waveout_open(Marshal.StringToHGlobalAuto(waveTablePath), SampleRate, SampleRate / 150, 32);
+            waveout_open(Marshal.StringToHGlobalAuto(waveTablePath), SampleRate, 256, 32);
             mpInstList = ptr_inst_list();
             if (null == mpInstList) {
                 return false;
@@ -197,7 +197,7 @@ namespace Player {
 
         public void Send(Event msg) {
             fixed (byte* ptr = &msg.Data[0]) {
-                send_message(ptr);
+                send_message(0, ptr);
             }
         }
     }

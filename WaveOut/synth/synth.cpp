@@ -14,55 +14,55 @@ Synth::Synth(InstList* pInst_list, int32 sample_rate, int32 buffer_length) {
     active_count = 0;
     bpm = 120.0;
     /* inst wave */
-    this->pInst_list = pInst_list;
-    pWave_table = pInst_list->mpWaveTable;
+    mpInst_list = pInst_list;
+    mpWave_table = pInst_list->mpWaveTable;
     /* allocate samplers */
-    ppSampler = (Sampler**)calloc(SAMPLER_COUNT, sizeof(Sampler*));
+    mppSampler = (Sampler**)calloc(SAMPLER_COUNT, sizeof(Sampler*));
     for (uint32 i = 0; i < SAMPLER_COUNT; i++) {
-        ppSampler[i] = new Sampler(this);
+        mppSampler[i] = new Sampler(this);
     }
     /* allocate channels */
-    ppChannels = (Channel**)calloc(CHANNEL_COUNT, sizeof(Channel*));
-    ppChannel_params = (CHANNEL_PARAM**)calloc(CHANNEL_COUNT, sizeof(CHANNEL_PARAM*));
+    mppChannels = (Channel**)calloc(CHANNEL_COUNT, sizeof(Channel*));
+    mppChannel_params = (CHANNEL_PARAM**)calloc(CHANNEL_COUNT, sizeof(CHANNEL_PARAM*));
     for (int32 i = 0; i < CHANNEL_COUNT; i++) {
-        ppChannels[i] = new Channel(this, i);
-        ppChannel_params[i] = &ppChannels[i]->param;
+        mppChannels[i] = new Channel(this, i);
+        mppChannel_params[i] = &mppChannels[i]->param;
     }
     /* allocate output buffer */
-    pBuffer_l = (double*)calloc(buffer_length, sizeof(double));
-    pBuffer_r = (double*)calloc(buffer_length, sizeof(double));
+    mpBuffer_l = (double*)calloc(buffer_length, sizeof(double));
+    mpBuffer_r = (double*)calloc(buffer_length, sizeof(double));
 }
 
 Synth::~Synth() {
     /* dispose samplers */
-    if (NULL != ppSampler) {
+    if (NULL != mppSampler) {
         for (uint32 i = 0; i < SAMPLER_COUNT; i++) {
-            delete ppSampler[i];
+            delete mppSampler[i];
         }
-        free(ppSampler);
-        ppSampler = NULL;
+        free(mppSampler);
+        mppSampler = NULL;
     }
     /* dispose channels */
-    if (NULL != ppChannels) {
+    if (NULL != mppChannels) {
         for (int32 c = 0; c < CHANNEL_COUNT; c++) {
-            delete ppChannels[c];
-            ppChannels[c] = NULL;
+            delete mppChannels[c];
+            mppChannels[c] = NULL;
         }
-        free(ppChannels);
-        ppChannels = NULL;
+        free(mppChannels);
+        mppChannels = NULL;
     }
-    if (NULL != ppChannel_params) {
-        free(ppChannel_params);
-        ppChannel_params = NULL;
+    if (NULL != mppChannel_params) {
+        free(mppChannel_params);
+        mppChannel_params = NULL;
     }
     /* dispose output buffer */
-    if (NULL != pBuffer_l) {
-        free(pBuffer_l);
-        pBuffer_l = NULL;
+    if (NULL != mpBuffer_l) {
+        free(mpBuffer_l);
+        mpBuffer_l = NULL;
     }
-    if (NULL != pBuffer_r) {
-        free(pBuffer_r);
-        pBuffer_r = NULL;
+    if (NULL != mpBuffer_r) {
+        free(mpBuffer_r);
+        mpBuffer_r = NULL;
     }
 }
 
@@ -71,7 +71,7 @@ Synth::write_buffer(LPSTR pData) {
     /* sampler loop */
     int32 activeCount = 0;
     for (int32 i = 0; i < SAMPLER_COUNT; i++) {
-        auto pSmpl = ppSampler[i];
+        auto pSmpl = mppSampler[i];
         if (pSmpl->state < Sampler::E_STATE::PURGE) {
             continue;
         }
@@ -81,14 +81,17 @@ Synth::write_buffer(LPSTR pData) {
     this->active_count = activeCount;
     /* channel loop */
     for (int32 i = 0; i < CHANNEL_COUNT; i++) {
-        auto pCh = ppChannels[i];
-        pCh->step(pBuffer_l, pBuffer_r);
+        auto pCh = mppChannels[i];
+        if (Channel::E_STATE::FREE == pCh->state) {
+            continue;
+        }
+        pCh->step(mpBuffer_l, mpBuffer_r);
     }
     /* write buffer */
     auto pOutput = (WAVDAT*)pData;
     for (int32 i = 0, j = 0; i < buffer_length; i++, j += 2) {
-        auto pL = &pBuffer_l[i];
-        auto pR = &pBuffer_r[i];
+        auto pL = &mpBuffer_l[i];
+        auto pR = &mpBuffer_r[i];
         if (*pL < -1.0) {
             *pL = -1.0;
         }
@@ -109,28 +112,28 @@ Synth::write_buffer(LPSTR pData) {
 }
 
 int32
-Synth::send_message(byte* pMsg) {
+Synth::send_message(byte port, byte* pMsg) {
     auto type = (E_EVENT_TYPE)(*pMsg & 0xF0);
-    auto ch = *pMsg & 0x0F;
+    auto ch = (port << 4) | (*pMsg & 0x0F);
     switch (type) {
     case E_EVENT_TYPE::NOTE_OFF:
-        ppChannels[ch]->note_off(pMsg[1]);
+        mppChannels[ch]->note_off(pMsg[1]);
         return 3;
     case E_EVENT_TYPE::NOTE_ON:
-        ppChannels[ch]->note_on(pMsg[1], pMsg[2]);
+        mppChannels[ch]->note_on(pMsg[1], pMsg[2]);
         return 3;
     case E_EVENT_TYPE::POLY_KEY:
         return 3;
     case E_EVENT_TYPE::CTRL_CHG:
-        ppChannels[ch]->ctrl_change(pMsg[1], pMsg[2]);
+        mppChannels[ch]->ctrl_change(pMsg[1], pMsg[2]);
         return 3;
     case E_EVENT_TYPE::PROG_CHG:
-        ppChannels[ch]->program_change(pMsg[1]);
+        mppChannels[ch]->program_change(pMsg[1]);
         return 2;
     case E_EVENT_TYPE::CH_PRESS:
         return 2;
     case E_EVENT_TYPE::PITCH:
-        ppChannels[ch]->pitch_bend(((pMsg[2] << 7) | pMsg[1]) - 8192);
+        mppChannels[ch]->pitch_bend(((pMsg[2] << 7) | pMsg[1]) - 8192);
         return 3;
     case E_EVENT_TYPE::SYS_EX:
         if (0xFF == pMsg[0]) {

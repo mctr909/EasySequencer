@@ -128,7 +128,7 @@ fileout_save(
             time += pSynth->bpm * delta_sec / 60.0;
             gFileOutProgress = event_pos;
         }
-        event_pos += pSynth->send_message(ev_value);
+        event_pos += pSynth->send_message(0, ev_value);
     }
     gFileOutProgress = event_size;
 
