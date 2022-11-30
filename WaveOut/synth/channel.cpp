@@ -1,12 +1,13 @@
-#include "channel.h"
+#include <math.h>
+
 #include "channel_const.h"
 #include "channel_params.h"
 #include "sampler.h"
 #include "filter.h"
-#include "../message_reciever.h"
 #include "../inst/inst_list.h"
+#include "../message_reciever.h"
 
-#include <math.h>
+#include "channel.h"
 
 Channel::Channel(SYSTEM_VALUE *pSystem_value, int32 number) {
     mpSystem_value = pSystem_value;

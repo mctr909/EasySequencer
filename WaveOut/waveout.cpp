@@ -1,16 +1,13 @@
-#include "waveout.h"
-#include "message_reciever.h"
-#include "inst/inst_list.h"
-#include "synth/channel.h"
-#include "synth/channel_const.h"
-#include "synth/channel_params.h"
-#include "synth/sampler.h"
-#include "type.h"
-
 #include <math.h>
 #include <stdio.h>
-#include <mmsystem.h>
+#include <stdlib.h>
 
+#include "inst/inst_list.h"
+#include "message_reciever.h"
+
+#include "waveout.h"
+
+#include <mmsystem.h>
 #pragma comment (lib, "winmm.lib")
 
 /******************************************************************************/
@@ -27,19 +24,13 @@ int32  gReadIndex = 0;
 int32  gBufferCount = 0;
 int32  gBufferLength = 0;
 
-HWAVEOUT        ghWaveOut = NULL;
-WAVEFORMATEX    gWaveFmt = { 0 };
-WAVEHDR         **gppWaveHdr = NULL;
+HWAVEOUT     ghWaveOut = NULL;
+WAVEFORMATEX gWaveFmt = { 0 };
+WAVEHDR      **gppWaveHdr = NULL;
 
 void (*gfpWriteBuffer)(LPSTR) = NULL;
 
 /******************************************************************************/
-int32         gActiveCount = 0;
-SYSTEM_VALUE  gSysValue = { 0 };
-
-/******************************************************************************/
-void write_buffer(LPSTR pData);
-
 BOOL waveOutOpen(
     int32 sampleRate,
     int32 bufferLength,
@@ -51,15 +42,8 @@ void CALLBACK waveOutProc(HWAVEOUT hwo, UINT uMsg, DWORD_PTR dwInstance, DWORD d
 DWORD writeBufferTask(LPVOID *param);
 
 /******************************************************************************/
-int* WINAPI waveout_getActiveSamplersPtr() {
-    return &gActiveCount;
-}
-
-CHANNEL_PARAM** WINAPI waveout_getChannelParamPtr() {
-    return gSysValue.ppChannel_params;
-}
-
-byte *WINAPI waveout_open(
+void WINAPI
+waveout_open(
     LPWSTR filePath,
     int32 sampleRate,
     int32 bufferLength,
@@ -67,119 +51,41 @@ byte *WINAPI waveout_open(
 ) {
     waveout_close();
     //
-    if (NULL != gSysValue.cInst_list) {
-        delete gSysValue.cInst_list;
-    }
-    //
     auto cInst = new InstList();
-    auto loadStatus = cInst->Load(filePath);
-    if (E_LOAD_STATUS::SUCCESS != loadStatus) {
-        delete cInst;
-    }
-    auto captionErr = L"ウェーブテーブル読み込み失敗";
-    switch (loadStatus) {
+    auto load_status = cInst->Load(filePath);
+    auto caption_err = L"ウェーブテーブル読み込み失敗";
+    switch (load_status) {
     case E_LOAD_STATUS::WAVE_TABLE_OPEN_FAILED:
-        MessageBoxW(NULL, L"ファイルが開けませんでした。", captionErr, 0);
-        return NULL;
+        MessageBoxW(NULL, L"ファイルが開けませんでした。", caption_err, 0);
+        return;
     case E_LOAD_STATUS::WAVE_TABLE_ALLOCATE_FAILED:
-        MessageBoxW(NULL, L"メモリの確保ができませんでした。", captionErr, 0);
-        return NULL;
+        MessageBoxW(NULL, L"メモリの確保ができませんでした。", caption_err, 0);
+        return;
     case E_LOAD_STATUS::WAVE_TABLE_UNKNOWN_FILE:
-        MessageBoxW(NULL, L"対応していない形式です。", captionErr, 0);
-        return NULL;
+        MessageBoxW(NULL, L"対応していない形式です。", caption_err, 0);
+        return;
     default:
         break;
     }
-    //
-    gSysValue.cInst_list = cInst;
-    gSysValue.pWave_table = (WAVDAT*)gSysValue.cInst_list->GetWaveTablePtr();
-    gSysValue.ppSampler = (Sampler**)calloc(SAMPLER_COUNT, sizeof(Sampler*));
-    for (uint32 i = 0; i < SAMPLER_COUNT; i++) {
-        gSysValue.ppSampler[i] = new Sampler(&gSysValue);
+    if (E_LOAD_STATUS::SUCCESS != load_status) {
+        delete cInst;
+        return;
     }
-    gSysValue.buffer_length = bufferLength;
-    gSysValue.buffer_count = bufferCount;
-    gSysValue.sample_rate = sampleRate;
-    gSysValue.delta_time = 1.0 / sampleRate;
-    gSysValue.bpm = 120.0;
-    gSysValue.pBuffer_l = (double*)calloc(bufferLength, sizeof(double));
-    gSysValue.pBuffer_r = (double*)calloc(bufferLength, sizeof(double));
     //
-    message_createChannels(&gSysValue);
+    synth_create(cInst, sampleRate, bufferLength, bufferCount);
     //
-    waveOutOpen(gSysValue.sample_rate, gSysValue.buffer_length, gSysValue.buffer_count, write_buffer);
-    //
-    return (byte*)gSysValue.cInst_list->GetInstList();
+    waveOutOpen(sampleRate, bufferLength, bufferCount, synth_write_buffer);
 }
 
-void WINAPI waveout_close() {
+void WINAPI
+waveout_close() {
     waveOutClose();
-    if (NULL != gSysValue.cInst_list) {
-        delete gSysValue.cInst_list;
-        gSysValue.cInst_list = NULL;
-    }
-    if (NULL != gSysValue.pBuffer_l) {
-        free(gSysValue.pBuffer_l);
-        gSysValue.pBuffer_l = NULL;
-    }
-    if (NULL != gSysValue.pBuffer_r) {
-        free(gSysValue.pBuffer_r);
-        gSysValue.pBuffer_r = NULL;
-    }
-    if (NULL != gSysValue.ppSampler) {
-        for (uint32 i = 0; i < SAMPLER_COUNT; i++) {
-            delete gSysValue.ppSampler[i];
-        }
-        free(gSysValue.ppSampler);
-        gSysValue.ppSampler = NULL;
-    }
-    message_disposeChannels(&gSysValue);
+    synth_dispose();
 }
 
 /******************************************************************************/
-void write_buffer(LPSTR pData) {
-    /* sampler loop */
-    int32 activeCount = 0;
-    for (int32 i = 0; i < SAMPLER_COUNT; i++) {
-        auto pSmpl = gSysValue.ppSampler[i];
-        if (pSmpl->state < Sampler::E_STATE::PURGE) {
-            continue;
-        }
-        if (pSmpl->step()) {
-            activeCount++;
-        }
-    }
-    gActiveCount = activeCount;
-    /* channel loop */
-    for (int32 i = 0; i < CHANNEL_COUNT; i++) {
-        auto pCh = gSysValue.ppChannels[i];
-        pCh->step(gSysValue.pBuffer_l, gSysValue.pBuffer_r);
-    }
-    /* write buffer */
-    auto pOutput = (short*)pData;
-    for (int32 i = 0, j = 0; i < gSysValue.buffer_length; i++, j += 2) {
-        auto pL = &gSysValue.pBuffer_l[i];
-        auto pR = &gSysValue.pBuffer_r[i];
-        if (*pL < -1.0) {
-            *pL = -1.0;
-        }
-        if (1.0 < *pL) {
-            *pL = 1.0;
-        }
-        if (*pR < -1.0) {
-            *pR = -1.0;
-        }
-        if (1.0 < *pR) {
-            *pR = 1.0;
-        }
-        pOutput[j] = (short)(*pL * 32767);
-        pOutput[j + 1] = (short)(*pR * 32767);
-        *pL = 0.0;
-        *pR = 0.0;
-    }
-}
-
-BOOL waveOutOpen(
+BOOL
+waveOutOpen(
     int32 sampleRate,
     int32 bufferLength,
     int32 bufferCount,
@@ -239,7 +145,8 @@ BOOL waveOutOpen(
     return TRUE;
 }
 
-BOOL waveOutClose() {
+BOOL
+waveOutClose() {
     if (NULL == ghWaveOut) {
         return TRUE;
     }
@@ -262,7 +169,8 @@ BOOL waveOutClose() {
     return TRUE;
 }
 
-void CALLBACK waveOutProc(HWAVEOUT hwo, UINT uMsg, DWORD_PTR dwInstance, DWORD dwParam1, DWORD dwParam) {
+void CALLBACK
+waveOutProc(HWAVEOUT hwo, UINT uMsg, DWORD_PTR dwInstance, DWORD dwParam1, DWORD dwParam) {
     switch (uMsg) {
     case MM_WOM_OPEN:
         break;
@@ -301,7 +209,8 @@ void CALLBACK waveOutProc(HWAVEOUT hwo, UINT uMsg, DWORD_PTR dwInstance, DWORD d
     }
 }
 
-DWORD writeBufferTask(LPVOID *param) {
+DWORD
+writeBufferTask(LPVOID *param) {
     while (TRUE) {
         if (gDoStop) {
             gThreadStopped = TRUE;

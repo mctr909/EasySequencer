@@ -84,14 +84,16 @@ namespace Player {
     unsafe public class Sender {
         #region WaveOut.dll
         [DllImport("WaveOut.dll")]
-        private static extern CHANNEL_PARAM** waveout_getChannelParamPtr();
+        private static extern INST_LIST* synth_inst_list_ptr();
+        [DllImport("WaveOut.dll")]
+        private static extern CHANNEL_PARAM** synth_channel_params_ptr();
+        [DllImport("WaveOut.dll")]
+        private static extern IntPtr synth_active_counter_ptr();
         [DllImport("WaveOut.dll")]
         private static extern void message_send(byte* pMsg);
 
         [DllImport("WaveOut.dll")]
-        private static extern IntPtr waveout_getActiveSamplersPtr();
-        [DllImport("WaveOut.dll")]
-        private static extern INST_LIST* waveout_open(
+        private static extern void waveout_open(
             IntPtr filePath,
             int sampleRate,
             int bufferLength,
@@ -101,7 +103,7 @@ namespace Player {
         private static extern void waveout_close();
 
         [DllImport("WaveOut.dll")]
-        private static extern IntPtr fileout_getProgressPtr();
+        private static extern IntPtr fileout_progress_ptr();
         [DllImport("WaveOut.dll")]
         private static extern void fileout_save(
             IntPtr waveTablePath,
@@ -123,7 +125,7 @@ namespace Player {
             get { return Marshal.PtrToStructure<int>(mpActiveCountPtr); }
         }
 
-        private static IntPtr mpActiveCountPtr = waveout_getActiveSamplersPtr();
+        private static IntPtr mpActiveCountPtr = synth_active_counter_ptr();
 
         private INST_LIST* mpInstList = null;
         private CHANNEL_PARAM** mppChParam;
@@ -150,11 +152,12 @@ namespace Player {
         public Sender() { }
 
         public bool SetUp(string waveTablePath) {
-            mpInstList = waveout_open(Marshal.StringToHGlobalAuto(waveTablePath), SampleRate, SampleRate / 150, 32);
+            waveout_open(Marshal.StringToHGlobalAuto(waveTablePath), SampleRate, SampleRate / 150, 32);
+            mpInstList = synth_inst_list_ptr();
             if (null == mpInstList) {
                 return false;
             }
-            mppChParam = waveout_getChannelParamPtr();
+            mppChParam = synth_channel_params_ptr();
             return true;
         }
 
@@ -176,7 +179,7 @@ namespace Player {
             }
             var evArr = ms.ToArray();
 
-            var prog = fileout_getProgressPtr();
+            var prog = fileout_progress_ptr();
             *(int*)prog = 0;
             var fm = new StatusWindow((int)ms.Length, prog);
             fm.Show();

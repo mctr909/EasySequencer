@@ -1,45 +1,135 @@
-#include "message_reciever.h"
+#include <stdio.h>
+
 #include "synth/channel.h"
 #include "synth/channel_const.h"
 #include "synth/channel_params.h"
+#include "synth/sampler.h"
+#include "inst/inst_list.h"
 
-#include <stdio.h>
-
-Channel **message_ppChannels = NULL;
+#include "message_reciever.h"
 
 /******************************************************************************/
-void message_createChannels(SYSTEM_VALUE *pSystemValue) {
-    message_disposeChannels(pSystemValue);
-    //
-    pSystemValue->ppChannels = (Channel**)calloc(CHANNEL_COUNT, sizeof(Channel*));
-    message_ppChannels = pSystemValue->ppChannels;
-    for (int32 c = 0; c < CHANNEL_COUNT; c++) {
-        pSystemValue->ppChannels[c] = new Channel(pSystemValue, c);
+SYSTEM_VALUE gSysValue = { 0 };
+
+/******************************************************************************/
+void
+synth_create(InstList* pInst_list, int32 sample_rate, int32 buffer_length, int32 buffer_count) {
+    synth_dispose();
+    gSysValue.active_count = 0;
+    gSysValue.buffer_length = buffer_length;
+    gSysValue.buffer_count = buffer_count;
+    gSysValue.sample_rate = sample_rate;
+    gSysValue.delta_time = 1.0 / sample_rate;
+    gSysValue.bpm = 120.0;
+    /* inst wave */
+    gSysValue.cInst_list = pInst_list;
+    gSysValue.pWave_table = (WAVDAT*)gSysValue.cInst_list->GetWaveTablePtr();
+    /* allocate output buffer */
+    gSysValue.pBuffer_l = (double*)calloc(buffer_length, sizeof(double));
+    gSysValue.pBuffer_r = (double*)calloc(buffer_length, sizeof(double));
+    /* allocate samplers */
+    gSysValue.ppSampler = (Sampler**)calloc(SAMPLER_COUNT, sizeof(Sampler*));
+    for (uint32 i = 0; i < SAMPLER_COUNT; i++) {
+        gSysValue.ppSampler[i] = new Sampler(&gSysValue);
     }
-    //
-    pSystemValue->ppChannel_params = (CHANNEL_PARAM**)calloc(CHANNEL_COUNT, sizeof(CHANNEL_PARAM*));
+    /* allocate channels */
+    gSysValue.ppChannels = (Channel**)calloc(CHANNEL_COUNT, sizeof(Channel*));
+    gSysValue.ppChannel_params = (CHANNEL_PARAM**)calloc(CHANNEL_COUNT, sizeof(CHANNEL_PARAM*));
     for (int32 i = 0; i < CHANNEL_COUNT; i++) {
-        pSystemValue->ppChannel_params[i] = &pSystemValue->ppChannels[i]->param;
+        gSysValue.ppChannels[i] = new Channel(&gSysValue, i);
+        gSysValue.ppChannel_params[i] = &gSysValue.ppChannels[i]->param;
     }
 }
 
-void message_disposeChannels(SYSTEM_VALUE *pSystemValue) {
-    if (NULL != pSystemValue->ppChannel_params) {
-        free(pSystemValue->ppChannel_params);
-        pSystemValue->ppChannel_params = NULL;
+void
+synth_dispose() {
+    /* dispose inst wave */
+    if (NULL != gSysValue.cInst_list) {
+        delete gSysValue.cInst_list;
+        gSysValue.cInst_list = NULL;
     }
-    if (NULL != pSystemValue->ppChannels) {
-        for (int32 c = 0; c < CHANNEL_COUNT; c++) {
-            delete pSystemValue->ppChannels[c];
-            pSystemValue->ppChannels[c] = NULL;
+    /* dispose output buffer */
+    if (NULL != gSysValue.pBuffer_l) {
+        free(gSysValue.pBuffer_l);
+        gSysValue.pBuffer_l = NULL;
+    }
+    if (NULL != gSysValue.pBuffer_r) {
+        free(gSysValue.pBuffer_r);
+        gSysValue.pBuffer_r = NULL;
+    }
+    /* dispose samplers */
+    if (NULL != gSysValue.ppSampler) {
+        for (uint32 i = 0; i < SAMPLER_COUNT; i++) {
+            delete gSysValue.ppSampler[i];
         }
-        free(pSystemValue->ppChannels);
-        pSystemValue->ppChannels = NULL;
+        free(gSysValue.ppSampler);
+        gSysValue.ppSampler = NULL;
     }
-    message_ppChannels = NULL;
+    /* dispose channels */
+    if (NULL != gSysValue.ppChannels) {
+        for (int32 c = 0; c < CHANNEL_COUNT; c++) {
+            delete gSysValue.ppChannels[c];
+            gSysValue.ppChannels[c] = NULL;
+        }
+        free(gSysValue.ppChannels);
+        gSysValue.ppChannels = NULL;
+    }
+    if (NULL != gSysValue.ppChannel_params) {
+        free(gSysValue.ppChannel_params);
+        gSysValue.ppChannel_params = NULL;
+    }
 }
 
-int32 message_perform(SYSTEM_VALUE *pSystemValue, byte* pMsg) {
+void
+synth_write_buffer(LPSTR pData) {
+    synth_write_buffer_perform(&gSysValue, pData);
+}
+
+void
+synth_write_buffer_perform(SYSTEM_VALUE* pSystemValue, LPSTR pData) {
+    /* sampler loop */
+    int32 activeCount = 0;
+    for (int32 i = 0; i < SAMPLER_COUNT; i++) {
+        auto pSmpl = pSystemValue->ppSampler[i];
+        if (pSmpl->state < Sampler::E_STATE::PURGE) {
+            continue;
+        }
+        if (pSmpl->step()) {
+            activeCount++;
+        }
+    }
+    pSystemValue->active_count = activeCount;
+    /* channel loop */
+    for (int32 i = 0; i < CHANNEL_COUNT; i++) {
+        auto pCh = pSystemValue->ppChannels[i];
+        pCh->step(pSystemValue->pBuffer_l, pSystemValue->pBuffer_r);
+    }
+    /* write buffer */
+    auto pOutput = (short*)pData;
+    for (int32 i = 0, j = 0; i < pSystemValue->buffer_length; i++, j += 2) {
+        auto pL = &pSystemValue->pBuffer_l[i];
+        auto pR = &pSystemValue->pBuffer_r[i];
+        if (*pL < -1.0) {
+            *pL = -1.0;
+        }
+        if (1.0 < *pL) {
+            *pL = 1.0;
+        }
+        if (*pR < -1.0) {
+            *pR = -1.0;
+        }
+        if (1.0 < *pR) {
+            *pR = 1.0;
+        }
+        pOutput[j] = (short)(*pL * 32767);
+        pOutput[j + 1] = (short)(*pR * 32767);
+        *pL = 0.0;
+        *pR = 0.0;
+    }
+}
+
+int32
+message_perform(SYSTEM_VALUE *pSystemValue, byte* pMsg) {
     auto type = (E_EVENT_TYPE)(*pMsg & 0xF0);
     auto ch = *pMsg & 0x0F;
     switch (type) {
@@ -83,24 +173,22 @@ int32 message_perform(SYSTEM_VALUE *pSystemValue, byte* pMsg) {
 }
 
 /******************************************************************************/
-void WINAPI message_send(byte *pMsg) {
-    auto type = (E_EVENT_TYPE)(*pMsg & 0xF0);
-    auto ch = *pMsg & 0x0F;
-    switch (type) {
-    case E_EVENT_TYPE::NOTE_OFF:
-        message_ppChannels[ch]->note_off(pMsg[1]);
-        break;
-    case E_EVENT_TYPE::NOTE_ON:
-        message_ppChannels[ch]->note_on(pMsg[1], pMsg[2]);
-        break;
-    case E_EVENT_TYPE::CTRL_CHG:
-        message_ppChannels[ch]->ctrl_change(pMsg[1], pMsg[2]);
-        break;
-    case E_EVENT_TYPE::PROG_CHG:
-        message_ppChannels[ch]->program_change(pMsg[1]);
-        break;
-    case E_EVENT_TYPE::PITCH:
-        message_ppChannels[ch]->pitch_bend(((pMsg[2] << 7) | pMsg[1]) - 8192);
-        break;
-    }
+byte* WINAPI
+synth_inst_list_ptr() {
+    return (byte*)gSysValue.cInst_list->GetInstList();
+}
+
+CHANNEL_PARAM** WINAPI
+synth_channel_params_ptr() {
+    return gSysValue.ppChannel_params;
+}
+
+int32* WINAPI
+synth_active_counter_ptr() {
+    return &gSysValue.active_count;
+}
+
+void WINAPI
+message_send(byte *pMsg) {
+    message_perform(&gSysValue, pMsg);
 }

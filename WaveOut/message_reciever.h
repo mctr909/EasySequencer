@@ -51,6 +51,7 @@ struct SYSTEM_VALUE {
     Channel** ppChannels;
     CHANNEL_PARAM** ppChannel_params;
     WAVDAT* pWave_table;
+    int32 active_count;
     int32 buffer_length;
     int32 buffer_count;
     int32 sample_rate;
@@ -65,9 +66,14 @@ struct SYSTEM_VALUE {
 #ifdef __cplusplus
 extern "C" {
 #endif
-    void message_createChannels(SYSTEM_VALUE *pSystemValue);
-    void message_disposeChannels(SYSTEM_VALUE *pSystemValue);
+    void synth_create(InstList* pInst_list, int32 sample_rate, int32 buffer_length, int32 buffer_count);
+    void synth_dispose();
+    void synth_write_buffer(LPSTR pData);
+    void synth_write_buffer_perform(SYSTEM_VALUE* pSystemValue, LPSTR pData);
     int32 message_perform(SYSTEM_VALUE* pSystemValue, byte* pMsg);
+    __declspec(dllexport) byte* WINAPI synth_inst_list_ptr();
+    __declspec(dllexport) CHANNEL_PARAM** WINAPI synth_channel_params_ptr();
+    __declspec(dllexport) int32* WINAPI synth_active_counter_ptr();
     __declspec(dllexport) void WINAPI message_send(byte *pMsg);
 #ifdef __cplusplus
 }

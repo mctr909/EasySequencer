@@ -6,7 +6,7 @@
 #ifdef __cplusplus
 extern "C" {
 #endif
-__declspec(dllexport) int32* WINAPI fileout_getProgressPtr();
+__declspec(dllexport) int32* WINAPI fileout_progress_ptr();
 __declspec(dllexport) void WINAPI fileout_save(
     LPWSTR waveTablePath,
     LPWSTR savePath,

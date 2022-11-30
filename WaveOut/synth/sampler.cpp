@@ -1,8 +1,9 @@
-#include "sampler.h"
 #include "channel.h"
 #include "channel_const.h"
-#include "../message_reciever.h"
 #include "../inst/inst_list.h"
+#include "../message_reciever.h"
+
+#include "sampler.h"
 
 /******************************************************************************/
 #define PURGE_THRESHOLD 0.0005
