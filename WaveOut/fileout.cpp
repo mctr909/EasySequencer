@@ -31,12 +31,12 @@ typedef struct {
 #pragma pack(pop)
 
 /******************************************************************************/
-int32  gFileOutProgress = 0;
+int32 fileout_progress = 0;
 
 /******************************************************************************/
 int32* WINAPI
 fileout_progress_ptr() {
-    return &gFileOutProgress;
+    return &fileout_progress;
 }
 
 void WINAPI
@@ -126,11 +126,11 @@ fileout_save(
             fwrite(pPcm_buffer, buff_size, 1, fp_out);
             fmt.data_size += buff_size;
             time += pSynth->bpm * delta_sec / 60.0;
-            gFileOutProgress = event_pos;
+            fileout_progress = event_pos;
         }
         event_pos += pSynth->send_message(0, ev_value);
     }
-    gFileOutProgress = event_size;
+    fileout_progress = event_size;
 
     /* close file */
     riff.file_size = fmt.data_size + sizeof(fmt) + 4;
