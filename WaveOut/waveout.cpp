@@ -29,7 +29,8 @@ int32  waveout_read_index = 0;
 int32  waveout_buffer_count = 0;
 int32  waveout_buffer_length = 0;
 
-Synth* waveout_synth = NULL;
+Synth*    waveout_synth = NULL;
+InstList* waveout_inst_list = NULL;
 
 /******************************************************************************/
 void CALLBACK
@@ -81,7 +82,7 @@ waveout_buffer_writing_task(LPVOID* param) {
             continue;
         } else {
             /*** Write Buffer ***/
-            auto pBuff = waveout_hdr[waveout_write_index].lpData;
+            auto pBuff = (byte*)waveout_hdr[waveout_write_index].lpData;
             memset(pBuff, 0, waveout_fmt.nBlockAlign * waveout_buffer_length);
             waveout_synth->write_buffer(pBuff);
             waveout_write_index = (waveout_write_index + 1) % waveout_buffer_count;
@@ -122,6 +123,8 @@ waveout_init(
     )) {
         return;
     }
+    /*** Init buffer locker ***/
+    InitializeCriticalSection(&waveout_buffer_lock);
     /*** Allocate wave header ***/
     waveout_hdr = (WAVEHDR*)calloc(waveout_buffer_count, sizeof(WAVEHDR));
     if (NULL == waveout_hdr) {
@@ -141,7 +144,6 @@ waveout_init(
         waveOutWrite(waveout_handle, &waveout_hdr[i], sizeof(WAVEHDR));
     }
     /*** Create buffer writing proc thread ***/
-    InitializeCriticalSection((LPCRITICAL_SECTION)&waveout_buffer_lock);
     waveout_thread = CreateThread(
         NULL,
         0,
@@ -174,8 +176,9 @@ waveout_open(
     int32 bufferCount
 ) {
     waveout_close();
-    auto cInst = new InstList();
-    auto load_status = cInst->Load(filePath);
+    /*** Load system value ***/
+    waveout_inst_list = new InstList();
+    auto load_status = waveout_inst_list->Load(filePath);
     auto caption_err = L"ウェーブテーブル読み込み失敗";
     switch (load_status) {
     case E_LOAD_STATUS::WAVE_TABLE_OPEN_FAILED:
@@ -191,10 +194,12 @@ waveout_open(
         break;
     }
     if (E_LOAD_STATUS::SUCCESS != load_status) {
-        delete cInst;
+        delete waveout_inst_list;
         return;
     }
-    waveout_synth = new Synth(cInst, sampleRate, bufferLength);
+    /*** Create system value ***/
+    waveout_synth = new Synth(waveout_inst_list, sampleRate, bufferLength);
+    /*** Open waveout ***/
     waveout_init(sampleRate, bufferLength, bufferCount);
 }
 
@@ -221,6 +226,16 @@ waveout_close() {
     if (NULL != waveout_synth) {
         delete waveout_synth;
         waveout_synth = NULL;
+    }
+    /*** Release inst list ***/
+    if (NULL != waveout_inst_list) {
+        delete waveout_inst_list;
+        waveout_inst_list = NULL;
+    }
+    /*** Delete buffer locker ***/
+    if (NULL != waveout_buffer_lock.DebugInfo) {
+        DeleteCriticalSection(&waveout_buffer_lock);
+        waveout_buffer_lock.DebugInfo = NULL;
     }
 }
 

@@ -12,11 +12,9 @@ Channel::Channel(Synth* pSynth, int32 number) {
     mpSynth = pSynth;
     this->number = (byte)number;
     param.pKeyboard = (byte*)calloc(1, sizeof(byte) * 128);
-
     pInput_l = (double*)calloc(pSynth->buffer_length, sizeof(double));
     pInput_r = (double*)calloc(pSynth->buffer_length, sizeof(double));
-
-    delay.write_index = 0;
+    delay.index = 0;
     delay.tap_length = pSynth->sample_rate;
     delay.pTap_l = (double*)calloc(delay.tap_length, sizeof(double));
     delay.pTap_r = (double*)calloc(delay.tap_length, sizeof(double));
@@ -72,15 +70,15 @@ Channel::set_pan(byte value) {
 void
 Channel::set_damper(byte value) {
     if (value < 64) {
-        for (int32 s = 0; s < SAMPLER_COUNT; ++s) {
-            auto pSmpl = mpSynth->mppSampler[s];
+        for (int32 i = 0; i < SAMPLER_COUNT; ++i) {
+            auto pSmpl = mpSynth->mppSampler[i];
             if (Sampler::E_STATE::HOLD == pSmpl->state) {
                 pSmpl->state = Sampler::E_STATE::RELEASE;
             }
         }
-        for (int32 n = 0; n < 128; ++n) {
-            if ((byte)E_KEY_STATE::HOLD == param.pKeyboard[n]) {
-                param.pKeyboard[n] = (byte)E_KEY_STATE::FREE;
+        for (int32 i = 0; i < 128; ++i) {
+            if ((byte)E_KEY_STATE::HOLD == param.pKeyboard[i]) {
+                param.pKeyboard[i] = static_cast<byte>(E_KEY_STATE::FREE);
             }
         }
     }
@@ -99,25 +97,20 @@ Channel::set_cut(byte value) {
 
 void
 Channel::set_rpn() {
-    switch (rpn_lsb | rpn_msb << 8) {
-    case 0x0000:
+    auto type = static_cast<E_RPN>(rpn_lsb | rpn_msb << 8);
+    switch (type) {
+    case E_RPN::BEND_RANGE:
         param.bend_range = data_msb;
+        break;
+    case E_RPN::VIB_DEPTH_RANGE:
         break;
     default:
         break;
     }
-    rpn_lsb = 0xFF;
-    rpn_msb = 0xFF;
 }
 
 void
 Channel::set_nrpn() {
-    //switch (mNrpnLSB | mNrpnMSB << 8) {
-    //default:
-    //    break;
-    //}
-    nrpn_lsb = 0xFF;
-    nrpn_msb = 0xFF;
 }
 
 /******************************************************************************/
@@ -129,10 +122,9 @@ Channel::init_ctrl() {
     set_damper(0);
 
     param.rev_send = 0;
+
     param.cho_send = 0;
     chorus.send = param.cho_send / 127.0;
-    chorus.pan_a = (1.0 - param.rev_send / 127.0) / 3.0;
-    chorus.pan_b = (1.0 + param.rev_send / 127.0) / 3.0;
     chorus.depth = 50 * 0.001;
     chorus.rate = 50 * 0.006283 / 1.732 * mpSynth->delta_time;
     
@@ -186,8 +178,8 @@ Channel::all_reset() {
 
 void
 Channel::note_off(byte note_num) {
-    for (int32 s = 0; s < SAMPLER_COUNT; ++s) {
-        auto pSmpl = mpSynth->mppSampler[s];
+    for (int32 i = 0; i < SAMPLER_COUNT; ++i) {
+        auto pSmpl = mpSynth->mppSampler[i];
         auto pChParam = mpSynth->mppChannel_params[pSmpl->channel_num];
         if (pSmpl->state < Sampler::E_STATE::PRESS ||
             (pChParam->is_drum && !pSmpl->loop_enable)) {
@@ -202,9 +194,9 @@ Channel::note_off(byte note_num) {
         }
     }
     if (param.damper < 64) {
-        param.pKeyboard[note_num] = (byte)E_KEY_STATE::FREE;
+        param.pKeyboard[note_num] = static_cast<byte>(E_KEY_STATE::FREE);
     } else {
-        param.pKeyboard[note_num] = (byte)E_KEY_STATE::HOLD;
+        param.pKeyboard[note_num] = static_cast<byte>(E_KEY_STATE::HOLD);
     }
 }
 
@@ -217,9 +209,9 @@ Channel::note_on(byte note_num, byte velocity) {
     if (E_STATE::FREE == state) {
         state = E_STATE::STANDBY;
     }
-    param.pKeyboard[note_num] = (byte)E_KEY_STATE::PRESS;
-    for (uint32 idxS = 0; idxS < SAMPLER_COUNT; idxS++) {
-        auto pSmpl = mpSynth->mppSampler[idxS];
+    param.pKeyboard[note_num] = static_cast<byte>(E_KEY_STATE::PRESS);
+    for (uint32 i = 0; i < SAMPLER_COUNT; ++i) {
+        auto pSmpl = mpSynth->mppSampler[i];
         if (pSmpl->channel_num == number && pSmpl->note_num == note_num &&
             Sampler::E_STATE::PRESS <= pSmpl->state) {
             pSmpl->state = Sampler::E_STATE::PURGE;
@@ -227,16 +219,16 @@ Channel::note_on(byte note_num, byte velocity) {
     }
     auto pInst_list = mpSynth->mpInst_list;
     auto ppLayer = pInst_list->mppLayerList + mpInst->layerIndex;
-    for (uint32 idxL = 0; idxL < mpInst->layerCount; idxL++) {
-        auto pLayer = ppLayer[idxL];
+    for (uint32 idxl = 0; idxl < mpInst->layerCount; idxl++) {
+        auto pLayer = ppLayer[idxl];
         auto ppRegion = pInst_list->mppRegionList + pLayer->regionIndex;
-        for (uint32 idxR = 0; idxR < pLayer->regionCount; idxR++) {
-            auto pRegion = ppRegion[idxR];
+        for (uint32 idxr = 0; idxr < pLayer->regionCount; idxr++) {
+            auto pRegion = ppRegion[idxr];
             if (pRegion->keyLow <= note_num && note_num <= pRegion->keyHigh &&
                 pRegion->velocityLow <= velocity && velocity <= pRegion->velocityHigh) {
                 auto pWave = pInst_list->mppWaveList[pRegion->waveIndex];
-                for (uint32 idxS = 0; idxS < SAMPLER_COUNT; idxS++) {
-                    auto pSmpl = mpSynth->mppSampler[idxS];
+                for (uint32 idxs = 0; idxs < SAMPLER_COUNT; idxs++) {
+                    auto pSmpl = mpSynth->mppSampler[idxs];
                     if (Sampler::E_STATE::FREE == pSmpl->state) {
                         pSmpl->note_on(this, pLayer, pRegion, note_num, velocity);
                         break;
@@ -301,16 +293,14 @@ Channel::ctrl_change(byte type, byte b1) {
 
     case E_CTRL_TYPE::REVERB:
         param.rev_send = b1;
-        chorus.pan_a = (1.0 - b1 / 127.0) / 3.0;
-        chorus.pan_b = (1.0 + b1 / 127.0) / 3.0;
         break;
     case E_CTRL_TYPE::CHORUS:
         param.cho_send = b1;
-        chorus.send = b1 / 128.0;
+        chorus.send = b1 / 127.0;
         break;
     case E_CTRL_TYPE::DELAY:
         param.del_send = b1;
-        delay.send = b1 / 127.0;
+        delay.send = b1 / 128.0;
         break;
 
     case E_CTRL_TYPE::NRPN_LSB:
@@ -327,6 +317,11 @@ Channel::ctrl_change(byte type, byte b1) {
         break;
     case E_CTRL_TYPE::DATA_MSB:
         data_msb = b1;
+        set_rpn();
+        set_nrpn();
+        break;
+    case E_CTRL_TYPE::DATA_LSB:
+        data_lsb = b1;
         set_rpn();
         set_nrpn();
         break;
@@ -371,7 +366,7 @@ Channel::step(double* pOutput_l, double* pOutput_r) {
 
         /* delay */
         {
-            auto delay_index = static_cast<long>(delay.write_index) - static_cast<long>(delay.time);
+            auto delay_index = delay.index - delay.time;
             if (delay_index < 0) {
                 delay_index += delay.tap_length;
             }
@@ -381,21 +376,21 @@ Channel::step(double* pOutput_l, double* pOutput_r) {
             auto del_r = tap_r * (1.0 - delay.cross) + tap_l * delay.cross;
             output_l += del_l * delay.send;
             output_r += del_r * delay.send;
-            delay.pTap_l[delay.write_index] = output_l;
-            delay.pTap_r[delay.write_index] = output_r;
-            delay.write_index++;
-            if (delay.tap_length <= delay.write_index) {
-                delay.write_index -= delay.tap_length;
+            delay.pTap_l[delay.index] = output_l;
+            delay.pTap_r[delay.index] = output_r;
+            delay.index++;
+            if (delay.tap_length <= delay.index) {
+                delay.index -= delay.tap_length;
             }
         }
 
         /* chorus */
         {
-            auto tu = delay.write_index
+            auto tu = delay.index
                 - ((0.5 + 0.5 * chorus.lfo_u) * chorus.depth * 0.99 + 0.01) * mpSynth->sample_rate;
-            auto tv = delay.write_index
+            auto tv = delay.index
                 - ((0.5 + 0.5 * chorus.lfo_v) * chorus.depth * 0.99 + 0.01) * mpSynth->sample_rate;
-            auto tw = delay.write_index
+            auto tw = delay.index
                 - ((0.5 + 0.5 * chorus.lfo_w) * chorus.depth * 0.99 + 0.01) * mpSynth->sample_rate;
             if (tu < 0.0) {
                 tu += delay.tap_length;
@@ -406,9 +401,9 @@ Channel::step(double* pOutput_l, double* pOutput_r) {
             if (tw < 0.0) {
                 tw += delay.tap_length;
             }
-            auto idx_ua = static_cast<long>(tu);
-            auto idx_va = static_cast<long>(tv);
-            auto idx_wa = static_cast<long>(tw);
+            auto idx_ua = static_cast<int32>(tu);
+            auto idx_va = static_cast<int32>(tv);
+            auto idx_wa = static_cast<int32>(tw);
             auto idx_ub = idx_ua + 1;
             auto idx_vb = idx_va + 1;
             auto idx_wb = idx_wa + 1;
@@ -425,13 +420,11 @@ Channel::step(double* pOutput_l, double* pOutput_r) {
                 idx_wb -= delay.tap_length;
             }
             auto cho_l
-                = (delay.pTap_l[idx_ua] * (1.0 - du) + delay.pTap_l[idx_ub] * du) / 3.0
-                + (delay.pTap_l[idx_va] * (1.0 - dv) + delay.pTap_l[idx_vb] * dv) * chorus.pan_a
-                + (delay.pTap_l[idx_wa] * (1.0 - dw) + delay.pTap_l[idx_wb] * dw) * chorus.pan_b;
+                = (delay.pTap_l[idx_ua] * (1.0 - du) + delay.pTap_l[idx_ub] * du) * 0.5
+                + (delay.pTap_l[idx_va] * (1.0 - dv) + delay.pTap_l[idx_vb] * dv) * 0.5;
             auto cho_r
-                = (delay.pTap_r[idx_ua] * (1.0 - du) + delay.pTap_r[idx_ub] * du) / 3.0
-                + (delay.pTap_r[idx_va] * (1.0 - dv) + delay.pTap_r[idx_vb] * dv) * chorus.pan_b
-                + (delay.pTap_r[idx_wa] * (1.0 - dw) + delay.pTap_r[idx_wb] * dw) * chorus.pan_a;
+                = (delay.pTap_r[idx_ua] * (1.0 - du) + delay.pTap_r[idx_ub] * du) * 0.5
+                + (delay.pTap_r[idx_wa] * (1.0 - dw) + delay.pTap_r[idx_wb] * dw) * 0.5;
             output_l += cho_l * chorus.send;
             output_r += cho_r * chorus.send;
             chorus.lfo_u += (chorus.lfo_v - chorus.lfo_w) * chorus.rate;

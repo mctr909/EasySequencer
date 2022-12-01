@@ -67,7 +67,7 @@ Synth::~Synth() {
 }
 
 void
-Synth::write_buffer(LPSTR pData) {
+Synth::write_buffer(byte* pData) {
     /* sampler loop */
     int32 activeCount = 0;
     for (int32 i = 0; i < SAMPLER_COUNT; i++) {

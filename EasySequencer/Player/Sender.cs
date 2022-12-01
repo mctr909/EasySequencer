@@ -81,7 +81,7 @@ namespace Player {
     }
     #endregion
 
-    unsafe public class Sender {
+    unsafe public class Sender : IDisposable {
         #region WaveOut.dll
         [DllImport("WaveOut.dll")]
         private static extern INST_LIST* ptr_inst_list();
@@ -150,6 +150,9 @@ namespace Player {
         }
 
         public Sender() { }
+        public void Dispose() {
+            waveout_close();
+        }
 
         public bool SetUp(string waveTablePath) {
             waveout_open(Marshal.StringToHGlobalAuto(waveTablePath), SampleRate, 256, 32);

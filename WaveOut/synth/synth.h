@@ -3,8 +3,6 @@
 
 #include "../type.h"
 
-#include <windows.h>
-
 /******************************************************************************/
 struct CHANNEL_PARAM;
 class InstList;
@@ -67,7 +65,7 @@ private:
 public:
     Synth(InstList* pInst_list, int32 sample_rate, int32 buffer_length);
     ~Synth();
-    void write_buffer(LPSTR pData);
+    void write_buffer(byte* pData);
     int32 send_message(byte port, byte* pMsg);
 };
 

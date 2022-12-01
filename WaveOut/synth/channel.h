@@ -85,6 +85,7 @@ private:
         PAN = 10,
         EXPRESSION = 11,
         BANK_LSB = 32,
+        DATA_LSB = 38,
         HOLD = 64,
         PORTAMENTO = 65,
         RESONANCE = 71,
@@ -104,15 +105,19 @@ private:
         ALL_RESET = 121,
         INVALID = 255
     };
+    enum struct E_RPN : uint16 {
+        BEND_RANGE = 0x0000,
+        VIB_DEPTH_RANGE = 0x0005
+    };
     enum struct E_KEY_STATE : byte {
         FREE,
         PRESS,
         HOLD
     };
     struct DELAY {
-        uint32 write_index;
-        uint32 time;
-        uint32 tap_length;
+        int32 index;
+        int32 time;
+        int32 tap_length;
         double send;
         double cross;
         double* pTap_l;
@@ -122,8 +127,6 @@ private:
         double send;
         double depth;
         double rate;
-        double pan_a;
-        double pan_b;
         double lfo_u;
         double lfo_v;
         double lfo_w;

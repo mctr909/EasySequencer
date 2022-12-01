@@ -90,7 +90,7 @@ fileout_save(
     fmt.data_size = 0;
 
     /* allocate pcm buffer */
-    auto pPcm_buffer = (LPSTR)calloc(pSynth->buffer_length, fmt.block_align);
+    auto pPcm_buffer = (byte*)calloc(pSynth->buffer_length, fmt.block_align);
     if (NULL == pPcm_buffer) {
         delete pSynth;
         delete pInst_list;
