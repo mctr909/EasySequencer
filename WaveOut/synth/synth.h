@@ -67,6 +67,10 @@ public:
     ~Synth();
     void write_buffer(byte* pData);
     int32 send_message(byte port, byte* pMsg);
+
+private:
+    int32 sys_ex(byte* pData);
+    int32 meta_data(byte* pData);
 };
 
 #endif /* __SYNTH_H__ */

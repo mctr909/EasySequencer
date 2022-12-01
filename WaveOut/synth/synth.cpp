@@ -136,21 +136,45 @@ Synth::send_message(byte port, byte* pMsg) {
         mppChannels[ch]->pitch_bend(((pMsg[2] << 7) | pMsg[1]) - 8192);
         return 3;
     case E_EVENT_TYPE::SYS_EX:
-        if (0xFF == pMsg[0]) {
-            auto type = (E_META_TYPE)pMsg[1];
-            auto size = pMsg[2];
-            switch (type) {
-            case E_META_TYPE::TEMPO:
-                bpm = 60000000.0 / ((pMsg[3] << 16) | (pMsg[4] << 8) | pMsg[5]);
-                break;
-            default:
-                break;
-            }
-            return size + 3;
-        } else {
+        switch (pMsg[0]) {
+        case 0xF0:
+            return sys_ex(pMsg);
+        case 0xFF:
+            return meta_data(pMsg);
+        default:
             return 0;
         }
     default:
         return 0;
     }
+}
+
+int32
+Synth::sys_ex(byte* pData) {
+    for (int32 i = 1; i < 1024; i++) {
+        if (0x7F == pData[i]) {
+            return i + 1;
+        }
+    }
+    return 1;
+}
+
+int32
+Synth::meta_data(byte* pData) {
+    auto type = (E_META_TYPE)pData[1];
+    auto size = pData[2];
+
+    switch (type) {
+    case E_META_TYPE::TEMPO:
+        bpm = 60000000.0 / ((pData[3] << 16) | (pData[4] << 8) | pData[5]);
+        break;
+    case E_META_TYPE::KEY:
+        break;
+    case E_META_TYPE::MEASURE:
+        break;
+    default:
+        break;
+    }
+
+    return size + 3;
 }

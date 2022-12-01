@@ -145,7 +145,6 @@ private:
     const double RMS_ATTENUTE  = 4.62;        /* -20db/sec * -0.2310 */
     const double PEAK_ATTENUTE = 2.31;        /* -20db/sec * -0.1155 */
 
-    Synth* mpSynth = NULL;
     byte rpn_lsb;
     byte rpn_msb;
     byte nrpn_lsb;
@@ -160,6 +159,7 @@ private:
     double target_pan_im;
     DELAY delay = { 0 };
     CHORUS chorus = { 0 };
+    Synth* mpSynth = 0;
 
 public:
     Channel(Synth* pSynth, int32 number);
