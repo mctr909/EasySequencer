@@ -125,8 +125,8 @@ Channel::init_ctrl() {
 
     param.cho_send = 0;
     chorus.send = param.cho_send / 127.0;
-    chorus.depth = 50 * 0.001;
-    chorus.rate = 50 * 0.006283 / 1.732 * mpSynth->delta_time;
+    chorus.depth = 30 * 0.001;
+    chorus.rate = 100 * 0.006283 / 1.732 * mpSynth->delta_time;
     
     param.del_send = 0;
     delay.send = param.del_send / 128.0;
@@ -387,11 +387,11 @@ Channel::step(double* pOutput_l, double* pOutput_r) {
         /* chorus */
         {
             auto tu = delay.index
-                - ((0.5 + 0.5 * chorus.lfo_u) * chorus.depth * 0.99 + 0.01) * mpSynth->sample_rate;
+                - ((0.5 + 0.5 * chorus.lfo_u) * chorus.depth * 0.999 + 0.001) * mpSynth->sample_rate;
             auto tv = delay.index
-                - ((0.5 + 0.5 * chorus.lfo_v) * chorus.depth * 0.99 + 0.01) * mpSynth->sample_rate;
+                - ((0.5 + 0.5 * chorus.lfo_v) * chorus.depth * 0.999 + 0.001) * mpSynth->sample_rate;
             auto tw = delay.index
-                - ((0.5 + 0.5 * chorus.lfo_w) * chorus.depth * 0.99 + 0.01) * mpSynth->sample_rate;
+                - ((0.5 + 0.5 * chorus.lfo_w) * chorus.depth * 0.999 + 0.001) * mpSynth->sample_rate;
             if (tu < 0.0) {
                 tu += delay.tap_length;
             }
