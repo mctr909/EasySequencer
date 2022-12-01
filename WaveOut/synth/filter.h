@@ -1,4 +1,5 @@
-#pragma once
+#ifndef __FILTER_H__
+#define __FILTER_H__
 
 /******************************************************************************/
 #pragma pack(push, 8)
@@ -18,3 +19,5 @@ struct FILTER {
 
 /******************************************************************************/
 extern inline void filter_lpf(FILTER* pFilter, double input);
+
+#endif /* __FILTER_H__ */

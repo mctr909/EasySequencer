@@ -1,4 +1,6 @@
-#pragma once
+#ifndef __SAMPLER_H__
+#define __SAMPLER_H__
+
 #include "../type.h"
 
 /******************************************************************************/
@@ -51,3 +53,5 @@ public:
     void note_on(Channel* pChannel, INST_LAYER* pLayer, INST_REGION *pRegion, byte note_num, byte velocity);
     void step();
 };
+
+#endif /* __SAMPLER_H__ */

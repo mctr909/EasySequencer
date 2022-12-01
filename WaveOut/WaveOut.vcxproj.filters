@@ -77,8 +77,10 @@
     <ClInclude Include="synth\sampler.h">
       <Filter>Synth</Filter>
     </ClInclude>
-    <ClInclude Include="synth\channel_params.h" />
     <ClInclude Include="synth\synth.h">
+      <Filter>Synth</Filter>
+    </ClInclude>
+    <ClInclude Include="synth\channel_params.h">
       <Filter>Synth</Filter>
     </ClInclude>
   </ItemGroup>

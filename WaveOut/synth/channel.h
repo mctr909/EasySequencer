@@ -5,12 +5,8 @@
 #include "filter.h"
 #include "channel_params.h"
 
-#include <windows.h>
-
 /******************************************************************************/
 #define CHANNEL_COUNT 256
-#define RMS_ATTENUTE  4.62 /* -20db/sec * -0.2310 */
-#define PEAK_ATTENUTE 2.31 /* -20db/sec * -0.1155 */
 
 /******************************************************************************/
 const double SemiTone[128] = {
@@ -76,6 +72,11 @@ public:
     };
 
 private:
+    enum struct E_KEY_STATE : byte {
+        FREE,
+        PRESS,
+        HOLD
+    };
     enum struct E_CTRL_TYPE : byte {
         BANK_MSB = 0,
         MODULATION = 1,
@@ -109,11 +110,8 @@ private:
         BEND_RANGE = 0x0000,
         VIB_DEPTH_RANGE = 0x0005
     };
-    enum struct E_KEY_STATE : byte {
-        FREE,
-        PRESS,
-        HOLD
-    };
+
+private:
     struct DELAY {
         int32 index;
         int32 time;
@@ -137,13 +135,15 @@ public:
     byte number;
     CHANNEL_PARAM param = { 0 };
     double pitch = 1.0;
-    double* pInput_l = NULL;
-    double* pInput_r = NULL;
-    INST_INFO* mpInst = NULL;
+    double* pInput_l = 0;
+    double* pInput_r = 0;
+    INST_INFO* mpInst = 0;
 
 private:
-    const double STOP_AMP = 1 / 32768.0; /* -90db */
-    const double START_AMP = 1 / 1024.0; /* -60db */
+    const double STOP_AMP      = 1 / 32768.0; /* -90db */
+    const double START_AMP     = 1 / 1024.0;  /* -60db */
+    const double RMS_ATTENUTE  = 4.62;        /* -20db/sec * -0.2310 */
+    const double PEAK_ATTENUTE = 2.31;        /* -20db/sec * -0.1155 */
 
     Synth* mpSynth = NULL;
     byte rpn_lsb;
