@@ -8,36 +8,42 @@ InstList::~InstList() {
             free(mppWaveList[i]);
         }
         free(mppWaveList);
+        mppWaveList = NULL;
     }
     if (NULL != mInstList.ppData) {
         for (uint32 i = 0; i < mInstList.count; i++) {
             auto pInst = mInstList.ppData[i];
             free(pInst->pName);
             free(pInst->pCategory);
-            free(mInstList.ppData[i]);
+            free(pInst);
         }
         free(mInstList.ppData);
+        mInstList.ppData = NULL;
     }
     if (NULL != mppLayerList) {
         for (uint32 i = 0; i < mLayerCount; i++) {
             free(mppLayerList[i]);
         }
         free(mppLayerList);
+        mppLayerList = NULL;
     }
     if (NULL != mppRegionList) {
         for (uint32 i = 0; i < mRegionCount; i++) {
             free(mppRegionList[i]);
         }
         free(mppRegionList);
+        mppRegionList = NULL;
     }
     if (NULL != mppArtList) {
         for (uint32 i = 0; i < mArtCount; i++) {
             free(mppArtList[i]);
         }
         free(mppArtList);
+        mppArtList = NULL;
     }
     if (NULL != mpWaveTable) {
         free(mpWaveTable);
+        mpWaveTable = NULL;
     }
 }
 
@@ -136,7 +142,7 @@ E_LOAD_STATUS InstList::loadDls(LPWSTR path) {
         auto cDlsInst = cDls->cLins->pcInst[idxI];
 
         INST_INFO inst;
-        mInstList.ppData[idxI] = (INST_INFO*)malloc(sizeof(INST_INFO));
+        mInstList.ppData[idxI] = (INST_INFO*)calloc(1, sizeof(INST_INFO));
         memcpy_s(mInstList.ppData[idxI], sizeof(INST_INFO), &inst, sizeof(INST_INFO));
         auto pInst = mInstList.ppData[idxI];
 
