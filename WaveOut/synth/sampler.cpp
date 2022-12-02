@@ -33,8 +33,8 @@ Sampler::note_on(Channel* p_channel, INST_LAYER* p_layer, INST_REGION* p_region,
     m_index = 0.0;
     m_time = 0.0;
     m_pitch = 1.0;
-    m_gain = velocity * velocity / 16129.0 / 32768.0;
-    
+    m_gain = velocity / 127.0 / 32768.0;
+
     if (UINT_MAX != p_inst_info->artIndex) {
         auto p_art = p_inst_list->mppArtList[p_inst_info->artIndex];
         //pan += p_art->pan;
