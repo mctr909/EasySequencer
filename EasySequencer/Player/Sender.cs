@@ -98,7 +98,7 @@ namespace Player {
         [DllImport("WaveOut.dll")]
         static extern void synth_close();
         [DllImport("WaveOut.dll")]
-        static extern void fileout_save(
+        static extern void fileout(
             IntPtr waveTablePath,
             IntPtr savePath,
             uint sampleRate,
@@ -195,7 +195,7 @@ namespace Player {
             Task.Factory.StartNew(() => {
                 var ptrEvents = Marshal.AllocHGlobal(evArr.Length);
                 Marshal.Copy(evArr, 0, ptrEvents, evArr.Length);
-                fileout_save(
+                fileout(
                     Marshal.StringToHGlobalAuto(wavetablePath),
                     Marshal.StringToHGlobalAuto(filePath),
                     48000, ptrEvents, (uint)evArr.Length, 960

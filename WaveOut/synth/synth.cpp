@@ -151,7 +151,7 @@ int32
 Synth::sys_ex(byte* p_data) {
     for (int32 i = 1; i < 1024; i++) {
         if (0x7F == p_data[i]) {
-            return i + 1;
+            return i;
         }
     }
     return 1;

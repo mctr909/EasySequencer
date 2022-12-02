@@ -13,7 +13,7 @@ extern "C" {
         int32 buffer_count
     );
     __declspec(dllexport) void WINAPI synth_close();
-    __declspec(dllexport) void WINAPI fileout_save(
+    __declspec(dllexport) void WINAPI fileout(
         LPWSTR wave_table_path,
         LPWSTR save_path,
         uint32 sample_rate,

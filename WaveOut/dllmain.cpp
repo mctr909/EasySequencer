@@ -267,7 +267,7 @@ synth_close() {
 }
 
 void WINAPI
-fileout_save(
+fileout(
     LPWSTR wave_table_path,
     LPWSTR save_path,
     uint32 sample_rate,
