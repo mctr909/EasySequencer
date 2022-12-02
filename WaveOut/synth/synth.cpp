@@ -149,8 +149,34 @@ Synth::send_message(byte port, byte* p_msg) {
 
 int32
 Synth::sys_ex(byte* p_data) {
-    for (int32 i = 1; i < 1024; i++) {
-        if (0x7F == p_data[i]) {
+    for (int32 i = 0; i < 1024; i++) {
+        if (0xF7 == p_data[i]) {
+            if (5 <= i && 0x7E == p_data[2] && 0x7F == p_data[3] && 0x09 == p_data[4] && 0x01 == p_data[5]) {
+                /* GM reset */
+                for (int32 i = 0; i < CHANNEL_COUNT; i++) {
+                    pp_channels[i]->init_ctrl();
+                }
+            }
+            if (5 <= i && 0x7E == p_data[2] && 0x7F == p_data[3] && 0x09 == p_data[4] && 0x03 == p_data[5]) {
+                /* GM2 reset */
+                for (int32 i = 0; i < CHANNEL_COUNT; i++) {
+                    pp_channels[i]->init_ctrl();
+                }
+            }
+            if (10 <= i && 0x41 == p_data[2] && 0x42 == p_data[4] && 0x12 == p_data[5] && 0x40 == p_data[6] &&
+                0x00 == p_data[7] && 0x7F == p_data[8] && 0x00 == p_data[9] && 0x41 == p_data[10]) {
+                /* GS reset */
+                for (int32 i = 0; i < CHANNEL_COUNT; i++) {
+                    pp_channels[i]->init_ctrl();
+                }
+            }
+            if (8 <= i && 0x43 == p_data[2] && 0x4C == p_data[4] && 0x00 == p_data[5] && 0x00 == p_data[6] &&
+                0x7E == p_data[7] && 0x00 == p_data[8]) {
+                /* XG reset */
+                for (int32 i = 0; i < CHANNEL_COUNT; i++) {
+                    pp_channels[i]->init_ctrl();
+                }
+            }
             return i;
         }
     }

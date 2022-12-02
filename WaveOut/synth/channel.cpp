@@ -148,7 +148,7 @@ Channel::init_ctrl() {
     m_nrpn_lsb = 0xFF;
     m_nrpn_msb = 0xFF;
 
-    param.is_drum = number == 9 ? 1 : 0;
+    param.is_drum = (number % 16 == 9) ? 1 : 0;
     param.bank_msb = 0;
     param.bank_lsb = 0;
     param.prog_num = 0;
