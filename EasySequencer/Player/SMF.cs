@@ -58,9 +58,11 @@ namespace Player {
         RPN_LSB = 100,
         RPN_MSB = 101,
 
-        ALL_OFF = 120,
+        ALL_SOUND_OFF = 120,
         ALL_RESET = 121,
-        ALL_NOTE_OFF = 123
+        ALL_NOTE_OFF = 123,
+
+        DRUM = 254
     }
 
     public enum E_META {

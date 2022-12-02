@@ -103,7 +103,11 @@ private:
         NRPN_MSB = 99,
         RPN_LSB = 100,
         RPN_MSB = 101,
+        ALL_SOUND_OFF = 120,
         ALL_RESET = 121,
+        ALL_NOTE_OFF = 123,
+
+        DRUM = 254,
         INVALID = 255
     };
     enum struct E_RPN : uint16 {

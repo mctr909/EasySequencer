@@ -139,10 +139,10 @@ namespace Player {
             return Marshal.PtrToStructure<CHANNEL_PARAM>(mpChParam[num]);
         }
         public void MuteChannel(int num, bool mute) {
-            //mppChParam[num]->enable = !mute;
+            Send(new Event(num, E_CONTROL.ALL_NOTE_OFF, mute ? 127 : 0));
         }
         public void DrumChannel(int num, bool isDrum) {
-            //mppChParam[num]->is_drum = (byte)(isDrum ? 1 : 0);
+            Send(new Event(num, E_CONTROL.DRUM, isDrum ? 127 : 0));
         }
 
         public Sender() {

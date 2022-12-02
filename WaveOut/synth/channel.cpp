@@ -324,6 +324,15 @@ Channel::ctrl_change(byte type, byte value) {
     case E_CTRL_TYPE::ALL_RESET:
         all_reset();
         break;
+
+    case E_CTRL_TYPE::ALL_SOUND_OFF:
+    case E_CTRL_TYPE::ALL_NOTE_OFF:
+        param.enable = 64 <= value ? 0 : 1;
+        break;
+
+    case E_CTRL_TYPE::DRUM:
+        param.is_drum = 64 <= value ? 1 : 0;
+        break;
     }
 }
 
