@@ -125,7 +125,7 @@ Channel::init_ctrl() {
     m_chorus.rate = 100 * 0.006283 / 1.732 * mp_synth->delta_time;
     
     param.del_send = 0;
-    m_delay.send = param.del_send / 128.0;
+    m_delay.send = param.del_send / 127.0 * 0.9;
     m_delay.cross = 64 / 127.0;
     m_delay.time = static_cast<int32>(mp_synth->sample_rate * 200 * 0.001);
     
@@ -295,7 +295,7 @@ Channel::ctrl_change(byte type, byte value) {
         break;
     case E_CTRL_TYPE::DELAY:
         param.del_send = value;
-        m_delay.send = value / 128.0;
+        m_delay.send = value / 127.0 * 0.9;
         break;
 
     case E_CTRL_TYPE::NRPN_LSB:

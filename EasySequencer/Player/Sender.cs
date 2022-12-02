@@ -116,22 +116,13 @@ namespace Player {
         public static int SAMPLER_COUNT = 128;
         public static bool IsFileOutput { get; private set; }
 
+        private SYSTEM_VALUE mSysValue;
         private IntPtr[] mpInstList;
         private IntPtr[] mpChParam;
-        private IntPtr mpActiveCountPtr;
-        private IntPtr mpProgressPtr;
         private IntPtr mpMessage;
 
-        public int ActiveCount {
-            get {
-                if (IntPtr.Zero == mpActiveCountPtr) {
-                    return 0;
-                } else {
-                    return Marshal.PtrToStructure<int>(mpActiveCountPtr);
-                }
-            }
-        }
-        public int InstCount { get; private set; }
+        public int ActiveCount { get { return Marshal.PtrToStructure<int>(mSysValue.p_active_counter); } }
+        public int InstCount { get { return mSysValue.inst_count; } }
         public INST_INFO Instruments(int num) {
             return Marshal.PtrToStructure<INST_INFO>(mpInstList[num]);
         }
@@ -159,14 +150,11 @@ namespace Player {
                 synth_close();
                 return false;
             }
-            var sysVal = Marshal.PtrToStructure<SYSTEM_VALUE>(ptrSysVal);
-            InstCount = sysVal.inst_count;
+            mSysValue = Marshal.PtrToStructure<SYSTEM_VALUE>(ptrSysVal);
             mpInstList = new IntPtr[InstCount];
-            Marshal.Copy(sysVal.p_inst_list, mpInstList, 0, InstCount);
+            Marshal.Copy(mSysValue.p_inst_list, mpInstList, 0, InstCount);
             mpChParam = new IntPtr[CHANNEL_COUNT];
-            Marshal.Copy(sysVal.p_channel_params, mpChParam, 0, CHANNEL_COUNT);
-            mpActiveCountPtr = sysVal.p_active_counter;
-            mpProgressPtr = sysVal.p_fileout_progress;
+            Marshal.Copy(mSysValue.p_channel_params, mpChParam, 0, CHANNEL_COUNT);
             return true;
         }
 
@@ -187,9 +175,9 @@ namespace Player {
                 bw.Write(ev.Data);
             }
             var evArr = ms.ToArray();
-            var fm = new StatusWindow((int)ms.Length, mpProgressPtr);
+            var fm = new StatusWindow((int)ms.Length, mSysValue.p_fileout_progress);
             int initProg = 0;
-            Marshal.StructureToPtr(initProg, mpProgressPtr, false);
+            Marshal.StructureToPtr(initProg, mSysValue.p_fileout_progress, false);
             fm.Show();
 
             Task.Factory.StartNew(() => {
