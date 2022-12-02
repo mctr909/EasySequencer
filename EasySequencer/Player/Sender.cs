@@ -33,7 +33,7 @@ namespace Player {
     [StructLayout(LayoutKind.Sequential, Pack = 4)]
     unsafe struct INST_LIST {
         public int count;
-        public INST_INFO** ppData;
+        public IntPtr ppData;
     }
     [StructLayout(LayoutKind.Sequential, Pack = 1)]
     public struct CHANNEL_PARAM {
@@ -121,9 +121,9 @@ namespace Player {
         public static int SAMPLER_COUNT = 128;
         public static bool IsFileOutput { get; private set; }
 
-        private INST_LIST mInstList;
         private CHANNEL_PARAM** mppChParam;
         private IntPtr mpActiveCountPtr;
+        private IntPtr[] mpInstList;
 
         public int ActiveCount {
             get {
@@ -134,9 +134,9 @@ namespace Player {
                 }
             }
         }
-        public int InstCount { get { return mInstList.count; } }
+        public int InstCount { get; private set; }
         public INST_INFO Instruments(int num) {
-            return *mInstList.ppData[num];
+            return Marshal.PtrToStructure<INST_INFO>(mpInstList[num]);
         }
         public CHANNEL_PARAM Channel(int num) {
             return *mppChParam[num];
@@ -163,7 +163,10 @@ namespace Player {
                 waveout_close();
                 return false;
             }
-            mInstList = Marshal.PtrToStructure<INST_LIST>(ptrInstList);
+            var instList = Marshal.PtrToStructure<INST_LIST>(ptrInstList);
+            InstCount = instList.count;
+            mpInstList = new IntPtr[InstCount];
+            Marshal.Copy(instList.ppData, mpInstList, 0, InstCount);
             mppChParam = ptr_channel_params();
             mpActiveCountPtr = ptr_active_counter();
             return true;
