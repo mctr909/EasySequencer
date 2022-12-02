@@ -10,7 +10,7 @@
 
 Channel::Channel(Synth* p_synth, int32 number) {
     mp_synth = p_synth;
-    mp_param = p_synth->pp_channel_params[number];
+    param.p_keyboard = (byte*)calloc(128, sizeof(byte));
     this->number = (byte)number;
     p_input_l = (double*)calloc(p_synth->buffer_length, sizeof(double));
     p_input_r = (double*)calloc(p_synth->buffer_length, sizeof(double));
@@ -26,6 +26,10 @@ Channel::Channel(Synth* p_synth, int32 number) {
 }
 
 Channel::~Channel() {
+    if (nullptr != param.p_keyboard) {
+        free(param.p_keyboard);
+        param.p_keyboard = nullptr;
+    }
     if (nullptr != p_input_l) {
         free(p_input_l);
         p_input_l = nullptr;
@@ -47,14 +51,14 @@ Channel::~Channel() {
 /******************************************************************************/
 void
 Channel::set_amp(byte vol, byte exp) {
-    mp_param->vol = vol;
-    mp_param->exp = exp;
+    param.vol = vol;
+    param.exp = exp;
     m_target_amp = vol * vol * exp * exp / 260144641.0;
 }
 
 void
 Channel::set_pan(byte value) {
-    mp_param->pan = value;
+    param.pan = value;
     m_target_pan_re = cos((value - 64) * 1.570796 / 127.0);
     m_target_pan_im = sin((value - 64) * 1.570796 / 127.0);
 }
@@ -69,22 +73,22 @@ Channel::set_damper(byte value) {
             }
         }
         for (int32 i = 0; i < 128; ++i) {
-            if ((byte)E_KEY_STATE::HOLD == mp_param->p_keyboard[i]) {
-                mp_param->p_keyboard[i] = static_cast<byte>(E_KEY_STATE::FREE);
+            if ((byte)E_KEY_STATE::HOLD == param.p_keyboard[i]) {
+                param.p_keyboard[i] = static_cast<byte>(E_KEY_STATE::FREE);
             }
         }
     }
-    mp_param->damper = value;
+    param.damper = value;
 }
 
 void
 Channel::set_res(byte value) {
-    mp_param->resonance = value;
+    param.resonance = value;
 }
 
 void
 Channel::set_cut(byte value) {
-    mp_param->cutoff = value;
+    param.cutoff = value;
 }
 
 void
@@ -92,7 +96,7 @@ Channel::set_rpn() {
     auto type = static_cast<E_RPN>(m_rpn_lsb | m_rpn_msb << 8);
     switch (type) {
     case E_RPN::BEND_RANGE:
-        mp_param->bend_range = m_data_msb;
+        param.bend_range = m_data_msb;
         break;
     case E_RPN::VIB_DEPTH_RANGE:
         break;
@@ -113,30 +117,30 @@ Channel::init_ctrl() {
 
     set_damper(0);
 
-    mp_param->rev_send = 0;
+    param.rev_send = 0;
 
-    mp_param->cho_send = 0;
-    m_chorus.send = mp_param->cho_send / 127.0;
+    param.cho_send = 0;
+    m_chorus.send = param.cho_send / 127.0;
     m_chorus.depth = 30 * 0.001;
     m_chorus.rate = 100 * 0.006283 / 1.732 * mp_synth->delta_time;
     
-    mp_param->del_send = 0;
-    m_delay.send = mp_param->del_send / 128.0;
+    param.del_send = 0;
+    m_delay.send = param.del_send / 128.0;
     m_delay.cross = 64 / 127.0;
     m_delay.time = static_cast<int32>(mp_synth->sample_rate * 200 * 0.001);
     
     set_res(64);
     set_cut(64);
 
-    mp_param->release = 64;
-    mp_param->attack = 64;
+    param.release = 64;
+    param.attack = 64;
 
-    mp_param->vib_rate = 64;
-    mp_param->vib_depth = 64;
-    mp_param->vib_delay = 64;
+    param.vib_rate = 64;
+    param.vib_depth = 64;
+    param.vib_delay = 64;
 
-    mp_param->bend_range = 2;
-    mp_param->pitch = 0;
+    param.bend_range = 2;
+    param.pitch = 0;
     pitch = 1.0;
 
     m_rpn_lsb = 0xFF;
@@ -144,22 +148,22 @@ Channel::init_ctrl() {
     m_nrpn_lsb = 0xFF;
     m_nrpn_msb = 0xFF;
 
-    mp_param->is_drum = number == 9 ? 1 : 0;
-    mp_param->bank_msb = 0;
-    mp_param->bank_lsb = 0;
-    mp_param->prog_num = 0;
+    param.is_drum = number == 9 ? 1 : 0;
+    param.bank_msb = 0;
+    param.bank_lsb = 0;
+    param.prog_num = 0;
     program_change(0);
 
-    mp_param->enable = 1;
+    param.enable = 1;
 }
 
 void
 Channel::all_reset() {
-    set_amp(mp_param->vol, 100);
+    set_amp(param.vol, 100);
     set_pan(64);
     set_damper(0);
 
-    mp_param->pitch = 0;
+    param.pitch = 0;
     pitch = 1.0;
 
     m_rpn_lsb = 0xFF;
@@ -178,17 +182,17 @@ Channel::note_off(byte note_num) {
             continue;
         }
         if (p_smpl->channel_num == number && p_smpl->note_num == note_num) {
-            if (mp_param->damper < 64) {
+            if (param.damper < 64) {
                 p_smpl->state = Sampler::E_STATE::RELEASE;
             } else {
                 p_smpl->state = Sampler::E_STATE::HOLD;
             }
         }
     }
-    if (mp_param->damper < 64) {
-        mp_param->p_keyboard[note_num] = static_cast<byte>(E_KEY_STATE::FREE);
+    if (param.damper < 64) {
+        param.p_keyboard[note_num] = static_cast<byte>(E_KEY_STATE::FREE);
     } else {
-        mp_param->p_keyboard[note_num] = static_cast<byte>(E_KEY_STATE::HOLD);
+        param.p_keyboard[note_num] = static_cast<byte>(E_KEY_STATE::HOLD);
     }
 }
 
@@ -201,7 +205,7 @@ Channel::note_on(byte note_num, byte velocity) {
     if (E_STATE::FREE == state) {
         state = E_STATE::STANDBY;
     }
-    mp_param->p_keyboard[note_num] = static_cast<byte>(E_KEY_STATE::PRESS);
+    param.p_keyboard[note_num] = static_cast<byte>(E_KEY_STATE::PRESS);
     for (uint32 i = 0; i < SAMPLER_COUNT; ++i) {
         auto p_smpl = mp_synth->pp_samplers[i];
         if (p_smpl->channel_num == number && p_smpl->note_num == note_num &&
@@ -235,34 +239,34 @@ void
 Channel::ctrl_change(byte type, byte value) {
     switch ((E_CTRL_TYPE)type) {
     case E_CTRL_TYPE::BANK_MSB:
-        mp_param->bank_msb = value;
+        param.bank_msb = value;
         break;
     case E_CTRL_TYPE::BANK_LSB:
-        mp_param->bank_lsb = value;
+        param.bank_lsb = value;
         break;
 
     case E_CTRL_TYPE::VOLUME:
-        set_amp(value, mp_param->exp);
+        set_amp(value, param.exp);
         break;
     case E_CTRL_TYPE::PAN:
         set_pan(value);
         break;
     case E_CTRL_TYPE::EXPRESSION:
-        set_amp(mp_param->vol, value);
+        set_amp(param.vol, value);
         break;
 
     case E_CTRL_TYPE::MODULATION:
-        mp_param->mod = value;
+        param.mod = value;
         break;
 
     case E_CTRL_TYPE::HOLD:
         set_damper(value);
         break;
     case E_CTRL_TYPE::RELEACE:
-        mp_param->release = value;
+        param.release = value;
         break;
     case E_CTRL_TYPE::ATTACK:
-        mp_param->attack = value;
+        param.attack = value;
         break;
 
     case E_CTRL_TYPE::RESONANCE:
@@ -273,24 +277,24 @@ Channel::ctrl_change(byte type, byte value) {
         break;
 
     case E_CTRL_TYPE::VIB_RATE:
-        mp_param->vib_rate = value;
+        param.vib_rate = value;
         break;
     case E_CTRL_TYPE::VIB_DEPTH:
-        mp_param->vib_depth = value;
+        param.vib_depth = value;
         break;
     case E_CTRL_TYPE::VIB_DELAY:
-        mp_param->vib_delay = value;
+        param.vib_delay = value;
         break;
 
     case E_CTRL_TYPE::REVERB:
-        mp_param->rev_send = value;
+        param.rev_send = value;
         break;
     case E_CTRL_TYPE::CHORUS:
-        mp_param->cho_send = value;
+        param.cho_send = value;
         m_chorus.send = value / 127.0;
         break;
     case E_CTRL_TYPE::DELAY:
-        mp_param->del_send = value;
+        param.del_send = value;
         m_delay.send = value / 128.0;
         break;
 
@@ -325,20 +329,20 @@ Channel::ctrl_change(byte type, byte value) {
 
 void
 Channel::program_change(byte value) {
-    mp_param->prog_num = value;
+    param.prog_num = value;
     p_inst = mp_synth->p_inst_list->GetInstInfo(
-        mp_param->is_drum,
-        mp_param->bank_lsb,
-        mp_param->bank_msb,
-        mp_param->prog_num
+        param.is_drum,
+        param.bank_lsb,
+        param.bank_msb,
+        param.prog_num
     );
-    mp_param->p_name = (byte*)p_inst->pName;
+    param.p_name = (byte*)p_inst->pName;
 }
 
 void
 Channel::pitch_bend(byte lsb, byte msb) {
-    mp_param->pitch = ((msb << 7) | lsb) - 8192;
-    auto temp = mp_param->pitch * mp_param->bend_range;
+    param.pitch = ((msb << 7) | lsb) - 8192;
+    auto temp = param.pitch * param.bend_range;
     if (temp < 0) {
         temp = -temp;
         pitch = 1.0 / (SEMITONE[temp >> 13] * PITCH_MSB[(temp >> 7) % 64] * PITCH_LSB[temp % 128]);
@@ -435,25 +439,25 @@ Channel::step(double* p_output_l, double* p_output_r) {
         {
             auto delta = RMS_ATTENUTE * mp_synth->delta_time;
             auto attenute = 1.0 - delta;
-            auto rms_l = mp_param->rms_l * attenute;
-            auto rms_r = mp_param->rms_r * attenute;
-            mp_param->rms_l = rms_l + output_l * output_l * delta;
-            mp_param->rms_r = rms_r + output_r * output_r * delta;
+            auto rms_l = param.rms_l * attenute;
+            auto rms_r = param.rms_r * attenute;
+            param.rms_l = rms_l + output_l * output_l * delta;
+            param.rms_r = rms_r + output_r * output_r * delta;
             attenute = 1.0 - PEAK_ATTENUTE * mp_synth->delta_time;
-            auto peak_l = mp_param->peak_l * attenute;
-            auto peak_r = mp_param->peak_r * attenute;
-            mp_param->peak_l = fmax(peak_l, fabs(output_l));
-            mp_param->peak_r = fmax(peak_r, fabs(output_r));
+            auto peak_l = param.peak_l * attenute;
+            auto peak_r = param.peak_r * attenute;
+            param.peak_l = fmax(peak_l, fabs(output_l));
+            param.peak_r = fmax(peak_r, fabs(output_r));
         }
 
         switch (state) {
         case E_STATE::STANDBY:
-            if (START_AMP <= sqrt(mp_param->rms_l) || START_AMP <= sqrt(mp_param->rms_r)) {
+            if (START_AMP <= sqrt(param.rms_l) || START_AMP <= sqrt(param.rms_r)) {
                 state = E_STATE::ACTIVE;
             }
             break;
         case E_STATE::ACTIVE:
-            if (sqrt(mp_param->rms_l) < STOP_AMP && sqrt(mp_param->rms_r) < STOP_AMP) {
+            if (sqrt(param.rms_l) < STOP_AMP && sqrt(param.rms_r) < STOP_AMP) {
                 state = E_STATE::FREE;
             }
             break;

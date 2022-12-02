@@ -24,14 +24,11 @@ Synth::Synth(InstList* p_inst_list, int32 sample_rate, int32 buffer_length) {
     }
     /* allocate channel params */
     pp_channel_params = (CHANNEL_PARAM**)malloc(sizeof(CHANNEL_PARAM*) * CHANNEL_COUNT);
-    for (int32 i = 0; i < CHANNEL_COUNT; i++) {
-        pp_channel_params[i] = (CHANNEL_PARAM*)calloc(CHANNEL_COUNT, sizeof(CHANNEL_PARAM));
-        pp_channel_params[i]->p_keyboard = (byte*)calloc(128, sizeof(byte));
-    }
     /* allocate channels */
     pp_channels = (Channel**)malloc(sizeof(Channel*) * CHANNEL_COUNT);
     for (int32 i = 0; i < CHANNEL_COUNT; i++) {
         pp_channels[i] = new Channel(this, i);
+        pp_channel_params[i] = &pp_channels[i]->param;
     }
 }
 
@@ -46,10 +43,6 @@ Synth::~Synth() {
     }
     /* dispose channel params */
     if (nullptr != pp_channel_params) {
-        for (int32 i = 0; i < CHANNEL_COUNT; i++) {
-            free(pp_channel_params[i]->p_keyboard);
-            free(pp_channel_params[i]);
-        }
         free(pp_channel_params);
         pp_channel_params = nullptr;
     }
