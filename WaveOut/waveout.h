@@ -3,6 +3,14 @@
 #include <windows.h>
 
 /******************************************************************************/
+struct SYSTEM_VALUE {
+    int32 inst_count;
+    byte* p_inst_list;
+    byte* p_channel_params;
+    int32* p_active_counter;
+};
+
+/******************************************************************************/
 #ifdef __cplusplus
 extern "C" {
 #endif
@@ -13,9 +21,7 @@ extern "C" {
         int32 bufferCount
     );
     __declspec(dllexport) void WINAPI waveout_close();
-    __declspec(dllexport) byte* WINAPI ptr_inst_list();
-    __declspec(dllexport) byte* WINAPI ptr_channel_params();
-    __declspec(dllexport) int32* WINAPI ptr_active_counter();
+    __declspec(dllexport) byte* WINAPI synth_system_value();
     __declspec(dllexport) void WINAPI send_message(byte port, byte* pMsg);
 #ifdef __cplusplus
 }

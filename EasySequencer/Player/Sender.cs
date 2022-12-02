@@ -4,7 +4,6 @@ using System.Threading.Tasks;
 using System.Runtime.InteropServices;
 
 using EasySequencer;
-using System.Runtime.Remoting.Channels;
 
 namespace Player {
     #region struct
@@ -77,6 +76,12 @@ namespace Player {
 
         public string Name { get { return Marshal.PtrToStringAnsi(p_name); } }
     }
+    struct SYSTEM_VALUE {
+        public int inst_count;
+        public IntPtr p_inst_list;
+        public IntPtr p_channel_params;
+        public IntPtr p_active_counter;
+    };
     #endregion
 
     public enum E_KEY_STATE : byte {
@@ -88,15 +93,6 @@ namespace Player {
     public class Sender : IDisposable {
         #region WaveOut.dll
         [DllImport("WaveOut.dll")]
-        static extern IntPtr ptr_inst_list();
-        [DllImport("WaveOut.dll")]
-        static extern IntPtr ptr_channel_params();
-        [DllImport("WaveOut.dll")]
-        static extern IntPtr ptr_active_counter();
-        [DllImport("WaveOut.dll")]
-        static extern void send_message(byte port, IntPtr pMsg);
-
-        [DllImport("WaveOut.dll")]
         static extern void waveout_open(
             IntPtr filePath,
             int sampleRate,
@@ -105,6 +101,10 @@ namespace Player {
         );
         [DllImport("WaveOut.dll")]
         static extern void waveout_close();
+        [DllImport("WaveOut.dll")]
+        static extern IntPtr synth_system_value();
+        [DllImport("WaveOut.dll")]
+        static extern void send_message(byte port, IntPtr pMsg);
 
         [DllImport("WaveOut.dll")]
         static extern IntPtr fileout_progress_ptr();
@@ -163,19 +163,18 @@ namespace Player {
 
         public bool SetUp(string waveTablePath) {
             waveout_open(Marshal.StringToHGlobalAuto(waveTablePath), SampleRate, 256, 32);
-            var ptrInstList = ptr_inst_list();
-            if (IntPtr.Zero == ptrInstList) {
+            var ptrSysVal = synth_system_value();
+            if (IntPtr.Zero == ptrSysVal) {
                 waveout_close();
                 return false;
             }
-            var instList = Marshal.PtrToStructure<INST_LIST>(ptrInstList);
-            InstCount = instList.count;
+            var sysVal = Marshal.PtrToStructure<SYSTEM_VALUE>(ptrSysVal);
+            InstCount = sysVal.inst_count;
             mpInstList = new IntPtr[InstCount];
-            Marshal.Copy(instList.ppData, mpInstList, 0, InstCount);
-            var ptrChParam = ptr_channel_params();
+            Marshal.Copy(sysVal.p_inst_list, mpInstList, 0, InstCount);
             mpChParam = new IntPtr[CHANNEL_COUNT];
-            Marshal.Copy(ptrChParam, mpChParam, 0, CHANNEL_COUNT);
-            mpActiveCountPtr = ptr_active_counter();
+            Marshal.Copy(sysVal.p_channel_params, mpChParam, 0, CHANNEL_COUNT);
+            mpActiveCountPtr = sysVal.p_active_counter;
             return true;
         }
 

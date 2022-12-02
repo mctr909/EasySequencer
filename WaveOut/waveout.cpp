@@ -29,8 +29,9 @@ int32  waveout_read_index = 0;
 int32  waveout_buffer_count = 0;
 int32  waveout_buffer_length = 0;
 
-Synth*    waveout_synth = NULL;
-InstList* waveout_inst_list = NULL;
+Synth*       waveout_synth = NULL;
+InstList*    waveout_inst_list = NULL;
+SYSTEM_VALUE waveout_system_value = { 0 };
 
 /******************************************************************************/
 void CALLBACK
@@ -240,22 +241,17 @@ waveout_close() {
 }
 
 byte* WINAPI
-ptr_inst_list() {
+synth_system_value() {
     if (NULL == waveout_synth) {
         return NULL;
     } else {
-        return (byte*)waveout_synth->p_inst_list->GetInstList();
+        auto inst_list = waveout_synth->p_inst_list->GetInstList();
+        waveout_system_value.inst_count = inst_list->count;
+        waveout_system_value.p_inst_list = (byte*)inst_list->ppData;
+        waveout_system_value.p_channel_params = (byte*)waveout_synth->pp_channel_params;
+        waveout_system_value.p_active_counter = &waveout_synth->active_count;
+        return (byte*)&waveout_system_value;
     }
-}
-
-byte* WINAPI
-ptr_channel_params() {
-    return (byte*)waveout_synth->pp_channel_params;
-}
-
-int32* WINAPI
-ptr_active_counter() {
-    return &waveout_synth->active_count;
 }
 
 void WINAPI
