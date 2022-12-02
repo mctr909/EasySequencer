@@ -84,7 +84,7 @@ namespace Player {
     unsafe public class Sender : IDisposable {
         #region WaveOut.dll
         [DllImport("WaveOut.dll")]
-        private static extern INST_LIST* ptr_inst_list();
+        private static extern IntPtr ptr_inst_list();
         [DllImport("WaveOut.dll")]
         private static extern CHANNEL_PARAM** ptr_channel_params();
         [DllImport("WaveOut.dll")]
@@ -121,18 +121,22 @@ namespace Player {
         public static int SAMPLER_COUNT = 128;
         public static bool IsFileOutput { get; private set; }
 
-        private INST_LIST* mpInstList = null;
+        private INST_LIST mInstList;
         private CHANNEL_PARAM** mppChParam;
         private IntPtr mpActiveCountPtr;
 
         public int ActiveCount {
-            get { return Marshal.PtrToStructure<int>(mpActiveCountPtr); }
+            get {
+                if (IntPtr.Zero == mpActiveCountPtr) {
+                    return 0;
+                } else {
+                    return Marshal.PtrToStructure<int>(mpActiveCountPtr);
+                }
+            }
         }
-        public int InstCount {
-            get { return mpInstList->count; }
-        }
+        public int InstCount { get { return mInstList.count; } }
         public INST_INFO Instruments(int num) {
-            return *mpInstList->ppData[num];
+            return *mInstList.ppData[num];
         }
         public CHANNEL_PARAM Channel(int num) {
             return *mppChParam[num];
@@ -154,11 +158,12 @@ namespace Player {
 
         public bool SetUp(string waveTablePath) {
             waveout_open(Marshal.StringToHGlobalAuto(waveTablePath), SampleRate, 256, 32);
-            mpInstList = ptr_inst_list();
-            if (null == mpInstList) {
+            var ptrInstList = ptr_inst_list();
+            if (IntPtr.Zero == ptrInstList) {
                 waveout_close();
                 return false;
             }
+            mInstList = Marshal.PtrToStructure<INST_LIST>(ptrInstList);
             mppChParam = ptr_channel_params();
             mpActiveCountPtr = ptr_active_counter();
             return true;
