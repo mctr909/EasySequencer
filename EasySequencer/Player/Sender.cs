@@ -31,11 +31,6 @@ namespace Player {
         }
     }
     [StructLayout(LayoutKind.Sequential, Pack = 4)]
-    struct INST_LIST {
-        public int count;
-        public IntPtr ppData;
-    }
-    [StructLayout(LayoutKind.Sequential, Pack = 4)]
     public struct CHANNEL_PARAM {
         public byte is_drum;
         public byte bank_msb;
@@ -81,6 +76,7 @@ namespace Player {
         public IntPtr p_inst_list;
         public IntPtr p_channel_params;
         public IntPtr p_active_counter;
+        public IntPtr p_fileout_progress;
     };
     #endregion
 
@@ -93,21 +89,14 @@ namespace Player {
     public class Sender : IDisposable {
         #region WaveOut.dll
         [DllImport("WaveOut.dll")]
-        static extern void waveout_open(
+        static extern IntPtr synth_setup(
             IntPtr filePath,
             int sampleRate,
             int bufferLength,
             int bufferCount
         );
         [DllImport("WaveOut.dll")]
-        static extern void waveout_close();
-        [DllImport("WaveOut.dll")]
-        static extern IntPtr synth_system_value();
-        [DllImport("WaveOut.dll")]
-        static extern void send_message(byte port, IntPtr pMsg);
-
-        [DllImport("WaveOut.dll")]
-        static extern IntPtr fileout_progress_ptr();
+        static extern void synth_close();
         [DllImport("WaveOut.dll")]
         static extern void fileout_save(
             IntPtr waveTablePath,
@@ -117,6 +106,8 @@ namespace Player {
             uint eventSize,
             uint baseTick
         );
+        [DllImport("WaveOut.dll")]
+        static extern void send_message(byte port, IntPtr pMsg);
         #endregion
 
         public static readonly int SampleRate = 44100;
@@ -128,6 +119,7 @@ namespace Player {
         private IntPtr[] mpInstList;
         private IntPtr[] mpChParam;
         private IntPtr mpActiveCountPtr;
+        private IntPtr mpProgressPtr;
         private IntPtr mpMessage;
 
         public int ActiveCount {
@@ -157,15 +149,14 @@ namespace Player {
             mpMessage = Marshal.AllocHGlobal(1024);
         }
         public void Dispose() {
-            waveout_close();
+            synth_close();
             Marshal.FreeHGlobal(mpMessage);
         }
 
-        public bool SetUp(string waveTablePath) {
-            waveout_open(Marshal.StringToHGlobalAuto(waveTablePath), SampleRate, 256, 32);
-            var ptrSysVal = synth_system_value();
+        public bool Setup(string waveTablePath) {
+            var ptrSysVal = synth_setup(Marshal.StringToHGlobalAuto(waveTablePath), SampleRate, 256, 32);
             if (IntPtr.Zero == ptrSysVal) {
-                waveout_close();
+                synth_close();
                 return false;
             }
             var sysVal = Marshal.PtrToStructure<SYSTEM_VALUE>(ptrSysVal);
@@ -175,6 +166,7 @@ namespace Player {
             mpChParam = new IntPtr[CHANNEL_COUNT];
             Marshal.Copy(sysVal.p_channel_params, mpChParam, 0, CHANNEL_COUNT);
             mpActiveCountPtr = sysVal.p_active_counter;
+            mpProgressPtr = sysVal.p_fileout_progress;
             return true;
         }
 
@@ -195,10 +187,11 @@ namespace Player {
                 bw.Write(ev.Data);
             }
             var evArr = ms.ToArray();
-
-            var prog = fileout_progress_ptr();
-            var fm = new StatusWindow((int)ms.Length, prog);
+            var fm = new StatusWindow((int)ms.Length, mpProgressPtr);
+            int initProg = 0;
+            Marshal.StructureToPtr(initProg, mpProgressPtr, false);
             fm.Show();
+
             Task.Factory.StartNew(() => {
                 var ptrEvents = Marshal.AllocHGlobal(evArr.Length);
                 Marshal.Copy(evArr, 0, ptrEvents, evArr.Length);

@@ -146,7 +146,6 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClCompile Include="fileout.cpp" />
     <ClCompile Include="inst\dls.cpp" />
     <ClCompile Include="inst\dls_art.cpp" />
     <ClCompile Include="inst\dls_ins.cpp" />
@@ -158,10 +157,9 @@
     <ClCompile Include="synth\filter.cpp" />
     <ClCompile Include="synth\sampler.cpp" />
     <ClCompile Include="synth\synth.cpp" />
-    <ClCompile Include="waveout.cpp" />
+    <ClCompile Include="dllmain.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="fileout.h" />
     <ClInclude Include="inst\dls.h" />
     <ClInclude Include="inst\dls_art.h" />
     <ClInclude Include="inst\dls_ins.h" />
@@ -177,7 +175,7 @@
     <ClInclude Include="synth\sampler.h" />
     <ClInclude Include="synth\synth.h" />
     <ClInclude Include="type.h" />
-    <ClInclude Include="waveout.h" />
+    <ClInclude Include="dllmain.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

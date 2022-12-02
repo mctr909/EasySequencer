@@ -25,7 +25,7 @@ namespace EasySequencer {
             mDlsFilePath = Path.GetDirectoryName(Application.ExecutablePath) + "\\gm.dls";
 
             mMidiSender = new Sender();
-            if (!mMidiSender.SetUp(mDlsFilePath)) {
+            if (!mMidiSender.Setup(mDlsFilePath)) {
                 Close();
                 return;
             }
