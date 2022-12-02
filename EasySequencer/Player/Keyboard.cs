@@ -173,7 +173,7 @@ namespace Player {
             mChannelNo = knobY;
             if (MuteButton.X <= mMouseDownPos.X && mMouseDownPos.X < MuteButton.X + MuteButton.Width) {
                 if (e.Button == MouseButtons.Right) {
-                    if (mPlayer.Channel(knobY).Enable) {
+                    if (mPlayer.Channel(knobY).enable) {
                         for (int i = 0; i < 16; ++i) {
                             if (knobY == i) {
                                 mSender.MuteChannel(i, true);
@@ -191,7 +191,7 @@ namespace Player {
                         }
                     }
                 } else {
-                    mSender.MuteChannel(knobY, mPlayer.Channel(knobY).Enable);
+                    mSender.MuteChannel(knobY, mPlayer.Channel(knobY).enable);
                 }
             }
             mKnobNo = knobX;
@@ -240,13 +240,13 @@ namespace Player {
                 var y_ch = ChannelHeight * ch;
 
                 // Mute Button
-                if (!channel.Enable) {
+                if (!channel.enable) {
                     mG.FillRectangle(Brushes.Red, MuteButton.X, MuteButton.Y + y_ch, MuteButton.Width, MuteButton.Height);
                 }
 
                 // Peak meter
-                var peakL = channel.PeakL;
-                var peakR = channel.PeakR;
+                var peakL = channel.peak_l;
+                var peakR = channel.peak_r;
                 if (peakL < 0.000001) {
                     peakL = 0.000001;
                 }
@@ -273,12 +273,12 @@ namespace Player {
                 ));
 
                 // Vol
-                drawKnob127(ch, 0, channel.Vol);
+                drawKnob127(ch, 0, channel.vol);
                 // Exp
-                drawKnob127(ch, 1, channel.Exp);
+                drawKnob127(ch, 1, channel.exp);
                 // Pan
-                var knobX = Knob[channel.Pan].X * KnobRadius;
-                var knobY = Knob[channel.Pan].Y * KnobRadius;
+                var knobX = Knob[channel.pan].X * KnobRadius;
+                var knobY = Knob[channel.pan].Y * KnobRadius;
                 mG.DrawLine(
                     mKnobMark,
                     knobX * 0.5f + KnobPos[2].X,
@@ -286,7 +286,7 @@ namespace Player {
                     knobX + KnobPos[2].X,
                     knobY + KnobPos[2].Y + y_ch
                 );
-                var pan = channel.Pan - 64;
+                var pan = channel.pan - 64;
                 if (0 == pan) {
                     mG.DrawString(
                         " C ",
@@ -308,18 +308,18 @@ namespace Player {
                 }
 
                 // Rev
-                drawKnob127(ch, 3, channel.Rev);
+                drawKnob127(ch, 3, channel.rev_send);
                 // Cho
-                drawKnob127(ch, 4, channel.Cho);
+                drawKnob127(ch, 4, channel.cho_send);
                 // Del
-                drawKnob127(ch, 5, channel.Del);
+                drawKnob127(ch, 5, channel.del_send);
 
                 // Fc
-                drawKnob127(ch, 6, channel.Fc);
+                drawKnob127(ch, 6, channel.cutoff);
                 // Fq
-                drawKnob127(ch, 7, channel.Fq);
+                drawKnob127(ch, 7, channel.resonance);
                 // Mod.
-                drawKnob127(ch, 8, channel.Mod);
+                drawKnob127(ch, 8, channel.mod);
 
                 // InstName
                 mG.DrawString(channel.Name, mInstFont, Brushes.Black, InstName.X, InstName.Y + y_ch, mInstFormat);
@@ -331,7 +331,7 @@ namespace Player {
         private void drawKeyboard() {
             for (var c = 0; c < Sender.CHANNEL_COUNT; c++) {
                 var channel = mPlayer.Channel(c);
-                var transpose = (int)(channel.Pitch * channel.BendRange / 8192.0 - 0.5);
+                var transpose = (int)(channel.pitch * channel.bend_range / 8192.0 - 0.5);
                 var y_ch = ChannelHeight * c;
                 for (var n = 0; n < 128; ++n) {
                     var k = n + transpose;

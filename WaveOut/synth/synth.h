@@ -52,15 +52,15 @@ public:
     int32 sample_rate = 44100;
     double delta_time = 1.0 / 44100;
     double bpm = 120.0;
-    InstList* p_inst_list = 0;
-    WAVE_DATA* p_wave_table = 0;
-    Sampler** pp_samplers = 0;
-    Channel** pp_channels = 0;
-    CHANNEL_PARAM** pp_channel_params = 0;
+    InstList* p_inst_list = nullptr;
+    WAVE_DATA* p_wave_table = nullptr;
+    Sampler** pp_samplers = nullptr;
+    Channel** pp_channels = nullptr;
+    CHANNEL_PARAM** pp_channel_params = nullptr;
 
 private:
-    double* mp_buffer_l = 0;
-    double* mp_buffer_r = 0;
+    double* mp_buffer_l = nullptr;
+    double* mp_buffer_r = nullptr;
 
 public:
     Synth(InstList* p_inst_list, int32 sample_rate, int32 buffer_length);

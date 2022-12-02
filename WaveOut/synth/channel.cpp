@@ -11,7 +11,7 @@
 Channel::Channel(Synth* p_synth, int32 number) {
     mp_synth = p_synth;
     this->number = (byte)number;
-    param.p_keyboard = (byte*)calloc(1, sizeof(byte) * 128);
+    param.p_keyboard = (byte*)calloc(128, sizeof(byte));
     p_input_l = (double*)calloc(p_synth->buffer_length, sizeof(double));
     p_input_r = (double*)calloc(p_synth->buffer_length, sizeof(double));
     m_delay.index = 0;
@@ -27,25 +27,25 @@ Channel::Channel(Synth* p_synth, int32 number) {
 }
 
 Channel::~Channel() {
-    if (NULL != p_input_l) {
+    if (nullptr != p_input_l) {
         free(p_input_l);
-        p_input_l = NULL;
+        p_input_l = nullptr;
     }
-    if (NULL != p_input_r) {
+    if (nullptr != p_input_r) {
         free(p_input_r);
-        p_input_r = NULL;
+        p_input_r = nullptr;
     }
-    if (NULL != m_delay.p_tap_l) {
+    if (nullptr != m_delay.p_tap_l) {
         free(m_delay.p_tap_l);
-        m_delay.p_tap_l = NULL;
+        m_delay.p_tap_l = nullptr;
     }
-    if (NULL != m_delay.p_tap_r) {
+    if (nullptr != m_delay.p_tap_r) {
         free(m_delay.p_tap_r);
-        m_delay.p_tap_r = NULL;
+        m_delay.p_tap_r = nullptr;
     }
-    if (NULL != param.p_keyboard) {
+    if (nullptr != param.p_keyboard) {
         free(param.p_keyboard);
-        param.p_keyboard = NULL;
+        param.p_keyboard = nullptr;
     }
 }
 
@@ -128,7 +128,7 @@ Channel::init_ctrl() {
     param.del_send = 0;
     m_delay.send = param.del_send / 128.0;
     m_delay.cross = 64 / 127.0;
-    m_delay.time = static_cast<long>(mp_synth->sample_rate * 200 * 0.001);
+    m_delay.time = static_cast<int32>(mp_synth->sample_rate * 200 * 0.001);
     
     set_res(64);
     set_cut(64);

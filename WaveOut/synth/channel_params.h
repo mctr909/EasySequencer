@@ -6,10 +6,10 @@
 /******************************************************************************/
 #pragma pack(push, 1)
 struct CHANNEL_PARAM {
-    byte is_drum = 0;
-    byte bank_msb = 0;
-    byte bank_lsb = 0;
-    byte prog_num = 0;
+    byte is_drum;
+    byte bank_msb;
+    byte bank_lsb;
+    byte prog_num;
     byte enable;
     byte vol;
     byte exp;
@@ -32,8 +32,8 @@ struct CHANNEL_PARAM {
     double peak_r;
     double rms_l;
     double rms_r;
-    byte* p_name = 0;
-    byte* p_keyboard = 0;
+    byte* p_name = nullptr;
+    byte* p_keyboard = nullptr;
 };
 #pragma pack(pop)
 

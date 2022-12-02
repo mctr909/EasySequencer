@@ -241,7 +241,11 @@ waveout_close() {
 
 byte* WINAPI
 ptr_inst_list() {
-    return (byte*)waveout_synth->p_inst_list->GetInstList();
+    if (NULL == waveout_synth) {
+        return NULL;
+    } else {
+        return (byte*)waveout_synth->p_inst_list->GetInstList();
+    }
 }
 
 CHANNEL_PARAM** WINAPI

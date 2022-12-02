@@ -141,9 +141,9 @@ public:
     byte number = 0;
     CHANNEL_PARAM param = { 0 };
     double pitch = 1.0;
-    double* p_input_l = 0;
-    double* p_input_r = 0;
-    INST_INFO* p_inst = 0;
+    double* p_input_l = nullptr;
+    double* p_input_r = nullptr;
+    INST_INFO* p_inst = nullptr;
 
 private:
     byte m_rpn_lsb = 0xFF;
@@ -160,7 +160,7 @@ private:
     double m_target_pan_im = 0.0;
     DELAY m_delay = { 0 };
     CHORUS m_chorus = { 0 };
-    Synth* mp_synth = 0;
+    Synth* mp_synth = nullptr;
 
 public:
     Channel(Synth* p_synth, int32 number);

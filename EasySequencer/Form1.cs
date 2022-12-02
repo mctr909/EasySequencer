@@ -150,7 +150,7 @@ namespace EasySequencer {
 
             mGActive.Clear(Color.Transparent);
             mGActive.FillRectangle(Brushes.LightGreen, 0, 0,
-                (float)Sender.ActiveCount * mBmpActive.Width / Sender.SAMPLER_COUNT,
+                (float)mMidiSender.ActiveCount * mBmpActive.Width / Sender.SAMPLER_COUNT,
                 mBmpActive.Height);
 
             picActive.Image = mBmpActive;

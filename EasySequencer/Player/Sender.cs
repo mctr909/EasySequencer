@@ -7,12 +7,6 @@ using EasySequencer;
 
 namespace Player {
     #region struct
-    public enum E_KEY_STATE : byte {
-        FREE,
-        PRESS,
-        HOLD
-    };
-
     [StructLayout(LayoutKind.Sequential, Pack = 4)]
     public struct INST_ID {
         public byte isDrum;
@@ -20,7 +14,6 @@ namespace Player {
         public byte bankLSB;
         public byte progNum;
     };
-
     [StructLayout(LayoutKind.Sequential, Pack = 4)]
     public struct INST_INFO {
         public INST_ID id;
@@ -37,49 +30,56 @@ namespace Player {
             get { return Marshal.PtrToStringAnsi(pCategory); }
         }
     }
-
     [StructLayout(LayoutKind.Sequential, Pack = 4)]
     unsafe struct INST_LIST {
         public int count;
         public INST_INFO** ppData;
     }
-
     [StructLayout(LayoutKind.Sequential, Pack = 1)]
     public struct CHANNEL_PARAM {
-        public INST_ID InstId;
-        public bool Enable;
-        public byte Vol;
-        public byte Exp;
-        public byte Pan;
-        public byte Rev;
-        public byte Del;
-        public byte Cho;
-        public byte Mod;
-        public byte Hld;
-        public byte Fc;
-        public byte Fq;
-        public byte Atk;
-        public byte Rel;
-        public byte VibRate;
-        public byte VibDepth;
-        public byte VibDelay;
-        public byte BendRange;
-        public int Pitch;
-        public double PeakL;
-        public double PeakR;
-        public double RmsL;
-        public double RmsR;
-        IntPtr pName;
-        IntPtr pKeyBoard;
+        public byte is_drum;
+        public byte bank_msb;
+        public byte bank_lsb;
+        public byte prog_num;
+        public bool enable;
+        public byte vol;
+        public byte exp;
+        public byte pan;
+        public byte rev_send;
+        public byte del_send;
+        public byte cho_send;
+        public byte mod;
+        public byte hold;
+        public byte cutoff;
+        public byte resonance;
+        public byte attack;
+        public byte release;
+        public byte vib_rate;
+        public byte vib_depth;
+        public byte vib_delay;
+        public byte bend_range;
+        public int pitch;
+        public double peak_l;
+        public double peak_r;
+        public double rms_l;
+        public double rms_r;
+        IntPtr p_name;
+        IntPtr p_keyboard;
 
         public string Name {
-            get { return Marshal.PtrToStringAnsi(pName); }
+            get { return Marshal.PtrToStringAnsi(p_name); }
         }
         public E_KEY_STATE KeyBoard(int noteNum) {
-            return (E_KEY_STATE)Marshal.PtrToStructure<byte>(pKeyBoard + noteNum);
+            return (E_KEY_STATE)Marshal.PtrToStructure<byte>(p_keyboard + noteNum);
         } 
     }
     #endregion
+
+    public enum E_KEY_STATE : byte {
+        FREE,
+        PRESS,
+        HOLD
+    };
 
     unsafe public class Sender : IDisposable {
         #region WaveOut.dll
@@ -121,15 +121,13 @@ namespace Player {
         public static int SAMPLER_COUNT = 128;
         public static bool IsFileOutput { get; private set; }
 
-        public static int ActiveCount {
-            get { return Marshal.PtrToStructure<int>(mpActiveCountPtr); }
-        }
-
-        private static IntPtr mpActiveCountPtr;
-
         private INST_LIST* mpInstList = null;
         private CHANNEL_PARAM** mppChParam;
+        private IntPtr mpActiveCountPtr;
 
+        public int ActiveCount {
+            get { return Marshal.PtrToStructure<int>(mpActiveCountPtr); }
+        }
         public int InstCount {
             get { return mpInstList->count; }
         }
@@ -140,13 +138,13 @@ namespace Player {
             return *mppChParam[num];
         }
         public void MuteChannel(int num, bool mute) {
-            mppChParam[num]->Enable = !mute;
+            mppChParam[num]->enable = !mute;
         }
         public void DrumChannel(int num, bool isDrum) {
-            mppChParam[num]->InstId.isDrum = (byte)(isDrum ? 1 : 0);
+            mppChParam[num]->is_drum = (byte)(isDrum ? 1 : 0);
         }
         public bool IsDrumChannel(int num) {
-            return mppChParam[num]->InstId.isDrum == 1;
+            return mppChParam[num]->is_drum == 1;
         }
 
         public Sender() { }
@@ -158,6 +156,7 @@ namespace Player {
             waveout_open(Marshal.StringToHGlobalAuto(waveTablePath), SampleRate, 256, 32);
             mpInstList = ptr_inst_list();
             if (null == mpInstList) {
+                waveout_close();
                 return false;
             }
             mppChParam = ptr_channel_params();

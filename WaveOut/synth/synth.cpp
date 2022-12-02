@@ -33,33 +33,33 @@ Synth::Synth(InstList* p_inst_list, int32 sample_rate, int32 buffer_length) {
 
 Synth::~Synth() {
     /* dispose samplers */
-    if (NULL != pp_samplers) {
+    if (nullptr != pp_samplers) {
         for (uint32 i = 0; i < SAMPLER_COUNT; i++) {
             delete pp_samplers[i];
         }
         free(pp_samplers);
-        pp_samplers = NULL;
+        pp_samplers = nullptr;
     }
     /* dispose channels */
-    if (NULL != pp_channels) {
+    if (nullptr != pp_channels) {
         for (int32 i = 0; i < CHANNEL_COUNT; i++) {
             delete pp_channels[i];
         }
         free(pp_channels);
-        pp_channels = NULL;
+        pp_channels = nullptr;
     }
-    if (NULL != pp_channel_params) {
+    if (nullptr != pp_channel_params) {
         free(pp_channel_params);
-        pp_channel_params = NULL;
+        pp_channel_params = nullptr;
     }
     /* dispose output buffer */
-    if (NULL != mp_buffer_l) {
+    if (nullptr != mp_buffer_l) {
         free(mp_buffer_l);
-        mp_buffer_l = NULL;
+        mp_buffer_l = nullptr;
     }
-    if (NULL != mp_buffer_r) {
+    if (nullptr != mp_buffer_r) {
         free(mp_buffer_r);
-        mp_buffer_r = NULL;
+        mp_buffer_r = nullptr;
     }
 }
 

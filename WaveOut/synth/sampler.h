@@ -41,10 +41,10 @@ private:
     double m_eg_cutoff = 1.0;
     long m_loop_length = 0;
     long m_loop_end = 0;
-    Synth* mp_synth = 0;
-    Channel* mp_channel = 0;
-    INST_ENV* mp_eg = 0;
-    WAVE_DATA* mp_wave_data = 0;
+    Synth* mp_synth = nullptr;
+    Channel* mp_channel = nullptr;
+    INST_ENV* mp_eg = nullptr;
+    WAVE_DATA* mp_wave_data = nullptr;
 
 public:
     Sampler(Synth* p_synth);

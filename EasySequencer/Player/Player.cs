@@ -203,7 +203,7 @@ namespace Player {
                 switch (ev.Type) {
                 case E_STATUS.NOTE_OFF: {
                         var chParam = mSender.Channel(ev.Channel);
-                        if (0 == chParam.InstId.isDrum) {
+                        if (0 == chParam.is_drum) {
                             if ((ev.Data[1] + Transpose) < 0 || 127 < (ev.Data[1] + Transpose)) {
                                 continue;
                             } else {
@@ -220,11 +220,11 @@ namespace Player {
                             if (0.25 * 960 < (mCurrentTick - ev.Tick)) {
                                 continue;
                             }
-                            if (!chParam.Enable || (0 <= SoloChannel && SoloChannel != ev.Channel)) {
+                            if (!chParam.enable || (0 <= SoloChannel && SoloChannel != ev.Channel)) {
                                 continue;
                             }
                         }
-                        if (0 == chParam.InstId.isDrum) {
+                        if (0 == chParam.is_drum) {
                             if ((ev.Data[1] + Transpose) < 0 || 127 < (ev.Data[1] + Transpose)) {
                                 continue;
                             } else {

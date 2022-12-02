@@ -32,10 +32,10 @@ namespace EasySequencer {
                     mInstList[cat].Add(inst.id, nam);
                 }
                 var chParam = mSender.Channel(mChNum);
-                if (chParam.InstId.isDrum == inst.id.isDrum &&
-                    chParam.InstId.progNum == inst.id.progNum &&
-                    chParam.InstId.bankMSB == inst.id.bankMSB &&
-                    chParam.InstId.bankLSB == inst.id.bankLSB
+                if (chParam.is_drum == inst.id.isDrum &&
+                    chParam.prog_num == inst.id.progNum &&
+                    chParam.bank_msb == inst.id.bankMSB &&
+                    chParam.bank_lsb == inst.id.bankLSB
                 ) {
                     selectedCategory = cat;
                     selectedInst = mInstList[cat].Count - 1;
