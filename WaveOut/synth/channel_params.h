@@ -4,7 +4,7 @@
 #include "../type.h"
 
 /******************************************************************************/
-#pragma pack(push, 1)
+#pragma pack(push, 4)
 struct CHANNEL_PARAM {
     byte is_drum;
     byte bank_msb;
@@ -14,6 +14,7 @@ struct CHANNEL_PARAM {
     byte vol;
     byte exp;
     byte pan;
+
     byte rev_send;
     byte del_send;
     byte cho_send;
@@ -22,18 +23,25 @@ struct CHANNEL_PARAM {
     byte cutoff;
     byte resonance;
     byte attack;
+
     byte release;
     byte vib_rate;
     byte vib_depth;
     byte vib_delay;
     byte bend_range;
+    byte reserved1;
+    byte reserved2;
+    byte reserved3;
+
     int32 pitch;
+
     double peak_l;
     double peak_r;
     double rms_l;
     double rms_r;
-    byte* p_name = nullptr;
+
     byte* p_keyboard = nullptr;
+    byte* p_name = nullptr;
 };
 #pragma pack(pop)
 

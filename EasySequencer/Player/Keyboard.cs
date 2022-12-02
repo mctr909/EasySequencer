@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 
 using EasySequencer;
 using EasySequencer.Properties;
+using System.Runtime.InteropServices;
 
 namespace Player {
     public class Keyboard {
@@ -322,7 +323,7 @@ namespace Player {
                 drawKnob127(ch, 8, channel.mod);
 
                 // InstName
-                mG.DrawString(channel.Name, mInstFont, Brushes.Black, InstName.X, InstName.Y + y_ch, mInstFormat);
+                mG.DrawString(Marshal.PtrToStringAnsi(channel.p_name), mInstFont, Brushes.Black, InstName.X, InstName.Y + y_ch, mInstFormat);
             }
             
             mBuffer.Render();
@@ -341,7 +342,7 @@ namespace Player {
                     var key = KeyboardPos[k % 12];
                     var px = key.X + OctWidth * (k / 12 - 1);
                     var py = key.Y + y_ch;
-                    var keyState = channel.KeyBoard(n);
+                    var keyState = (E_KEY_STATE)Marshal.PtrToStructure<byte>(channel.p_keyboard + n);
                     switch (keyState) {
                     case E_KEY_STATE.PRESS:
                         mG.FillRectangle(Brushes.Red, px, py, key.Width, key.Height);

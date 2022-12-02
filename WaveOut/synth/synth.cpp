@@ -15,13 +15,13 @@ Synth::Synth(InstList* p_inst_list, int32 sample_rate, int32 buffer_length) {
     this->p_inst_list = p_inst_list;
     p_wave_table = p_inst_list->mpWaveTable;
     /* allocate samplers */
-    pp_samplers = (Sampler**)calloc(SAMPLER_COUNT, sizeof(Sampler*));
+    pp_samplers = (Sampler**)malloc(sizeof(Sampler*) * SAMPLER_COUNT);
     for (uint32 i = 0; i < SAMPLER_COUNT; i++) {
         pp_samplers[i] = new Sampler(this);
     }
     /* allocate channels */
-    pp_channels = (Channel**)calloc(CHANNEL_COUNT, sizeof(Channel*));
-    pp_channel_params = (CHANNEL_PARAM**)calloc(CHANNEL_COUNT, sizeof(CHANNEL_PARAM*));
+    pp_channels = (Channel**)malloc(sizeof(Channel*) * CHANNEL_COUNT);
+    pp_channel_params = (CHANNEL_PARAM**)malloc(sizeof(CHANNEL_PARAM*) * CHANNEL_COUNT);
     for (int32 i = 0; i < CHANNEL_COUNT; i++) {
         pp_channels[i] = new Channel(this, i);
         pp_channel_params[i] = &pp_channels[i]->param;

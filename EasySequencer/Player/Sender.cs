@@ -35,7 +35,7 @@ namespace Player {
         public int count;
         public IntPtr ppData;
     }
-    [StructLayout(LayoutKind.Sequential, Pack = 1)]
+    [StructLayout(LayoutKind.Sequential, Pack = 4)]
     public struct CHANNEL_PARAM {
         public byte is_drum;
         public byte bank_msb;
@@ -45,6 +45,7 @@ namespace Player {
         public byte vol;
         public byte exp;
         public byte pan;
+
         public byte rev_send;
         public byte del_send;
         public byte cho_send;
@@ -53,25 +54,25 @@ namespace Player {
         public byte cutoff;
         public byte resonance;
         public byte attack;
+
         public byte release;
         public byte vib_rate;
         public byte vib_depth;
         public byte vib_delay;
         public byte bend_range;
+        byte reserved1;
+        byte reserved2;
+        byte reserved3;
+
         public int pitch;
+
         public double peak_l;
         public double peak_r;
         public double rms_l;
         public double rms_r;
-        IntPtr p_name;
-        IntPtr p_keyboard;
 
-        public string Name {
-            get { return Marshal.PtrToStringAnsi(p_name); }
-        }
-        public E_KEY_STATE KeyBoard(int noteNum) {
-            return (E_KEY_STATE)Marshal.PtrToStructure<byte>(p_keyboard + noteNum);
-        } 
+        public IntPtr p_keyboard;
+        public IntPtr p_name;
     }
     #endregion
 
@@ -121,9 +122,9 @@ namespace Player {
         public static int SAMPLER_COUNT = 128;
         public static bool IsFileOutput { get; private set; }
 
+        private IntPtr[] mpInstList;
         private CHANNEL_PARAM** mppChParam;
         private IntPtr mpActiveCountPtr;
-        private IntPtr[] mpInstList;
 
         public int ActiveCount {
             get {
@@ -146,9 +147,6 @@ namespace Player {
         }
         public void DrumChannel(int num, bool isDrum) {
             mppChParam[num]->is_drum = (byte)(isDrum ? 1 : 0);
-        }
-        public bool IsDrumChannel(int num) {
-            return mppChParam[num]->is_drum == 1;
         }
 
         public Sender() { }

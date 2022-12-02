@@ -248,9 +248,9 @@ ptr_inst_list() {
     }
 }
 
-CHANNEL_PARAM** WINAPI
+byte* WINAPI
 ptr_channel_params() {
-    return waveout_synth->pp_channel_params;
+    return (byte*)waveout_synth->pp_channel_params;
 }
 
 int32* WINAPI
