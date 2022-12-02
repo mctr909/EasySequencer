@@ -139,7 +139,6 @@ private:
 public:
     E_STATE state = E_STATE::FREE;
     byte number = 0;
-    CHANNEL_PARAM param = { 0 };
     double pitch = 1.0;
     double* p_input_l = nullptr;
     double* p_input_r = nullptr;
@@ -161,6 +160,7 @@ private:
     DELAY m_delay = { 0 };
     CHORUS m_chorus = { 0 };
     Synth* mp_synth = nullptr;
+    CHANNEL_PARAM* mp_param = nullptr;
 
 public:
     Channel(Synth* p_synth, int32 number);

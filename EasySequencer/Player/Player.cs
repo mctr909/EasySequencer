@@ -220,7 +220,7 @@ namespace Player {
                             if (0.25 * 960 < (mCurrentTick - ev.Tick)) {
                                 continue;
                             }
-                            if (!chParam.enable || (0 <= SoloChannel && SoloChannel != ev.Channel)) {
+                            if (0 == chParam.enable || (0 <= SoloChannel && SoloChannel != ev.Channel)) {
                                 continue;
                             }
                         }

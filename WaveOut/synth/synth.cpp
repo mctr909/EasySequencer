@@ -14,32 +14,28 @@ Synth::Synth(InstList* p_inst_list, int32 sample_rate, int32 buffer_length) {
     /* inst wave */
     this->p_inst_list = p_inst_list;
     p_wave_table = p_inst_list->mpWaveTable;
+    /* allocate output buffer */
+    mp_buffer_l = (double*)calloc(buffer_length, sizeof(double));
+    mp_buffer_r = (double*)calloc(buffer_length, sizeof(double));
     /* allocate samplers */
     pp_samplers = (Sampler**)malloc(sizeof(Sampler*) * SAMPLER_COUNT);
     for (uint32 i = 0; i < SAMPLER_COUNT; i++) {
         pp_samplers[i] = new Sampler(this);
     }
-    /* allocate channels */
-    pp_channels = (Channel**)malloc(sizeof(Channel*) * CHANNEL_COUNT);
+    /* allocate channel params */
     pp_channel_params = (CHANNEL_PARAM**)malloc(sizeof(CHANNEL_PARAM*) * CHANNEL_COUNT);
     for (int32 i = 0; i < CHANNEL_COUNT; i++) {
-        pp_channels[i] = new Channel(this, i);
-        pp_channel_params[i] = &pp_channels[i]->param;
+        pp_channel_params[i] = (CHANNEL_PARAM*)calloc(CHANNEL_COUNT, sizeof(CHANNEL_PARAM));
+        pp_channel_params[i]->p_keyboard = (byte*)calloc(128, sizeof(byte));
     }
-    /* allocate output buffer */
-    mp_buffer_l = (double*)calloc(buffer_length, sizeof(double));
-    mp_buffer_r = (double*)calloc(buffer_length, sizeof(double));
+    /* allocate channels */
+    pp_channels = (Channel**)malloc(sizeof(Channel*) * CHANNEL_COUNT);
+    for (int32 i = 0; i < CHANNEL_COUNT; i++) {
+        pp_channels[i] = new Channel(this, i);
+    }
 }
 
 Synth::~Synth() {
-    /* dispose samplers */
-    if (nullptr != pp_samplers) {
-        for (uint32 i = 0; i < SAMPLER_COUNT; i++) {
-            delete pp_samplers[i];
-        }
-        free(pp_samplers);
-        pp_samplers = nullptr;
-    }
     /* dispose channels */
     if (nullptr != pp_channels) {
         for (int32 i = 0; i < CHANNEL_COUNT; i++) {
@@ -48,9 +44,22 @@ Synth::~Synth() {
         free(pp_channels);
         pp_channels = nullptr;
     }
+    /* dispose channel params */
     if (nullptr != pp_channel_params) {
+        for (int32 i = 0; i < CHANNEL_COUNT; i++) {
+            free(pp_channel_params[i]->p_keyboard);
+            free(pp_channel_params[i]);
+        }
         free(pp_channel_params);
         pp_channel_params = nullptr;
+    }
+    /* dispose samplers */
+    if (nullptr != pp_samplers) {
+        for (uint32 i = 0; i < SAMPLER_COUNT; i++) {
+            delete pp_samplers[i];
+        }
+        free(pp_samplers);
+        pp_samplers = nullptr;
     }
     /* dispose output buffer */
     if (nullptr != mp_buffer_l) {

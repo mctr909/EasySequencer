@@ -174,7 +174,7 @@ namespace Player {
             mChannelNo = knobY;
             if (MuteButton.X <= mMouseDownPos.X && mMouseDownPos.X < MuteButton.X + MuteButton.Width) {
                 if (e.Button == MouseButtons.Right) {
-                    if (mPlayer.Channel(knobY).enable) {
+                    if (1 == mPlayer.Channel(knobY).enable) {
                         for (int i = 0; i < 16; ++i) {
                             if (knobY == i) {
                                 mSender.MuteChannel(i, true);
@@ -192,7 +192,7 @@ namespace Player {
                         }
                     }
                 } else {
-                    mSender.MuteChannel(knobY, mPlayer.Channel(knobY).enable);
+                    mSender.MuteChannel(knobY, 1 == mPlayer.Channel(knobY).enable);
                 }
             }
             mKnobNo = knobX;
@@ -241,7 +241,7 @@ namespace Player {
                 var y_ch = ChannelHeight * ch;
 
                 // Mute Button
-                if (!channel.enable) {
+                if (0 == channel.enable) {
                     mG.FillRectangle(Brushes.Red, MuteButton.X, MuteButton.Y + y_ch, MuteButton.Width, MuteButton.Height);
                 }
 
@@ -322,8 +322,7 @@ namespace Player {
                 // Mod.
                 drawKnob127(ch, 8, channel.mod);
 
-                // InstName
-                mG.DrawString(Marshal.PtrToStringAnsi(channel.p_name), mInstFont, Brushes.Black, InstName.X, InstName.Y + y_ch, mInstFormat);
+                mG.DrawString(channel.Name, mInstFont, Brushes.Black, InstName.X, InstName.Y + y_ch, mInstFormat);
             }
             
             mBuffer.Render();
