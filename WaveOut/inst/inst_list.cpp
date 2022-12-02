@@ -280,10 +280,10 @@ E_LOAD_STATUS InstList::loadDlsWave(DLS *cDls) {
     }
     fclose(fpWave);
 
-    auto waveTableSize = wavePos * sizeof(WAVDAT);
-    mpWaveTable = (WAVDAT*)malloc(waveTableSize);
+    auto waveTableSize = wavePos * sizeof(WAVE_DATA);
+    mpWaveTable = (WAVE_DATA*)malloc(waveTableSize);
     if (NULL == mpWaveTable) {
-        return E_LOAD_STATUS::WAVE_TABLE_ALLOCATE_FAILED;
+        return E_LOAD_STATUS::ALLOCATE_FAILED;
     }
 
     fpWave = NULL;
@@ -343,8 +343,8 @@ void InstList::loadDlsArt(LART *cLart, INST_ART *pArt) {
 uint32 InstList::writeWaveTable8(FILE *fp, byte* pData, uint32 size) {
     uint32 samples = size;
     for (uint32 i = 0; i < samples; i++) {
-        auto tmp = (WAVDAT)((pData[i] - 128) * WAVMAX / 128);
-        fwrite(&tmp, sizeof(WAVDAT), 1, fp);
+        auto tmp = (WAVE_DATA)((pData[i] - 128) * WAVE_MAX / 128);
+        fwrite(&tmp, sizeof(WAVE_DATA), 1, fp);
     }
     return samples;
 }
@@ -353,8 +353,8 @@ uint32 InstList::writeWaveTable16(FILE *fp, byte* pData, uint32 size) {
     uint32 samples = size / sizeof(int16);
     auto pShort = (int16*)pData;
     for (uint32 i = 0; i < samples; i++) {
-        auto tmp = (WAVDAT)(pShort[i] * WAVMAX / 0x8000);
-        fwrite(&tmp, sizeof(WAVDAT), 1, fp);
+        auto tmp = (WAVE_DATA)(pShort[i] * WAVE_MAX / 0x8000);
+        fwrite(&tmp, sizeof(WAVE_DATA), 1, fp);
     }
     return samples;
 }
@@ -363,8 +363,8 @@ uint32 InstList::writeWaveTable24(FILE *fp, byte* pData, uint32 size) {
     uint32 samples = size / sizeof(RIFFint24);
     auto pInt24 = (RIFFint24*)pData;
     for (uint32 i = 0; i < samples; i++) {
-        auto tmp = (WAVDAT)(pInt24[i].msb * WAVMAX / 0x8000);
-        fwrite(&tmp, sizeof(WAVDAT), 1, fp);
+        auto tmp = (WAVE_DATA)(pInt24[i].msb * WAVE_MAX / 0x8000);
+        fwrite(&tmp, sizeof(WAVE_DATA), 1, fp);
     }
     return samples;
 }
@@ -373,8 +373,8 @@ uint32 InstList::writeWaveTable32(FILE *fp, byte* pData, uint32 size) {
     uint32 samples = size / sizeof(int);
     auto pInt32 = (int*)pData;
     for (uint32 i = 0; i < samples; i++) {
-        auto tmp = (WAVDAT)((pInt32[i] >> 16) * WAVMAX / 0x8000);
-        fwrite(&tmp, sizeof(WAVDAT), 1, fp);
+        auto tmp = (WAVE_DATA)((pInt32[i] >> 16) * WAVE_MAX / 0x8000);
+        fwrite(&tmp, sizeof(WAVE_DATA), 1, fp);
     }
     return samples;
 }
@@ -386,8 +386,8 @@ uint32 InstList::writeWaveTableFloat(FILE *fp, byte* pData, uint32 size) {
         auto tmpFloat = pFloat[i];
         if (1.0f < tmpFloat) tmpFloat = 1.0f;
         if (tmpFloat < -1.0f) tmpFloat = -1.0f;
-        auto tmp = (WAVDAT)(tmpFloat * WAVMAX);
-        fwrite(&tmp, sizeof(WAVDAT), 1, fp);
+        auto tmp = (WAVE_DATA)(tmpFloat * WAVE_MAX);
+        fwrite(&tmp, sizeof(WAVE_DATA), 1, fp);
     }
     return samples;
 }

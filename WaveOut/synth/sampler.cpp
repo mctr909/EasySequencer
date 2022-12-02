@@ -10,103 +10,103 @@
 #define OVER_SAMPLING   8
 
 /******************************************************************************/
-Sampler::Sampler(Synth* pSynth) {
-    mpSynth = pSynth;
+Sampler::Sampler(Synth* p_synth) {
+    mp_synth = p_synth;
 }
 
 void
-Sampler::note_on(Channel* pChannel, INST_LAYER* pLayer, INST_REGION* pRegion, byte note_num, byte velocity) {
+Sampler::note_on(Channel* p_channel, INST_LAYER* p_layer, INST_REGION* p_region, byte note_num, byte velocity) {
     state = Sampler::E_STATE::RESERVED;
-    mpChannel = pChannel;
-    channel_num = pChannel->number;
+    mp_channel = p_channel;
+    channel_num = p_channel->number;
     this->note_num = note_num;
 
-    auto pInst_list = mpSynth->mpInst_list;
-    auto pInst_info = pChannel->mpInst;
+    auto p_inst_list = mp_synth->p_inst_list;
+    auto p_inst_info = p_channel->p_inst;
 
-    auto pWave = pInst_list->mppWaveList[pRegion->waveIndex];
-    loop_enable = 1 == pWave->loopEnable;
-    loop_length = pWave->loopLength;
-    loop_end = (long)pWave->loopBegin + pWave->loopLength;
-    mpWave_data = mpSynth->mpWave_table + pWave->offset;
+    auto p_wave_info = p_inst_list->mppWaveList[p_region->waveIndex];
+    loop_enable = 1 == p_wave_info->loopEnable;
+    m_loop_length = p_wave_info->loopLength;
+    m_loop_end = (long)p_wave_info->loopBegin + p_wave_info->loopLength;
+    mp_wave_data = mp_synth->p_wave_table + p_wave_info->offset;
 
-    index = 0.0;
-    time = 0.0;
-    pitch = 1.0;
-    gain = velocity * velocity / 16129.0 / 32768.0;
+    m_index = 0.0;
+    m_time = 0.0;
+    m_pitch = 1.0;
+    m_gain = velocity * velocity / 16129.0 / 32768.0;
     
-    if (UINT_MAX != pInst_info->artIndex) {
-        auto pArt = pInst_list->mppArtList[pInst_info->artIndex];
-        pan += pArt->pan;
-        //pArt->transpose;
-        pitch *= pArt->pitch;
-        gain *= pArt->gain;
-        pEg = &pArt->env;
-        eg_amp = 0.0;
-        eg_pitch = pArt->env.pitchRise;
-        eg_cutoff = pArt->env.cutoffRise;
+    if (UINT_MAX != p_inst_info->artIndex) {
+        auto p_art = p_inst_list->mppArtList[p_inst_info->artIndex];
+        //pan += p_art->pan;
+        //p_art->transpose;
+        m_pitch *= p_art->pitch;
+        m_gain *= p_art->gain;
+        m_eg_amp = 0.0;
+        m_eg_pitch = p_art->env.pitchRise;
+        m_eg_cutoff = p_art->env.cutoffRise;
+        mp_eg = &p_art->env;
     }
-    if (UINT_MAX != pLayer->artIndex) {
-        auto pArt = pInst_list->mppArtList[pLayer->artIndex];
-        pan += pArt->pan;
-        //pArt->transpose;
-        pitch *= pArt->pitch;
-        gain *= pArt->gain;
-        pEg = &pArt->env;
-        eg_amp = 0.0;
-        eg_pitch = pArt->env.pitchRise;
-        eg_cutoff = pArt->env.cutoffRise;
+    if (UINT_MAX != p_layer->artIndex) {
+        auto p_art = p_inst_list->mppArtList[p_layer->artIndex];
+        //pan += p_art->pan;
+        //p_art->transpose;
+        m_pitch *= p_art->pitch;
+        m_gain *= p_art->gain;
+        m_eg_amp = 0.0;
+        m_eg_pitch = p_art->env.pitchRise;
+        m_eg_cutoff = p_art->env.cutoffRise;
+        mp_eg = &p_art->env;
     }
-    if (UINT_MAX != pRegion->artIndex) {
-        auto pArt = pInst_list->mppArtList[pRegion->artIndex];
-        pan += pArt->pan;
-        //pArt->transpose;
-        pitch *= pArt->pitch;
-        gain *= pArt->gain;
-        pEg = &pArt->env;
-        eg_amp = 0.0;
-        eg_pitch = pArt->env.pitchRise;
-        eg_cutoff = pArt->env.cutoffRise;
+    if (UINT_MAX != p_region->artIndex) {
+        auto p_art = p_inst_list->mppArtList[p_region->artIndex];
+        //pan += p_art->pan;
+        //p_art->transpose;
+        m_pitch *= p_art->pitch;
+        m_gain *= p_art->gain;
+        m_eg_amp = 0.0;
+        m_eg_pitch = p_art->env.pitchRise;
+        m_eg_cutoff = p_art->env.cutoffRise;
+        mp_eg = &p_art->env;
     }
 
     auto diff_note = 0;
-    if (UINT_MAX == pRegion->wsmpIndex) {
-        diff_note = note_num - pWave->unityNote;
-        pitch *= pWave->pitch;
-        gain *= pWave->gain;
+    if (UINT_MAX == p_region->wsmpIndex) {
+        diff_note = note_num - p_wave_info->unityNote;
+        m_pitch *= p_wave_info->pitch;
+        m_gain *= p_wave_info->gain;
     } else {
-        auto pWsmp = pInst_list->mppWaveList[pRegion->wsmpIndex];
-        diff_note = note_num - pWsmp->unityNote;
-        pitch *= pWsmp->pitch;
-        gain *= pWsmp->gain;
+        auto p_wsmp = p_inst_list->mppWaveList[p_region->wsmpIndex];
+        diff_note = note_num - p_wsmp->unityNote;
+        m_pitch *= p_wsmp->pitch;
+        m_gain *= p_wsmp->gain;
     }
 
     if (diff_note < 0) {
-        pitch *= 1.0 / SemiTone[-diff_note];
+        m_pitch *= 1.0 / SEMITONE[-diff_note];
     } else {
-        pitch *= SemiTone[diff_note];
+        m_pitch *= SEMITONE[diff_note];
     }
-    pitch *= pWave->sampleRate;
-    pitch = pitch / mpSynth->sample_rate / OVER_SAMPLING;
+    m_pitch *= p_wave_info->sampleRate;
+    m_pitch = m_pitch / mp_synth->sample_rate / OVER_SAMPLING;
     state = Sampler::E_STATE::PRESS;
 }
 
 void
 Sampler::step() {
-    auto pOutput_l = mpChannel->pInput_l;
-    auto pOutput_r = mpChannel->pInput_r;
-    for (int32 i = 0; i < mpSynth->buffer_length; i++) {
+    auto p_output_l = mp_channel->p_input_l;
+    auto p_output_r = mp_channel->p_input_r;
+    for (int32 i = 0; i < mp_synth->buffer_length; i++) {
         /*** generate wave ***/
         double smoothed_wave = 0.0;
-        auto delta = pitch * mpChannel->pitch;
+        auto delta = m_pitch * mp_channel->pitch;
         for (int32 o = 0; o < OVER_SAMPLING; o++) {
-            auto ii = (int32)index;
-            auto dt = index - ii;
-            smoothed_wave += mpWave_data[ii - 1] * (1.0 - dt) + mpWave_data[ii] * dt;
-            index += delta;
-            if (loop_end < index) {
+            auto ii = (int32)m_index;
+            auto dt = m_index - ii;
+            smoothed_wave += mp_wave_data[ii - 1] * (1.0 - dt) + mp_wave_data[ii] * dt;
+            m_index += delta;
+            if (m_loop_end < m_index) {
                 if (loop_enable) {
-                    index -= loop_length;
+                    m_index -= m_loop_length;
                 } else {
                     state = E_STATE::FREE;
                     return;
@@ -114,31 +114,31 @@ Sampler::step() {
             }
         }
         /*** output ***/
-        auto wave = smoothed_wave * gain * eg_amp / OVER_SAMPLING;
-        pOutput_l[i] += wave;
-        pOutput_r[i] += wave;
+        auto wave = smoothed_wave * m_gain * m_eg_amp / OVER_SAMPLING;
+        p_output_l[i] += wave;
+        p_output_r[i] += wave;
         /*** generate envelope ***/
         switch (state) {
         case E_STATE::PRESS:
-            if (time <= pEg->ampH) {
-                eg_amp += (1.0 - eg_amp) * mpSynth->delta_time * pEg->ampA;
+            if (m_time <= mp_eg->ampH) {
+                m_eg_amp += (1.0 - m_eg_amp) * mp_synth->delta_time * mp_eg->ampA;
             } else {
-                eg_amp += (pEg->ampS - eg_amp) * mpSynth->delta_time * pEg->ampD;
+                m_eg_amp += (mp_eg->ampS - m_eg_amp) * mp_synth->delta_time * mp_eg->ampD;
             }
             break;
         case E_STATE::RELEASE:
-            eg_amp -= eg_amp * mpSynth->delta_time * pEg->ampR;
+            m_eg_amp -= m_eg_amp * mp_synth->delta_time * mp_eg->ampR;
             break;
         case E_STATE::HOLD:
-            eg_amp -= eg_amp * mpSynth->delta_time;
+            m_eg_amp -= m_eg_amp * mp_synth->delta_time;
             break;
         case E_STATE::PURGE:
-            eg_amp -= eg_amp * mpSynth->delta_time * PURGE_SPEED;
+            m_eg_amp -= m_eg_amp * mp_synth->delta_time * PURGE_SPEED;
             break;
         }
-        time += mpSynth->delta_time;
+        m_time += mp_synth->delta_time;
         /*** purge threshold ***/
-        if (E_STATE::PRESS != state && eg_amp < PURGE_THRESHOLD) {
+        if (E_STATE::PRESS != state && m_eg_amp < PURGE_THRESHOLD) {
             state = E_STATE::FREE;
             return;
         }

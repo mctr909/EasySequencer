@@ -82,7 +82,7 @@ waveout_buffer_writing_task(LPVOID* param) {
             continue;
         } else {
             /*** Write Buffer ***/
-            auto pBuff = (byte*)waveout_hdr[waveout_write_index].lpData;
+            auto pBuff = (WAVE_DATA*)waveout_hdr[waveout_write_index].lpData;
             memset(pBuff, 0, waveout_fmt.nBlockAlign * waveout_buffer_length);
             waveout_synth->write_buffer(pBuff);
             waveout_write_index = (waveout_write_index + 1) % waveout_buffer_count;
@@ -108,7 +108,7 @@ waveout_init(
     /*** Set wave fmt ***/
     waveout_fmt.wFormatTag = 1;
     waveout_fmt.nChannels = 2;
-    waveout_fmt.wBitsPerSample = (WORD)(sizeof(WAVDAT) << 3);
+    waveout_fmt.wBitsPerSample = (WORD)(sizeof(WAVE_DATA) << 3);
     waveout_fmt.nSamplesPerSec = (DWORD)sampleRate;
     waveout_fmt.nBlockAlign = waveout_fmt.nChannels * waveout_fmt.wBitsPerSample / 8;
     waveout_fmt.nAvgBytesPerSec = waveout_fmt.nSamplesPerSec * waveout_fmt.nBlockAlign;
@@ -181,13 +181,13 @@ waveout_open(
     auto load_status = waveout_inst_list->Load(filePath);
     auto caption_err = L"ウェーブテーブル読み込み失敗";
     switch (load_status) {
-    case E_LOAD_STATUS::WAVE_TABLE_OPEN_FAILED:
+    case E_LOAD_STATUS::FILE_OPEN_FAILED:
         MessageBoxW(NULL, L"ファイルが開けませんでした。", caption_err, 0);
         return;
-    case E_LOAD_STATUS::WAVE_TABLE_ALLOCATE_FAILED:
+    case E_LOAD_STATUS::ALLOCATE_FAILED:
         MessageBoxW(NULL, L"メモリの確保ができませんでした。", caption_err, 0);
         return;
-    case E_LOAD_STATUS::WAVE_TABLE_UNKNOWN_FILE:
+    case E_LOAD_STATUS::UNKNOWN_FILE:
         MessageBoxW(NULL, L"対応していない形式です。", caption_err, 0);
         return;
     default:
@@ -241,12 +241,12 @@ waveout_close() {
 
 byte* WINAPI
 ptr_inst_list() {
-    return (byte*)waveout_synth->mpInst_list->GetInstList();
+    return (byte*)waveout_synth->p_inst_list->GetInstList();
 }
 
 CHANNEL_PARAM** WINAPI
 ptr_channel_params() {
-    return waveout_synth->mppChannel_params;
+    return waveout_synth->pp_channel_params;
 }
 
 int32* WINAPI

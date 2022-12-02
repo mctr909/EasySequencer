@@ -9,7 +9,7 @@ E_LOAD_STATUS RiffChunk::Load(LPWSTR path, long offset) {
     FILE *fp = NULL;
     _wfopen_s(&fp, path, L"rb");
     if (NULL == fp) {
-        return E_LOAD_STATUS::WAVE_TABLE_OPEN_FAILED;
+        return E_LOAD_STATUS::FILE_OPEN_FAILED;
     }
 
     fseek(fp, offset, SEEK_SET);
@@ -25,7 +25,7 @@ E_LOAD_STATUS RiffChunk::Load(LPWSTR path, long offset) {
     if (0 == strcmp("RIFF", riffId) && CheckFileType(riffType, riffSize)) {
         loop(fp, riffSize - 4);
     } else {
-        return E_LOAD_STATUS::WAVE_TABLE_UNKNOWN_FILE;
+        return E_LOAD_STATUS::UNKNOWN_FILE;
     }
 
     fclose(fp);

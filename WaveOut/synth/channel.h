@@ -9,7 +9,7 @@
 #define CHANNEL_COUNT 256
 
 /******************************************************************************/
-const double SemiTone[128] = {
+const double SEMITONE[128] = {
     1.000000, 1.059463, 1.122462, 1.189207, 1.259921, 1.334840, 1.414214, 1.498307,
     1.587401, 1.681793, 1.781797, 1.887749, 2.000000, 2.118926, 2.244924, 2.378414,
     2.519842, 2.669680, 2.828427, 2.996614, 3.174802, 3.363586, 3.563595, 3.775497,
@@ -28,7 +28,7 @@ const double SemiTone[128] = {
     1024.000, 1084.890, 1149.401, 1217.748, 1290.159, 1366.876, 1448.154, 1534.266
 };
 
-const double PitchMSB[64] = {
+const double PITCH_MSB[64] = {
     1.00000000, 1.00090294, 1.00180670, 1.00271128, 1.00361667, 1.00452287, 1.00542990, 1.00633775,
     1.00724641, 1.00815590, 1.00906621, 1.00997733, 1.01088929, 1.01180206, 1.01271566, 1.01363008,
     1.01454533, 1.01546141, 1.01637831, 1.01729605, 1.01821461, 1.01913400, 1.02005422, 1.02097527,
@@ -39,7 +39,7 @@ const double PitchMSB[64] = {
     1.05184102, 1.05279077, 1.05374138, 1.05469285, 1.05564518, 1.05659837, 1.05755241, 1.05850732
 };
 
-const double PitchLSB[128] = {
+const double PITCH_LSB[128] = {
     1.00000000, 1.00000705, 1.00001410, 1.00002115, 1.00002820, 1.00003526, 1.00004231, 1.00004936,
     1.00005641, 1.00006346, 1.00007051, 1.00007756, 1.00008462, 1.00009167, 1.00009872, 1.00010577,
     1.00011282, 1.00011988, 1.00012693, 1.00013398, 1.00014103, 1.00014808, 1.00015514, 1.00016219,
@@ -112,14 +112,20 @@ private:
     };
 
 private:
+    const double STOP_AMP = 1 / 32768.0; /* -90db */
+    const double START_AMP = 1 / 1024.0; /* -60db */
+    const double RMS_ATTENUTE = 4.62;    /* -20db/sec * -0.2310 */
+    const double PEAK_ATTENUTE = 2.31;   /* -20db/sec * -0.1155 */
+
+private:
     struct DELAY {
         int32 index;
         int32 time;
         int32 tap_length;
         double send;
         double cross;
-        double* pTap_l;
-        double* pTap_r;
+        double* p_tap_l;
+        double* p_tap_r;
     };
     struct CHORUS {
         double send;
@@ -131,38 +137,33 @@ private:
     };
 
 public:
-    E_STATE state;
-    byte number;
+    E_STATE state = E_STATE::FREE;
+    byte number = 0;
     CHANNEL_PARAM param = { 0 };
     double pitch = 1.0;
-    double* pInput_l = 0;
-    double* pInput_r = 0;
-    INST_INFO* mpInst = 0;
+    double* p_input_l = 0;
+    double* p_input_r = 0;
+    INST_INFO* p_inst = 0;
 
 private:
-    const double STOP_AMP      = 1 / 32768.0; /* -90db */
-    const double START_AMP     = 1 / 1024.0;  /* -60db */
-    const double RMS_ATTENUTE  = 4.62;        /* -20db/sec * -0.2310 */
-    const double PEAK_ATTENUTE = 2.31;        /* -20db/sec * -0.1155 */
-
-    byte rpn_lsb;
-    byte rpn_msb;
-    byte nrpn_lsb;
-    byte nrpn_msb;
-    byte data_lsb;
-    byte data_msb;
-    double current_amp;
-    double current_pan_re;
-    double current_pan_im;
-    double target_amp;
-    double target_pan_re;
-    double target_pan_im;
-    DELAY delay = { 0 };
-    CHORUS chorus = { 0 };
-    Synth* mpSynth = 0;
+    byte m_rpn_lsb = 0xFF;
+    byte m_rpn_msb = 0xFF;
+    byte m_nrpn_lsb = 0xFF;
+    byte m_nrpn_msb = 0xFF;
+    byte m_data_lsb = 0;
+    byte m_data_msb = 0;
+    double m_current_amp = 10000 / 16129.0;
+    double m_current_pan_re = 1.0;
+    double m_current_pan_im = 0.0;
+    double m_target_amp = 10000 / 16129.0;
+    double m_target_pan_re = 1.0;
+    double m_target_pan_im = 0.0;
+    DELAY m_delay = { 0 };
+    CHORUS m_chorus = { 0 };
+    Synth* mp_synth = 0;
 
 public:
-    Channel(Synth* pSynth, int32 number);
+    Channel(Synth* p_synth, int32 number);
     ~Channel();
 
 public:
@@ -170,12 +171,13 @@ public:
     void all_reset();
     void note_off(byte note_num);
     void note_on(byte note_num, byte velocity);
-    void ctrl_change(byte type, byte b1);
+    void ctrl_change(byte type, byte value);
     void program_change(byte value);
-    void pitch_bend(int16 pitch);
-    void step(double* pOutput_l, double* pOutput_r);
+    void pitch_bend(byte lsb, byte msb);
+    void step(double* p_output_l, double* p_output_r);
 
 private:
+    Channel() {}
     void set_amp(byte vol, byte exp);
     void set_pan(byte value);
     void set_damper(byte value);

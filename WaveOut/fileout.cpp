@@ -52,13 +52,13 @@ fileout_save(
     auto load_status = pInst_list->Load(wave_table_path);
     auto caption_err = L"ウェーブテーブル読み込み失敗";
     switch (load_status) {
-    case E_LOAD_STATUS::WAVE_TABLE_OPEN_FAILED:
+    case E_LOAD_STATUS::FILE_OPEN_FAILED:
         MessageBoxW(NULL, L"ファイルが開けませんでした。", caption_err, 0);
         return;
-    case E_LOAD_STATUS::WAVE_TABLE_ALLOCATE_FAILED:
+    case E_LOAD_STATUS::ALLOCATE_FAILED:
         MessageBoxW(NULL, L"メモリの確保ができませんでした。", caption_err, 0);
         return;
-    case E_LOAD_STATUS::WAVE_TABLE_UNKNOWN_FILE:
+    case E_LOAD_STATUS::UNKNOWN_FILE:
         MessageBoxW(NULL, L"対応していない形式です。", caption_err, 0);
         return;
     default:
@@ -83,14 +83,14 @@ fileout_save(
     fmt.format_id = 1;
     fmt.channels = 2;
     fmt.sample_rate = sample_rate;
-    fmt.bit_per_sample = (uint16)(sizeof(WAVDAT) << 3);
+    fmt.bit_per_sample = (uint16)(sizeof(WAVE_DATA) << 3);
     fmt.block_align = fmt.channels * fmt.bit_per_sample >> 3;
     fmt.byte_per_sec = fmt.sample_rate * fmt.block_align;
     fmt.data_id = 0x61746164;
     fmt.data_size = 0;
 
     /* allocate pcm buffer */
-    auto pPcm_buffer = (byte*)calloc(pSynth->buffer_length, fmt.block_align);
+    auto pPcm_buffer = (WAVE_DATA*)calloc(pSynth->buffer_length, fmt.block_align);
     if (NULL == pPcm_buffer) {
         delete pSynth;
         delete pInst_list;

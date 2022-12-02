@@ -118,7 +118,7 @@ public:
     INST_LAYER** mppLayerList = NULL;
     INST_REGION** mppRegionList = NULL;
     INST_ART** mppArtList = NULL;
-    WAVDAT* mpWaveTable = NULL;
+    WAVE_DATA* mpWaveTable = NULL;
 
 public:
     InstList() {}

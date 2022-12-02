@@ -25,32 +25,30 @@ public:
         HOLD
     };
 
-private:
-    Synth* mpSynth = 0;
-    Channel* mpChannel = 0;
-    WAVDAT* mpWave_data = 0;
-    long loop_length = 0;
-    long loop_end = 0;
-
-    int16 pan = 0;
-    double gain = 1.0;
-    double pitch = 1.0;
-    double index = 0.0;
-    double time = 0.0;
-    double eg_amp = 0.0;
-    double eg_pitch = 1.0;
-    double eg_cutoff = 1.0;
-    INST_ENV* pEg = 0;
-
 public:
     E_STATE state = E_STATE::FREE;
     byte channel_num = 0;
     byte note_num = 0;
     bool loop_enable = false;
 
+private:
+    double m_gain = 1.0;
+    double m_pitch = 1.0;
+    double m_index = 0.0;
+    double m_time = 0.0;
+    double m_eg_amp = 0.0;
+    double m_eg_pitch = 1.0;
+    double m_eg_cutoff = 1.0;
+    long m_loop_length = 0;
+    long m_loop_end = 0;
+    Synth* mp_synth = 0;
+    Channel* mp_channel = 0;
+    INST_ENV* mp_eg = 0;
+    WAVE_DATA* mp_wave_data = 0;
+
 public:
-    Sampler(Synth* pSynth);
-    void note_on(Channel* pChannel, INST_LAYER* pLayer, INST_REGION *pRegion, byte note_num, byte velocity);
+    Sampler(Synth* p_synth);
+    void note_on(Channel* p_channel, INST_LAYER* p_layer, INST_REGION *p_region, byte note_num, byte velocity);
     void step();
 };
 

@@ -32,8 +32,8 @@ struct CHANNEL_PARAM {
     double peak_r;
     double rms_l;
     double rms_r;
-    byte* pName = 0;
-    byte* pKeyboard = 0;
+    byte* p_name = 0;
+    byte* p_keyboard = 0;
 };
 #pragma pack(pop)
 

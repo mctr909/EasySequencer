@@ -47,30 +47,31 @@ private:
     };
 
 public:
-    int32 active_count;
-    int32 buffer_length;
-    int32 sample_rate;
-    double delta_time;
-    double bpm;
-    InstList* mpInst_list;
-    WAVDAT* mpWave_table;
-    Sampler** mppSampler;
-    Channel** mppChannels;
-    CHANNEL_PARAM** mppChannel_params;
+    int32 active_count = 0;
+    int32 buffer_length = 256;
+    int32 sample_rate = 44100;
+    double delta_time = 1.0 / 44100;
+    double bpm = 120.0;
+    InstList* p_inst_list = 0;
+    WAVE_DATA* p_wave_table = 0;
+    Sampler** pp_samplers = 0;
+    Channel** pp_channels = 0;
+    CHANNEL_PARAM** pp_channel_params = 0;
 
 private:
-    double* mpBuffer_l = 0;
-    double* mpBuffer_r = 0;
+    double* mp_buffer_l = 0;
+    double* mp_buffer_r = 0;
 
 public:
-    Synth(InstList* pInst_list, int32 sample_rate, int32 buffer_length);
+    Synth(InstList* p_inst_list, int32 sample_rate, int32 buffer_length);
     ~Synth();
-    void write_buffer(byte* pData);
-    int32 send_message(byte port, byte* pMsg);
+    void write_buffer(WAVE_DATA* p_pcm);
+    int32 send_message(byte port, byte* p_msg);
 
 private:
-    int32 sys_ex(byte* pData);
-    int32 meta_data(byte* pData);
+    Synth() {}
+    int32 sys_ex(byte* p_data);
+    int32 meta_data(byte* p_data);
 };
 
 #endif /* __SYNTH_H__ */
