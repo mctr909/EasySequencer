@@ -8,26 +8,22 @@ using EasySequencer;
 namespace Player {
     #region struct
     [StructLayout(LayoutKind.Sequential, Pack = 4)]
-    public struct INST_ID {
-        public byte isDrum;
-        public byte bankMSB;
-        public byte bankLSB;
-        public byte progNum;
-    };
-    [StructLayout(LayoutKind.Sequential, Pack = 4)]
     public struct INST_INFO {
-        public INST_ID id;
-        uint layerIndex;
-        uint layerCount;
-        uint artIndex;
-        IntPtr pName;
-        IntPtr pCategory;
+        public byte is_drum;
+        public byte bank_msb;
+        public byte bank_lsb;
+        public byte prog_num;
+        uint layer_index;
+        uint layer_count;
+        uint art_index;
+        IntPtr p_name;
+        IntPtr p_category;
 
         public string Name {
-            get { return Marshal.PtrToStringAnsi(pName); }
+            get { return Marshal.PtrToStringAnsi(p_name); }
         }
         public string Category {
-            get { return Marshal.PtrToStringAnsi(pCategory); }
+            get { return Marshal.PtrToStringAnsi(p_category); }
         }
     }
     [StructLayout(LayoutKind.Sequential, Pack = 4)]
@@ -102,18 +98,19 @@ namespace Player {
             IntPtr waveTablePath,
             IntPtr savePath,
             uint sampleRate,
-            IntPtr pEvents,
+            uint baseTick,
             uint eventSize,
-            uint baseTick
+            IntPtr pEvents
         );
         [DllImport("WaveOut.dll")]
         static extern void send_message(byte port, IntPtr pMsg);
         #endregion
 
-        public static readonly int SampleRate = 44100;
-        public static readonly double DeltaTime = 1.0 / SampleRate;
-        public static int CHANNEL_COUNT = 16;
-        public static int SAMPLER_COUNT = 128;
+        public const int CHANNEL_COUNT = 16;
+        public const int SAMPLER_COUNT = 128;
+        public const int SAMPLE_RATE = 44100;
+        public const double DELTA_TIME = 1.0 / SAMPLE_RATE;
+
         public static bool IsFileOutput { get; private set; }
 
         private SYSTEM_VALUE mSysValue;
@@ -145,7 +142,7 @@ namespace Player {
         }
 
         public bool Setup(string waveTablePath) {
-            var ptrSysVal = synth_setup(Marshal.StringToHGlobalAuto(waveTablePath), SampleRate, 256, 32);
+            var ptrSysVal = synth_setup(Marshal.StringToHGlobalAuto(waveTablePath), SAMPLE_RATE, 256, 32);
             if (IntPtr.Zero == ptrSysVal) {
                 synth_close();
                 return false;
@@ -186,7 +183,7 @@ namespace Player {
                 fileout(
                     Marshal.StringToHGlobalAuto(wavetablePath),
                     Marshal.StringToHGlobalAuto(filePath),
-                    48000, ptrEvents, (uint)evArr.Length, 960
+                    48000, 960, (uint)evArr.Length, ptrEvents
                 );
                 Marshal.FreeHGlobal(ptrEvents);
                 IsFileOutput = false;

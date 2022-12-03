@@ -7,6 +7,13 @@ using Player;
 
 namespace EasySequencer {
     public partial class InstList : Form {
+        public struct INST_ID {
+            public byte isDrum;
+            public byte bankMSB;
+            public byte bankLSB;
+            public byte progNum;
+        };
+
         private Sender mSender;
         private int mChNum;
         private Dictionary<string , Dictionary<INST_ID, string>> mInstList;
@@ -22,20 +29,26 @@ namespace EasySequencer {
             var selectedInst = 0;
             for (int i = 0; i < mSender.InstCount; i++) {
                 var inst = mSender.Instruments(i);
-                var nam = string.Format("{0} {1}", inst.id.progNum, inst.Name);
+                var nam = string.Format("{0} {1}", inst.prog_num, inst.Name);
                 var cat = inst.Category;
                 if (!mInstList.ContainsKey(cat)) {
                     mInstList.Add(cat, new Dictionary<INST_ID, string>());
                     cmbCategory.Items.Add(cat);
                 }
-                if (!mInstList[cat].ContainsKey(inst.id)) {
-                    mInstList[cat].Add(inst.id, nam);
+                var id = new INST_ID() {
+                    isDrum = inst.is_drum,
+                    bankMSB = inst.bank_msb,
+                    bankLSB = inst.bank_lsb,
+                    progNum = inst.prog_num
+                };
+                if (!mInstList[cat].ContainsKey(id)) {
+                    mInstList[cat].Add(id, nam);
                 }
                 var chParam = mSender.Channel(mChNum);
-                if (chParam.is_drum == inst.id.isDrum &&
-                    chParam.prog_num == inst.id.progNum &&
-                    chParam.bank_msb == inst.id.bankMSB &&
-                    chParam.bank_lsb == inst.id.bankLSB
+                if (chParam.is_drum == inst.is_drum &&
+                    chParam.prog_num == inst.prog_num &&
+                    chParam.bank_msb == inst.bank_msb &&
+                    chParam.bank_lsb == inst.bank_lsb
                 ) {
                     selectedCategory = cat;
                     selectedInst = mInstList[cat].Count - 1;

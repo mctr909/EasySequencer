@@ -271,9 +271,9 @@ fileout(
     LPWSTR wave_table_path,
     LPWSTR save_path,
     uint32 sample_rate,
-    byte* p_events,
+    uint32 base_tick,
     uint32 event_size,
-    uint32 base_tick
+    byte* p_events
 ) {
     auto p_inst_list = new InstList();
     auto load_status = p_inst_list->Load(wave_table_path);

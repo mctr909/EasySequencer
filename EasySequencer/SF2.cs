@@ -196,6 +196,13 @@ namespace SF2 {
             env.hold = -1.0;
         }
     }
+
+    public struct INST_ID {
+        public byte isDrum;
+        public byte bankMSB;
+        public byte bankLSB;
+        public byte progNum;
+    };
     #endregion
 
     public class Const {
@@ -281,11 +288,11 @@ namespace SF2 {
                         sw.Write(",{0}", 1200.0 / Math.Log(2.0, prgn.fineTune));
                     }
 
-                    sw.Write(",{0}", (Const.AttackSpeed * Sender.DeltaTime / prgn.env.attack).ToString("0.000"));
+                    sw.Write(",{0}", (Const.AttackSpeed * Sender.DELTA_TIME / prgn.env.attack).ToString("0.000"));
                     sw.Write(",{0}", prgn.env.hold.ToString("0.000"));
-                    sw.Write(",{0}", (Const.AttackSpeed * Sender.DeltaTime / prgn.env.decay).ToString("0.000"));
+                    sw.Write(",{0}", (Const.AttackSpeed * Sender.DELTA_TIME / prgn.env.decay).ToString("0.000"));
                     sw.Write(",{0}", prgn.env.sustain.ToString("0.000"));
-                    sw.Write(",{0}", (Const.AttackSpeed * Sender.DeltaTime / prgn.env.release).ToString("0.000"));
+                    sw.Write(",{0}", (Const.AttackSpeed * Sender.DELTA_TIME / prgn.env.release).ToString("0.000"));
 
                     sw.Write(",{0}:{1}",
                         prgn.instId,
@@ -341,11 +348,11 @@ namespace SF2 {
                         sw.Write(",{0}", 1200.0 / Math.Log(2.0, irgn.fineTune));
                     }
 
-                    sw.Write(",{0}", (Const.AttackSpeed * Sender.DeltaTime / irgn.env.attack).ToString("0.000"));
+                    sw.Write(",{0}", (Const.AttackSpeed * Sender.DELTA_TIME / irgn.env.attack).ToString("0.000"));
                     sw.Write(",{0}", irgn.env.hold.ToString("0.000"));
-                    sw.Write(",{0}", (Const.AttackSpeed * Sender.DeltaTime / irgn.env.decay).ToString("0.000"));
+                    sw.Write(",{0}", (Const.AttackSpeed * Sender.DELTA_TIME / irgn.env.decay).ToString("0.000"));
                     sw.Write(",{0}", irgn.env.sustain.ToString("0.000"));
-                    sw.Write(",{0}", (Const.AttackSpeed * Sender.DeltaTime / irgn.env.release).ToString("0.000"));
+                    sw.Write(",{0}", (Const.AttackSpeed * Sender.DELTA_TIME / irgn.env.release).ToString("0.000"));
 
                     var waveBegin = smpl.start + irgn.waveBegin;
                     var waveEnd = smpl.end + irgn.waveEnd;
@@ -560,21 +567,21 @@ namespace SF2 {
                     break;
 
                 case E_OPER.ENV_VOL__ATTACK:
-                    v.env.attack = Const.AttackSpeed * Sender.DeltaTime
+                    v.env.attack = Const.AttackSpeed * Sender.DELTA_TIME
                         / Math.Pow(2.0, g.genAmount / 1200.0);
                     break;
                 case E_OPER.ENV_VOL__HOLD:
                     v.env.hold = Math.Pow(2.0, g.genAmount / 1200.0);
                     break;
                 case E_OPER.ENV_VOL__DECAY:
-                    v.env.decay = Const.AttackSpeed * Sender.DeltaTime
+                    v.env.decay = Const.AttackSpeed * Sender.DELTA_TIME
                         / Math.Pow(2.0, g.genAmount / 1200.0);
                     break;
                 case E_OPER.ENV_VOL__SUSTAIN:
                     v.env.sustain = Math.Pow(10.0, -(ushort)g.genAmount / 200.0);
                     break;
                 case E_OPER.ENV_VOL__RELEASE:
-                    v.env.release = Const.AttackSpeed * Sender.DeltaTime
+                    v.env.release = Const.AttackSpeed * Sender.DELTA_TIME
                         / Math.Pow(2.0, g.genAmount / 1200.0);
                     break;
 
@@ -620,13 +627,13 @@ namespace SF2 {
                     v.fineTune = 1.0;
                 }
                 if (v.env.attack <= 0.0) {
-                    v.env.attack = 1000 * Const.AttackSpeed * Sender.DeltaTime;
+                    v.env.attack = 1000 * Const.AttackSpeed * Sender.DELTA_TIME;
                 }
                 if (v.env.decay <= 0.0) {
-                    v.env.decay = 1000 * Const.AttackSpeed * Sender.DeltaTime;
+                    v.env.decay = 1000 * Const.AttackSpeed * Sender.DELTA_TIME;
                 }
                 if (v.env.release <= 0.0) {
-                    v.env.release = 1000 * Const.AttackSpeed * Sender.DeltaTime;
+                    v.env.release = 1000 * Const.AttackSpeed * Sender.DELTA_TIME;
                 }
                 if (v.env.hold < 0.0) {
                     v.env.hold = 0.0;
@@ -634,7 +641,7 @@ namespace SF2 {
                 if (v.env.sustain < 0.0) {
                     v.env.sustain = 1.0;
                 }
-                v.env.hold += Const.AttackSpeed * Sender.DeltaTime / v.env.attack;
+                v.env.hold += Const.AttackSpeed * Sender.DELTA_TIME / v.env.attack;
             }
 
             return v;
@@ -694,21 +701,21 @@ namespace SF2 {
                     break;
 
                 case E_OPER.ENV_VOL__ATTACK:
-                    v.env.attack = Const.AttackSpeed * Sender.DeltaTime
+                    v.env.attack = Const.AttackSpeed * Sender.DELTA_TIME
                         / Math.Pow(2.0, g.genAmount / 1200.0);
                     break;
                 case E_OPER.ENV_VOL__HOLD:
                     v.env.hold = Math.Pow(2.0, g.genAmount / 1200.0);
                     break;
                 case E_OPER.ENV_VOL__DECAY:
-                    v.env.decay = Const.AttackSpeed * Sender.DeltaTime
+                    v.env.decay = Const.AttackSpeed * Sender.DELTA_TIME
                         / Math.Pow(2.0, g.genAmount / 1200.0);
                     break;
                 case E_OPER.ENV_VOL__SUSTAIN:
                     v.env.sustain = Math.Pow(10.0, -(ushort)g.genAmount / 200.0);
                     break;
                 case E_OPER.ENV_VOL__RELEASE:
-                    v.env.release = Const.AttackSpeed * Sender.DeltaTime
+                    v.env.release = Const.AttackSpeed * Sender.DELTA_TIME
                         / Math.Pow(2.0, g.genAmount / 1200.0);
                     break;
                 default:
@@ -753,13 +760,13 @@ namespace SF2 {
                     v.fineTune = 1.0;
                 }
                 if (v.env.attack <= 0.0) {
-                    v.env.attack = 1000 * Const.AttackSpeed * Sender.DeltaTime;
+                    v.env.attack = 1000 * Const.AttackSpeed * Sender.DELTA_TIME;
                 }
                 if (v.env.decay <= 0.0) {
-                    v.env.decay = 1000 * Const.AttackSpeed * Sender.DeltaTime;
+                    v.env.decay = 1000 * Const.AttackSpeed * Sender.DELTA_TIME;
                 }
                 if (v.env.release <= 0.0) {
-                    v.env.release = 1000 * Const.AttackSpeed * Sender.DeltaTime;
+                    v.env.release = 1000 * Const.AttackSpeed * Sender.DELTA_TIME;
                 }
                 if (v.env.hold < 0.0) {
                     v.env.hold = 0.0;
@@ -767,7 +774,7 @@ namespace SF2 {
                 if (v.env.sustain < 0.0) {
                     v.env.sustain = 1.0;
                 }
-                v.env.hold += Const.AttackSpeed * Sender.DeltaTime / v.env.attack;
+                v.env.hold += Const.AttackSpeed * Sender.DELTA_TIME / v.env.attack;
             }
 
             return v;

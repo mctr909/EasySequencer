@@ -17,9 +17,9 @@ extern "C" {
         LPWSTR wave_table_path,
         LPWSTR save_path,
         uint32 sample_rate,
-        byte* p_events,
+        uint32 base_tick,
         uint32 event_size,
-        uint32 base_tick
+        byte* p_events
     );
     __declspec(dllexport) void WINAPI send_message(byte port, byte* p_msg);
 #ifdef __cplusplus
