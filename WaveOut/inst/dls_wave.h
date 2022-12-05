@@ -1,7 +1,8 @@
-#pragma once
-#include "../riff.h"
+#ifndef __DLS_WAVE_H__
+#define __DLS_WAVE_H__
+
+#include "../type.h"
 #include "../riff_struct.h"
-#include "dls_struct.h"
 
 class WAVE;
 class LART;
@@ -38,3 +39,5 @@ protected:
     void LoadInfo(FILE *fp, const char *type, long size) override;
     void LoadChunk(FILE *fp, const char *type, long size) override;
 };
+
+#endif /* __DLS_WAVE_H__ */

@@ -1,5 +1,7 @@
-#include "dls_art.h"
 #include <string.h>
+#include "../riff.h"
+
+#include "dls_art.h"
 
 LART::LART(FILE *fp, long size) : Riff() {
     Load(fp, size);

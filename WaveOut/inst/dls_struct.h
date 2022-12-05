@@ -1,8 +1,8 @@
-#pragma once
-#include "../type.h"
-#include "../riff.h"
+#ifndef __DLS_STRUCT_H__
+#define __DLS_STRUCT_H__
 
 #include <math.h>
+#include "../type.h"
 
 typedef struct DLS_INSH {
     uint32 regions;
@@ -194,3 +194,5 @@ typedef struct DLS_CONN {
         }
     }
 } DLS_CONN;
+
+#endif /* __DLS_STRUCT_H__ */

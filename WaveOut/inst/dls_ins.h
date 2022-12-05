@@ -1,8 +1,8 @@
-#pragma once
-#include "../riff.h"
+#ifndef __DLS_INS_H__
+#define __DLS_INS_H__
+
+#include "../type.h"
 #include "dls_struct.h"
-#include "dls_rgn.h"
-#include "dls_art.h"
 
 class INS_;
 class LRGN;
@@ -38,3 +38,5 @@ protected:
     void LoadChunk(FILE *fp, const char *type, long size) override;
     void LoadList(FILE *fp, const char *type, long size) override;
 };
+
+#endif /* __DLS_INS_H__ */

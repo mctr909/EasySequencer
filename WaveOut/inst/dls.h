@@ -1,8 +1,10 @@
-#pragma once
+#ifndef __DLS_H__
+#define __DLS_H__
+
 #include "../type.h"
-#include "../riff.h"
-#include "dls_ins.h"
-#include "dls_wave.h"
+
+class LINS;
+class WVPL;
 
 class DLS : public Riff {
 public:
@@ -23,3 +25,5 @@ protected:
     void LoadChunk(FILE *fp, const char *type, long size) override;
     void LoadList(FILE *fp, const char *type, long size) override;
 };
+
+#endif /* __DLS_H__ */

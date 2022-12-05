@@ -1,5 +1,7 @@
-#pragma once
-#include "../riff.h"
+#ifndef __DLS_ART_H__
+#define __DLS_ART_H__
+
+#include "../type.h"
 #include "dls_struct.h"
 
 class ART_;
@@ -25,3 +27,5 @@ public:
     ART_(FILE *fp, long size);
     ~ART_();
 };
+
+#endif /* __DLS_ART_H__ */

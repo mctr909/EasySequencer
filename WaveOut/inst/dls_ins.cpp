@@ -1,7 +1,10 @@
-#include "dls_ins.h"
+#include <string.h>
+#include "../riff.h"
+
 #include "dls_rgn.h"
 #include "dls_art.h"
-#include <string.h>
+
+#include "dls_ins.h"
 
 LINS::LINS(FILE *fp, long size, int32 count) : Riff() {
     Count = 0;

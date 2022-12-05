@@ -1,9 +1,12 @@
-#pragma once
+#ifndef __RIFF_H__
+#define __RIFF_H__
+
 #include "type.h"
 
 #include <stdio.h>
 #include <windows.h>
 
+/******************************************************************************/
 class Riff {
 public:
     Riff() {}
@@ -20,3 +23,5 @@ private:
     void loop(FILE *fp, long size);
     void infoLoop(FILE *fp, long size);
 };
+
+#endif /* __RIFF_H__ */

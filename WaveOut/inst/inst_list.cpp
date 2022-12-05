@@ -1,5 +1,14 @@
-#include "inst_list.h"
+#include "../riff.h"
+#include "../riff_struct.h"
+
+#include "dls_struct.h"
+#include "dls_ins.h"
+#include "dls_rgn.h"
+#include "dls_art.h"
+#include "dls_wave.h"
 #include "dls.h"
+
+#include "inst_list.h"
 
 /******************************************************************************/
 InstList::~InstList() {

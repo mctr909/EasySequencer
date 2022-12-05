@@ -1,4 +1,6 @@
-#pragma once
+#ifndef __INST_LIST_H__
+#define __INST_LIST_H__
+
 #include "../type.h"
 #include <windows.h>
 #include <stdio.h>
@@ -101,7 +103,6 @@ typedef struct INST_WAVE {
 /******************************************************************************/
 class DLS;
 class LART;
-typedef struct INST_SAMPLER INST_SAMPLER;
 
 /******************************************************************************/
 class InstList {
@@ -139,3 +140,5 @@ private:
     uint32 writeWaveTable32(FILE *fp, byte* pData, uint32 size);
     uint32 writeWaveTableFloat(FILE *fp, byte* pData, uint32 size);
 };
+
+#endif /* __INST_LIST_H__ */

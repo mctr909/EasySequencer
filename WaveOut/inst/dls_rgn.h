@@ -1,5 +1,7 @@
-#pragma once
-#include "../riff.h"
+#ifndef __DLS_RGN_H__
+#define __DLS_RGN_H__
+
+#include "../type.h"
 #include "dls_struct.h"
 
 class RGN_;
@@ -20,8 +22,8 @@ protected:
 
 class RGN_ : public Riff {
 public:
-    DLS_RGNH Header = { 0 };
-    DLS_WLNK WaveLink = { 0 };
+    DLS_RGNH Header;
+    DLS_WLNK WaveLink;
     DLS_WSMP *pWaveSmpl = NULL;
     DLS_LOOP **ppWaveLoop = NULL;
     LART *cLart = NULL;
@@ -34,3 +36,5 @@ protected:
     void LoadChunk(FILE *fp, const char *type, long size) override;
     void LoadList(FILE *fp, const char *type, long size) override;
 };
+
+#endif /* __DLS_RGN_H__ */
