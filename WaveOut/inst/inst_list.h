@@ -71,8 +71,11 @@ typedef struct INST_ENV {
     double resonance = 0.0;
 
     double pitchA = 500.0;
+    double pitchH = 0.0;
+    double pitchD = 500.0;
     double pitchR = 500.0;
     double pitchRise = 1.0;
+    double pitchTop = 1.0;
     double pitchFall = 1.0;
 } INST_ENV;
 
