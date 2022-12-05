@@ -11,6 +11,7 @@
 #pragma comment (lib, "winmm.lib")
 
 /******************************************************************************/
+#pragma pack(push, 4)
 struct SYSTEM_VALUE {
     int32 inst_count;
     byte* p_inst_list;
@@ -18,6 +19,7 @@ struct SYSTEM_VALUE {
     int32* p_active_counter;
     int32* p_fileout_progress;
 };
+#pragma pack(pop)
 #pragma pack(push, 4)
 struct RIFF {
     uint32 riff;

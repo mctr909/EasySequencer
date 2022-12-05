@@ -67,6 +67,7 @@ namespace Player {
 
         public string Name { get { return Marshal.PtrToStringAnsi(p_name); } }
     }
+    [StructLayout(LayoutKind.Sequential, Pack = 4)]
     struct SYSTEM_VALUE {
         public int inst_count;
         public IntPtr p_inst_list;
