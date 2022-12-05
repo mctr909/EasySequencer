@@ -17,9 +17,6 @@
     <ClCompile Include="inst\dls_wave.cpp">
       <Filter>Inst</Filter>
     </ClCompile>
-    <ClCompile Include="inst\riff_chunk.cpp">
-      <Filter>Inst</Filter>
-    </ClCompile>
     <ClCompile Include="inst\inst_list.cpp">
       <Filter>Inst</Filter>
     </ClCompile>
@@ -35,6 +32,7 @@
     <ClCompile Include="synth\synth.cpp">
       <Filter>Synth</Filter>
     </ClCompile>
+    <ClCompile Include="riff.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="type.h" />
@@ -57,12 +55,6 @@
     <ClInclude Include="inst\dls_wave.h">
       <Filter>Inst</Filter>
     </ClInclude>
-    <ClInclude Include="inst\riff_chunk.h">
-      <Filter>Inst</Filter>
-    </ClInclude>
-    <ClInclude Include="inst\riff_struct.h">
-      <Filter>Inst</Filter>
-    </ClInclude>
     <ClInclude Include="inst\inst_list.h">
       <Filter>Inst</Filter>
     </ClInclude>
@@ -81,6 +73,8 @@
     <ClInclude Include="synth\channel_params.h">
       <Filter>Synth</Filter>
     </ClInclude>
+    <ClInclude Include="riff.h" />
+    <ClInclude Include="riff_struct.h" />
   </ItemGroup>
   <ItemGroup>
     <Filter Include="Inst">

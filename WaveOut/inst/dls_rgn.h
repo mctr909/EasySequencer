@@ -1,11 +1,11 @@
 #pragma once
+#include "../riff.h"
 #include "dls_struct.h"
-#include "riff_chunk.h"
 
 class RGN_;
 class LART;
 
-class LRGN : public RiffChunk {
+class LRGN : public Riff {
 public:
     RGN_ **pcRegion = NULL;
     int32 Count;
@@ -18,7 +18,7 @@ protected:
     void LoadList(FILE *fp, const char *type, long size) override;
 };
 
-class RGN_ : public RiffChunk {
+class RGN_ : public Riff {
 public:
     DLS_RGNH Header = { 0 };
     DLS_WLNK WaveLink = { 0 };

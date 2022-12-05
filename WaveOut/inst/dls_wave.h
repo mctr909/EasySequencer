@@ -1,11 +1,12 @@
 #pragma once
+#include "../riff.h"
+#include "../riff_struct.h"
 #include "dls_struct.h"
-#include "riff_chunk.h"
 
 class WAVE;
 class LART;
 
-class WVPL : public RiffChunk {
+class WVPL : public Riff {
 public:
     WAVE **pcWave = NULL;
     int32 Count;
@@ -18,7 +19,7 @@ protected:
     void LoadList(FILE *fp, const char *type, long size) override;
 };
 
-class WAVE : public RiffChunk {
+class WAVE : public Riff {
 public:
     WAVE_FMT Format;
     DLS_WSMP WaveSmpl;

@@ -1,5 +1,6 @@
-#include "dls.h"
 #include <string.h>
+
+#include "dls.h"
 
 DLS::~DLS() {
     if (NULL != cLins) {
@@ -13,7 +14,7 @@ DLS::~DLS() {
 }
 
 E_LOAD_STATUS DLS::Load(LPWSTR path) {
-    return RiffChunk::Load(path, 0);
+    return Riff::Load(path, 0);
 }
 
 bool DLS::CheckFileType(const char *type, long size) {

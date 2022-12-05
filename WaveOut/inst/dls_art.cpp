@@ -1,7 +1,7 @@
 #include "dls_art.h"
 #include <string.h>
 
-LART::LART(FILE *fp, long size) : RiffChunk() {
+LART::LART(FILE *fp, long size) : Riff() {
     Load(fp, size);
 }
 

@@ -1,11 +1,12 @@
 #pragma once
+#include "type.h"
+
 #include <stdio.h>
 #include <windows.h>
-#include "../type.h"
 
-class RiffChunk {
+class Riff {
 public:
-    RiffChunk() {}
+    Riff() {}
 
 protected:
     void Load(FILE *fp, long size);

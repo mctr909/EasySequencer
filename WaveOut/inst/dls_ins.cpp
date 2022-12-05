@@ -3,7 +3,7 @@
 #include "dls_art.h"
 #include <string.h>
 
-LINS::LINS(FILE *fp, long size, int32 count) : RiffChunk() {
+LINS::LINS(FILE *fp, long size, int32 count) : Riff() {
     Count = 0;
     pcInst = (INS_**)calloc(count, sizeof(INS_*));
     Load(fp, size);
@@ -27,7 +27,7 @@ void LINS::LoadList(FILE *fp, const char *type, long size) {
     fseek(fp, size, SEEK_CUR);
 }
 
-INS_::INS_(FILE *fp, long size) : RiffChunk() {
+INS_::INS_(FILE *fp, long size) : Riff() {
     Load(fp, size);
 }
 

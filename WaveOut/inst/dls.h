@@ -1,9 +1,10 @@
 #pragma once
-#include "riff_chunk.h"
+#include "../type.h"
+#include "../riff.h"
 #include "dls_ins.h"
 #include "dls_wave.h"
 
-class DLS : public RiffChunk {
+class DLS : public Riff {
 public:
     LINS *cLins = NULL;
     WVPL *cWvpl = NULL;
@@ -11,7 +12,7 @@ public:
     uint32 WaveCount = 0;
 
 public:
-    DLS() : RiffChunk() {}
+    DLS() : Riff() {}
     ~DLS();
 
 public:

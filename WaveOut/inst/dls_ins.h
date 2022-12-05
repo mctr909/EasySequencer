@@ -1,14 +1,14 @@
 #pragma once
+#include "../riff.h"
 #include "dls_struct.h"
 #include "dls_rgn.h"
 #include "dls_art.h"
-#include "riff_chunk.h"
 
 class INS_;
 class LRGN;
 class LART;
 
-class LINS : public RiffChunk {
+class LINS : public Riff {
 public:
     INS_ **pcInst = NULL;
     int32 Count;
@@ -21,7 +21,7 @@ protected:
     void LoadList(FILE *fp, const char *type, long size) override;
 };
 
-class INS_ : public RiffChunk {
+class INS_ : public Riff {
 public:
     char Name[32] = { 0 };
     char Category[32] = { 0 };

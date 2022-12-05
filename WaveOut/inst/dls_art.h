@@ -1,10 +1,10 @@
 #pragma once
+#include "../riff.h"
 #include "dls_struct.h"
-#include "riff_chunk.h"
 
 class ART_;
 
-class LART : public RiffChunk {
+class LART : public Riff {
 public:
     ART_ *cArt = NULL;
 

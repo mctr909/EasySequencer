@@ -1,11 +1,12 @@
-#include "riff_chunk.h"
+#include "riff.h"
+
 #include <string.h>
 
-void RiffChunk::Load(FILE *fp, long size) {
+void Riff::Load(FILE *fp, long size) {
     loop(fp, size);
 }
 
-E_LOAD_STATUS RiffChunk::Load(LPWSTR path, long offset) {
+E_LOAD_STATUS Riff::Load(LPWSTR path, long offset) {
     FILE *fp = NULL;
     _wfopen_s(&fp, path, L"rb");
     if (NULL == fp) {
@@ -33,7 +34,7 @@ E_LOAD_STATUS RiffChunk::Load(LPWSTR path, long offset) {
     return E_LOAD_STATUS::SUCCESS;
 }
 
-void RiffChunk::loop(FILE *fp, long size) {
+void Riff::loop(FILE *fp, long size) {
     char chunkId[5] = { 0 };
     unsigned int chunkSize;
     char listType[5] = { 0 };
@@ -57,7 +58,7 @@ void RiffChunk::loop(FILE *fp, long size) {
     }
 }
 
-void RiffChunk::infoLoop(FILE *fp, long size) {
+void Riff::infoLoop(FILE *fp, long size) {
     char infoType[5] = { 0 };
     unsigned int infoSize;
 

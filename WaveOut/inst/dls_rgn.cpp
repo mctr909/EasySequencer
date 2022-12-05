@@ -2,7 +2,7 @@
 #include "dls_art.h"
 #include <string.h>
 
-LRGN::LRGN(FILE *fp, long size, int32 count) : RiffChunk() {
+LRGN::LRGN(FILE *fp, long size, int32 count) : Riff() {
     Count = 0;
     pcRegion = (RGN_**)calloc(count, sizeof(RGN_*));
     Load(fp, size);
@@ -26,7 +26,7 @@ void LRGN::LoadList(FILE *fp, const char *type, long size) {
     fseek(fp, size, SEEK_CUR);
 }
 
-RGN_::RGN_(FILE *fp, long size) : RiffChunk() {
+RGN_::RGN_(FILE *fp, long size) : Riff() {
     Load(fp, size);
 }
 

@@ -1,7 +1,8 @@
 #pragma once
-#include <math.h>
 #include "../type.h"
-#include "riff_struct.h"
+#include "../riff.h"
+
+#include <math.h>
 
 typedef struct DLS_INSH {
     uint32 regions;
