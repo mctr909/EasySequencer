@@ -51,6 +51,12 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Monitor.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Monitor.Designer.cs">
+      <DependentUpon>Monitor.cs</DependentUpon>
+    </Compile>
     <Compile Include="Properties\Resources.Designer.cs">
       <AutoGen>True</AutoGen>
       <DesignTime>True</DesignTime>
@@ -71,7 +77,6 @@
     </Compile>
     <Compile Include="SF2.cs" />
     <Compile Include="Player\DoubleBuffer.cs" />
-    <Compile Include="Player\Keyboard.cs" />
     <Compile Include="Player\Player.cs" />
     <Compile Include="Player\Sender.cs" />
     <Compile Include="Program.cs" />
@@ -88,6 +93,9 @@
     </EmbeddedResource>
     <EmbeddedResource Include="InstList.resx">
       <DependentUpon>InstList.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Monitor.resx">
+      <DependentUpon>Monitor.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="Properties\Resources.resx">
       <Generator>ResXFileCodeGenerator</Generator>
@@ -115,6 +123,15 @@
   </ItemGroup>
   <ItemGroup>
     <Content Include="Resources\Keyboard.png" />
+    <Content Include="Resources\player.png" />
+    <Content Include="Resources\player_down.png" />
+    <Content Include="Resources\player_ff.png" />
+    <Content Include="Resources\player_play.png" />
+    <Content Include="Resources\player_prev.png" />
+    <Content Include="Resources\player_rew.png" />
+    <Content Include="Resources\player_seek.png" />
+    <Content Include="Resources\player_stop.png" />
+    <Content Include="Resources\player_up.png" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <PropertyGroup>

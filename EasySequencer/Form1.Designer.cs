@@ -52,13 +52,13 @@
             this.trkSpeed = new System.Windows.Forms.TrackBar();
             this.saveFileDialog1 = new System.Windows.Forms.SaveFileDialog();
             this.timer1 = new System.Windows.Forms.Timer(this.components);
-            this.picKeyBack = new System.Windows.Forms.PictureBox();
+            this.picPlayer = new System.Windows.Forms.PictureBox();
             this.menuStrip1.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.numKey)).BeginInit();
             this.pnlPlayer.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.picActive)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.trkSpeed)).BeginInit();
-            ((System.ComponentModel.ISupportInitialize)(this.picKeyBack)).BeginInit();
+            ((System.ComponentModel.ISupportInitialize)(this.picPlayer)).BeginInit();
             this.SuspendLayout();
             // 
             // lblPosition
@@ -87,7 +87,7 @@
             // 
             this.hsbSeek.Location = new System.Drawing.Point(3, 28);
             this.hsbSeek.Name = "hsbSeek";
-            this.hsbSeek.Size = new System.Drawing.Size(608, 46);
+            this.hsbSeek.Size = new System.Drawing.Size(608, 19);
             this.hsbSeek.TabIndex = 8;
             this.hsbSeek.Scroll += new System.Windows.Forms.ScrollEventHandler(this.hsbSeek_Scroll);
             this.hsbSeek.MouseLeave += new System.EventHandler(this.hsbSeek_MouseLeave);
@@ -104,7 +104,7 @@
             this.編集EToolStripMenuItem});
             this.menuStrip1.Location = new System.Drawing.Point(0, 0);
             this.menuStrip1.Name = "menuStrip1";
-            this.menuStrip1.Size = new System.Drawing.Size(1052, 24);
+            this.menuStrip1.Size = new System.Drawing.Size(616, 24);
             this.menuStrip1.TabIndex = 26;
             this.menuStrip1.Text = "menuStrip1";
             // 
@@ -218,9 +218,9 @@
             this.pnlPlayer.Controls.Add(this.numKey);
             this.pnlPlayer.Controls.Add(this.btnPalyStop);
             this.pnlPlayer.Controls.Add(this.trkSpeed);
-            this.pnlPlayer.Location = new System.Drawing.Point(0, 27);
+            this.pnlPlayer.Location = new System.Drawing.Point(0, 131);
             this.pnlPlayer.Name = "pnlPlayer";
-            this.pnlPlayer.Size = new System.Drawing.Size(613, 53);
+            this.pnlPlayer.Size = new System.Drawing.Size(613, 56);
             this.pnlPlayer.TabIndex = 35;
             // 
             // picActive
@@ -261,24 +261,24 @@
             // 
             this.timer1.Tick += new System.EventHandler(this.timer1_Tick);
             // 
-            // picKeyBack
+            // picPlayer
             // 
-            this.picKeyBack.BackColor = System.Drawing.Color.Transparent;
-            this.picKeyBack.BackgroundImage = global::EasySequencer.Properties.Resources.Keyboard;
-            this.picKeyBack.BackgroundImageLayout = System.Windows.Forms.ImageLayout.None;
-            this.picKeyBack.InitialImage = null;
-            this.picKeyBack.Location = new System.Drawing.Point(0, 86);
-            this.picKeyBack.Name = "picKeyBack";
-            this.picKeyBack.Size = new System.Drawing.Size(1002, 642);
-            this.picKeyBack.TabIndex = 0;
-            this.picKeyBack.TabStop = false;
+            this.picPlayer.BackgroundImage = global::EasySequencer.Properties.Resources.player;
+            this.picPlayer.BackgroundImageLayout = System.Windows.Forms.ImageLayout.None;
+            this.picPlayer.Location = new System.Drawing.Point(0, 25);
+            this.picPlayer.Name = "picPlayer";
+            this.picPlayer.Size = new System.Drawing.Size(354, 100);
+            this.picPlayer.TabIndex = 36;
+            this.picPlayer.TabStop = false;
+            this.picPlayer.MouseDown += new System.Windows.Forms.MouseEventHandler(this.picPlayer_MouseDown);
+            this.picPlayer.MouseUp += new System.Windows.Forms.MouseEventHandler(this.picPlayer_MouseUp);
             // 
             // Form1
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 12F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(1052, 490);
-            this.Controls.Add(this.picKeyBack);
+            this.ClientSize = new System.Drawing.Size(616, 191);
+            this.Controls.Add(this.picPlayer);
             this.Controls.Add(this.pnlPlayer);
             this.Controls.Add(this.menuStrip1);
             this.DoubleBuffered = true;
@@ -294,7 +294,7 @@
             this.pnlPlayer.PerformLayout();
             ((System.ComponentModel.ISupportInitialize)(this.picActive)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.trkSpeed)).EndInit();
-            ((System.ComponentModel.ISupportInitialize)(this.picKeyBack)).EndInit();
+            ((System.ComponentModel.ISupportInitialize)(this.picPlayer)).EndInit();
             this.ResumeLayout(false);
             this.PerformLayout();
 
@@ -324,7 +324,7 @@
 		private System.Windows.Forms.Timer timer1;
         private System.Windows.Forms.Label lblTempoPercent;
         private System.Windows.Forms.PictureBox picActive;
-        private System.Windows.Forms.PictureBox picKeyBack;
+        private System.Windows.Forms.PictureBox picPlayer;
     }
 }
 

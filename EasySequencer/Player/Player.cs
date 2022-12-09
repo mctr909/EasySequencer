@@ -14,18 +14,11 @@ namespace Player {
         private double mPreviousTick;
         private double mTick;
         private double mBPM;
-        private E_KEY mKey;
 
         private int mBeat;
         private int mMeasure;
         private int mMeasureDenomi;
         private int mMeasureNumer;
-
-        public CHANNEL_PARAM Channel(int num) {
-            return mSender.Channel(num);
-        }
-
-        public int SoloChannel { get; set; }
 
         public int Transpose { get; set; }
 
@@ -117,7 +110,6 @@ namespace Player {
             mMeasureDenomi = 4;
             mMeasureNumer = 4;
             IsPlay = false;
-            SoloChannel = -1;
             Speed = 1.0;
             mTask = new Task(MainProc);
         }
@@ -220,7 +212,7 @@ namespace Player {
                             if (0.25 * 960 < (mCurrentTick - ev.Tick)) {
                                 continue;
                             }
-                            if (0 == chParam.enable || (0 <= SoloChannel && SoloChannel != ev.Channel)) {
+                            if (0 == chParam.enable) {
                                 continue;
                             }
                         }
@@ -247,7 +239,6 @@ namespace Player {
                         mMeasureDenomi = m.denominator;
                         break;
                     case E_META.KEY:
-                        mKey = (E_KEY)ev.Meta.Int;
                         break;
                     }
                     break;

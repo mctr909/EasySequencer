@@ -10,7 +10,7 @@ namespace EasySequencer {
         private SMF mSMF;
         private Sender mMidiSender;
         private Player.Player mPlayer;
-        private Keyboard mKeyboard;
+        private Monitor mMonitor;
         private Bitmap mBmpActive;
         private Graphics mGActive;
         private string mDlsFilePath;
@@ -31,7 +31,8 @@ namespace EasySequencer {
             }
 
             mPlayer = new Player.Player(mMidiSender);
-            mKeyboard = new Keyboard(picKeyBack, mMidiSender, mPlayer);
+            mMonitor = new Monitor(mMidiSender);
+            mMonitor.Show();
 
             setSize();
 
@@ -114,9 +115,15 @@ namespace EasySequencer {
             mIsSeek = false;
         }
 
+        private void picPlayer_MouseDown(object sender, MouseEventArgs e) {
+
+        }
+
+        private void picPlayer_MouseUp(object sender, MouseEventArgs e) {
+
+        }
+
         private void setSize() {
-            MaximumSize = new Size(picKeyBack.Width + 16, menuStrip1.Height + pnlPlayer.Height + picKeyBack.Height + 48);
-            MinimumSize = MaximumSize;
             btnPalyStop.Top = 2;
             btnPalyStop.Left = 2;
             numKey.Top = 2;
