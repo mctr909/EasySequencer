@@ -52,30 +52,30 @@ Sampler::note_on(Channel* p_channel, INST_LAYER* p_layer, INST_REGION* p_region,
         m_pitch *= p_art->pitch;
         m_gain *= p_art->gain;
         m_amp = 0.0;
-        m_epitch = p_art->env.pitchRise;
-        m_cutoff = p_art->env.cutoffRise;
 
-        m_eg_amp.attack = p_art->env.ampA * mp_synth->delta_time;
-        m_eg_amp.decay = p_art->env.ampD * mp_synth->delta_time;
-        m_eg_amp.release = p_art->env.ampR * mp_synth->delta_time;
-        m_eg_amp.hold = p_art->env.ampH;
-        m_eg_amp.sustain = p_art->env.ampS;
+        m_eg_amp.attack = p_art->eg_amp.attack * mp_synth->delta_time;
+        m_eg_amp.decay = p_art->eg_amp.decay * mp_synth->delta_time;
+        m_eg_amp.release = p_art->eg_amp.release * mp_synth->delta_time;
+        m_eg_amp.hold = p_art->eg_amp.hold;
+        m_eg_amp.sustain = p_art->eg_amp.sustain;
 
-        m_eg_pitch.attack = p_art->env.pitchA * mp_synth->delta_time;
-        m_eg_pitch.decay = p_art->env.pitchD * mp_synth->delta_time;
-        m_eg_pitch.release = p_art->env.pitchR * mp_synth->delta_time;
-        m_eg_pitch.hold = p_art->env.pitchH;
-        m_eg_pitch.top = p_art->env.pitchTop;
-        m_eg_pitch.fall = p_art->env.pitchFall;
+        m_epitch = p_art->eg_pitch.rise;
+        m_eg_pitch.attack = p_art->eg_pitch.attack * mp_synth->delta_time;
+        m_eg_pitch.decay = p_art->eg_pitch.decay * mp_synth->delta_time;
+        m_eg_pitch.release = p_art->eg_pitch.release * mp_synth->delta_time;
+        m_eg_pitch.hold = p_art->eg_pitch.hold;
+        m_eg_pitch.top = p_art->eg_pitch.top;
+        m_eg_pitch.fall = p_art->eg_pitch.fall;
 
-        m_eg_cutoff.attack = p_art->env.cutoffA * mp_synth->delta_time;
-        m_eg_cutoff.decay = p_art->env.cutoffD * mp_synth->delta_time;
-        m_eg_cutoff.release = p_art->env.cutoffR * mp_synth->delta_time;
-        m_eg_cutoff.hold = p_art->env.cutoffH;
-        m_eg_cutoff.sustain = p_art->env.cutoffS;
-        m_eg_cutoff.top = p_art->env.cutoffTop;
-        m_eg_cutoff.fall = p_art->env.cutoffFall;
-        m_eg_cutoff.resonance = p_art->env.resonance;
+        m_cutoff = p_art->eg_cutoff.rise;
+        m_eg_cutoff.attack = p_art->eg_cutoff.attack * mp_synth->delta_time;
+        m_eg_cutoff.decay = p_art->eg_cutoff.decay * mp_synth->delta_time;
+        m_eg_cutoff.release = p_art->eg_cutoff.release * mp_synth->delta_time;
+        m_eg_cutoff.hold = p_art->eg_cutoff.hold;
+        m_eg_cutoff.sustain = p_art->eg_cutoff.sustain;
+        m_eg_cutoff.top = p_art->eg_cutoff.top;
+        m_eg_cutoff.fall = p_art->eg_cutoff.fall;
+        m_eg_cutoff.resonance = p_art->eg_cutoff.resonance;
     }
 
     auto diff_note = 0;

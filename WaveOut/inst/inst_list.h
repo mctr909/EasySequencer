@@ -53,31 +53,35 @@ typedef struct INST_REGION {
 } INST_REGION;
 #pragma pack()
 
-typedef struct INST_ENV {
-    double ampA = 500.0;
-    double ampH = 0.0;
-    double ampD = 500.0;
-    double ampS = 1.0;
-    double ampR = 500.0;
+typedef struct INST_EG_AMP {
+    double attack = 500.0;
+    double hold = 0.0;
+    double decay = 500.0;
+    double sustain = 1.0;
+    double release = 500.0;
+} INST_EG_AMP;
 
-    double cutoffA = 500.0;
-    double cutoffH = 0.0;
-    double cutoffD = 500.0;
-    double cutoffS = 1.0;
-    double cutoffR = 500.0;
-    double cutoffRise = 1.0;
-    double cutoffTop = 1.0;
-    double cutoffFall = 1.0;
+typedef struct INST_EG_CUTOFF {
+    double attack = 500.0;
+    double hold = 0.0;
+    double decay = 500.0;
+    double sustain = 1.0;
+    double release = 500.0;
+    double rise = 1.0;
+    double top = 1.0;
+    double fall = 1.0;
     double resonance = 0.0;
+} INST_EG_CUTOFF;
 
-    double pitchA = 500.0;
-    double pitchH = 0.0;
-    double pitchD = 500.0;
-    double pitchR = 500.0;
-    double pitchRise = 1.0;
-    double pitchTop = 1.0;
-    double pitchFall = 1.0;
-} INST_ENV;
+typedef struct INST_EG_PITCH {
+    double attack = 500.0;
+    double hold = 0.0;
+    double decay = 500.0;
+    double release = 500.0;
+    double rise = 1.0;
+    double top = 1.0;
+    double fall = 1.0;
+} INST_EG_PITCH;
 
 #pragma pack(4)
 typedef struct INST_ART {
@@ -85,7 +89,9 @@ typedef struct INST_ART {
     int16 pan = 0;
     double gain = 1.0;
     double pitch = 1.0;
-    INST_ENV env;
+    INST_EG_AMP eg_amp;
+    INST_EG_CUTOFF eg_cutoff;
+    INST_EG_PITCH eg_pitch;
 } INST_ART;
 #pragma pack()
 

@@ -325,19 +325,19 @@ void InstList::loadDlsArt(LART *cLart, INST_ART *pArt) {
 
         case E_DLS_DST::EG1_ATTACK_TIME:
             ampA = pConn->getValue();
-            pArt->env.ampA = 48.0 / ampA;
+            pArt->eg_amp.attack = 48.0 / ampA;
             break;
         case E_DLS_DST::EG1_HOLD_TIME:
-            pArt->env.ampH = pConn->getValue();
+            pArt->eg_amp.hold = pConn->getValue();
             break;
         case E_DLS_DST::EG1_DECAY_TIME:
-            pArt->env.ampD = 32.0 / pConn->getValue();
+            pArt->eg_amp.decay = 32.0 / pConn->getValue();
             break;
         case E_DLS_DST::EG1_SUSTAIN_LEVEL:
-            pArt->env.ampS = pConn->getValue();
+            pArt->eg_amp.sustain = pConn->getValue();
             break;
         case E_DLS_DST::EG1_RELEASE_TIME:
-            pArt->env.ampR = 24.0 / pConn->getValue();
+            pArt->eg_amp.release = 24.0 / pConn->getValue();
             break;
 
         default:
@@ -345,7 +345,7 @@ void InstList::loadDlsArt(LART *cLart, INST_ART *pArt) {
         }
     }
 
-    pArt->env.ampH += ampA;
+    pArt->eg_amp.hold += ampA;
 }
 
 /******************************************************************************/
