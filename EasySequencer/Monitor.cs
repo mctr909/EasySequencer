@@ -16,6 +16,7 @@ namespace EasySequencer {
 
         Point mMouseDownPos;
         bool mIsDrag;
+        bool mIsMove;
         bool mIsParamChg;
         int mChannelNo;
         int mKnobNo;
@@ -34,57 +35,58 @@ namespace EasySequencer {
             Trimming = StringTrimming.EllipsisCharacter,
         };
 
-        static readonly int ChannelHeight = 40;
+        static readonly int TabHeight = 26;
+        static readonly int ChannelHeight = 32;
         static readonly float KnobRadius = 11.0f;
 
-        static readonly Rectangle MuteButton = new Rectangle(542, 8, 13, 18);
-        static readonly Rectangle InstName = new Rectangle(1014, 10, 146, 19);
+        static readonly Rectangle MuteButton = new Rectangle(496, 27, 28, 30);
+        static readonly Rectangle InstName = new Rectangle(999, 36, 219, 13);
 
-        static readonly Rectangle MeterPosL = new Rectangle(574, 7, 120, 5);
-        static readonly Rectangle MeterPosR = new Rectangle(574, 17, 120, 5);
-        static readonly Size MeterCell = new Size(4, 5);
-        static readonly double MeterMin = -24.0;
+        static readonly Rectangle MeterPosL = new Rectangle(537, 31, 144, 6);
+        static readonly Rectangle MeterPosR = new Rectangle(537, 40, 144, 6);
+        static readonly Size MeterCell = new Size(4, 6);
+        static readonly double MeterMin = -30.0;
         static readonly double MeterMax = 6.0;
 
         static readonly Rectangle[] KeyboardPos = {
-            new Rectangle( 5, 20, 6, 10),   // C
-            new Rectangle( 9,  1, 5, 19),   // Db
-            new Rectangle(12, 20, 6, 10),   // D
-            new Rectangle(16,  1, 5, 19),   // Eb
-            new Rectangle(19, 20, 6, 10),   // E
-            new Rectangle(26, 20, 6, 10),   // F
-            new Rectangle(30,  1, 5, 19),   // Gb
-            new Rectangle(33, 20, 6, 10),   // G
-            new Rectangle(37,  1, 5, 19),   // Ab
-            new Rectangle(40, 20, 6, 10),   // A
-            new Rectangle(44,  1, 5, 19),   // Bb
-            new Rectangle(47, 20, 6, 10)    // B
+            new Rectangle(40, 44, 5, 9),  // C
+            new Rectangle(43, 31, 5, 14), // Db
+            new Rectangle(46, 44, 5, 9),  // D
+            new Rectangle(49, 31, 5, 14), // Eb
+            new Rectangle(52, 44, 5, 9),  // E
+            new Rectangle(58, 44, 5, 9),  // F
+            new Rectangle(61, 31, 5, 14), // Gb
+            new Rectangle(64, 44, 5, 9),  // G
+            new Rectangle(67, 31, 5, 14), // Ab
+            new Rectangle(70, 44, 5, 9),  // A
+            new Rectangle(73, 31, 5, 14), // Bb
+            new Rectangle(76, 44, 5, 9)   // B
         };
 
         static readonly int OctWidth = (KeyboardPos[0].Width + 1) * 7;
 
         static readonly Point[] KnobPos = {
-            new Point(716, 16), // Vol.
-            new Point(749, 16), // Exp.
-            new Point(782, 16), // Pan.
-            new Point(821, 16), // Rev.
-            new Point(854, 16), // Cho.
-            new Point(887, 16), // Del.
-            new Point(926, 16), // Fc
-            new Point(959, 16), // Q
-            new Point(992, 16)  // Mod.
+            new Point(703, 43), // Vol.
+            new Point(736, 43), // Exp.
+            new Point(769, 43), // Pan.
+            new Point(805, 43), // Rev.
+            new Point(838, 43), // Cho.
+            new Point(871, 43), // Del.
+            new Point(907, 43), // Fc
+            new Point(940, 43), // Q
+            new Point(973, 43)  // Mod.
         };
 
         static readonly Point[] KnobValPos = {
-            new Point(706, 11), // Vol.
-            new Point(739, 11), // Exp.
-            new Point(772, 11), // Pan.
-            new Point(811, 11), // Rev.
-            new Point(844, 11), // Cho.
-            new Point(877, 11), // Del.
-            new Point(916, 11), // Fc
-            new Point(949, 11), // Q
-            new Point(982, 11)  // Mod.
+            new Point(694, 38), // Vol.
+            new Point(727, 38), // Exp.
+            new Point(760, 38), // Pan.
+            new Point(796, 38), // Rev.
+            new Point(829, 38), // Cho.
+            new Point(862, 38), // Del.
+            new Point(898, 38), // Fc
+            new Point(931, 38), // Q
+            new Point(964, 38)  // Mod.
         };
 
         static readonly PointF[] Knob = {
@@ -125,8 +127,10 @@ namespace EasySequencer {
         public Monitor(Sender sender) {
             InitializeComponent();
 
-            picMonitor.Width = Resources.Keyboard.Width + 2;
-            picMonitor.Height = Resources.Keyboard.Height + 2;
+            Width = Resources.piano.Width;
+            Height = Resources.piano.Height;
+            picMonitor.Width = Width;
+            picMonitor.Height = Height;
 
             picMonitor.DoubleClick += new EventHandler(picMonitor_DoubleClick);
             picMonitor.MouseDown += new MouseEventHandler(picMonitor_MouseDown);
@@ -134,7 +138,7 @@ namespace EasySequencer {
             picMonitor.MouseUp += new MouseEventHandler(picMonitor_MouseUp);
 
             picMonitor.Image = new Bitmap(picMonitor.Width, picMonitor.Height);
-            mBuffer = new DoubleBuffer(picMonitor, Resources.Keyboard);
+            mBuffer = new DoubleBuffer(picMonitor, Resources.piano);
             mSender = sender;
         }
 
@@ -150,7 +154,7 @@ namespace EasySequencer {
 
         void picMonitor_DoubleClick(object sender, EventArgs e) {
             mMouseDownPos = picMonitor.PointToClient(Cursor.Position);
-            var channel = mMouseDownPos.Y / ChannelHeight;
+            var channel = (mMouseDownPos.Y - TabHeight) / ChannelHeight;
             if (InstName.X <= mMouseDownPos.X && channel < 16) {
                 var fm = new InstList(mSender, channel);
                 fm.ShowDialog();
@@ -159,7 +163,7 @@ namespace EasySequencer {
 
         void picMonitor_MouseDown(object sender, MouseEventArgs e) {
             mMouseDownPos = picMonitor.PointToClient(Cursor.Position);
-            var knobY = mMouseDownPos.Y / ChannelHeight;
+            var knobY = (mMouseDownPos.Y - TabHeight) / ChannelHeight;
             var knobX = -1;
             for (int i = 0; i < KnobPos.Length; i++) {
                 var x = mMouseDownPos.X - KnobPos[i].X - 1.5;
@@ -169,10 +173,12 @@ namespace EasySequencer {
                     knobX = i;
                 }
             }
-            mIsDrag = 0 <= knobX;
+
+            mIsMove = mMouseDownPos.Y < TabHeight;
+            mIsDrag = 0 <= knobX && TabHeight <= mMouseDownPos.Y;
 
             mChannelNo = knobY;
-            if (MuteButton.X <= mMouseDownPos.X && mMouseDownPos.X < MuteButton.X + MuteButton.Width) {
+            if (TabHeight <= mMouseDownPos.Y && MuteButton.X <= mMouseDownPos.X && mMouseDownPos.X < MuteButton.X + MuteButton.Width) {
                 if (e.Button == MouseButtons.Right) {
                     if (1 == mSender.Channel(knobY).enable) {
                         for (int i = 0; i < 16; ++i) {
@@ -199,6 +205,7 @@ namespace EasySequencer {
         }
 
         void picMonitor_MouseUp(object sender, MouseEventArgs e) {
+            mIsMove = false;
             mIsDrag = false;
         }
 
@@ -227,6 +234,12 @@ namespace EasySequencer {
                 }
 
                 mIsParamChg = true;
+            }
+            if (mIsMove) {
+                var pos = Cursor.Position;
+                pos.X -= mMouseDownPos.X;
+                pos.Y -= mMouseDownPos.Y;
+                Location = pos;
             }
         }
 
