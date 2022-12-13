@@ -63,6 +63,16 @@ namespace EasySequencer.Properties {
         /// <summary>
         ///   型 System.Drawing.Bitmap のローカライズされたリソースを検索します。
         /// </summary>
+        internal static System.Drawing.Bitmap font_5x7 {
+            get {
+                object obj = ResourceManager.GetObject("font_5x7", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   型 System.Drawing.Bitmap のローカライズされたリソースを検索します。
+        /// </summary>
         internal static System.Drawing.Bitmap Meter {
             get {
                 object obj = ResourceManager.GetObject("Meter", resourceCulture);

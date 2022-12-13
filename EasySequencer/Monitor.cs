@@ -7,6 +7,7 @@ using System.Windows.Forms;
 
 using EasySequencer.Properties;
 using Player;
+using System.Text;
 
 namespace EasySequencer {
     public partial class Monitor : Form {
@@ -23,19 +24,21 @@ namespace EasySequencer {
         int mChangeValue;
 
         static readonly Font FONT_KNOB = new Font("ＭＳ ゴシック", 9.0f, FontStyle.Regular, GraphicsUnit.Point);
-        static readonly Font FONT_INST = new Font("Meiryo UI", 9.0f, FontStyle.Regular, GraphicsUnit.Point);
         static readonly Pen COLOR_KNOB_MARK = new Pen(Brushes.LawnGreen, 3.5f) {
             StartCap = System.Drawing.Drawing2D.LineCap.Round,
             EndCap = System.Drawing.Drawing2D.LineCap.Round
         };
         static readonly Brush COLOR_KNOB_TEXT = (new Pen(Color.FromArgb(255, 255, 255, 255), 1.0f)).Brush;
 
+        const int FONT_WIDTH = 11;
+        const int FONT_HEIGHT = 15;
         const int TAB_HEIGHT = 26;
         const int CHANNEL_HEIGHT = 32;
         const float KNOB_RADIUS = 11.0f;
         const double METER_MIN = -30.0;
         const double METER_MAX = 6.0;
 
+        static readonly Bitmap[,] BMP_FONT = new Bitmap[16, 6];
         static readonly Rectangle RECT_ON_OFF = new Rectangle(501, 33, 28, 30);
         static readonly Rectangle RECT_METER_L = new Rectangle(537, 31, 144, 6);
         static readonly Rectangle RECT_METER_R = new Rectangle(537, 40, 144, 6);
@@ -128,6 +131,22 @@ namespace EasySequencer {
             picMonitor.Image = new Bitmap(picMonitor.Width, picMonitor.Height);
             mBuffer = new DoubleBuffer(picMonitor, Resources.Monitor);
             mSender = sender;
+
+            for (int by = 0; by < 6; by++) {
+                for (int bx = 0; bx < 16; bx++) {
+                    BMP_FONT[bx, by] = new Bitmap(FONT_WIDTH, FONT_HEIGHT);
+                    var g = Graphics.FromImage(BMP_FONT[bx, by]);
+                    g.DrawImage(Resources.font_5x7, new Rectangle(0, 0, FONT_WIDTH, FONT_HEIGHT),
+                        FONT_WIDTH * bx,
+                        FONT_HEIGHT * by,
+                        FONT_WIDTH,
+                        FONT_HEIGHT,
+                        GraphicsUnit.Pixel
+                    );
+                    g.Flush();
+                    g.Dispose();
+                }
+            }
         }
 
         void Monitor_Load(object sender, EventArgs e) {
@@ -323,7 +342,18 @@ namespace EasySequencer {
                 // Mod.
                 drawKnob127(ch, 8, channel.mod);
 
-                mG.DrawString(channel.Name, FONT_INST, Brushes.Black, RECT_PRESET_NAME.X, RECT_PRESET_NAME.Y + y_ch);
+                // Preset name
+                var arrName = Encoding.ASCII.GetBytes(channel.Name);
+                for (int i = 0; i < arrName.Length && i < 20; i++) {
+                    var tx = arrName[i] % 16;
+                    var ty = (arrName[i] - 0x20) / 16;
+                    mG.DrawImageUnscaledAndClipped(BMP_FONT[tx, ty], new Rectangle(
+                        RECT_PRESET_NAME.X + FONT_WIDTH * i,
+                        RECT_PRESET_NAME.Y + y_ch,
+                        FONT_WIDTH,
+                        FONT_HEIGHT
+                    ));
+                }
             }
 
             mBuffer.Render();
