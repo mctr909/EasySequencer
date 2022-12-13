@@ -30,7 +30,7 @@
             // picMonitor
             // 
             this.picMonitor.BackColor = System.Drawing.Color.Transparent;
-            this.picMonitor.BackgroundImage = global::EasySequencer.Properties.Resources.piano;
+            this.picMonitor.BackgroundImage = global::EasySequencer.Properties.Resources.Monitor;
             this.picMonitor.BackgroundImageLayout = System.Windows.Forms.ImageLayout.None;
             this.picMonitor.InitialImage = null;
             this.picMonitor.Location = new System.Drawing.Point(0, 0);

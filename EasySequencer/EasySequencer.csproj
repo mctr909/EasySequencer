@@ -122,8 +122,7 @@
     <None Include="Resources\Meter.png" />
   </ItemGroup>
   <ItemGroup>
-    <Content Include="Resources\Keyboard.png" />
-    <None Include="Resources\piano.png" />
+    <Content Include="Resources\Monitor.png" />
     <Content Include="Resources\player.png" />
     <Content Include="Resources\player_down.png" />
     <Content Include="Resources\player_ff.png" />

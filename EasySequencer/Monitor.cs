@@ -127,8 +127,8 @@ namespace EasySequencer {
         public Monitor(Sender sender) {
             InitializeComponent();
 
-            Width = Resources.piano.Width;
-            Height = Resources.piano.Height;
+            Width = Resources.Monitor.Width;
+            Height = Resources.Monitor.Height;
             picMonitor.Width = Width;
             picMonitor.Height = Height;
 
@@ -138,7 +138,7 @@ namespace EasySequencer {
             picMonitor.MouseUp += new MouseEventHandler(picMonitor_MouseUp);
 
             picMonitor.Image = new Bitmap(picMonitor.Width, picMonitor.Height);
-            mBuffer = new DoubleBuffer(picMonitor, Resources.piano);
+            mBuffer = new DoubleBuffer(picMonitor, Resources.Monitor);
             mSender = sender;
         }
 
