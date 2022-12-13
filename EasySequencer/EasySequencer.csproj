@@ -132,6 +132,7 @@
     <Content Include="Resources\player_seek.png" />
     <Content Include="Resources\player_stop.png" />
     <Content Include="Resources\player_up.png" />
+    <None Include="Resources\track_on.png" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <PropertyGroup>

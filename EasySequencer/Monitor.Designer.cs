@@ -1,4 +1,7 @@
-﻿namespace EasySequencer {
+﻿using System.Windows.Forms;
+using System;
+
+namespace EasySequencer {
     partial class Monitor {
         /// <summary>
         /// Required designer variable.
@@ -38,6 +41,10 @@
             this.picMonitor.Size = new System.Drawing.Size(1227, 541);
             this.picMonitor.TabIndex = 1;
             this.picMonitor.TabStop = false;
+            this.picMonitor.DoubleClick += new EventHandler(picMonitor_DoubleClick);
+            this.picMonitor.MouseDown += new MouseEventHandler(picMonitor_MouseDown);
+            this.picMonitor.MouseMove += new MouseEventHandler(picMonitor_MouseMove);
+            this.picMonitor.MouseUp += new MouseEventHandler(picMonitor_MouseUp);
             // 
             // Monitor
             // 
