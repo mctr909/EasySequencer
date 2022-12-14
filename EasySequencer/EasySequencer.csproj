@@ -63,11 +63,11 @@
       <DependentUpon>Resources.resx</DependentUpon>
     </Compile>
     <Compile Include="RiffChunk.cs" />
-    <Compile Include="Form1.cs">
+    <Compile Include="Player.cs">
       <SubType>Form</SubType>
     </Compile>
-    <Compile Include="Form1.Designer.cs">
-      <DependentUpon>Form1.cs</DependentUpon>
+    <Compile Include="Player.Designer.cs">
+      <DependentUpon>Player.cs</DependentUpon>
     </Compile>
     <Compile Include="InstList.cs">
       <SubType>Form</SubType>
@@ -88,8 +88,8 @@
     <Compile Include="StatusWindow.Designer.cs">
       <DependentUpon>StatusWindow.cs</DependentUpon>
     </Compile>
-    <EmbeddedResource Include="Form1.resx">
-      <DependentUpon>Form1.cs</DependentUpon>
+    <EmbeddedResource Include="Player.resx">
+      <DependentUpon>Player.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="InstList.resx">
       <DependentUpon>InstList.cs</DependentUpon>
@@ -123,6 +123,7 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="Resources\font_5x7.png" />
+    <None Include="Resources\font_14seg.png" />
     <Content Include="Resources\Monitor.png" />
     <Content Include="Resources\player.png" />
     <Content Include="Resources\player_down.png" />

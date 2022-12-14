@@ -130,6 +130,33 @@
   <data name="track_on" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>..\Resources\track_on.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
   </data>
+  <data name="player_down" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\player_down.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="player_ff" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\player_ff.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="player_play" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\player_play.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="player_prev" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\player_prev.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="player_rew" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\player_rew.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="player_seek" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\player_seek.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="player_stop" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\player_stop.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="player_up" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\player_up.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="font_14seg" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\font_14seg.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
   <data name="font_5x7" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>..\Resources\font_5x7.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
   </data>

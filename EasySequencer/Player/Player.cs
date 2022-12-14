@@ -12,106 +12,50 @@ namespace Player {
         private long mPrevious_mSec;
         private double mCurrentTick;
         private double mPreviousTick;
-        private double mTick;
-        private double mBPM;
+        private double mBeatTick;
 
-        private int mBeat;
-        private int mMeasure;
         private int mMeasureDenomi;
         private int mMeasureNumer;
+
+        public double BPM { get; private set; }
+
+        public int Measure { get; private set; }
+
+        public int Beat { get; private set; }
 
         public int Transpose { get; set; }
 
         public double Speed { get; set; }
 
         public int Seek {
+            get { return (int)mCurrentTick; }
             set {
                 Stop();
                 if (value < 0) {
                     mCurrentTick = 0.0;
-                }
-                else if (MaxTick < value) {
+                } else if (MaxTick < value) {
                     mCurrentTick = MaxTick;
-                }
-                else {
+                } else {
                     mCurrentTick = value;
                 }
+                mPreviousTick = mCurrentTick;
                 Play();
             }
         }
 
         public int MaxTick { get; private set; }
 
-        public int CurrentTick {
-            get { return (int)mCurrentTick; }
-        }
-
         public bool IsPlay { get; private set; }
-
-        public string GetPositionText(int tick) {
-            int ticks = 0;
-            int beat = 0;
-            int measures = 0;
-            int currentTick = 0;
-            var mesure = new Mesure() {
-                denominator = 4,
-                numerator = 4
-            };
-
-            foreach (var ev in mEventList) {
-                if (tick <= currentTick) {
-                    break;
-                }
-                while (currentTick < ev.Tick) {
-                    currentTick++;
-                    ticks++;
-                    if (3840 / mesure.denominator <= ticks) {
-                        ticks -= 3840 / mesure.denominator;
-                        ++beat;
-                        if (mesure.numerator <= beat) {
-                            beat -= mesure.numerator;
-                            ++measures;
-                        }
-                    }
-                }
-                if (E_STATUS.META == ev.Type) {
-                    if (E_META.MEASURE == ev.Meta.Type) {
-                        mesure = new Mesure(ev.Meta.Int);
-                    }
-                }
-            }
-            return string.Format(
-                "{0}:{1}:{2}",
-                (measures + 1).ToString("0000"),
-                (beat + 1).ToString("00"),
-                ticks.ToString("0000")
-            );
-        }
-
-        public string PositionText {
-            get {
-                return string.Format(
-                    "{0}:{1}:{2}",
-                    (mMeasure + 1).ToString("0000"),
-                    (mBeat + 1).ToString("00"),
-                    ((int)mTick).ToString("0000")
-                );
-            }
-        }
-
-        public string TempoText {
-            get { return (mBPM * Speed).ToString("000.00"); }
-        }
 
         public Player(Sender sender) {
             mSender = sender;
             mEventList = null;
-            mBPM = 120;
+            BPM = 120;
             mMeasureDenomi = 4;
             mMeasureNumer = 4;
             IsPlay = false;
             Speed = 1.0;
-            mTask = new Task(MainProc);
+            mTask = new Task(mainProc);
         }
 
         public void SetEventList(Event[] eventList) {
@@ -126,44 +70,94 @@ namespace Player {
                 }
             }
 
-            mBPM = 120.0;
+            BPM = 120.0;
             mMeasureDenomi = 4;
             mMeasureNumer = 4;
             mCurrentTick = 0.0;
+        }
+
+        public void Reset() {
+            if (IsPlay) {
+                Stop();
+            }
+            mPrevious_mSec = 0;
+            mPreviousTick = 0.0;
+            mCurrentTick = 0.0;
+            Measure = 0;
+            Beat = 0;
+            mBeatTick = 0.0;
+            mSw = new Stopwatch();
         }
 
         public void Play() {
             if (null == mEventList) {
                 return;
             }
-            mPrevious_mSec = 0;
-            mPreviousTick = 0.0;
-            mMeasure = 0;
-            mBeat = 0;
-            mTick = 0.0;
-            mSw = new Stopwatch();
+            if (null == mSw) {
+                Reset();
+            }
+            countMesure();
             mSw.Start();
             IsPlay = true;
-            mTask = new Task(MainProc);
+            mTask = new Task(mainProc);
             mTask.Start();
         }
 
         public void Stop() {
-            IsPlay = false;
-            while (!mTask.IsCompleted) {
-                Thread.Sleep(100);
+            if (null == mSw) {
+                return;
             }
-
+            IsPlay = false;
+            mSw.Stop();
+            while (!mTask.IsCompleted) {
+                Thread.Sleep(10);
+            }
             for (byte ch = 0; ch < 16; ++ch) {
                 for (byte noteNo = 0; noteNo < 128; ++noteNo) {
                     mSender.Send(new Event(ch, E_STATUS.NOTE_OFF, noteNo));
-                    Task.Delay(10);
                 }
                 mSender.Send(new Event(ch, E_CONTROL.ALL_RESET));
             }
         }
 
-        private void MainProc() {
+        void countMesure() {
+            Measure = 0;
+            Beat = 0;
+            mBeatTick = 0;
+            int curTick = 0;
+            int preTick = 0;
+            foreach (Event ev in mEventList) {
+                curTick += ev.Tick - preTick;
+                mBeatTick += ev.Tick - preTick;
+                if (mCurrentTick <= curTick) {
+                    return;
+                }
+                preTick = ev.Tick;
+                while (3840 / mMeasureDenomi <= mBeatTick) {
+                    mBeatTick -= 3840 / mMeasureDenomi;
+                    ++Beat;
+                    if (mMeasureNumer <= Beat) {
+                        Beat -= mMeasureNumer;
+                        ++Measure;
+                    }
+                }
+                switch (ev.Type) {
+                    case E_STATUS.META:
+                        switch (ev.Meta.Type) {
+                            case E_META.MEASURE:
+                                var m = new Mesure(ev.Meta.Int);
+                                mMeasureNumer = m.numerator;
+                                mMeasureDenomi = m.denominator;
+                                break;
+                            case E_META.KEY:
+                                break;
+                        }
+                        break;
+                }
+            }
+        }
+
+        void mainProc() {
             foreach (Event e in mEventList) {
                 if (!IsPlay) {
                     return;
@@ -172,19 +166,19 @@ namespace Player {
                 var ev = e;
 
                 while (mCurrentTick < ev.Tick) {
-                    if (!IsPlay) {
+                    if (!IsPlay || MaxTick <= mCurrentTick) {
                         return;
                     }
                     var current_mSec = mSw.ElapsedMilliseconds;
                     var deltaTime = current_mSec - mPrevious_mSec;
-                    mCurrentTick += 0.096 * mBPM * Speed * deltaTime / 6.0;
-                    mTick += mCurrentTick - mPreviousTick;
-                    if (3840 / mMeasureDenomi <= mTick) {
-                        mTick -= 3840 / mMeasureDenomi;
-                        ++mBeat;
-                        if (mMeasureNumer <= mBeat) {
-                            mBeat -= mMeasureNumer;
-                            ++mMeasure;
+                    mCurrentTick += 0.096 * BPM * Speed * deltaTime / 6.0;
+                    mBeatTick += mCurrentTick - mPreviousTick;
+                    while (3840 / mMeasureDenomi <= mBeatTick) {
+                        mBeatTick -= 3840 / mMeasureDenomi;
+                        ++Beat;
+                        if (mMeasureNumer <= Beat) {
+                            Beat -= mMeasureNumer;
+                            ++Measure;
                         }
                     }
                     mPrevious_mSec = current_mSec;
@@ -231,7 +225,7 @@ namespace Player {
                 case E_STATUS.META:
                     switch (ev.Meta.Type) {
                     case E_META.TEMPO:
-                        mBPM = 60000000.0 / ev.Meta.Int;
+                        BPM = 60000000.0 / ev.Meta.Int;
                         break;
                     case E_META.MEASURE:
                         var m = new Mesure(ev.Meta.Int);
