@@ -23,7 +23,15 @@ namespace EasySequencer {
         int mChangeValue;
 
         static readonly Font FONT_KNOB = new Font("ＭＳ ゴシック", 9.0f, FontStyle.Regular, GraphicsUnit.Point);
-        static readonly Pen COLOR_KNOB_MARK = new Pen(Brushes.LawnGreen, 3.5f) {
+        static readonly Pen COLOR_KNOB_BLACK = new Pen(Brushes.Black, 3) {
+            StartCap = System.Drawing.Drawing2D.LineCap.Round,
+            EndCap = System.Drawing.Drawing2D.LineCap.Round
+        };
+        static readonly Pen COLOR_KNOB_GREEN = new Pen(Brushes.DarkOliveGreen, 3) {
+            StartCap = System.Drawing.Drawing2D.LineCap.Round,
+            EndCap = System.Drawing.Drawing2D.LineCap.Round
+        };
+        static readonly Pen COLOR_KNOB_BLUE = new Pen(Brushes.Navy, 3) {
             StartCap = System.Drawing.Drawing2D.LineCap.Round,
             EndCap = System.Drawing.Drawing2D.LineCap.Round
         };
@@ -153,7 +161,7 @@ namespace EasySequencer {
                 while (true) {
                     draw();
                     sendValue();
-                    Thread.Sleep(10);
+                    Thread.Sleep(20);
                 }
             });
         }
@@ -311,25 +319,25 @@ namespace EasySequencer {
                 ));
 
                 /*** Vol. ***/
-                drawKnob(g, ch, 0, channel.vol);
+                drawKnob(g, COLOR_KNOB_BLACK, ch, 0, channel.vol);
                 /*** Exp. ***/
-                drawKnob(g, ch, 1, channel.exp);
+                drawKnob(g, COLOR_KNOB_BLACK, ch, 1, channel.exp);
                 /*** Pan  ***/
-                drawKnob(g, ch, 2, channel.pan, "R00;L00; C ");
+                drawKnob(g, COLOR_KNOB_BLACK, ch, 2, channel.pan, "R00;L00; C ");
 
                 /*** Rev. ***/
-                drawKnob(g, ch, 3, channel.rev_send);
+                drawKnob(g, COLOR_KNOB_BLUE, ch, 3, channel.rev_send);
                 /*** Cho. ***/
-                drawKnob(g, ch, 4, channel.cho_send);
+                drawKnob(g, COLOR_KNOB_BLUE, ch, 4, channel.cho_send);
                 /*** Del. ***/
-                drawKnob(g, ch, 5, channel.del_send);
+                drawKnob(g, COLOR_KNOB_BLUE, ch, 5, channel.del_send);
 
                 /*** Fc ***/
-                drawKnob(g, ch, 6, channel.cutoff);
+                drawKnob(g, COLOR_KNOB_GREEN, ch, 6, channel.cutoff);
                 /*** Res. ***/
-                drawKnob(g, ch, 7, channel.resonance);
+                drawKnob(g, COLOR_KNOB_GREEN, ch, 7, channel.resonance);
                 /*** Mod. ***/
-                drawKnob(g, ch, 8, channel.mod);
+                drawKnob(g, COLOR_KNOB_GREEN, ch, 8, channel.mod);
 
                 /*** Preset name ***/
                 var bName = Encoding.ASCII.GetBytes(channel.Name);
@@ -348,14 +356,14 @@ namespace EasySequencer {
             mBuffer.Render();
         }
 
-        void drawKnob(Graphics g, int ch, int index, int value, string format = "000") {
+        void drawKnob(Graphics g, Pen color, int ch, int index, int value, string format = "000") {
             var y_ch = ch * CHANNEL_HEIGHT;
             var knobX = POS_KNOB_ROT[value].X * KNOB_RADIUS;
             var knobY = POS_KNOB_ROT[value].Y * KNOB_RADIUS;
             g.DrawLine(
-                COLOR_KNOB_MARK,
-                knobX * 0.5f + POS_KNOBS[index].X,
-                knobY * 0.5f + POS_KNOBS[index].Y + y_ch,
+                color,
+                knobX * 0.25f + POS_KNOBS[index].X,
+                knobY * 0.25f + POS_KNOBS[index].Y + y_ch,
                 knobX + POS_KNOBS[index].X,
                 knobY + POS_KNOBS[index].Y + y_ch
             );
