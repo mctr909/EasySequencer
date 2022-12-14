@@ -46,49 +46,49 @@ namespace EasySequencer {
         const double RMS_MAX = 0.0;
 
         static readonly Bitmap[,] BMP_FONT = new Bitmap[16, 6];
-        static readonly Rectangle RECT_ON_OFF = new Rectangle(501, 33, 28, 30);
-        static readonly Rectangle RECT_METER_L = new Rectangle(537, 31, 144, 6);
-        static readonly Rectangle RECT_METER_R = new Rectangle(537, 40, 144, 6);
+        static readonly Rectangle RECT_ON_OFF = new Rectangle(527, 33, 28, 30);
+        static readonly Rectangle RECT_METER_L = new Rectangle(563, 31, 144, 6);
+        static readonly Rectangle RECT_METER_R = new Rectangle(563, 40, 144, 6);
         static readonly Size SIZE_METER_CELL = new Size(4, 6);
-        static readonly Rectangle RECT_PRESET_NAME = new Rectangle(999, 36, 219, 13);
+        static readonly Rectangle RECT_PRESET_NAME = new Rectangle(1025, 36, 219, 13);
 
         static readonly Rectangle[] RECT_KEYS = {
-            new Rectangle(40, 44, 5, 9),  // C
-            new Rectangle(43, 31, 5, 14), // Db
-            new Rectangle(46, 44, 5, 9),  // D
-            new Rectangle(49, 31, 5, 14), // Eb
-            new Rectangle(52, 44, 5, 9),  // E
-            new Rectangle(58, 44, 5, 9),  // F
-            new Rectangle(61, 31, 5, 14), // Gb
-            new Rectangle(64, 44, 5, 9),  // G
-            new Rectangle(67, 31, 5, 14), // Ab
-            new Rectangle(70, 44, 5, 9),  // A
-            new Rectangle(73, 31, 5, 14), // Bb
-            new Rectangle(76, 44, 5, 9)   // B
+            new Rectangle(40, 44, 6, 10), // C
+            new Rectangle(44, 29, 5, 16), // Db
+            new Rectangle(47, 44, 6, 10), // D
+            new Rectangle(51, 29, 5, 16), // Eb
+            new Rectangle(54, 44, 6, 10), // E
+            new Rectangle(61, 44, 6, 10), // F
+            new Rectangle(65, 29, 5, 16), // Gb
+            new Rectangle(68, 44, 6, 10), // G
+            new Rectangle(72, 29, 5, 16), // Ab
+            new Rectangle(75, 44, 6, 10), // A
+            new Rectangle(79, 29, 5, 16), // Bb
+            new Rectangle(82, 44, 6, 10)  // B
         };
 
         static readonly Point[] POS_KNOBS = {
-            new Point(703, 43), // Vol.
-            new Point(736, 43), // Exp.
-            new Point(769, 43), // Pan
-            new Point(805, 43), // Rev.
-            new Point(838, 43), // Cho.
-            new Point(871, 43), // Del.
-            new Point(907, 43), // Fc
-            new Point(940, 43), // Res.
-            new Point(973, 43)  // Mod.
+            new Point(729, 43), // Vol.
+            new Point(762, 43), // Exp.
+            new Point(795, 43), // Pan
+            new Point(831, 43), // Rev.
+            new Point(864, 43), // Cho.
+            new Point(897, 43), // Del.
+            new Point(933, 43), // Fc
+            new Point(966, 43), // Res.
+            new Point(999, 43)  // Mod.
         };
 
         static readonly Point[] POS_KNOB_VALS = {
-            new Point(694, 38), // Vol.
-            new Point(727, 38), // Exp.
-            new Point(760, 38), // Pan
-            new Point(796, 38), // Rev.
-            new Point(829, 38), // Cho.
-            new Point(862, 38), // Del.
-            new Point(898, 38), // Fc
-            new Point(931, 38), // Res.
-            new Point(964, 38)  // Mod.
+            new Point(720, 38), // Vol.
+            new Point(753, 38), // Exp.
+            new Point(786, 38), // Pan
+            new Point(822, 38), // Rev.
+            new Point(855, 38), // Cho.
+            new Point(888, 38), // Del.
+            new Point(924, 38), // Fc
+            new Point(957, 38), // Res.
+            new Point(990, 38)  // Mod.
         };
 
         static readonly PointF[] POS_KNOB_ROT = {
@@ -268,7 +268,7 @@ namespace EasySequencer {
                 var transpose = (int)(channel.pitch * channel.bend_range / 8192.0 - 0.5);
                 for (var n = 0; n < 128; ++n) {
                     var k = n + transpose;
-                    if (k < 0 || 127 < k) {
+                    if (k < 12 || 127 < k) {
                         continue;
                     }
                     var key = RECT_KEYS[k % 12];
