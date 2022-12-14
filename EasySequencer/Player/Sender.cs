@@ -108,7 +108,7 @@ namespace Player {
         #endregion
 
         public const int CHANNEL_COUNT = 16;
-        public const int SAMPLER_COUNT = 128;
+        public const int SAMPLER_COUNT = 64;
         public const int SAMPLE_RATE = 44100;
         public const double DELTA_TIME = 1.0 / SAMPLE_RATE;
 

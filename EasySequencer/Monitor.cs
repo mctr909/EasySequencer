@@ -12,7 +12,6 @@ using System.Text;
 namespace EasySequencer {
     public partial class Monitor : Form {
         DoubleBuffer mBuffer;
-        Graphics mG;
         Sender mSender;
 
         Point mMouseDownPos;
@@ -35,8 +34,8 @@ namespace EasySequencer {
         const int TAB_HEIGHT = 26;
         const int CHANNEL_HEIGHT = 32;
         const float KNOB_RADIUS = 11.0f;
-        const double METER_MIN = -30.0;
-        const double METER_MAX = 6.0;
+        const double RMS_MIN = -36.0;
+        const double RMS_MAX = 0.0;
 
         static readonly Bitmap[,] BMP_FONT = new Bitmap[16, 6];
         static readonly Rectangle RECT_ON_OFF = new Rectangle(501, 33, 28, 30);
@@ -251,103 +250,93 @@ namespace EasySequencer {
         }
 
         void draw() {
-            mG = mBuffer.Graphics;
+            var g = mBuffer.Graphics;
 
-            drawKeyboard();
-
-            /** Meter & Knob **/
             for (var ch = 0; ch < Sender.CHANNEL_COUNT; ++ch) {
                 var channel = mSender.Channel(ch);
                 var y_ch = CHANNEL_HEIGHT * ch;
 
-                // On/Off Button
+                /*** Keyboard ***/
+                var transpose = (int)(channel.pitch * channel.bend_range / 8192.0 - 0.5);
+                for (var n = 0; n < 128; ++n) {
+                    var k = n + transpose;
+                    if (k < 0 || 127 < k) {
+                        continue;
+                    }
+                    var key = RECT_KEYS[k % 12];
+                    var kx = key.X + OCT_WIDTH * (k / 12 - 1);
+                    var ky = key.Y + y_ch;
+                    var keyState = (E_KEY_STATE)Marshal.PtrToStructure<byte>(channel.p_keyboard + n);
+                    switch (keyState) {
+                        case E_KEY_STATE.PRESS:
+                            g.FillRectangle(Brushes.Red, kx, ky, key.Width, key.Height);
+                            break;
+                        case E_KEY_STATE.HOLD:
+                            g.FillRectangle(Brushes.Blue, kx, ky, key.Width, key.Height);
+                            break;
+                    }
+                }
+
+                /*** On/Off Button ***/
                 if (1 == channel.enable) {
-                    mG.DrawImage(Resources.track_on, RECT_ON_OFF.X, RECT_ON_OFF.Y + y_ch);
+                    g.DrawImageUnscaled(Resources.track_on, RECT_ON_OFF.X, RECT_ON_OFF.Y + y_ch);
                 }
 
-                // Peak meter
-                var peakL = channel.peak_l;
-                var peakR = channel.peak_r;
-                if (peakL < 0.000001) {
-                    peakL = 0.000001;
+                /*** RMS meter ***/
+                var rmsL = Math.Sqrt(channel.rms_l) * 2;
+                var rmsR = Math.Sqrt(channel.rms_r) * 2;
+                if (rmsL < 0.0000001) {
+                    rmsL = 0.0000001;
                 }
-                if (peakR < 0.000001) {
-                    peakR = 0.000001;
+                if (rmsR < 0.0000001) {
+                    rmsR = 0.0000001;
                 }
-                peakL = 20 * Math.Log10(Math.Sqrt(peakL));
-                peakR = 20 * Math.Log10(Math.Sqrt(peakR));
-                peakL = Math.Max(METER_MIN, peakL);
-                peakR = Math.Max(METER_MIN, peakR);
-                peakL = Math.Min(METER_MAX, peakL);
-                peakR = Math.Min(METER_MAX, peakR);
-                var peakLnorm = 1.0 - (peakL - METER_MAX) / METER_MIN;
-                var peakRnorm = 1.0 - (peakR - METER_MAX) / METER_MIN;
-                var peakLpx = (int)(peakLnorm * RECT_METER_L.Width + 1) / SIZE_METER_CELL.Width * SIZE_METER_CELL.Width;
-                var peakRpx = (int)(peakRnorm * RECT_METER_R.Width + 1) / SIZE_METER_CELL.Width * SIZE_METER_CELL.Width;
-                mG.DrawImageUnscaledAndClipped(Resources.Meter, new Rectangle(
+                rmsL = 20 * Math.Log10(rmsL);
+                rmsR = 20 * Math.Log10(rmsR);
+                rmsL = Math.Max(RMS_MIN, rmsL);
+                rmsR = Math.Max(RMS_MIN, rmsR);
+                rmsL = Math.Min(RMS_MAX, rmsL);
+                rmsR = Math.Min(RMS_MAX, rmsR);
+                var normL = 1.0 - (rmsL - RMS_MAX) / RMS_MIN;
+                var normR = 1.0 - (rmsR - RMS_MAX) / RMS_MIN;
+                var rmsLpx = (int)(normL * RECT_METER_L.Width + 1) / SIZE_METER_CELL.Width * SIZE_METER_CELL.Width;
+                var rmsRpx = (int)(normR * RECT_METER_R.Width + 1) / SIZE_METER_CELL.Width * SIZE_METER_CELL.Width;
+                g.DrawImageUnscaledAndClipped(Resources.Meter, new Rectangle(
                     RECT_METER_L.X, RECT_METER_L.Y + y_ch,
-                    peakLpx, SIZE_METER_CELL.Height
+                    rmsLpx, SIZE_METER_CELL.Height
                 ));
-                mG.DrawImageUnscaledAndClipped(Resources.Meter, new Rectangle(
+                g.DrawImageUnscaledAndClipped(Resources.Meter, new Rectangle(
                     RECT_METER_R.X, RECT_METER_R.Y + y_ch,
-                    peakRpx, SIZE_METER_CELL.Height
+                    rmsRpx, SIZE_METER_CELL.Height
                 ));
 
-                // Vol.
-                drawKnob127(ch, 0, channel.vol);
-                // Exp.
-                drawKnob127(ch, 1, channel.exp);
-                // Pan
-                var knobX = POS_KNOB_ROT[channel.pan].X * KNOB_RADIUS;
-                var knobY = POS_KNOB_ROT[channel.pan].Y * KNOB_RADIUS;
-                mG.DrawLine(
-                    COLOR_KNOB_MARK,
-                    knobX * 0.5f + POS_KNOBS[2].X,
-                    knobY * 0.5f + POS_KNOBS[2].Y + y_ch,
-                    knobX + POS_KNOBS[2].X,
-                    knobY + POS_KNOBS[2].Y + y_ch
-                );
-                var pan = channel.pan - 64;
-                if (0 == pan) {
-                    mG.DrawString(
-                        " C ",
-                        FONT_KNOB, COLOR_KNOB_TEXT,
-                        POS_KNOB_VALS[2].X, POS_KNOB_VALS[2].Y + y_ch
-                    );
-                } else if (pan < 0) {
-                    mG.DrawString(
-                        "L" + (-pan).ToString("00"),
-                        FONT_KNOB, COLOR_KNOB_TEXT,
-                        POS_KNOB_VALS[2].X, POS_KNOB_VALS[2].Y + y_ch
-                    );
-                } else {
-                    mG.DrawString(
-                        "R" + pan.ToString("00"),
-                        FONT_KNOB, COLOR_KNOB_TEXT,
-                        POS_KNOB_VALS[2].X, POS_KNOB_VALS[2].Y + y_ch
-                    );
-                }
+                /*** Vol. ***/
+                drawKnob(g, ch, 0, channel.vol);
+                /*** Exp. ***/
+                drawKnob(g, ch, 1, channel.exp);
+                /*** Pan  ***/
+                drawKnob(g, ch, 2, channel.pan, "R00;L00; C ");
 
-                // Rev.
-                drawKnob127(ch, 3, channel.rev_send);
-                // Cho.
-                drawKnob127(ch, 4, channel.cho_send);
-                // Del.
-                drawKnob127(ch, 5, channel.del_send);
+                /*** Rev. ***/
+                drawKnob(g, ch, 3, channel.rev_send);
+                /*** Cho. ***/
+                drawKnob(g, ch, 4, channel.cho_send);
+                /*** Del. ***/
+                drawKnob(g, ch, 5, channel.del_send);
 
-                // Fc
-                drawKnob127(ch, 6, channel.cutoff);
-                // Res.
-                drawKnob127(ch, 7, channel.resonance);
-                // Mod.
-                drawKnob127(ch, 8, channel.mod);
+                /*** Fc ***/
+                drawKnob(g, ch, 6, channel.cutoff);
+                /*** Res. ***/
+                drawKnob(g, ch, 7, channel.resonance);
+                /*** Mod. ***/
+                drawKnob(g, ch, 8, channel.mod);
 
-                // Preset name
-                var arrName = Encoding.ASCII.GetBytes(channel.Name);
-                for (int i = 0; i < arrName.Length && i < 20; i++) {
-                    var tx = arrName[i] % 16;
-                    var ty = (arrName[i] - 0x20) / 16;
-                    mG.DrawImageUnscaledAndClipped(BMP_FONT[tx, ty], new Rectangle(
+                /*** Preset name ***/
+                var bName = Encoding.ASCII.GetBytes(channel.Name);
+                for (int i = 0; i < bName.Length && i < 20; i++) {
+                    var cx = bName[i] % 16;
+                    var cy = (bName[i] - 0x20) / 16;
+                    g.DrawImageUnscaled(BMP_FONT[cx, cy], new Rectangle(
                         RECT_PRESET_NAME.X + FONT_WIDTH * i,
                         RECT_PRESET_NAME.Y + y_ch,
                         FONT_WIDTH,
@@ -359,45 +348,22 @@ namespace EasySequencer {
             mBuffer.Render();
         }
 
-        void drawKeyboard() {
-            for (var c = 0; c < Sender.CHANNEL_COUNT; c++) {
-                var channel = mSender.Channel(c);
-                var transpose = (int)(channel.pitch * channel.bend_range / 8192.0 - 0.5);
-                var y_ch = CHANNEL_HEIGHT * c;
-                for (var n = 0; n < 128; ++n) {
-                    var k = n + transpose;
-                    if (k < 0 || 127 < k) {
-                        continue;
-                    }
-                    var key = RECT_KEYS[k % 12];
-                    var px = key.X + OCT_WIDTH * (k / 12 - 1);
-                    var py = key.Y + y_ch;
-                    var keyState = (E_KEY_STATE)Marshal.PtrToStructure<byte>(channel.p_keyboard + n);
-                    switch (keyState) {
-                        case E_KEY_STATE.PRESS:
-                            mG.FillRectangle(Brushes.Red, px, py, key.Width, key.Height);
-                            break;
-                        case E_KEY_STATE.HOLD:
-                            mG.FillRectangle(Brushes.Blue, px, py, key.Width, key.Height);
-                            break;
-                    }
-                }
-            }
-        }
-
-        void drawKnob127(int ch, int index, int value) {
+        void drawKnob(Graphics g, int ch, int index, int value, string format = "000") {
             var y_ch = ch * CHANNEL_HEIGHT;
             var knobX = POS_KNOB_ROT[value].X * KNOB_RADIUS;
             var knobY = POS_KNOB_ROT[value].Y * KNOB_RADIUS;
-            mG.DrawLine(
+            g.DrawLine(
                 COLOR_KNOB_MARK,
                 knobX * 0.5f + POS_KNOBS[index].X,
                 knobY * 0.5f + POS_KNOBS[index].Y + y_ch,
                 knobX + POS_KNOBS[index].X,
                 knobY + POS_KNOBS[index].Y + y_ch
             );
-            mG.DrawString(
-                value.ToString("000"),
+            if ("000" != format) {
+                value -= 64;
+            }
+            g.DrawString(
+                value.ToString(format),
                 FONT_KNOB, COLOR_KNOB_TEXT,
                 POS_KNOB_VALS[index].X, POS_KNOB_VALS[index].Y + y_ch
             );

@@ -116,8 +116,8 @@ private:
 private:
     const double STOP_AMP = 1 / 32768.0; /* -90db */
     const double START_AMP = 1 / 1024.0; /* -60db */
-    const double RMS_ATTENUTE = 4.62;    /* -20db/sec * -0.2310 */
-    const double PEAK_ATTENUTE = 4.62;   /* -40db/sec * -0.1155 */
+    const double RMS_ATTENUTE = 9.24;    /* -40db/sec * -0.2310 */
+    const double PEAK_ATTENUTE = 2.31;   /* -20db/sec * -0.1155 */
 
 private:
     struct DELAY {

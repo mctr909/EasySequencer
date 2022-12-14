@@ -10,6 +10,7 @@
 
 Channel::Channel(Synth* p_synth, int32 number) {
     mp_synth = p_synth;
+    param.enable = 1;
     param.p_keyboard = (byte*)calloc(128, sizeof(byte));
     this->number = (byte)number;
     p_input_l = (double*)calloc(p_synth->buffer_length, sizeof(double));
@@ -153,8 +154,6 @@ Channel::init_ctrl() {
     param.bank_lsb = 0;
     param.prog_num = 0;
     program_change(0);
-
-    param.enable = 1;
 }
 
 void
