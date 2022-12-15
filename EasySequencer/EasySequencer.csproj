@@ -77,7 +77,6 @@
     </Compile>
     <Compile Include="SF2.cs" />
     <Compile Include="Player\DoubleBuffer.cs" />
-    <Compile Include="Player\Player.cs" />
     <Compile Include="Player\Sender.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />

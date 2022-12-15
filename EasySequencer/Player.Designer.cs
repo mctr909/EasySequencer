@@ -40,13 +40,10 @@
             this.名前を付けて保存ToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.toolStripSeparator3 = new System.Windows.Forms.ToolStripSeparator();
             this.wavファイル出力ToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            this.編集EToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            this.picActive = new System.Windows.Forms.PictureBox();
             this.saveFileDialog1 = new System.Windows.Forms.SaveFileDialog();
             this.timer1 = new System.Windows.Forms.Timer(this.components);
             this.picPlayer = new System.Windows.Forms.PictureBox();
             this.menuStrip1.SuspendLayout();
-            ((System.ComponentModel.ISupportInitialize)(this.picActive)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.picPlayer)).BeginInit();
             this.SuspendLayout();
             // 
@@ -58,8 +55,7 @@
             // 
             this.menuStrip1.ImageScalingSize = new System.Drawing.Size(32, 32);
             this.menuStrip1.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
-            this.ファイルFToolStripMenuItem,
-            this.編集EToolStripMenuItem});
+            this.ファイルFToolStripMenuItem});
             this.menuStrip1.Location = new System.Drawing.Point(0, 0);
             this.menuStrip1.Name = "menuStrip1";
             this.menuStrip1.Size = new System.Drawing.Size(354, 24);
@@ -130,22 +126,6 @@
             this.wavファイル出力ToolStripMenuItem.Text = "wavファイル出力(W)";
             this.wavファイル出力ToolStripMenuItem.Click += new System.EventHandler(this.wavファイル出力ToolStripMenuItem_Click);
             // 
-            // 編集EToolStripMenuItem
-            // 
-            this.編集EToolStripMenuItem.Name = "編集EToolStripMenuItem";
-            this.編集EToolStripMenuItem.Size = new System.Drawing.Size(57, 20);
-            this.編集EToolStripMenuItem.Text = "編集(E)";
-            // 
-            // picActive
-            // 
-            this.picActive.BorderStyle = System.Windows.Forms.BorderStyle.Fixed3D;
-            this.picActive.Location = new System.Drawing.Point(0, 130);
-            this.picActive.Margin = new System.Windows.Forms.Padding(1, 2, 1, 2);
-            this.picActive.Name = "picActive";
-            this.picActive.Size = new System.Drawing.Size(354, 18);
-            this.picActive.TabIndex = 31;
-            this.picActive.TabStop = false;
-            // 
             // timer1
             // 
             this.timer1.Tick += new System.EventHandler(this.timer1_Tick);
@@ -166,8 +146,7 @@
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 12F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(354, 152);
-            this.Controls.Add(this.picActive);
+            this.ClientSize = new System.Drawing.Size(354, 125);
             this.Controls.Add(this.picPlayer);
             this.Controls.Add(this.menuStrip1);
             this.DoubleBuffered = true;
@@ -178,7 +157,6 @@
             this.Load += new System.EventHandler(this.Form1_Load);
             this.menuStrip1.ResumeLayout(false);
             this.menuStrip1.PerformLayout();
-            ((System.ComponentModel.ISupportInitialize)(this.picActive)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.picPlayer)).EndInit();
             this.ResumeLayout(false);
             this.PerformLayout();
@@ -193,14 +171,12 @@
 		private System.Windows.Forms.ToolStripMenuItem 開くOToolStripMenuItem;
 		private System.Windows.Forms.ToolStripMenuItem 上書き保存SToolStripMenuItem;
 		private System.Windows.Forms.ToolStripMenuItem 名前を付けて保存ToolStripMenuItem;
-		private System.Windows.Forms.ToolStripMenuItem 編集EToolStripMenuItem;
 		private System.Windows.Forms.ToolStripSeparator toolStripSeparator1;
 		private System.Windows.Forms.ToolStripSeparator toolStripSeparator2;
 		private System.Windows.Forms.ToolStripSeparator toolStripSeparator3;
 		private System.Windows.Forms.ToolStripMenuItem wavファイル出力ToolStripMenuItem;
 		private System.Windows.Forms.SaveFileDialog saveFileDialog1;
 		private System.Windows.Forms.Timer timer1;
-        private System.Windows.Forms.PictureBox picActive;
         private System.Windows.Forms.PictureBox picPlayer;
     }
 }

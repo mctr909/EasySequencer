@@ -2,7 +2,10 @@
 using System.Windows.Forms;
 using System.IO;
 using System.Drawing;
+using System.Diagnostics;
 using System.Text;
+using System.Threading;
+using System.Threading.Tasks;
 
 using Player;
 using EasySequencer.Properties;
@@ -30,17 +33,54 @@ namespace EasySequencer {
 
         SMF mSMF;
         Sender mMidiSender;
-        global::Player.Player mPlayer;
+        Stopwatch mSw;
+        Task mTask;
+        Event[] mEventList;
+
+        bool mIsPlay = false;
+        bool mIsSeek = false;
+        int mTranspose = 0;
+        double mSpeed = 1.0;
+
+        long mPrevious_mSec;
+        double mCurrentTick;
+        double mPreviousTick;
+        double mBeatTick;
+        double mBPM;
+        int mMeasureDenomi;
+        int mMeasureNumer;
+        int mMeasure;
+        int mBeat;
+        int mMaxTick;
+        
         Monitor mMonitor;
         Bitmap mBmp;
         Graphics mG;
-        Bitmap mBmpActive;
-        Graphics mGActive;
         string mDlsFilePath;
-        bool mIsSeek = false;
         static readonly Bitmap[,] BMP_FONT = new Bitmap[16, 6];
         Point mMouseDownPos;
         bool mMouseDown = false;
+
+        int Seek {
+            get { return (int)mCurrentTick; }
+            set {
+                var isPlay = mIsPlay;
+                stop();
+                if (value < 0) {
+                    mCurrentTick = 0.0;
+                } else if (mMaxTick < value) {
+                    mCurrentTick = mMaxTick;
+                } else {
+                    mCurrentTick = value;
+                }
+                mPreviousTick = mCurrentTick;
+                if (isPlay) {
+                    play();
+                } else {
+                    countMesure();
+                }
+            }
+        }
 
         public Player() {
             InitializeComponent();
@@ -71,16 +111,15 @@ namespace EasySequencer {
                 return;
             }
 
-            mPlayer = new global::Player.Player(mMidiSender);
+            reset();
+
             mMonitor = new Monitor(mMidiSender);
             mMonitor.Show();
 
             mBmp = new Bitmap(picPlayer.Width, picPlayer.Height);
             mG = Graphics.FromImage(mBmp);
-            mBmpActive = new Bitmap(picActive.Width, picActive.Height);
-            mGActive = Graphics.FromImage(mBmpActive);
 
-            timer1.Interval = 25;
+            timer1.Interval = 50;
             timer1.Enabled = true;
             timer1.Start();
         }
@@ -93,19 +132,18 @@ namespace EasySequencer {
                 return;
             }
 
-            mPlayer.Reset();
+            reset();
 
             try {
                 mSMF = new SMF(filePath);
-                mPlayer.SetEventList(mSMF.EventList);
+                setEventList(mSMF.EventList);
                 Text = Path.GetFileNameWithoutExtension(filePath);
-            }
-            catch (Exception ex) {
+            } catch (Exception ex) {
                 MessageBox.Show(ex.ToString());
             }
         }
 
-        private void wavファイル出力ToolStripMenuItem_Click(Object sender, EventArgs e) {
+        private void wavファイル出力ToolStripMenuItem_Click(object sender, EventArgs e) {
             if (null == mSMF || null == mMidiSender || Sender.IsFileOutput) {
                 return;
             }
@@ -125,55 +163,55 @@ namespace EasySequencer {
                 mIsSeek = true;
             }
             if (RECT_FF.Contains(mMouseDownPos)) {
-                mPlayer.Speed = 8.0;
+                mSpeed = 8.0;
             }
         }
 
         private void picPlayer_MouseUp(object sender, MouseEventArgs e) {
             mMouseDown = false;
             if (RECT_PREV.Contains(mMouseDownPos)) {
-                if (mPlayer.IsPlay) {
-                    mPlayer.Reset();
-                    mPlayer.Play();
+                if (mIsPlay) {
+                    reset();
+                    play();
                 } else {
-                    mPlayer.Reset();
+                    reset();
                 }
             }
-            if (RECT_STOP.Contains(mMouseDownPos) && mPlayer.IsPlay) {
-                mPlayer.Stop();
+            if (RECT_STOP.Contains(mMouseDownPos) && mIsPlay) {
+                stop();
             }
-            if (RECT_PLAY.Contains(mMouseDownPos) && !mPlayer.IsPlay) {
-                mPlayer.Play();
+            if (RECT_PLAY.Contains(mMouseDownPos) && !mIsPlay) {
+                play();
             }
             if (RECT_FF.Contains(mMouseDownPos)) {
-                mPlayer.Speed = 1.0;
+                mSpeed = 1.0;
             }
             if (RECT_KEY_DOWN.Contains(mMouseDownPos)) {
-                if (mPlayer.IsPlay) {
-                    mPlayer.Stop();
-                    mPlayer.Transpose--;
-                    mPlayer.Play();
+                if (mIsPlay) {
+                    stop();
+                    mTranspose--;
+                    play();
                 } else {
-                    mPlayer.Transpose--;
+                    mTranspose--;
                 }
             }
             if (RECT_KEY_UP.Contains(mMouseDownPos)) {
-                if (mPlayer.IsPlay) {
-                    mPlayer.Stop();
-                    mPlayer.Transpose++;
-                    mPlayer.Play();
+                if (mIsPlay) {
+                    stop();
+                    mTranspose++;
+                    play();
                 } else {
-                    mPlayer.Transpose++;
+                    mTranspose++;
                 }
             }
             if (RECT_SPEED_DOWN.Contains(mMouseDownPos)) {
-                if (0.25 < mPlayer.Speed) {
-                    mPlayer.Speed -= 0.125;
+                if (0.25 < mSpeed) {
+                    mSpeed -= 0.125;
                 }
             }
             if (RECT_SPEED_UP.Contains(mMouseDownPos)) {
-                if (mPlayer.Speed < 2.0) {
-                    mPlayer.Speed += 0.125;
+                if (mSpeed < 2.0) {
+                    mSpeed += 0.125;
                 }
             }
             if (mIsSeek) {
@@ -185,21 +223,21 @@ namespace EasySequencer {
                 if (RECT_SEEK.Width - 1 < pos.X) {
                     pos.X = RECT_SEEK.Width - 1;
                 }
-                mPlayer.Seek = mPlayer.MaxTick * pos.X / RECT_SEEK.Width;
+                Seek = mMaxTick * pos.X / RECT_SEEK.Width;
             }
             mIsSeek = false;
         }
 
         private void timer1_Tick(object sender, EventArgs e) {
             mG.Clear(Color.Transparent);
-            draw7seg(POS_MEASURE, (mPlayer.Measure + 1).ToString().PadLeft(4, ' '));
-            draw7seg(POS_BEAT, (mPlayer.Beat + 1).ToString().PadLeft(2, ' '));
-            draw7seg(POS_TEMPO, 2 < mPlayer.Speed ? "----" :
-                (mPlayer.BPM * mPlayer.Speed * 10).ToString("0").PadLeft(4, ' '));
-            draw7seg(POS_SPEED, (mPlayer.Speed * 100).ToString("0").PadLeft(3, ' '));
-            draw7seg(POS_TRANSPOSE, mPlayer.Transpose.ToString("+0;-0;0").PadLeft(3, ' '));
+            draw7seg(POS_MEASURE, (mMeasure + 1).ToString().PadLeft(4, ' '));
+            draw7seg(POS_BEAT, (mBeat + 1).ToString().PadLeft(2, ' '));
+            draw7seg(POS_TEMPO, 2 < mSpeed ? "----" :
+                (mBPM * mSpeed * 10).ToString("0").PadLeft(4, ' '));
+            draw7seg(POS_SPEED, (mSpeed * 100).ToString("0").PadLeft(3, ' '));
+            draw7seg(POS_TRANSPOSE, mTranspose.ToString("+0;-0;0").PadLeft(3, ' '));
 
-            if (mPlayer.IsPlay) {
+            if (mIsPlay) {
                 mG.DrawImageUnscaled(Resources.player_play, RECT_PLAY.X, RECT_PLAY.Y);
             }
 
@@ -232,6 +270,7 @@ namespace EasySequencer {
                     mG.DrawImageUnscaled(Resources.player_up, RECT_KEY_UP.X, RECT_KEY_UP.Y);
                 }
             }
+
             if (mIsSeek) {
                 var pos = picPlayer.PointToClient(Cursor.Position);
                 if (pos.X < RECT_SEEK.X) {
@@ -243,19 +282,13 @@ namespace EasySequencer {
                 mG.DrawImageUnscaled(Resources.player_seek, pos.X - Resources.player_seek.Width / 2, RECT_SEEK.Y);
             } else {
                 var seek = 0;
-                if (0 < mPlayer.MaxTick) {
-                    seek = mPlayer.Seek * RECT_SEEK.Width / mPlayer.MaxTick;
+                if (0 < mMaxTick) {
+                    seek = Seek * RECT_SEEK.Width / mMaxTick;
                 }
                 mG.DrawImageUnscaled(Resources.player_seek, RECT_SEEK.X + seek - Resources.player_seek.Width / 2, RECT_SEEK.Y);
             }
 
-            mGActive.Clear(Color.Transparent);
-            mGActive.FillRectangle(Brushes.LightGreen, 0, 0,
-                (float)mMidiSender.ActiveCount * mBmpActive.Width / Sender.SAMPLER_COUNT,
-                mBmpActive.Height);
-
             picPlayer.Image = mBmp;
-            picActive.Image = mBmpActive;
         }
 
         void draw7seg(Point pos, string value) {
@@ -267,6 +300,192 @@ namespace EasySequencer {
                     pos.X + FONT_WIDTH * i, pos.Y,
                     FONT_WIDTH, FONT_HEIGHT
                 ));
+            }
+        }
+
+        void reset() {
+            if (mIsPlay) {
+                stop();
+            }
+            mBPM = 120;
+            mMeasureDenomi = 4;
+            mMeasureNumer = 4;
+            mPrevious_mSec = 0;
+            mPreviousTick = 0.0;
+            mCurrentTick = 0.0;
+            mMeasure = 0;
+            mBeat = 0;
+            mBeatTick = 0.0;
+            mSw = new Stopwatch();
+        }
+
+        void play() {
+            if (null == mEventList) {
+                return;
+            }
+            countMesure();
+            mSw.Start();
+            mIsPlay = true;
+            mTask = new Task(mainProc);
+            mTask.Start();
+        }
+
+        void stop() {
+            if (null == mSw || null == mTask) {
+                return;
+            }
+            mIsPlay = false;
+            mSw.Stop();
+            while (!mTask.IsCompleted) {
+                Thread.Sleep(10);
+            }
+            for (byte ch = 0; ch < Sender.CHANNEL_COUNT; ++ch) {
+                for (byte noteNo = 0; noteNo < 128; ++noteNo) {
+                    mMidiSender.Send(new Event(ch, E_STATUS.NOTE_OFF, noteNo));
+                }
+                mMidiSender.Send(new Event(ch, E_CONTROL.ALL_RESET));
+            }
+        }
+
+        void setEventList(Event[] eventList) {
+            mEventList = eventList;
+            mMaxTick = 0;
+            foreach (var ev in eventList) {
+                if (E_STATUS.NOTE_OFF == ev.Type || E_STATUS.NOTE_ON == ev.Type) {
+                    if (mMaxTick < ev.Tick) {
+                        mMaxTick = ev.Tick;
+                    }
+                }
+            }
+            mBPM = 120.0;
+            mMeasureDenomi = 4;
+            mMeasureNumer = 4;
+            mCurrentTick = 0.0;
+        }
+
+        void countMesure() {
+            if (null == mEventList) {
+                return;
+            }
+            mMeasure = 0;
+            mBeat = 0;
+            mBeatTick = 0;
+            int curTick = 0;
+            int preTick = 0;
+            foreach (Event ev in mEventList) {
+                curTick += ev.Tick - preTick;
+                mBeatTick += ev.Tick - preTick;
+                if (mCurrentTick <= curTick) {
+                    return;
+                }
+                preTick = ev.Tick;
+                while (3840 / mMeasureDenomi <= mBeatTick) {
+                    mBeatTick -= 3840 / mMeasureDenomi;
+                    ++mBeat;
+                    if (mMeasureNumer <= mBeat) {
+                        mBeat -= mMeasureNumer;
+                        ++mMeasure;
+                    }
+                }
+                switch (ev.Type) {
+                case E_STATUS.META:
+                    switch (ev.Meta.Type) {
+                    case E_META.MEASURE:
+                        var m = new Mesure(ev.Meta.Int);
+                        mMeasureNumer = m.numerator;
+                        mMeasureDenomi = m.denominator;
+                        break;
+                    case E_META.KEY:
+                        break;
+                    }
+                    break;
+                }
+            }
+        }
+
+        void mainProc() {
+            foreach (Event e in mEventList) {
+                if (!mIsPlay) {
+                    return;
+                }
+
+                var ev = e;
+
+                while (mCurrentTick < ev.Tick) {
+                    if (!mIsPlay || mMaxTick <= mCurrentTick) {
+                        return;
+                    }
+                    var current_mSec = mSw.ElapsedMilliseconds;
+                    var deltaTime = current_mSec - mPrevious_mSec;
+                    mCurrentTick += 0.096 * mBPM * mSpeed * deltaTime / 6.0;
+                    mBeatTick += mCurrentTick - mPreviousTick;
+                    while (3840 / mMeasureDenomi <= mBeatTick) {
+                        mBeatTick -= 3840 / mMeasureDenomi;
+                        ++mBeat;
+                        if (mMeasureNumer <= mBeat) {
+                            mBeat -= mMeasureNumer;
+                            ++mMeasure;
+                        }
+                    }
+                    mPrevious_mSec = current_mSec;
+                    mPreviousTick = mCurrentTick;
+                    Thread.Sleep(1);
+                }
+
+                switch (ev.Type) {
+                case E_STATUS.NOTE_OFF: {
+                    var chParam = mMidiSender.Channel(ev.Channel);
+                    if (0 == chParam.is_drum) {
+                        if ((ev.Data[1] + mTranspose) < 0 || 127 < (ev.Data[1] + mTranspose)) {
+                            continue;
+                        } else {
+                            ev = new Event(ev.Channel, E_STATUS.NOTE_OFF, ev.Data[1] + mTranspose, ev.Data[2]);
+                        }
+                    } else {
+                        ev = new Event(ev.Channel, E_STATUS.NOTE_OFF, ev.Data[1], ev.Data[2]);
+                    }
+                }
+                break;
+                case E_STATUS.NOTE_ON: {
+                    var chParam = mMidiSender.Channel(ev.Channel);
+                    if (ev.Data[2] != 0) {
+                        if (0.25 * 960 < (mCurrentTick - ev.Tick)) {
+                            continue;
+                        }
+                        if (0 == chParam.enable) {
+                            continue;
+                        }
+                    }
+                    if (0 == chParam.is_drum) {
+                        if ((ev.Data[1] + mTranspose) < 0 || 127 < (ev.Data[1] + mTranspose)) {
+                            continue;
+                        } else {
+                            ev = new Event(ev.Channel, E_STATUS.NOTE_ON, ev.Data[1] + mTranspose, ev.Data[2]);
+                        }
+                    } else {
+                        ev = new Event(ev.Channel, E_STATUS.NOTE_ON, ev.Data[1], ev.Data[2]);
+                    }
+                }
+                break;
+
+                case E_STATUS.META:
+                    switch (ev.Meta.Type) {
+                    case E_META.TEMPO:
+                        mBPM = 60000000.0 / ev.Meta.Int;
+                        break;
+                    case E_META.MEASURE:
+                        var m = new Mesure(ev.Meta.Int);
+                        mMeasureNumer = m.numerator;
+                        mMeasureDenomi = m.denominator;
+                        break;
+                    case E_META.KEY:
+                        break;
+                    }
+                    break;
+                }
+
+                /*** send message ***/
+                mMidiSender.Send(ev);
             }
         }
     }
