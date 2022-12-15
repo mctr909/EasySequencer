@@ -7,10 +7,9 @@ using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 
-using Player;
 using EasySequencer.Properties;
 
-namespace EasySequencer {
+namespace Player {
     public partial class Player : Form {
         const int FONT_WIDTH = 16;
         const int FONT_HEIGHT = 26;
@@ -52,8 +51,8 @@ namespace EasySequencer {
         int mMeasure;
         int mBeat;
         int mMaxTick;
-        
-        Monitor mMonitor;
+
+        EasySequencer.Monitor mMonitor;
         Bitmap mBmp;
         Graphics mG;
         string mDlsFilePath;
@@ -113,7 +112,7 @@ namespace EasySequencer {
 
             reset();
 
-            mMonitor = new Monitor(mMidiSender);
+            mMonitor = new EasySequencer.Monitor(mMidiSender);
             mMonitor.Show();
 
             mBmp = new Bitmap(picPlayer.Width, picPlayer.Height);

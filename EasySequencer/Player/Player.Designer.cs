@@ -1,5 +1,4 @@
-﻿namespace EasySequencer
-{
+﻿namespace Player {
 	partial class Player
 	{
 		/// <summary>
