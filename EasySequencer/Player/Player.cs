@@ -30,6 +30,7 @@ namespace Player {
         public int Seek {
             get { return (int)mCurrentTick; }
             set {
+                var isPlay = IsPlay;
                 Stop();
                 if (value < 0) {
                     mCurrentTick = 0.0;
@@ -39,7 +40,11 @@ namespace Player {
                     mCurrentTick = value;
                 }
                 mPreviousTick = mCurrentTick;
-                Play();
+                if (isPlay) {
+                    Play();
+                } else {
+                    countMesure();
+                }
             }
         }
 
@@ -121,6 +126,9 @@ namespace Player {
         }
 
         void countMesure() {
+            if (null == mEventList) {
+                return;
+            }
             Measure = 0;
             Beat = 0;
             mBeatTick = 0;
