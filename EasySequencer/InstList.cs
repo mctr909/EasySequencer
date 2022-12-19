@@ -3,7 +3,8 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Windows.Forms;
 
-using Player;
+using SMF;
+using WaveoutDll;
 
 namespace EasySequencer {
     public partial class InstList : Form {

@@ -3,7 +3,8 @@ using System.Collections.Generic;
 using System.Runtime.InteropServices;
 using System.IO;
 using System.Text;
-using Player;
+
+using WaveoutDll;
 
 namespace SF2 {
     #region enum

@@ -8,6 +8,8 @@ using System.Threading;
 using System.Threading.Tasks;
 
 using EasySequencer.Properties;
+using SMF;
+using WaveoutDll;
 
 namespace Player {
     public partial class Player : Form {
@@ -30,7 +32,7 @@ namespace Player {
         readonly Rectangle RECT_KEY_UP = new Rectangle(316, 53, 29, 18);
         readonly Rectangle RECT_SEEK = new Rectangle(12, 76, 330, 19);
 
-        SMF mSMF;
+        SMF.File mSMF;
         Sender mMidiSender;
         Stopwatch mSw;
         Task mTask;
@@ -127,14 +129,14 @@ namespace Player {
             openFileDialog1.Filter = "MIDIファイル(*.mid)|*.mid";
             openFileDialog1.ShowDialog();
             var filePath = openFileDialog1.FileName;
-            if (string.IsNullOrWhiteSpace(filePath) || !File.Exists(filePath)) {
+            if (string.IsNullOrWhiteSpace(filePath) || !System.IO.File.Exists(filePath)) {
                 return;
             }
 
             reset();
 
             try {
-                mSMF = new SMF(filePath);
+                mSMF = new SMF.File(filePath);
                 setEventList(mSMF.EventList);
                 Text = Path.GetFileNameWithoutExtension(filePath);
             } catch (Exception ex) {

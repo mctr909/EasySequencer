@@ -1,13 +1,14 @@
 ﻿using System;
 using System.Drawing;
+using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Runtime.InteropServices;
 using System.Windows.Forms;
 
 using EasySequencer.Properties;
-using Player;
-using System.Text;
+using SMF;
+using WaveoutDll;
 
 namespace EasySequencer {
     public partial class Monitor : Form {

@@ -4,8 +4,9 @@ using System.Threading.Tasks;
 using System.Runtime.InteropServices;
 
 using EasySequencer;
+using SMF;
 
-namespace Player {
+namespace WaveoutDll {
     #region struct
     [StructLayout(LayoutKind.Sequential, Pack = 4)]
     public struct INST_INFO {
@@ -156,7 +157,7 @@ namespace Player {
             return true;
         }
 
-        public void FileOut(string wavetablePath, string filePath, SMF smf) {
+        public void FileOut(string wavetablePath, string filePath, SMF.File smf) {
             IsFileOutput = true;
 
             var ms = new MemoryStream();

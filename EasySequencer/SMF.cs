@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Text;
 using System.IO;
 
-namespace Player {
+namespace SMF {
     public enum E_STATUS : byte {
         NOTE_OFF  = 0x80,
         NOTE_ON   = 0x90,
@@ -511,7 +511,7 @@ namespace Player {
         }
     }
 
-    class Utils {
+    internal class Utils {
         public static byte[] GetDeltaBytes(int value) {
             if (0 < (value >> 21)) {
                 return new byte[] {
@@ -653,7 +653,7 @@ namespace Player {
         }
     }
 
-    public class SMF {
+    public class File {
         public enum E_FORMAT : ushort {
             FORMAT0 = 0x0000,
             FORMAT1 = 0x0001,
@@ -716,12 +716,12 @@ namespace Player {
             }
         }
 
-        public SMF(E_FORMAT format = E_FORMAT.FORMAT1, int ticks = 960) {
+        public File(E_FORMAT format = E_FORMAT.FORMAT1, int ticks = 960) {
             mHead = new Header(format, 0, ticks);
             mTracks = new List<List<Event>>();
         }
 
-        public SMF(string filePath) {
+        public File(string filePath) {
             var fs = new FileStream(filePath, FileMode.Open);
             var br = new BinaryReader(fs);
 
