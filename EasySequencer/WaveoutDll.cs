@@ -28,7 +28,7 @@ namespace WaveoutDll {
         }
     }
     [StructLayout(LayoutKind.Sequential, Pack = 4)]
-    public struct CHANNEL_PARAM {
+    public struct TRACK_PARAM {
         public byte is_drum;
         public byte bank_msb;
         public byte bank_lsb;
@@ -108,7 +108,7 @@ namespace WaveoutDll {
         static extern void send_message(byte port, IntPtr pMsg);
         #endregion
 
-        public const int CHANNEL_COUNT = 16;
+        public const int TRACK_COUNT = 256;
         public const int SAMPLER_COUNT = 64;
         public const int SAMPLE_RATE = 44100;
         public const double DELTA_TIME = 1.0 / SAMPLE_RATE;
@@ -125,19 +125,20 @@ namespace WaveoutDll {
         public INST_INFO Instruments(int num) {
             return Marshal.PtrToStructure<INST_INFO>(mpInstList[num]);
         }
-        public CHANNEL_PARAM Channel(int num) {
-            return Marshal.PtrToStructure<CHANNEL_PARAM>(mpChParam[num]);
+        public TRACK_PARAM Track(int num) {
+            return Marshal.PtrToStructure<TRACK_PARAM>(mpChParam[num]);
         }
-        public void MuteChannel(int num, bool mute) {
-            Send(new Event(num, E_CONTROL.ALL_NOTE_OFF, mute ? 127 : 0));
+        public void MuteTrack(int num, bool mute) {
+            Send((byte)(num / 16), new Event(num % 16, E_CONTROL.ALL_NOTE_OFF, mute ? 127 : 0));
         }
-        public void DrumChannel(int num, bool isDrum) {
-            Send(new Event(num, E_CONTROL.DRUM, isDrum ? 127 : 0));
+        public void RythmTrack(byte port, int chNum, bool isDrum) {
+            Send(port, new Event(chNum, E_CONTROL.DRUM, isDrum ? 127 : 0));
         }
 
         public Sender() {
             mpMessage = Marshal.AllocHGlobal(1024);
         }
+        
         public void Dispose() {
             synth_close();
             Marshal.FreeHGlobal(mpMessage);
@@ -152,8 +153,8 @@ namespace WaveoutDll {
             mSysValue = Marshal.PtrToStructure<SYSTEM_VALUE>(ptrSysVal);
             mpInstList = new IntPtr[InstCount];
             Marshal.Copy(mSysValue.p_inst_list, mpInstList, 0, InstCount);
-            mpChParam = new IntPtr[CHANNEL_COUNT];
-            Marshal.Copy(mSysValue.p_channel_params, mpChParam, 0, CHANNEL_COUNT);
+            mpChParam = new IntPtr[TRACK_COUNT];
+            Marshal.Copy(mSysValue.p_channel_params, mpChParam, 0, TRACK_COUNT);
             return true;
         }
 
@@ -192,9 +193,9 @@ namespace WaveoutDll {
             });
         }
 
-        public void Send(Event msg) {
+        public void Send(byte port, Event msg) {
             Marshal.Copy(msg.Data, 0, mpMessage, msg.Data.Length);
-            send_message(0, mpMessage);
+            send_message(port, mpMessage);
         }
     }
 }

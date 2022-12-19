@@ -45,11 +45,11 @@ namespace EasySequencer {
                 if (!mInstList[cat].ContainsKey(id)) {
                     mInstList[cat].Add(id, nam);
                 }
-                var chParam = mSender.Channel(mChNum);
-                if (chParam.is_drum == inst.is_drum &&
-                    chParam.prog_num == inst.prog_num &&
-                    chParam.bank_msb == inst.bank_msb &&
-                    chParam.bank_lsb == inst.bank_lsb
+                var param = mSender.Track(mChNum);
+                if (param.is_drum == inst.is_drum &&
+                    param.prog_num == inst.prog_num &&
+                    param.bank_msb == inst.bank_msb &&
+                    param.bank_lsb == inst.bank_lsb
                 ) {
                     selectedCategory = cat;
                     selectedInst = mInstList[cat].Count - 1;
@@ -82,10 +82,12 @@ namespace EasySequencer {
             }
             var list = mInstList[(string)cmbCategory.SelectedItem].ToArray();
             var inst = list[(lstInst.SelectedIndex < list.Count()) ? lstInst.SelectedIndex : list.Count() - 1];
-            mSender.DrumChannel(mChNum, inst.Key.isDrum != 0);
-            mSender.Send(new Event(mChNum, E_CONTROL.BANK_MSB, inst.Key.bankMSB));
-            mSender.Send(new Event(mChNum, E_CONTROL.BANK_LSB, inst.Key.bankLSB));
-            mSender.Send(new Event(mChNum, E_STATUS.PROGRAM, inst.Key.progNum));
+            var port = (byte)(mChNum / 16);
+            var chNum = mChNum % 16;
+            mSender.RythmTrack(port, chNum, inst.Key.isDrum != 0);
+            mSender.Send(port, new Event(chNum, E_CONTROL.BANK_MSB, inst.Key.bankMSB));
+            mSender.Send(port, new Event(chNum, E_CONTROL.BANK_LSB, inst.Key.bankLSB));
+            mSender.Send(port, new Event(chNum, E_STATUS.PROGRAM, inst.Key.progNum));
         }
 
         private void btnCommit_Click(object sender, EventArgs e) {

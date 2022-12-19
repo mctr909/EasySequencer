@@ -19,8 +19,8 @@ namespace EasySequencer {
         bool mIsDrag;
         bool mIsMove;
         bool mIsParamChg;
-        int mChannelNo;
-        int mKnobNo;
+        int mTrackNum;
+        int mKnobNum;
         int mChangeValue;
 
         static readonly Font FONT_KNOB = new Font("ＭＳ ゴシック", 9.0f, FontStyle.Regular, GraphicsUnit.Point);
@@ -40,8 +40,9 @@ namespace EasySequencer {
 
         const int FONT_WIDTH = 11;
         const int FONT_HEIGHT = 15;
+        const int DISP_TRACKS = 16;
         const int TAB_HEIGHT = 26;
-        const int CHANNEL_HEIGHT = 32;
+        const int TRACK_HEIGHT = 32;
         const float KNOB_RADIUS = 11.0f;
         const double RMS_MIN = -36.0;
         const double RMS_MAX = 0.0;
@@ -169,7 +170,7 @@ namespace EasySequencer {
 
         void picMonitor_DoubleClick(object sender, EventArgs e) {
             mMouseDownPos = picMonitor.PointToClient(Cursor.Position);
-            var channel = (mMouseDownPos.Y - TAB_HEIGHT) / CHANNEL_HEIGHT;
+            var channel = (mMouseDownPos.Y - TAB_HEIGHT) / TRACK_HEIGHT;
             if (RECT_PRESET_NAME.X <= mMouseDownPos.X && channel < 16) {
                 var fm = new InstList(mSender, channel);
                 fm.ShowDialog();
@@ -178,11 +179,11 @@ namespace EasySequencer {
 
         void picMonitor_MouseDown(object sender, MouseEventArgs e) {
             mMouseDownPos = picMonitor.PointToClient(Cursor.Position);
-            var knobY = (mMouseDownPos.Y - TAB_HEIGHT) / CHANNEL_HEIGHT;
+            var knobY = (mMouseDownPos.Y - TAB_HEIGHT) / TRACK_HEIGHT;
             var knobX = -1;
             for (int i = 0; i < POS_KNOBS.Length; i++) {
                 var x = mMouseDownPos.X - POS_KNOBS[i].X - 1.5;
-                var y = mMouseDownPos.Y - knobY * CHANNEL_HEIGHT - POS_KNOBS[i].Y;
+                var y = mMouseDownPos.Y - knobY * TRACK_HEIGHT - POS_KNOBS[i].Y;
                 var r = Math.Sqrt(x * x + y * y);
                 if (r <= KNOB_RADIUS + 5) {
                     knobX = i;
@@ -192,31 +193,32 @@ namespace EasySequencer {
             mIsMove = mMouseDownPos.Y < TAB_HEIGHT;
             mIsDrag = 0 <= knobX && TAB_HEIGHT <= mMouseDownPos.Y;
 
-            mChannelNo = knobY;
             if (TAB_HEIGHT <= mMouseDownPos.Y && RECT_ON_OFF.X <= mMouseDownPos.X && mMouseDownPos.X < RECT_ON_OFF.X + RECT_ON_OFF.Width) {
                 if (e.Button == MouseButtons.Right) {
-                    if (1 == mSender.Channel(knobY).enable) {
+                    if (1 == mSender.Track(knobY).enable) {
                         for (int i = 0; i < 16; ++i) {
                             if (knobY == i) {
-                                mSender.MuteChannel(i, true);
+                                mSender.MuteTrack(i, true);
                             } else {
-                                mSender.MuteChannel(i, false);
+                                mSender.MuteTrack(i, false);
                             }
                         }
                     } else {
                         for (int i = 0; i < 16; ++i) {
                             if (knobY == i) {
-                                mSender.MuteChannel(i, false);
+                                mSender.MuteTrack(i, false);
                             } else {
-                                mSender.MuteChannel(i, true);
+                                mSender.MuteTrack(i, true);
                             }
                         }
                     }
                 } else {
-                    mSender.MuteChannel(knobY, 1 == mSender.Channel(knobY).enable);
+                    mSender.MuteTrack(knobY, 1 == mSender.Track(knobY).enable);
                 }
             }
-            mKnobNo = knobX;
+
+            mKnobNum = knobX;
+            mTrackNum = knobY;
         }
 
         void picMonitor_MouseUp(object sender, MouseEventArgs e) {
@@ -227,8 +229,8 @@ namespace EasySequencer {
         void picMonitor_MouseMove(object sender, MouseEventArgs e) {
             if (mIsDrag) {
                 var pos = picMonitor.PointToClient(Cursor.Position);
-                var knobCenter = POS_KNOBS[mKnobNo];
-                knobCenter.Y += mChannelNo * CHANNEL_HEIGHT;
+                var knobCenter = POS_KNOBS[mKnobNum];
+                knobCenter.Y += mTrackNum * TRACK_HEIGHT;
 
                 var sx = pos.X - knobCenter.X;
                 var sy = pos.Y - knobCenter.Y;
@@ -261,12 +263,12 @@ namespace EasySequencer {
         void draw() {
             var g = mBuffer.Graphics;
 
-            for (var ch = 0; ch < Sender.CHANNEL_COUNT; ++ch) {
-                var channel = mSender.Channel(ch);
-                var y_ch = CHANNEL_HEIGHT * ch;
+            for (int track = 0, track_num = 0; track < DISP_TRACKS; ++track, ++track_num) {
+                var param = mSender.Track(track_num);
+                var track_y = TRACK_HEIGHT * track;
 
                 /*** Keyboard ***/
-                var transpose = (int)(channel.pitch * channel.bend_range / 8192.0 - 0.5);
+                var transpose = (int)(param.pitch * param.bend_range / 8192.0 - 0.5);
                 for (var n = 0; n < 128; ++n) {
                     var k = n + transpose;
                     if (k < 12 || 127 < k) {
@@ -274,8 +276,8 @@ namespace EasySequencer {
                     }
                     var key = RECT_KEYS[k % 12];
                     var kx = key.X + OCT_WIDTH * (k / 12 - 1);
-                    var ky = key.Y + y_ch;
-                    var keyState = (E_KEY_STATE)Marshal.PtrToStructure<byte>(channel.p_keyboard + n);
+                    var ky = key.Y + track_y;
+                    var keyState = (E_KEY_STATE)Marshal.PtrToStructure<byte>(param.p_keyboard + n);
                     switch (keyState) {
                         case E_KEY_STATE.PRESS:
                             g.FillRectangle(Brushes.Red, kx, ky, key.Width, key.Height);
@@ -287,13 +289,13 @@ namespace EasySequencer {
                 }
 
                 /*** On/Off Button ***/
-                if (1 == channel.enable) {
-                    g.DrawImageUnscaled(Resources.track_on, RECT_ON_OFF.X, RECT_ON_OFF.Y + y_ch);
+                if (1 == param.enable) {
+                    g.DrawImageUnscaled(Resources.track_on, RECT_ON_OFF.X, RECT_ON_OFF.Y + track_y);
                 }
 
                 /*** RMS meter ***/
-                var rmsL = Math.Sqrt(channel.rms_l) * 2;
-                var rmsR = Math.Sqrt(channel.rms_r) * 2;
+                var rmsL = Math.Sqrt(param.rms_l) * 2;
+                var rmsR = Math.Sqrt(param.rms_r) * 2;
                 if (rmsL < 0.0000001) {
                     rmsL = 0.0000001;
                 }
@@ -311,43 +313,43 @@ namespace EasySequencer {
                 var rmsLpx = (int)(normL * RECT_METER_L.Width + 1) / SIZE_METER_CELL.Width * SIZE_METER_CELL.Width;
                 var rmsRpx = (int)(normR * RECT_METER_R.Width + 1) / SIZE_METER_CELL.Width * SIZE_METER_CELL.Width;
                 g.DrawImageUnscaledAndClipped(Resources.Meter, new Rectangle(
-                    RECT_METER_L.X, RECT_METER_L.Y + y_ch,
+                    RECT_METER_L.X, RECT_METER_L.Y + track_y,
                     rmsLpx, SIZE_METER_CELL.Height
                 ));
                 g.DrawImageUnscaledAndClipped(Resources.Meter, new Rectangle(
-                    RECT_METER_R.X, RECT_METER_R.Y + y_ch,
+                    RECT_METER_R.X, RECT_METER_R.Y + track_y,
                     rmsRpx, SIZE_METER_CELL.Height
                 ));
 
                 /*** Vol. ***/
-                drawKnob(g, COLOR_KNOB_BLACK, ch, 0, channel.vol);
+                drawKnob(g, COLOR_KNOB_BLACK, track, 0, param.vol);
                 /*** Exp. ***/
-                drawKnob(g, COLOR_KNOB_BLACK, ch, 1, channel.exp);
+                drawKnob(g, COLOR_KNOB_BLACK, track, 1, param.exp);
                 /*** Pan  ***/
-                drawKnob(g, COLOR_KNOB_BLACK, ch, 2, channel.pan, "R00;L00; C ");
+                drawKnob(g, COLOR_KNOB_BLACK, track, 2, param.pan, "R00;L00; C ");
 
                 /*** Rev. ***/
-                drawKnob(g, COLOR_KNOB_BLUE, ch, 3, channel.rev_send);
+                drawKnob(g, COLOR_KNOB_BLUE, track, 3, param.rev_send);
                 /*** Cho. ***/
-                drawKnob(g, COLOR_KNOB_BLUE, ch, 4, channel.cho_send);
+                drawKnob(g, COLOR_KNOB_BLUE, track, 4, param.cho_send);
                 /*** Del. ***/
-                drawKnob(g, COLOR_KNOB_BLUE, ch, 5, channel.del_send);
+                drawKnob(g, COLOR_KNOB_BLUE, track, 5, param.del_send);
 
                 /*** Fc ***/
-                drawKnob(g, COLOR_KNOB_GREEN, ch, 6, channel.cutoff);
+                drawKnob(g, COLOR_KNOB_GREEN, track, 6, param.cutoff);
                 /*** Res. ***/
-                drawKnob(g, COLOR_KNOB_GREEN, ch, 7, channel.resonance);
+                drawKnob(g, COLOR_KNOB_GREEN, track, 7, param.resonance);
                 /*** Mod. ***/
-                drawKnob(g, COLOR_KNOB_GREEN, ch, 8, channel.mod);
+                drawKnob(g, COLOR_KNOB_GREEN, track, 8, param.mod);
 
                 /*** Preset name ***/
-                var bName = Encoding.ASCII.GetBytes(channel.Name);
+                var bName = Encoding.ASCII.GetBytes(param.Name);
                 for (int i = 0; i < bName.Length && i < 20; i++) {
                     var cx = bName[i] % 16;
                     var cy = (bName[i] - 0x20) / 16;
                     g.DrawImageUnscaled(BMP_FONT[cx, cy], new Rectangle(
                         RECT_PRESET_NAME.X + FONT_WIDTH * i,
-                        RECT_PRESET_NAME.Y + y_ch,
+                        RECT_PRESET_NAME.Y + track_y,
                         FONT_WIDTH,
                         FONT_HEIGHT
                     ));
@@ -357,16 +359,16 @@ namespace EasySequencer {
             mBuffer.Render();
         }
 
-        void drawKnob(Graphics g, Pen color, int ch, int index, int value, string format = "000") {
-            var y_ch = ch * CHANNEL_HEIGHT;
+        void drawKnob(Graphics g, Pen color, int track, int index, int value, string format = "000") {
+            var track_y = track * TRACK_HEIGHT;
             var knobX = POS_KNOB_ROT[value].X * KNOB_RADIUS;
             var knobY = POS_KNOB_ROT[value].Y * KNOB_RADIUS;
             g.DrawLine(
                 color,
                 knobX * 0.25f + POS_KNOBS[index].X,
-                knobY * 0.25f + POS_KNOBS[index].Y + y_ch,
+                knobY * 0.25f + POS_KNOBS[index].Y + track_y,
                 knobX + POS_KNOBS[index].X,
-                knobY + POS_KNOBS[index].Y + y_ch
+                knobY + POS_KNOBS[index].Y + track_y
             );
             if ("000" != format) {
                 value -= 64;
@@ -374,7 +376,7 @@ namespace EasySequencer {
             g.DrawString(
                 value.ToString(format),
                 FONT_KNOB, COLOR_KNOB_TEXT,
-                POS_KNOB_VALS[index].X, POS_KNOB_VALS[index].Y + y_ch
+                POS_KNOB_VALS[index].X, POS_KNOB_VALS[index].Y + track_y
             );
         }
 
@@ -385,33 +387,36 @@ namespace EasySequencer {
 
             mIsParamChg = false;
 
-            switch (mKnobNo) {
+            var chNum = mTrackNum % 16;
+            var port = (byte)(mTrackNum / 16);
+
+            switch (mKnobNum) {
                 case 0:
-                    mSender.Send(new Event(mChannelNo, E_CONTROL.VOLUME, mChangeValue));
+                    mSender.Send(port, new Event(chNum, E_CONTROL.VOLUME, mChangeValue));
                     break;
                 case 1:
-                    mSender.Send(new Event(mChannelNo, E_CONTROL.EXPRESSION, mChangeValue));
+                    mSender.Send(port, new Event(chNum, E_CONTROL.EXPRESSION, mChangeValue));
                     break;
                 case 2:
-                    mSender.Send(new Event(mChannelNo, E_CONTROL.PAN, mChangeValue));
+                    mSender.Send(port, new Event(chNum, E_CONTROL.PAN, mChangeValue));
                     break;
                 case 3:
-                    mSender.Send(new Event(mChannelNo, E_CONTROL.REVERB, mChangeValue));
+                    mSender.Send(port, new Event(chNum, E_CONTROL.REVERB, mChangeValue));
                     break;
                 case 4:
-                    mSender.Send(new Event(mChannelNo, E_CONTROL.CHORUS, mChangeValue));
+                    mSender.Send(port, new Event(chNum, E_CONTROL.CHORUS, mChangeValue));
                     break;
                 case 5:
-                    mSender.Send(new Event(mChannelNo, E_CONTROL.DELAY, mChangeValue));
+                    mSender.Send(port, new Event(chNum, E_CONTROL.DELAY, mChangeValue));
                     break;
                 case 6:
-                    mSender.Send(new Event(mChannelNo, E_CONTROL.CUTOFF, mChangeValue));
+                    mSender.Send(port, new Event(chNum, E_CONTROL.CUTOFF, mChangeValue));
                     break;
                 case 7:
-                    mSender.Send(new Event(mChannelNo, E_CONTROL.RESONANCE, mChangeValue));
+                    mSender.Send(port, new Event(chNum, E_CONTROL.RESONANCE, mChangeValue));
                     break;
                 case 8:
-                    mSender.Send(new Event(mChannelNo, E_CONTROL.MODULATION, mChangeValue));
+                    mSender.Send(port, new Event(chNum, E_CONTROL.MODULATION, mChangeValue));
                     break;
             }
         }

@@ -340,11 +340,13 @@ namespace Player {
             while (!mTask.IsCompleted) {
                 Thread.Sleep(10);
             }
-            for (byte ch = 0; ch < Sender.CHANNEL_COUNT; ++ch) {
+            for (int track_num = 0; track_num < Sender.TRACK_COUNT; ++track_num) {
+                var port = (byte)(track_num / 16);
+                var chNum = track_num % 16;
                 for (byte noteNo = 0; noteNo < 128; ++noteNo) {
-                    mMidiSender.Send(new Event(ch, E_STATUS.NOTE_OFF, noteNo));
+                    mMidiSender.Send(port, new Event(chNum, E_STATUS.NOTE_OFF, noteNo));
                 }
-                mMidiSender.Send(new Event(ch, E_CONTROL.ALL_RESET));
+                mMidiSender.Send(port, new Event(chNum, E_CONTROL.ALL_RESET));
             }
         }
 
@@ -410,6 +412,7 @@ namespace Player {
                     return;
                 }
 
+                var port = mSMF.Tracks[e.Track].Port;
                 var ev = e;
 
                 while (mCurrentTick < ev.Tick) {
@@ -435,8 +438,8 @@ namespace Player {
 
                 switch (ev.Type) {
                 case E_STATUS.NOTE_OFF: {
-                    var chParam = mMidiSender.Channel(ev.Channel);
-                    if (0 == chParam.is_drum) {
+                    var param = mMidiSender.Track(ev.Channel);
+                    if (0 == param.is_drum) {
                         if ((ev.Data[1] + mTranspose) < 0 || 127 < (ev.Data[1] + mTranspose)) {
                             continue;
                         } else {
@@ -448,16 +451,16 @@ namespace Player {
                 }
                 break;
                 case E_STATUS.NOTE_ON: {
-                    var chParam = mMidiSender.Channel(ev.Channel);
+                    var param = mMidiSender.Track(ev.Channel);
                     if (ev.Data[2] != 0) {
                         if (0.25 * 960 < (mCurrentTick - ev.Tick)) {
                             continue;
                         }
-                        if (0 == chParam.enable) {
+                        if (0 == param.enable) {
                             continue;
                         }
                     }
-                    if (0 == chParam.is_drum) {
+                    if (0 == param.is_drum) {
                         if ((ev.Data[1] + mTranspose) < 0 || 127 < (ev.Data[1] + mTranspose)) {
                             continue;
                         } else {
@@ -486,7 +489,7 @@ namespace Player {
                 }
 
                 /*** send message ***/
-                mMidiSender.Send(ev);
+                mMidiSender.Send(port, ev);
             }
         }
     }

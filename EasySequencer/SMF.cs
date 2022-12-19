@@ -126,36 +126,36 @@ namespace SMF {
         public static readonly Comparison<Event> Compare = new Comparison<Event>((a, b) => {
             var dTime = a.Tick - b.Tick;
             if (0 == dTime) {
-                var dCh = a.Channel - b.Channel;
-                if (0 == dCh) {
-                    var dTrack = a.Track - b.Track;
-                    if (0 == dTrack) {
-                        var aStatus = (int)a.Type;
-                        if (aStatus < 0xA0) {
+                var dTrack = a.Track - b.Track;
+                if (0 == dTrack) {
+                    var dCh = a.Channel - b.Channel;
+                    if (0 == dCh) {
+                        var aType = (int)a.Type;
+                        if (aType < 0xA0) {
                             // 0x280 - 0x290
-                            aStatus |= 0x0200;
-                        } else if (aStatus < 0xF0) {
+                            aType |= 0x0200;
+                        } else if (aType < 0xF0) {
                             // 0x1A0 - 0x1E0
-                            aStatus |= 0x0100;
+                            aType |= 0x0100;
                         } else {
                             // 0x0F0 - 0x0FF
                         }
-                        var bStatus = (int)b.Type;
-                        if (bStatus < 0xA0) {
+                        var bType = (int)b.Type;
+                        if (bType < 0xA0) {
                             // 0x280 - 0x290
-                            bStatus |= 0x0200;
-                        } else if (bStatus < 0xF0) {
+                            bType |= 0x0200;
+                        } else if (aType < 0xF0) {
                             // 0x1A0 - 0x1E0
-                            bStatus |= 0x0100;
+                            bType |= 0x0100;
                         } else {
                             // 0x0F0 - 0x0FF
                         }
-                        return aStatus - bStatus;
+                        return aType - bType;
                     } else {
-                        return dTrack;
+                        return dCh;
                     }
                 } else {
-                    return dCh;
+                    return dTrack;
                 }
             } else {
                 return dTime;
@@ -164,6 +164,7 @@ namespace SMF {
 
         public int Tick;
         public int Track;
+
         public byte[] Data { get; private set; }
 
         public byte Status { get { return Data[0]; } }
@@ -447,6 +448,7 @@ namespace SMF {
                 switch (Type) {
                 case E_META.SEQ_NUM:
                 case E_META.CH_PREF:
+                case E_META.PORT:
                     return Data[3];
                 case E_META.TEMPO:
                     return Utils.GetUINT24(Data, 3);
@@ -462,6 +464,7 @@ namespace SMF {
                 switch (Type) {
                 case E_META.SEQ_NUM:
                 case E_META.CH_PREF:
+                case E_META.PORT:
                     Data[3] = (byte)value;
                     break;
                 case E_META.TEMPO:
@@ -496,6 +499,7 @@ namespace SMF {
                 break;
             case E_META.SEQ_NUM:
             case E_META.CH_PREF:
+            case E_META.PORT:
                 Data = new byte[] { 0xFF, (byte)type, 1, 0 };
                 break;
             case E_META.TEMPO:
@@ -691,16 +695,23 @@ namespace SMF {
                 Utils.WriteUINT16(str, Ticks);
             }
         }
+        
+        public class Track {
+            public bool Enable = true;
+            public byte Port = 0;
+            public string Name = "";
+            public List<Event> Events = new List<Event>();
+        }
 
-        private string mPath;
         private Header mHead;
-        private List<List<Event>> mTracks;
+        
+        public List<Track> Tracks = new List<Track>();
 
         public Event[] EventList {
             get {
                 var list = new List<Event>();
-                foreach (var tr in mTracks) {
-                    foreach (var ev in tr) {
+                foreach (var tr in Tracks) {
+                    foreach (var ev in tr.Events) {
                         list.Add(ev);
                     }
                 }
@@ -718,19 +729,18 @@ namespace SMF {
 
         public File(E_FORMAT format = E_FORMAT.FORMAT1, int ticks = 960) {
             mHead = new Header(format, 0, ticks);
-            mTracks = new List<List<Event>>();
         }
 
         public File(string filePath) {
             var fs = new FileStream(filePath, FileMode.Open);
             var br = new BinaryReader(fs);
 
-            mPath = filePath;
             mHead = new Header(br);
 
-            mTracks = new List<List<Event>>();
             for (var i = 0; i < mHead.Tracks; ++i) {
-                mTracks.Add(LoadTrack(br, i, mHead.Ticks));
+                var tr = new Track();
+                Tracks.Add(tr);
+                tr.Events = LoadTrack(br, i, mHead.Ticks);
             }
 
             mHead.Ticks = 960;
@@ -742,24 +752,33 @@ namespace SMF {
         public void Write(string path) {
             var str = new FileStream(path, FileMode.Create);
             mHead.Write(str);
-            foreach (var tr in mTracks) {
-                WriteTrack(str, tr);
+            foreach (var tr in Tracks) {
+                WriteTrack(str, tr.Events);
             }
             str.Close();
             str.Dispose();
         }
 
         public void AddEvent(Event ev) {
-            if (mTracks.Count <= ev.Track) {
-                return;
+            var trackNum = ev.Track;
+            if (Tracks.Count <= trackNum) {
+                Tracks.Add(new Track());
             }
-            var eventList = mTracks[ev.Track];
+            if (E_STATUS.META == ev.Type && E_META.PORT == ev.Meta.Type) {
+                switch (ev.Meta.Type) {
+                case E_META.PORT:
+                    Tracks[trackNum].Port = (byte)ev.Meta.Int;
+                    break;
+                case E_META.TRACK_NAME:
+                    Tracks[trackNum].Name = ev.Meta.String;
+                    break;
+                }
+            }
             if (ev.Type == E_STATUS.NOTE_OFF || ev.Type == E_STATUS.NOTE_ON) {
-
             } else {
-                mTracks[ev.Track].Add(ev);
+                Tracks[trackNum].Events.Add(ev);
             }
-            mTracks[ev.Track].Sort(Event.Compare);
+            Tracks[trackNum].Events.Sort(Event.Compare);
         }
 
         private List<Event> LoadTrack(BinaryReader br, int trackNum, int baseTick) {
@@ -773,7 +792,18 @@ namespace SMF {
             while (ms.Position < ms.Length) {
                 var delta = Utils.ReadDelta(ms) * 960 / baseTick;
                 time += delta;
-                events.Add(new Event(ms, time, trackNum, ref currentStatus));
+                var ev = new Event(ms, time, trackNum, ref currentStatus);
+                events.Add(ev);
+                if (E_STATUS.META == ev.Type) {
+                    switch(ev.Meta.Type) {
+                    case E_META.PORT:
+                        Tracks[trackNum].Port = (byte)ev.Meta.Int;
+                        break;
+                    case E_META.TRACK_NAME:
+                        Tracks[trackNum].Name = ev.Meta.String;
+                        break;
+                    }
+                }
             }
             return events;
         }
