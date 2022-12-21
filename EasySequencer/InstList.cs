@@ -45,7 +45,7 @@ namespace EasySequencer {
                 if (!mInstList[cat].ContainsKey(id)) {
                     mInstList[cat].Add(id, nam);
                 }
-                var param = mSender.Track(mChNum);
+                var param = mSender.GetChannel(mChNum);
                 if (param.is_drum == inst.is_drum &&
                     param.prog_num == inst.prog_num &&
                     param.bank_msb == inst.bank_msb &&
@@ -84,7 +84,7 @@ namespace EasySequencer {
             var inst = list[(lstInst.SelectedIndex < list.Count()) ? lstInst.SelectedIndex : list.Count() - 1];
             var port = (byte)(mChNum / 16);
             var chNum = mChNum % 16;
-            mSender.RythmTrack(port, chNum, inst.Key.isDrum != 0);
+            mSender.RythmChannel(port, chNum, inst.Key.isDrum != 0);
             mSender.Send(port, new Event(chNum, E_CONTROL.BANK_MSB, inst.Key.bankMSB));
             mSender.Send(port, new Event(chNum, E_CONTROL.BANK_LSB, inst.Key.bankLSB));
             mSender.Send(port, new Event(chNum, E_STATUS.PROGRAM, inst.Key.progNum));

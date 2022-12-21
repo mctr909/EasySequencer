@@ -28,7 +28,7 @@ namespace SynthDll {
         }
     }
     [StructLayout(LayoutKind.Sequential, Pack = 4)]
-    public struct TRACK_PARAM {
+    public struct CHANNEL_PARAM {
         public byte is_drum;
         public byte bank_msb;
         public byte bank_lsb;
@@ -58,8 +58,6 @@ namespace SynthDll {
 
         public int pitch;
 
-        public double peak_l;
-        public double peak_r;
         public double rms_l;
         public double rms_r;
 
@@ -125,13 +123,13 @@ namespace SynthDll {
         public INST_INFO Instruments(int num) {
             return Marshal.PtrToStructure<INST_INFO>(mpInstList[num]);
         }
-        public TRACK_PARAM Track(int num) {
-            return Marshal.PtrToStructure<TRACK_PARAM>(mpChParam[num]);
+        public CHANNEL_PARAM GetChannel(int num) {
+            return Marshal.PtrToStructure<CHANNEL_PARAM>(mpChParam[num]);
         }
-        public void MuteTrack(int num, bool mute) {
+        public void MuteChannel(int num, bool mute) {
             Send((byte)(num / 16), new Event(num % 16, E_CONTROL.ALL_NOTE_OFF, mute ? 127 : 0));
         }
-        public void RythmTrack(byte port, int chNum, bool isDrum) {
+        public void RythmChannel(byte port, int chNum, bool isDrum) {
             Send(port, new Event(chNum, E_CONTROL.DRUM, isDrum ? 127 : 0));
         }
 

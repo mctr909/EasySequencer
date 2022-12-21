@@ -438,7 +438,7 @@ namespace Player {
 
                 switch (ev.Type) {
                 case E_STATUS.NOTE_OFF: {
-                    var param = mMidiSender.Track(ev.Channel);
+                    var param = mMidiSender.GetChannel(ev.Channel);
                     if (0 == param.is_drum) {
                         if ((ev.Data[1] + mTranspose) < 0 || 127 < (ev.Data[1] + mTranspose)) {
                             continue;
@@ -451,7 +451,7 @@ namespace Player {
                 }
                 break;
                 case E_STATUS.NOTE_ON: {
-                    var param = mMidiSender.Track(ev.Channel);
+                    var param = mMidiSender.GetChannel(ev.Channel);
                     if (ev.Data[2] != 0) {
                         if (0.25 * 960 < (mCurrentTick - ev.Tick)) {
                             continue;

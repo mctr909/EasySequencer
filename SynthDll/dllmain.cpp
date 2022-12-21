@@ -20,13 +20,6 @@ struct SYSTEM_VALUE {
     int32* p_fileout_progress;
 };
 #pragma pack(pop)
-#pragma pack(push, 4)
-struct RIFF {
-    uint32 riff;
-    uint32 file_size;
-    uint32 id;
-};
-#pragma pack(pop)
 
 /******************************************************************************/
 HWAVEOUT     waveout_handle = nullptr;
@@ -41,11 +34,11 @@ bool waveout_dostop = true;
 bool waveout_stopped = true;
 bool waveout_thread_stopped = true;
 
-int32  waveout_write_count = 0;
-int32  waveout_write_index = 0;
-int32  waveout_read_index = 0;
-int32  waveout_buffer_count = 0;
-int32  waveout_buffer_length = 0;
+int32 waveout_write_count = 0;
+int32 waveout_write_index = 0;
+int32 waveout_read_index = 0;
+int32 waveout_buffer_count = 0;
+int32 waveout_buffer_length = 0;
 
 Synth*       waveout_synth = nullptr;
 InstList*    waveout_inst_list = nullptr;
@@ -302,12 +295,11 @@ fileout(
     auto p_synth = new Synth(p_inst_list, sample_rate, 256);
 
     /* riff wave format */
-    RIFF riff;
-    riff.riff = 0x46464952;
-    riff.file_size = 0;
-    riff.id = 0x45564157;
-    const uint32 chunk_id = 0x20746D66;
-    const uint32 chunk_size = 18;
+    uint32 riff_id = 0x46464952;
+    uint32 file_size = 0;
+    uint32 file_id = 0x45564157;
+    const uint32 fmt_id = 0x20746D66;
+    const uint32 fmt_size = 18;
     WAVEFORMATEX fmt;
     fmt.wFormatTag = 1;
     fmt.nChannels = 2;
@@ -336,9 +328,11 @@ fileout(
         MessageBoxW(nullptr, L"wavファイルが作成できませんでした。", L"wavファイル出力エラー", 0);
         return;
     }
-    fwrite(&riff, sizeof(riff), 1, fp_out);
-    fwrite(&chunk_id, sizeof(chunk_id), 1, fp_out);
-    fwrite(&chunk_size, sizeof(chunk_size), 1, fp_out);
+    fwrite(&riff_id, sizeof(riff_id), 1, fp_out);
+    fwrite(&file_size, sizeof(file_size), 1, fp_out);
+    fwrite(&file_id, sizeof(file_id), 1, fp_out);
+    fwrite(&fmt_id, sizeof(fmt_id), 1, fp_out);
+    fwrite(&fmt_size, sizeof(fmt_size), 1, fp_out);
     fwrite(&fmt, sizeof(fmt), 1, fp_out);
     fwrite(&data_id, sizeof(data_id), 1, fp_out);
     fwrite(&data_size, sizeof(data_size), 1, fp_out);
@@ -366,11 +360,13 @@ fileout(
     fileout_progress = event_size;
 
     /* close file */
-    riff.file_size = data_size + sizeof(fmt) + 4;
+    file_size = data_size + sizeof(fmt) + 4;
     fseek(fp_out, 0, SEEK_SET);
-    fwrite(&riff, sizeof(riff), 1, fp_out);
-    fwrite(&chunk_id, sizeof(chunk_id), 1, fp_out);
-    fwrite(&chunk_size, sizeof(chunk_size), 1, fp_out);
+    fwrite(&riff_id, sizeof(riff_id), 1, fp_out);
+    fwrite(&file_size, sizeof(file_size), 1, fp_out);
+    fwrite(&file_id, sizeof(file_id), 1, fp_out);
+    fwrite(&fmt_id, sizeof(fmt_id), 1, fp_out);
+    fwrite(&fmt_size, sizeof(fmt_size), 1, fp_out);
     fwrite(&fmt, sizeof(fmt), 1, fp_out);
     fwrite(&data_id, sizeof(data_id), 1, fp_out);
     fwrite(&data_size, sizeof(data_size), 1, fp_out);

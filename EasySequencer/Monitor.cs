@@ -195,25 +195,25 @@ namespace EasySequencer {
 
             if (TAB_HEIGHT <= mMouseDownPos.Y && RECT_ON_OFF.X <= mMouseDownPos.X && mMouseDownPos.X < RECT_ON_OFF.X + RECT_ON_OFF.Width) {
                 if (e.Button == MouseButtons.Right) {
-                    if (1 == mSender.Track(knobY).enable) {
-                        for (int i = 0; i < 16; ++i) {
+                    if (1 == mSender.GetChannel(knobY).enable) {
+                        for (int i = 0, chNum = 0; i < DISP_TRACKS; ++i, ++chNum) {
                             if (knobY == i) {
-                                mSender.MuteTrack(i, true);
+                                mSender.MuteChannel(chNum, true);
                             } else {
-                                mSender.MuteTrack(i, false);
+                                mSender.MuteChannel(chNum, false);
                             }
                         }
                     } else {
-                        for (int i = 0; i < 16; ++i) {
+                        for (int i = 0, chNum = 0; i < DISP_TRACKS; ++i, ++chNum) {
                             if (knobY == i) {
-                                mSender.MuteTrack(i, false);
+                                mSender.MuteChannel(chNum, false);
                             } else {
-                                mSender.MuteTrack(i, true);
+                                mSender.MuteChannel(chNum, true);
                             }
                         }
                     }
                 } else {
-                    mSender.MuteTrack(knobY, 1 == mSender.Track(knobY).enable);
+                    mSender.MuteChannel(knobY, 1 == mSender.GetChannel(knobY).enable);
                 }
             }
 
@@ -263,8 +263,8 @@ namespace EasySequencer {
         void draw() {
             var g = mBuffer.Graphics;
 
-            for (int track = 0, track_num = 0; track < DISP_TRACKS; ++track, ++track_num) {
-                var param = mSender.Track(track_num);
+            for (int track = 0, chNum = 0; track < DISP_TRACKS; ++track, ++chNum) {
+                var param = mSender.GetChannel(chNum);
                 var track_y = TRACK_HEIGHT * track;
 
                 /*** Keyboard ***/

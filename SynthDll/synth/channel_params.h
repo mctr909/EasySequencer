@@ -35,8 +35,6 @@ struct CHANNEL_PARAM {
 
     int32 pitch;
 
-    double peak_l;
-    double peak_r;
     double rms_l;
     double rms_r;
 
