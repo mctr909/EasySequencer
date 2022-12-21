@@ -22,7 +22,8 @@ WVPL::~WVPL() {
     pcWave = NULL;
 }
 
-void WVPL::LoadList(FILE *fp, const char *type, long size) {
+void
+WVPL::LoadChunk(FILE *fp, const char *type, long size) {
     if (0 == strcmp("wave", type)) {
         pcWave[Count++] = new WAVE(fp, size);
         return;
@@ -48,7 +49,8 @@ WAVE::~WAVE() {
     }
 }
 
-void WAVE::LoadInfo(FILE *fp, const char *type, long size) {
+void
+WAVE::LoadInfo(FILE *fp, const char *type, long size) {
     if (0 == strcmp("INAM", type)) {
         fread_s(&Name, sizeof(Name), size, 1, fp);
         return;
@@ -60,7 +62,8 @@ void WAVE::LoadInfo(FILE *fp, const char *type, long size) {
     fseek(fp, size, SEEK_CUR);
 }
 
-void WAVE::LoadChunk(FILE *fp, const char *type, long size) {
+void
+WAVE::LoadChunk(FILE *fp, const char *type, long size) {
     if (0 == strcmp("fmt ", type)) {
         fread_s(&Format, sizeof(Format), sizeof(Format), 1, fp);
         fseek(fp, size - sizeof(Format), SEEK_CUR);

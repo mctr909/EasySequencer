@@ -21,7 +21,8 @@ LRGN::~LRGN() {
     pcRegion = NULL;
 }
 
-void LRGN::LoadList(FILE *fp, const char *type, long size) {
+void
+LRGN::LoadChunk(FILE *fp, const char *type, long size) {
     if (0 == strcmp("rgn ", type)) {
         pcRegion[Count++] = new RGN_(fp, size);
         return;
@@ -51,7 +52,8 @@ RGN_::~RGN_() {
     }
 }
 
-void RGN_::LoadChunk(FILE *fp, const char *type, long size) {
+void
+RGN_::LoadChunk(FILE *fp, const char *type, long size) {
     if (0 == strcmp("rgnh", type)) {
         fread_s(&Header, sizeof(Header), size, 1, fp);
         return;
@@ -81,10 +83,6 @@ void RGN_::LoadChunk(FILE *fp, const char *type, long size) {
         }
         return;
     }
-    fseek(fp, size, SEEK_CUR);
-}
-
-void RGN_::LoadList(FILE *fp, const char *type, long size) {
     if (0 == strcmp("lart", type) || 0 == strcmp("lar2", type)) {
         cLart = new LART(fp, size);
         return;

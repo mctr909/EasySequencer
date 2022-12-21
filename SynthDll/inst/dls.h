@@ -23,7 +23,6 @@ public:
 protected:
     bool CheckFileType(const char *type, long size) override;
     void LoadChunk(FILE *fp, const char *type, long size) override;
-    void LoadList(FILE *fp, const char *type, long size) override;
 };
 
 #endif /* __DLS_H__ */

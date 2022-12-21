@@ -22,7 +22,8 @@ LINS::~LINS() {
     pcInst = NULL;
 }
 
-void LINS::LoadList(FILE *fp, const char *type, long size) {
+void
+LINS::LoadChunk(FILE *fp, const char *type, long size) {
     if (0 == strcmp("ins ", type)) {
         pcInst[Count++] = new INS_(fp, size);
         return;
@@ -45,7 +46,8 @@ INS_::~INS_() {
     }
 }
 
-void INS_::LoadInfo(FILE *fp, const char *type, long size) {
+void
+INS_::LoadInfo(FILE *fp, const char *type, long size) {
     if (0 == strcmp("INAM", type)) {
         fread_s(&Name, sizeof(Name), size, 1, fp);
         return;
@@ -57,15 +59,12 @@ void INS_::LoadInfo(FILE *fp, const char *type, long size) {
     fseek(fp, size, SEEK_CUR);
 }
 
-void INS_::LoadChunk(FILE *fp, const char *type, long size) {
+void
+INS_::LoadChunk(FILE *fp, const char *type, long size) {
     if (0 == strcmp("insh", type)) {
         fread_s(&Header, sizeof(Header), size, 1, fp);
         return;
     }
-    fseek(fp, size, SEEK_CUR);
-}
-
-void INS_::LoadList(FILE *fp, const char *type, long size) {
     if (0 == strcmp("lrgn", type)) {
         cLrgn = new LRGN(fp, size, Header.regions);
         return;

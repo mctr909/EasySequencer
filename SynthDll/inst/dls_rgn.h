@@ -17,7 +17,7 @@ public:
     ~LRGN();
 
 protected:
-    void LoadList(FILE *fp, const char *type, long size) override;
+    void LoadChunk(FILE *fp, const char *type, long size) override;
 };
 
 class RGN_ : public Riff {
@@ -34,7 +34,6 @@ public:
 
 protected:
     void LoadChunk(FILE *fp, const char *type, long size) override;
-    void LoadList(FILE *fp, const char *type, long size) override;
 };
 
 #endif /* __DLS_RGN_H__ */

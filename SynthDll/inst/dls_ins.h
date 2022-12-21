@@ -18,7 +18,7 @@ public:
     ~LINS();
 
 protected:
-    void LoadList(FILE *fp, const char *type, long size) override;
+    void LoadChunk(FILE *fp, const char *type, long size) override;
 };
 
 class INS_ : public Riff {
@@ -36,7 +36,6 @@ public:
 protected:
     void LoadInfo(FILE *fp, const char *type, long size) override;
     void LoadChunk(FILE *fp, const char *type, long size) override;
-    void LoadList(FILE *fp, const char *type, long size) override;
 };
 
 #endif /* __DLS_INS_H__ */

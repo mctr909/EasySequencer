@@ -21,11 +21,13 @@ E_LOAD_STATUS DLS::Load(LPWSTR path) {
     return Riff::Load(path, 0);
 }
 
-bool DLS::CheckFileType(const char *type, long size) {
+bool
+DLS::CheckFileType(const char *type, long size) {
     return 0 == strcmp("DLS ", type);
 }
 
-void DLS::LoadChunk(FILE *fp, const char *type, long size) {
+void
+DLS::LoadChunk(FILE *fp, const char *type, long size) {
     if (0 == strcmp("colh", type)) {
         fread_s(&InstCount, 4, 4, 1, fp);
         fseek(fp, size - 4, SEEK_CUR);
@@ -49,10 +51,6 @@ void DLS::LoadChunk(FILE *fp, const char *type, long size) {
         fseek(fp, size, SEEK_CUR);
         return;
     }
-    fseek(fp, size, SEEK_CUR);
-}
-
-void DLS::LoadList(FILE *fp, const char *type, long size) {
     if (0 == strcmp("lins", type)) {
         cLins = new LINS(fp, size, InstCount);
         return;

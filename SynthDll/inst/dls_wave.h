@@ -17,7 +17,7 @@ public:
     ~WVPL();
 
 protected:
-    void LoadList(FILE *fp, const char *type, long size) override;
+    void LoadChunk(FILE *fp, const char *type, long size) override;
 };
 
 class WAVE : public Riff {

@@ -12,7 +12,8 @@ LART::~LART() {
     cArt = NULL;
 }
 
-void LART::LoadChunk(FILE *fp, const char *type, long size) {
+void
+LART::LoadChunk(FILE *fp, const char *type, long size) {
     if (0 == strcmp("art1", type) || 0 == strcmp("art2", type)) {
         cArt = new ART_(fp, size);
         return;
