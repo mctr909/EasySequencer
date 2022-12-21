@@ -4,7 +4,7 @@
 #include <math.h>
 #include "../type.h"
 
-typedef struct DLS_INSH {
+struct DLS_INSH {
     uint32 regions;
     byte bankLSB;
     byte bankMSB;
@@ -14,9 +14,9 @@ typedef struct DLS_INSH {
     byte reserve2;
     byte reserve3;
     byte reserve4;
-} DLS_INSH;
+};
 
-typedef struct DLS_RGNH {
+struct DLS_RGNH {
     uint16 keyLow;
     uint16 keyHigh;
     uint16 velocityLow;
@@ -24,16 +24,16 @@ typedef struct DLS_RGNH {
     uint16 options;
     uint16 keyGroup;
     uint16 layer;
-} DLS_RGNH;
+};
 
-typedef struct DLS_WLNK {
+struct DLS_WLNK {
     uint16 options;
     uint16 phaseGroup;
     uint32 channel;
     uint32 tableIndex;
-} DLS_WLNK;
+};
 
-typedef struct DLS_WSMP {
+struct DLS_WSMP {
     uint32 size;
     uint16 unityNote;
     int16 fineTune;
@@ -47,14 +47,14 @@ typedef struct DLS_WSMP {
     double getGain() {
         return pow(10.0, gainInt / (200 * 65536.0));
     }
-} DLS_WSMP;
+};
 
-typedef struct DLS_LOOP {
+struct DLS_LOOP {
     uint32 size;
     uint32 type;
     uint32 start;
     uint32 length;
-} DLS_LOOP;
+};
 
 enum struct E_DLS_SRC : uint16 {
     // MODULATOR SOURCES
@@ -141,7 +141,7 @@ enum struct E_DLS_TRN : uint16 {
     SWITCH = 0x0003
 };
 
-typedef struct DLS_CONN {
+struct DLS_CONN {
     E_DLS_SRC source;
     E_DLS_SRC control;
     E_DLS_DST destination;
@@ -193,6 +193,6 @@ typedef struct DLS_CONN {
             return 0.0;
         }
     }
-} DLS_CONN;
+};
 
 #endif /* __DLS_STRUCT_H__ */

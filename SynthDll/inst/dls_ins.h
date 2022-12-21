@@ -10,8 +10,8 @@ class LART;
 
 class LINS : public Riff {
 public:
-    INS_ **pcInst = NULL;
-    int32 Count;
+    int32 Count = 0;
+    INS_ **pcInst = nullptr;
 
 public:
     LINS(FILE *fp, long size, int32 count);
@@ -25,9 +25,9 @@ class INS_ : public Riff {
 public:
     char Name[32] = { 0 };
     char Category[32] = { 0 };
-    DLS_INSH Header;
-    LRGN *cLrgn = NULL;
-    LART *cLart = NULL;
+    DLS_INSH Header = { 0 };
+    LRGN *cLrgn = nullptr;
+    LART *cLart = nullptr;
 
 public:
     INS_(FILE *fp, long size);

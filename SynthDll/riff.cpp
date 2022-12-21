@@ -8,9 +8,9 @@ void Riff::Load(FILE *fp, long size) {
 
 E_LOAD_STATUS
 Riff::Load(LPWSTR path, long offset) {
-    FILE *fp = NULL;
+    FILE *fp = nullptr;
     _wfopen_s(&fp, path, L"rb");
-    if (NULL == fp) {
+    if (nullptr == fp) {
         return E_LOAD_STATUS::FILE_OPEN_FAILED;
     }
 

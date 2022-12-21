@@ -14,12 +14,12 @@ WVPL::WVPL(FILE *fp, long size, int32 count) : Riff() {
 
 WVPL::~WVPL() {
     for (int32 i = 0; i < Count; i++) {
-        if (NULL != pcWave[i]) {
+        if (nullptr != pcWave[i]) {
             delete pcWave[i];
         }
     }
     free(pcWave);
-    pcWave = NULL;
+    pcWave = nullptr;
 }
 
 void
@@ -36,16 +36,16 @@ WAVE::WAVE(FILE *fp, long size) : Riff() {
 }
 
 WAVE::~WAVE() {
-    if (NULL != pData) {
+    if (nullptr != pData) {
         free(pData);
-        pData = NULL;
+        pData = nullptr;
     }
-    if (NULL != ppWaveLoop) {
+    if (nullptr != ppWaveLoop) {
         for (uint32 i = 0; i < WaveSmpl.loopCount; ++i) {
             free(ppWaveLoop[i]);
         }
         free(ppWaveLoop);
-        ppWaveLoop = NULL;
+        ppWaveLoop = nullptr;
     }
 }
 
@@ -77,9 +77,8 @@ WAVE::LoadChunk(FILE *fp, const char *type, long size) {
     }
     if (0 == strcmp("wsmp", type)) {
         fread_s(&WaveSmpl, sizeof(WaveSmpl), sizeof(WaveSmpl), 1, fp);
-        LoopCount = WaveSmpl.loopCount;
-        ppWaveLoop = (DLS_LOOP**)calloc(LoopCount, sizeof(DLS_LOOP*));
-        for (uint32 i = 0; i < LoopCount; ++i) {
+        ppWaveLoop = (DLS_LOOP**)calloc(WaveSmpl.loopCount, sizeof(DLS_LOOP*));
+        for (uint32 i = 0; i < WaveSmpl.loopCount; ++i) {
             ppWaveLoop[i] = (DLS_LOOP*)malloc(sizeof(DLS_LOOP));
             fread_s(ppWaveLoop[i], sizeof(DLS_LOOP), sizeof(DLS_LOOP), 1, fp);
         }

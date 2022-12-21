@@ -9,8 +9,8 @@ class LART;
 
 class LRGN : public Riff {
 public:
-    RGN_ **pcRegion = NULL;
-    int32 Count;
+    int32 Count = 0;
+    RGN_ **pcRegion = nullptr;
 
 public:
     LRGN(FILE *fp, long size, int32 count);
@@ -22,11 +22,11 @@ protected:
 
 class RGN_ : public Riff {
 public:
-    DLS_RGNH Header;
-    DLS_WLNK WaveLink;
-    DLS_WSMP *pWaveSmpl = NULL;
-    DLS_LOOP **ppWaveLoop = NULL;
-    LART *cLart = NULL;
+    DLS_RGNH Header = { 0 };
+    DLS_WLNK WaveLink = { 0 };
+    DLS_WSMP *pWaveSmpl = nullptr;
+    DLS_LOOP **ppWaveLoop = nullptr;
+    LART *cLart = nullptr;
 
 public:
     RGN_(FILE *fp, long size);

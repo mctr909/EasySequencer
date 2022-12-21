@@ -12,14 +12,14 @@
 
 /******************************************************************************/
 InstList::~InstList() {
-    if (NULL != mppWaveList) {
+    if (nullptr != mppWaveList) {
         for (uint32 i = 0; i < mWaveCount; i++) {
             free(mppWaveList[i]);
         }
         free(mppWaveList);
-        mppWaveList = NULL;
+        mppWaveList = nullptr;
     }
-    if (NULL != mInstList.ppData) {
+    if (nullptr != mInstList.ppData) {
         for (uint32 i = 0; i < mInstList.count; i++) {
             auto pInst = mInstList.ppData[i];
             free(pInst->pName);
@@ -27,32 +27,32 @@ InstList::~InstList() {
             free(pInst);
         }
         free(mInstList.ppData);
-        mInstList.ppData = NULL;
+        mInstList.ppData = nullptr;
     }
-    if (NULL != mppLayerList) {
+    if (nullptr != mppLayerList) {
         for (uint32 i = 0; i < mLayerCount; i++) {
             free(mppLayerList[i]);
         }
         free(mppLayerList);
-        mppLayerList = NULL;
+        mppLayerList = nullptr;
     }
-    if (NULL != mppRegionList) {
+    if (nullptr != mppRegionList) {
         for (uint32 i = 0; i < mRegionCount; i++) {
             free(mppRegionList[i]);
         }
         free(mppRegionList);
-        mppRegionList = NULL;
+        mppRegionList = nullptr;
     }
-    if (NULL != mppArtList) {
+    if (nullptr != mppArtList) {
         for (uint32 i = 0; i < mArtCount; i++) {
             free(mppArtList[i]);
         }
         free(mppArtList);
-        mppArtList = NULL;
+        mppArtList = nullptr;
     }
-    if (NULL != mpWaveTable) {
+    if (nullptr != mpWaveTable) {
         free(mpWaveTable);
-        mpWaveTable = NULL;
+        mpWaveTable = nullptr;
     }
 }
 
@@ -108,16 +108,16 @@ E_LOAD_STATUS InstList::loadDls(LPWSTR path) {
     mInstList.count = cDls->InstCount;
     for (uint32 idxI = 0; idxI < mInstList.count; idxI++) {
         auto cDlsInst = cDls->cLins->pcInst[idxI];
-        if (NULL != cDlsInst->cLart) {
+        if (nullptr != cDlsInst->cLart) {
             mArtCount++;
         }
         uint32 rgnLayer = 0;
         for (int32 idxR = 0; idxR < cDlsInst->cLrgn->Count; idxR++) {
             auto cDlsRgn = cDlsInst->cLrgn->pcRegion[idxR];
-            if (NULL != cDlsRgn->cLart) {
+            if (nullptr != cDlsRgn->cLart) {
                 mArtCount++;
             }
-            if (NULL != cDlsRgn->pWaveSmpl) {
+            if (nullptr != cDlsRgn->pWaveSmpl) {
                 mWaveCount++;
             }
             if (rgnLayer < static_cast<uint32>(cDlsRgn->Header.layer + 1)) {
@@ -165,7 +165,7 @@ E_LOAD_STATUS InstList::loadDls(LPWSTR path) {
         pInst->pCategory = (char*)malloc(sizeof(cDlsInst->Category));
         memcpy_s(pInst->pCategory, sizeof(cDlsInst->Category), cDlsInst->Category, sizeof(cDlsInst->Category));
 
-        if (NULL == cDlsInst->cLart) {
+        if (nullptr == cDlsInst->cLart) {
             pInst->artIndex = UINT_MAX;
         } else {
             pInst->artIndex = artIndex;
@@ -174,7 +174,7 @@ E_LOAD_STATUS InstList::loadDls(LPWSTR path) {
             artIndex++;
         }
 
-        INST_LAYER *pLayer = NULL;
+        INST_LAYER *pLayer = nullptr;
         for (int32 idxR = 0; idxR < cDlsInst->cLrgn->Count; idxR++) {
             INST_REGION region;
             mppRegionList[regionIndex] = (INST_REGION*)malloc(sizeof(INST_REGION));
@@ -187,7 +187,7 @@ E_LOAD_STATUS InstList::loadDls(LPWSTR path) {
             pRegion->velocityHigh = (byte)cDlsRgn->Header.velocityHigh;
             pRegion->waveIndex = cDlsRgn->WaveLink.tableIndex;
 
-            if (NULL == cDlsRgn->cLart) {
+            if (nullptr == cDlsRgn->cLart) {
                 pRegion->artIndex = UINT_MAX;
             } else {
                 mppArtList[artIndex] = (INST_ART*)calloc(1, sizeof(INST_ART));
@@ -196,7 +196,7 @@ E_LOAD_STATUS InstList::loadDls(LPWSTR path) {
                 artIndex++;
             }
 
-            if (NULL == cDlsRgn->pWaveSmpl) {
+            if (nullptr == cDlsRgn->pWaveSmpl) {
                 pRegion->wsmpIndex = UINT_MAX;
             } else {
                 INST_WAVE wave;
@@ -242,7 +242,7 @@ E_LOAD_STATUS InstList::loadDls(LPWSTR path) {
 }
 
 E_LOAD_STATUS InstList::loadDlsWave(DLS *cDls) {
-    FILE *fpWave = NULL;
+    FILE *fpWave = nullptr;
     _wfopen_s(&fpWave, mWaveTablePath, L"wb");
     uint32 wavePos = 0;
     for (uint32 idxW = 0; idxW < cDls->WaveCount; idxW++) {
@@ -252,7 +252,7 @@ E_LOAD_STATUS InstList::loadDlsWave(DLS *cDls) {
 
         pWave->offset = wavePos;
         pWave->sampleRate = cDlsWave->Format.sampleRate;
-        if (cDlsWave->LoopCount) {
+        if (cDlsWave->WaveSmpl.loopCount) {
             pWave->loopEnable = 1;
             pWave->loopBegin = cDlsWave->ppWaveLoop[0]->start;
             pWave->loopLength = cDlsWave->ppWaveLoop[0]->length;
@@ -291,11 +291,11 @@ E_LOAD_STATUS InstList::loadDlsWave(DLS *cDls) {
 
     auto waveTableSize = wavePos * sizeof(WAVE_DATA);
     mpWaveTable = (WAVE_DATA*)malloc(waveTableSize);
-    if (NULL == mpWaveTable) {
+    if (nullptr == mpWaveTable) {
         return E_LOAD_STATUS::ALLOCATE_FAILED;
     }
 
-    fpWave = NULL;
+    fpWave = nullptr;
     _wfopen_s(&fpWave, mWaveTablePath, L"rb");
     fread_s(mpWaveTable, waveTableSize, waveTableSize, 1, fpWave);
     fclose(fpWave);

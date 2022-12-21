@@ -13,12 +13,12 @@ LRGN::LRGN(FILE *fp, long size, int32 count) : Riff() {
 
 LRGN::~LRGN() {
     for (int32 i = 0; i < Count; i++) {
-        if (NULL != pcRegion[i]) {
+        if (nullptr != pcRegion[i]) {
             delete pcRegion[i];
         }
     }
     free(pcRegion);
-    pcRegion = NULL;
+    pcRegion = nullptr;
 }
 
 void
@@ -35,20 +35,16 @@ RGN_::RGN_(FILE *fp, long size) : Riff() {
 }
 
 RGN_::~RGN_() {
-    if (NULL != ppWaveLoop) {
+    if (nullptr != ppWaveLoop) {
         for (uint32 i = 0; i < pWaveSmpl->loopCount; ++i) {
             free(ppWaveLoop[i]);
         }
         free(ppWaveLoop);
-        ppWaveLoop = NULL;
+        ppWaveLoop = nullptr;
     }
-    if (NULL != pWaveSmpl) {
-        free(pWaveSmpl);
-        pWaveSmpl = NULL;
-    }
-    if (NULL != cLart) {
+    if (nullptr != cLart) {
         delete cLart;
-        cLart = NULL;
+        cLart = nullptr;
     }
 }
 
@@ -63,16 +59,16 @@ RGN_::LoadChunk(FILE *fp, const char *type, long size) {
         return;
     }
     if (0 == strcmp("wsmp", type)) {
-        if (NULL != pWaveSmpl) {
-            free(pWaveSmpl);
-            pWaveSmpl = NULL;
-        }
-        if (NULL != ppWaveLoop) {
+        if (nullptr != ppWaveLoop) {
             for (uint32 i = 0; i < pWaveSmpl->loopCount; ++i) {
                 free(ppWaveLoop[i]);
             }
             free(ppWaveLoop);
-            ppWaveLoop = NULL;
+            ppWaveLoop = nullptr;
+        }
+        if (nullptr != pWaveSmpl) {
+            free(pWaveSmpl);
+            pWaveSmpl = nullptr;
         }
         pWaveSmpl = (DLS_WSMP*)malloc(sizeof(DLS_WSMP));
         fread_s(pWaveSmpl, sizeof(DLS_WSMP), sizeof(DLS_WSMP), 1, fp);

@@ -8,7 +8,7 @@ class ART_;
 
 class LART : public Riff {
 public:
-    ART_ *cArt = NULL;
+    ART_ *cArt = nullptr;
 
 public:
     LART(FILE *fp, long size);
@@ -21,7 +21,7 @@ protected:
 class ART_ {
 public:
     uint32 Count = 0;
-    DLS_CONN **ppConnection;
+    DLS_CONN **ppConnection = nullptr;
 
 public:
     ART_(FILE *fp, long size);

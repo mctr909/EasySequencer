@@ -8,8 +8,8 @@ class WVPL;
 
 class DLS : public Riff {
 public:
-    LINS *cLins = NULL;
-    WVPL *cWvpl = NULL;
+    LINS *cLins = nullptr;
+    WVPL *cWvpl = nullptr;
     uint32 InstCount = 0;
     uint32 WaveCount = 0;
 

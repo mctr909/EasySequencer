@@ -7,13 +7,13 @@
 #include "dls.h"
 
 DLS::~DLS() {
-    if (NULL != cLins) {
+    if (nullptr != cLins) {
         delete cLins;
-        cLins = NULL;
+        cLins = nullptr;
     }
-    if (NULL != cWvpl) {
+    if (nullptr != cWvpl) {
         delete cWvpl;
-        cWvpl = NULL;
+        cWvpl = nullptr;
     }
 }
 

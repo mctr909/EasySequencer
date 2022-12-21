@@ -21,8 +21,8 @@ typedef struct INST_INFO {
     uint32 layerIndex = 0;
     uint32 layerCount = 0;
     uint32 artIndex = 0;
-    char *pName = NULL;
-    char *pCategory = NULL;
+    char *pName = nullptr;
+    char *pCategory = nullptr;
 } INST_INFO;
 #pragma pack()
 
@@ -124,11 +124,11 @@ private:
     uint32 mArtCount = 0;
 
 public:
-    INST_WAVE** mppWaveList = NULL;
-    INST_LAYER** mppLayerList = NULL;
-    INST_REGION** mppRegionList = NULL;
-    INST_ART** mppArtList = NULL;
-    WAVE_DATA* mpWaveTable = NULL;
+    INST_WAVE** mppWaveList = nullptr;
+    INST_LAYER** mppLayerList = nullptr;
+    INST_REGION** mppRegionList = nullptr;
+    INST_ART** mppArtList = nullptr;
+    WAVE_DATA* mpWaveTable = nullptr;
 
 public:
     InstList() {}

@@ -14,12 +14,12 @@ LINS::LINS(FILE *fp, long size, int32 count) : Riff() {
 
 LINS::~LINS() {
     for (int32 i = 0; i < Count; i++) {
-        if (NULL != pcInst[i]) {
+        if (nullptr != pcInst[i]) {
             delete pcInst[i];
         }
     }
     free(pcInst);
-    pcInst = NULL;
+    pcInst = nullptr;
 }
 
 void
@@ -36,13 +36,13 @@ INS_::INS_(FILE *fp, long size) : Riff() {
 }
 
 INS_::~INS_() {
-    if (NULL != cLrgn) {
+    if (nullptr != cLrgn) {
         delete cLrgn;
-        cLrgn = NULL;
+        cLrgn = nullptr;
     }
-    if (NULL != cLart) {
+    if (nullptr != cLart) {
         delete cLart;
-        cLart = NULL;
+        cLart = nullptr;
     }
 }
 

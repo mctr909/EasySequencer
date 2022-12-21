@@ -312,7 +312,7 @@ fileout(
 
     /* allocate pcm buffer */
     auto p_pcm_buffer = (WAVE_DATA*)calloc(p_synth->buffer_length, fmt.nBlockAlign);
-    if (NULL == p_pcm_buffer) {
+    if (nullptr == p_pcm_buffer) {
         delete p_synth;
         delete p_inst_list;
         return;

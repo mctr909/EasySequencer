@@ -9,7 +9,7 @@ LART::LART(FILE *fp, long size) : Riff() {
 
 LART::~LART() {
     delete cArt;
-    cArt = NULL;
+    cArt = nullptr;
 }
 
 void
@@ -38,5 +38,5 @@ ART_::~ART_() {
         free(ppConnection[i]);
     }
     free(ppConnection);
-    ppConnection = NULL;
+    ppConnection = nullptr;
 }
