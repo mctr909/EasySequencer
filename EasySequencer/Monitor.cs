@@ -8,7 +8,7 @@ using System.Windows.Forms;
 
 using EasySequencer.Properties;
 using SMF;
-using WaveoutDll;
+using SynthDll;
 
 namespace EasySequencer {
     public partial class Monitor : Form {

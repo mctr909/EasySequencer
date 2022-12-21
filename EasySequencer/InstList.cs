@@ -4,7 +4,7 @@ using System.Linq;
 using System.Windows.Forms;
 
 using SMF;
-using WaveoutDll;
+using SynthDll;
 
 namespace EasySequencer {
     public partial class InstList : Form {

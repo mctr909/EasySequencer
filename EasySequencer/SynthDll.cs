@@ -6,7 +6,7 @@ using System.Runtime.InteropServices;
 using EasySequencer;
 using SMF;
 
-namespace WaveoutDll {
+namespace SynthDll {
     #region struct
     [StructLayout(LayoutKind.Sequential, Pack = 4)]
     public struct INST_INFO {
@@ -85,17 +85,17 @@ namespace WaveoutDll {
     };
 
     public class Sender : IDisposable {
-        #region WaveOut.dll
-        [DllImport("WaveOut.dll")]
+        #region synth.dll
+        [DllImport("synth.dll")]
         static extern IntPtr synth_setup(
             IntPtr filePath,
             int sampleRate,
             int bufferLength,
             int bufferCount
         );
-        [DllImport("WaveOut.dll")]
+        [DllImport("synth.dll")]
         static extern void synth_close();
-        [DllImport("WaveOut.dll")]
+        [DllImport("synth.dll")]
         static extern void fileout(
             IntPtr waveTablePath,
             IntPtr savePath,
@@ -104,7 +104,7 @@ namespace WaveoutDll {
             uint eventSize,
             IntPtr pEvents
         );
-        [DllImport("WaveOut.dll")]
+        [DllImport("synth.dll")]
         static extern void send_message(byte port, IntPtr pMsg);
         #endregion
 

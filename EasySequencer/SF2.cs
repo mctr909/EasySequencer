@@ -4,7 +4,7 @@ using System.Runtime.InteropServices;
 using System.IO;
 using System.Text;
 
-using WaveoutDll;
+using SynthDll;
 
 namespace SF2 {
     #region enum

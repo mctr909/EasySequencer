@@ -9,7 +9,7 @@ using System.Threading.Tasks;
 
 using EasySequencer.Properties;
 using SMF;
-using WaveoutDll;
+using SynthDll;
 
 namespace Player {
     public partial class Player : Form {
