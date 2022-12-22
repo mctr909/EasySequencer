@@ -2,10 +2,6 @@
 
 #include <string.h>
 
-void Riff::Load(FILE *fp, long size) {
-    loop(fp, size);
-}
-
 E_LOAD_STATUS
 Riff::Load(LPWSTR path, long offset) {
     FILE *fp = nullptr;
@@ -25,7 +21,7 @@ Riff::Load(LPWSTR path, long offset) {
     fread_s(&riffType, 4, 4, 1, fp);
 
     if (0 == strcmp("RIFF", riffId) && CheckFileType(riffType, riffSize)) {
-        loop(fp, riffSize - 4);
+        Load(fp, riffSize - 4);
     } else {
         return E_LOAD_STATUS::UNKNOWN_FILE;
     }
@@ -35,8 +31,7 @@ Riff::Load(LPWSTR path, long offset) {
     return E_LOAD_STATUS::SUCCESS;
 }
 
-void
-Riff::loop(FILE *fp, long size) {
+void Riff::Load(FILE* fp, long size) {
     char chunkId[5] = { 0 };
     unsigned int chunkSize;
     char listType[5] = { 0 };

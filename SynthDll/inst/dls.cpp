@@ -6,6 +6,8 @@
 
 #include "dls.h"
 
+DLS::DLS() : Riff() { }
+
 DLS::~DLS() {
     if (nullptr != cLins) {
         delete cLins;

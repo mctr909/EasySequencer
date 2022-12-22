@@ -14,10 +14,8 @@ public:
     uint32 WaveCount = 0;
 
 public:
-    DLS() : Riff() {}
+    DLS();
     ~DLS();
-
-public:
     E_LOAD_STATUS Load(LPWSTR path);
 
 protected:
