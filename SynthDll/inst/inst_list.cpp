@@ -252,18 +252,27 @@ E_LOAD_STATUS InstList::loadDlsWave(DLS *cDls) {
 
         pWave->offset = wavePos;
         pWave->sampleRate = cDlsWave->Format.sampleRate;
-        if (cDlsWave->WaveSmpl.loopCount) {
-            pWave->loopEnable = 1;
-            pWave->loopBegin = cDlsWave->ppWaveLoop[0]->start;
-            pWave->loopLength = cDlsWave->ppWaveLoop[0]->length;
-        } else {
+        if (nullptr == cDlsWave->pWaveSmpl) {
+            pWave->unityNote = 64;
+            pWave->pitch = 1.0;
+            pWave->gain = 1.0;
             pWave->loopEnable = 0;
             pWave->loopBegin = 0;
             pWave->loopLength = cDlsWave->DataSize * 8 / cDlsWave->Format.bits;
+        } else {
+            pWave->unityNote = (byte)cDlsWave->pWaveSmpl->unityNote;
+            pWave->pitch = cDlsWave->pWaveSmpl->getFileTune();
+            pWave->gain = cDlsWave->pWaveSmpl->getGain();
+            if (cDlsWave->pWaveSmpl->loopCount) {
+                pWave->loopEnable = 1;
+                pWave->loopBegin = cDlsWave->ppWaveLoop[0]->start;
+                pWave->loopLength = cDlsWave->ppWaveLoop[0]->length;
+            } else {
+                pWave->loopEnable = 0;
+                pWave->loopBegin = 0;
+                pWave->loopLength = cDlsWave->DataSize * 8 / cDlsWave->Format.bits;
+            }
         }
-        pWave->unityNote = (byte)cDlsWave->WaveSmpl.unityNote;
-        pWave->pitch = cDlsWave->WaveSmpl.getFileTune();
-        pWave->gain = cDlsWave->WaveSmpl.getGain();
 
         /* output wave table */
         switch (cDlsWave->Format.bits) {

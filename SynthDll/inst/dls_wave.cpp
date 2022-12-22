@@ -41,11 +41,15 @@ WAVE::~WAVE() {
         pData = nullptr;
     }
     if (nullptr != ppWaveLoop) {
-        for (uint32 i = 0; i < WaveSmpl.loopCount; ++i) {
+        for (uint32 i = 0; i < pWaveSmpl->loopCount; ++i) {
             free(ppWaveLoop[i]);
         }
         free(ppWaveLoop);
         ppWaveLoop = nullptr;
+    }
+    if (nullptr != pWaveSmpl) {
+        free(pWaveSmpl);
+        pWaveSmpl = nullptr;
     }
 }
 
@@ -76,9 +80,10 @@ WAVE::LoadChunk(FILE *fp, const char *type, long size) {
         return;
     }
     if (0 == strcmp("wsmp", type)) {
-        fread_s(&WaveSmpl, sizeof(WaveSmpl), sizeof(WaveSmpl), 1, fp);
-        ppWaveLoop = (DLS_LOOP**)calloc(WaveSmpl.loopCount, sizeof(DLS_LOOP*));
-        for (uint32 i = 0; i < WaveSmpl.loopCount; ++i) {
+        pWaveSmpl = (DLS_WSMP*)malloc(sizeof(DLS_WSMP));
+        fread_s(pWaveSmpl, sizeof(DLS_WSMP), sizeof(DLS_WSMP), 1, fp);
+        ppWaveLoop = (DLS_LOOP**)calloc(pWaveSmpl->loopCount, sizeof(DLS_LOOP*));
+        for (uint32 i = 0; i < pWaveSmpl->loopCount; ++i) {
             ppWaveLoop[i] = (DLS_LOOP*)malloc(sizeof(DLS_LOOP));
             fread_s(ppWaveLoop[i], sizeof(DLS_LOOP), sizeof(DLS_LOOP), 1, fp);
         }

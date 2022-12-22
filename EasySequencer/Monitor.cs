@@ -28,11 +28,11 @@ namespace EasySequencer {
             StartCap = System.Drawing.Drawing2D.LineCap.Round,
             EndCap = System.Drawing.Drawing2D.LineCap.Round
         };
-        static readonly Pen COLOR_KNOB_GREEN = new Pen(Brushes.DarkOliveGreen, 3) {
+        static readonly Pen COLOR_KNOB_BLUE = new Pen(Color.FromArgb(0, 0, 191), 3) {
             StartCap = System.Drawing.Drawing2D.LineCap.Round,
             EndCap = System.Drawing.Drawing2D.LineCap.Round
         };
-        static readonly Pen COLOR_KNOB_BLUE = new Pen(Brushes.Navy, 3) {
+        static readonly Pen COLOR_KNOB_GREEN = new Pen(Color.FromArgb(0, 127, 0), 3) {
             StartCap = System.Drawing.Drawing2D.LineCap.Round,
             EndCap = System.Drawing.Drawing2D.LineCap.Round
         };

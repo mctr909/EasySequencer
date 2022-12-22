@@ -42,6 +42,10 @@ RGN_::~RGN_() {
         free(ppWaveLoop);
         ppWaveLoop = nullptr;
     }
+    if (nullptr != pWaveSmpl) {
+        free(pWaveSmpl);
+        pWaveSmpl = nullptr;
+    }
     if (nullptr != cLart) {
         delete cLart;
         cLart = nullptr;

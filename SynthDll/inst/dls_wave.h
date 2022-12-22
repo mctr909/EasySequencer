@@ -25,7 +25,7 @@ public:
     char Name[32] = { 0 };
     char Category[32] = { 0 };
     WAVE_FMT Format = { 0 };
-    DLS_WSMP WaveSmpl = { 0 };
+    DLS_WSMP *pWaveSmpl = nullptr;
     DLS_LOOP **ppWaveLoop = nullptr;
     uint32 DataSize = 0;
     byte *pData = nullptr;
