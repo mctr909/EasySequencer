@@ -62,7 +62,6 @@
       <DesignTime>True</DesignTime>
       <DependentUpon>Resources.resx</DependentUpon>
     </Compile>
-    <Compile Include="RiffChunk.cs" />
     <Compile Include="Player.cs">
       <SubType>Form</SubType>
     </Compile>
@@ -75,7 +74,6 @@
     <Compile Include="InstList.Designer.cs">
       <DependentUpon>InstList.cs</DependentUpon>
     </Compile>
-    <Compile Include="SF2.cs" />
     <Compile Include="DoubleBuffer.cs" />
     <Compile Include="SynthDll.cs" />
     <Compile Include="Program.cs" />

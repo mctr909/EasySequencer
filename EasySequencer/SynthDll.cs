@@ -84,6 +84,9 @@ namespace SynthDll {
 
     public class Sender : IDisposable {
         #region synth.dll
+        public const int TRACK_COUNT = 256;
+        public const int SAMPLER_COUNT = 64;
+
         [DllImport("synth.dll")]
         static extern IntPtr synth_setup(
             IntPtr filePath,
@@ -105,11 +108,6 @@ namespace SynthDll {
         [DllImport("synth.dll")]
         static extern void send_message(byte port, IntPtr pMsg);
         #endregion
-
-        public const int TRACK_COUNT = 256;
-        public const int SAMPLER_COUNT = 64;
-        public const int SAMPLE_RATE = 44100;
-        public const double DELTA_TIME = 1.0 / SAMPLE_RATE;
 
         public static bool IsFileOutput { get; private set; }
 
@@ -142,8 +140,8 @@ namespace SynthDll {
             Marshal.FreeHGlobal(mpMessage);
         }
 
-        public bool Setup(string waveTablePath) {
-            var ptrSysVal = synth_setup(Marshal.StringToHGlobalAuto(waveTablePath), SAMPLE_RATE, 256, 32);
+        public bool Setup(string waveTablePath, int sampleRate) {
+            var ptrSysVal = synth_setup(Marshal.StringToHGlobalAuto(waveTablePath), sampleRate, 256, 32);
             if (IntPtr.Zero == ptrSysVal) {
                 synth_close();
                 return false;

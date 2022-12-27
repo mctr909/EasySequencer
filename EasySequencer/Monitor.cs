@@ -23,7 +23,6 @@ namespace EasySequencer {
         int mKnobNum;
         int mChangeValue;
 
-        static readonly Font FONT_KNOB = new Font("ＭＳ ゴシック", 9.0f, FontStyle.Regular, GraphicsUnit.Point);
         static readonly Pen COLOR_KNOB_BLACK = new Pen(Brushes.Black, 3) {
             StartCap = System.Drawing.Drawing2D.LineCap.Round,
             EndCap = System.Drawing.Drawing2D.LineCap.Round
@@ -36,7 +35,6 @@ namespace EasySequencer {
             StartCap = System.Drawing.Drawing2D.LineCap.Round,
             EndCap = System.Drawing.Drawing2D.LineCap.Round
         };
-        static readonly Brush COLOR_KNOB_TEXT = (new Pen(Color.FromArgb(255, 255, 255, 255), 1.0f)).Brush;
 
         const int FONT_WIDTH = 11;
         const int FONT_HEIGHT = 15;
@@ -326,7 +324,7 @@ namespace EasySequencer {
                 /*** Exp. ***/
                 drawKnob(g, COLOR_KNOB_BLACK, track, 1, param.exp);
                 /*** Pan  ***/
-                drawKnob(g, COLOR_KNOB_BLACK, track, 2, param.pan, "R00;L00; C ");
+                drawKnob(g, COLOR_KNOB_BLACK, track, 2, param.pan);
 
                 /*** Rev. ***/
                 drawKnob(g, COLOR_KNOB_BLUE, track, 3, param.rev_send);
@@ -359,7 +357,7 @@ namespace EasySequencer {
             mBuffer.Render();
         }
 
-        void drawKnob(Graphics g, Pen color, int track, int index, int value, string format = "000") {
+        void drawKnob(Graphics g, Pen color, int track, int index, int value) {
             var track_y = track * TRACK_HEIGHT;
             var knobX = POS_KNOB_ROT[value].X * KNOB_RADIUS;
             var knobY = POS_KNOB_ROT[value].Y * KNOB_RADIUS;
@@ -369,14 +367,6 @@ namespace EasySequencer {
                 knobY * 0.25f + POS_KNOBS[index].Y + track_y,
                 knobX + POS_KNOBS[index].X,
                 knobY + POS_KNOBS[index].Y + track_y
-            );
-            if ("000" != format) {
-                value -= 64;
-            }
-            g.DrawString(
-                value.ToString(format),
-                FONT_KNOB, COLOR_KNOB_TEXT,
-                POS_KNOB_VALS[index].X, POS_KNOB_VALS[index].Y + track_y
             );
         }
 

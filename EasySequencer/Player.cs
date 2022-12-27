@@ -66,7 +66,9 @@ namespace Player {
             get { return (int)mCurrentTick; }
             set {
                 var isPlay = mIsPlay;
-                stop();
+                if (isPlay) {
+                    stop();
+                }
                 if (value < 0) {
                     mCurrentTick = 0.0;
                 } else if (mMaxTick < value) {
@@ -102,12 +104,11 @@ namespace Player {
             }
         }
 
-        private void Form1_Load(object sender, EventArgs e) {
-            //mDlsFilePath = Path.GetDirectoryName(Application.ExecutablePath) + "\\gm.sf2";
+        private void Player_Shown(object sender, EventArgs e) {
             mDlsFilePath = Path.GetDirectoryName(Application.ExecutablePath) + "\\gm.dls";
 
             mMidiSender = new Sender();
-            if (!mMidiSender.Setup(mDlsFilePath)) {
+            if (!mMidiSender.Setup(mDlsFilePath, 44100)) {
                 Close();
                 return;
             }
@@ -281,6 +282,17 @@ namespace Player {
                     pos.X = RECT_SEEK.X + RECT_SEEK.Width - 1;
                 }
                 mG.DrawImageUnscaled(Resources.player_seek, pos.X - Resources.player_seek.Width / 2, RECT_SEEK.Y);
+                if (!mIsPlay) {
+                    var seekPos = picPlayer.PointToClient(Cursor.Position);
+                    seekPos.X -= RECT_SEEK.X;
+                    if (seekPos.X < 0) {
+                        seekPos.X = 0;
+                    }
+                    if (RECT_SEEK.Width - 1 < seekPos.X) {
+                        seekPos.X = RECT_SEEK.Width - 1;
+                    }
+                    Seek = mMaxTick * seekPos.X / RECT_SEEK.Width;
+                }
             } else {
                 var seek = 0;
                 if (0 < mMaxTick) {
