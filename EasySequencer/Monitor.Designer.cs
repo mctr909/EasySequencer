@@ -26,7 +26,9 @@ namespace EasySequencer {
         /// the contents of this method with the code editor.
         /// </summary>
         private void InitializeComponent() {
+            this.components = new System.ComponentModel.Container();
             this.picMonitor = new System.Windows.Forms.PictureBox();
+            this.timer1 = new System.Windows.Forms.Timer(this.components);
             ((System.ComponentModel.ISupportInitialize)(this.picMonitor)).BeginInit();
             this.SuspendLayout();
             // 
@@ -41,10 +43,14 @@ namespace EasySequencer {
             this.picMonitor.Size = new System.Drawing.Size(1227, 541);
             this.picMonitor.TabIndex = 1;
             this.picMonitor.TabStop = false;
-            this.picMonitor.DoubleClick += new EventHandler(picMonitor_DoubleClick);
-            this.picMonitor.MouseDown += new MouseEventHandler(picMonitor_MouseDown);
-            this.picMonitor.MouseMove += new MouseEventHandler(picMonitor_MouseMove);
-            this.picMonitor.MouseUp += new MouseEventHandler(picMonitor_MouseUp);
+            this.picMonitor.DoubleClick += new System.EventHandler(this.picMonitor_DoubleClick);
+            this.picMonitor.MouseDown += new System.Windows.Forms.MouseEventHandler(this.picMonitor_MouseDown);
+            this.picMonitor.MouseMove += new System.Windows.Forms.MouseEventHandler(this.picMonitor_MouseMove);
+            this.picMonitor.MouseUp += new System.Windows.Forms.MouseEventHandler(this.picMonitor_MouseUp);
+            // 
+            // timer1
+            // 
+            this.timer1.Tick += new System.EventHandler(this.timer1_Tick);
             // 
             // Monitor
             // 
@@ -55,7 +61,7 @@ namespace EasySequencer {
             this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.None;
             this.Name = "Monitor";
             this.Text = "Monitor";
-            this.Load += new System.EventHandler(this.Monitor_Load);
+            this.Shown += new System.EventHandler(this.Monitor_Shown);
             ((System.ComponentModel.ISupportInitialize)(this.picMonitor)).EndInit();
             this.ResumeLayout(false);
 
@@ -64,5 +70,6 @@ namespace EasySequencer {
         #endregion
 
         private System.Windows.Forms.PictureBox picMonitor;
+        private Timer timer1;
     }
 }

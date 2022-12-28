@@ -74,7 +74,6 @@
     <Compile Include="InstList.Designer.cs">
       <DependentUpon>InstList.cs</DependentUpon>
     </Compile>
-    <Compile Include="DoubleBuffer.cs" />
     <Compile Include="SynthDll.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />

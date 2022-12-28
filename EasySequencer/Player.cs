@@ -55,7 +55,6 @@ namespace Player {
         int mMaxTick;
 
         EasySequencer.Monitor mMonitor;
-        Bitmap mBmp;
         Graphics mG;
         string mDlsFilePath;
         static readonly Bitmap[,] BMP_FONT = new Bitmap[16, 6];
@@ -118,8 +117,8 @@ namespace Player {
             mMonitor = new EasySequencer.Monitor(mMidiSender);
             mMonitor.Show();
 
-            mBmp = new Bitmap(picPlayer.Width, picPlayer.Height);
-            mG = Graphics.FromImage(mBmp);
+            picPlayer.Image = new Bitmap(picPlayer.Width, picPlayer.Height);
+            mG = Graphics.FromImage(picPlayer.Image);
 
             timer1.Interval = 50;
             timer1.Enabled = true;
@@ -232,6 +231,7 @@ namespace Player {
 
         private void timer1_Tick(object sender, EventArgs e) {
             mG.Clear(Color.Transparent);
+
             draw7seg(POS_MEASURE, (mMeasure + 1).ToString().PadLeft(4, ' '));
             draw7seg(POS_BEAT, (mBeat + 1).ToString().PadLeft(2, ' '));
             draw7seg(POS_TEMPO, 2 < mSpeed ? "----" :
@@ -301,7 +301,7 @@ namespace Player {
                 mG.DrawImageUnscaled(Resources.player_seek, RECT_SEEK.X + seek - Resources.player_seek.Width / 2, RECT_SEEK.Y);
             }
 
-            picPlayer.Image = mBmp;
+            picPlayer.Image = picPlayer.Image;
         }
 
         void draw7seg(Point pos, string value) {

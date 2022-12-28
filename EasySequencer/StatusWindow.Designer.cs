@@ -23,36 +23,36 @@
 		/// the contents of this method with the code editor.
 		/// </summary>
 		private void InitializeComponent() {
-			this.components = new System.ComponentModel.Container();
-			this.progressBar1 = new System.Windows.Forms.ProgressBar();
-			this.timer1 = new System.Windows.Forms.Timer(this.components);
-			this.SuspendLayout();
-			// 
-			// progressBar1
-			// 
-			this.progressBar1.Location = new System.Drawing.Point(12, 12);
-			this.progressBar1.Name = "progressBar1";
-			this.progressBar1.Size = new System.Drawing.Size(367, 23);
-			this.progressBar1.TabIndex = 0;
-			// 
-			// timer1
-			// 
-			this.timer1.Tick += new System.EventHandler(this.timer1_Tick);
-			// 
-			// StatusWindow
-			// 
-			this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 12F);
-			this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-			this.BackgroundImageLayout = System.Windows.Forms.ImageLayout.None;
-			this.ClientSize = new System.Drawing.Size(391, 49);
-			this.ControlBox = false;
-			this.Controls.Add(this.progressBar1);
-			this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.FixedToolWindow;
-			this.Name = "StatusWindow";
-			this.StartPosition = System.Windows.Forms.FormStartPosition.CenterParent;
-			this.Text = "StatusWindow";
-			this.Load += new System.EventHandler(this.StatusWindow_Load);
-			this.ResumeLayout(false);
+            this.components = new System.ComponentModel.Container();
+            this.progressBar1 = new System.Windows.Forms.ProgressBar();
+            this.timer1 = new System.Windows.Forms.Timer(this.components);
+            this.SuspendLayout();
+            // 
+            // progressBar1
+            // 
+            this.progressBar1.Location = new System.Drawing.Point(1, 1);
+            this.progressBar1.Name = "progressBar1";
+            this.progressBar1.Size = new System.Drawing.Size(300, 23);
+            this.progressBar1.TabIndex = 0;
+            // 
+            // timer1
+            // 
+            this.timer1.Tick += new System.EventHandler(this.timer1_Tick);
+            // 
+            // StatusWindow
+            // 
+            this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 12F);
+            this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
+            this.BackgroundImageLayout = System.Windows.Forms.ImageLayout.None;
+            this.ClientSize = new System.Drawing.Size(302, 25);
+            this.ControlBox = false;
+            this.Controls.Add(this.progressBar1);
+            this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.FixedToolWindow;
+            this.Name = "StatusWindow";
+            this.StartPosition = System.Windows.Forms.FormStartPosition.CenterParent;
+            this.Text = "StatusWindow";
+            this.Load += new System.EventHandler(this.StatusWindow_Load);
+            this.ResumeLayout(false);
 
 		}
 

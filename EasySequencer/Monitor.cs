@@ -1,8 +1,6 @@
 ﻿using System;
 using System.Drawing;
 using System.Text;
-using System.Threading;
-using System.Threading.Tasks;
 using System.Runtime.InteropServices;
 using System.Windows.Forms;
 
@@ -12,7 +10,7 @@ using SynthDll;
 
 namespace EasySequencer {
     public partial class Monitor : Form {
-        DoubleBuffer mBuffer;
+        Graphics mG;
         Sender mSender;
 
         Point mMouseDownPos;
@@ -79,18 +77,6 @@ namespace EasySequencer {
             new Point(999, 43)  // Mod.
         };
 
-        static readonly Point[] POS_KNOB_VALS = {
-            new Point(720, 38), // Vol.
-            new Point(753, 38), // Exp.
-            new Point(786, 38), // Pan
-            new Point(822, 38), // Rev.
-            new Point(855, 38), // Cho.
-            new Point(888, 38), // Del.
-            new Point(924, 38), // Fc
-            new Point(957, 38), // Res.
-            new Point(990, 38)  // Mod.
-        };
-
         static readonly PointF[] POS_KNOB_ROT = {
             new PointF(-0.604f,  0.797f), new PointF(-0.635f,  0.773f), new PointF(-0.665f,  0.747f), new PointF(-0.694f,  0.720f),
             new PointF(-0.721f,  0.693f), new PointF(-0.748f,  0.664f), new PointF(-0.774f,  0.634f), new PointF(-0.798f,  0.603f),
@@ -136,7 +122,7 @@ namespace EasySequencer {
             picMonitor.Width = Width;
             picMonitor.Height = Height;
             picMonitor.Image = new Bitmap(picMonitor.Width, picMonitor.Height);
-            mBuffer = new DoubleBuffer(picMonitor, Resources.Monitor);
+            mG = Graphics.FromImage(picMonitor.Image);
             mSender = sender;
 
             for (int by = 0; by < 6; by++) {
@@ -156,14 +142,15 @@ namespace EasySequencer {
             }
         }
 
-        void Monitor_Load(object sender, EventArgs e) {
-            Task.Run(() => {
-                while (true) {
-                    draw();
-                    sendValue();
-                    Thread.Sleep(20);
-                }
-            });
+        private void Monitor_Shown(object sender, EventArgs e) {
+            timer1.Enabled = true;
+            timer1.Interval = 16;
+            timer1.Start();
+        }
+
+        private void timer1_Tick(object sender, EventArgs e) {
+            draw();
+            sendValue();
         }
 
         void picMonitor_DoubleClick(object sender, EventArgs e) {
@@ -259,7 +246,7 @@ namespace EasySequencer {
         }
 
         void draw() {
-            var g = mBuffer.Graphics;
+            mG.Clear(Color.Transparent);
 
             for (int track = 0, chNum = 0; track < DISP_TRACKS; ++track, ++chNum) {
                 var param = mSender.GetChannel(chNum);
@@ -277,18 +264,18 @@ namespace EasySequencer {
                     var ky = key.Y + track_y;
                     var keyState = (E_KEY_STATE)Marshal.PtrToStructure<byte>(param.p_keyboard + n);
                     switch (keyState) {
-                        case E_KEY_STATE.PRESS:
-                            g.FillRectangle(Brushes.Red, kx, ky, key.Width, key.Height);
-                            break;
-                        case E_KEY_STATE.HOLD:
-                            g.FillRectangle(Brushes.Blue, kx, ky, key.Width, key.Height);
-                            break;
+                    case E_KEY_STATE.PRESS:
+                        mG.FillRectangle(Brushes.Red, kx, ky, key.Width, key.Height);
+                        break;
+                    case E_KEY_STATE.HOLD:
+                        mG.FillRectangle(Brushes.Blue, kx, ky, key.Width, key.Height);
+                        break;
                     }
                 }
 
                 /*** On/Off Button ***/
                 if (1 == param.enable) {
-                    g.DrawImageUnscaled(Resources.track_on, RECT_ON_OFF.X, RECT_ON_OFF.Y + track_y);
+                    mG.DrawImageUnscaled(Resources.track_on, RECT_ON_OFF.X, RECT_ON_OFF.Y + track_y);
                 }
 
                 /*** RMS meter ***/
@@ -310,42 +297,42 @@ namespace EasySequencer {
                 var normR = 1.0 - (rmsR - RMS_MAX) / RMS_MIN;
                 var rmsLpx = (int)(normL * RECT_METER_L.Width + 1) / SIZE_METER_CELL.Width * SIZE_METER_CELL.Width;
                 var rmsRpx = (int)(normR * RECT_METER_R.Width + 1) / SIZE_METER_CELL.Width * SIZE_METER_CELL.Width;
-                g.DrawImageUnscaledAndClipped(Resources.Meter, new Rectangle(
+                mG.DrawImageUnscaledAndClipped(Resources.Meter, new Rectangle(
                     RECT_METER_L.X, RECT_METER_L.Y + track_y,
                     rmsLpx, SIZE_METER_CELL.Height
                 ));
-                g.DrawImageUnscaledAndClipped(Resources.Meter, new Rectangle(
+                mG.DrawImageUnscaledAndClipped(Resources.Meter, new Rectangle(
                     RECT_METER_R.X, RECT_METER_R.Y + track_y,
                     rmsRpx, SIZE_METER_CELL.Height
                 ));
 
                 /*** Vol. ***/
-                drawKnob(g, COLOR_KNOB_BLACK, track, 0, param.vol);
+                drawKnob(COLOR_KNOB_BLACK, track, 0, param.vol);
                 /*** Exp. ***/
-                drawKnob(g, COLOR_KNOB_BLACK, track, 1, param.exp);
+                drawKnob(COLOR_KNOB_BLACK, track, 1, param.exp);
                 /*** Pan  ***/
-                drawKnob(g, COLOR_KNOB_BLACK, track, 2, param.pan);
+                drawKnob(COLOR_KNOB_BLACK, track, 2, param.pan);
 
                 /*** Rev. ***/
-                drawKnob(g, COLOR_KNOB_BLUE, track, 3, param.rev_send);
+                drawKnob(COLOR_KNOB_BLUE, track, 3, param.rev_send);
                 /*** Cho. ***/
-                drawKnob(g, COLOR_KNOB_BLUE, track, 4, param.cho_send);
+                drawKnob(COLOR_KNOB_BLUE, track, 4, param.cho_send);
                 /*** Del. ***/
-                drawKnob(g, COLOR_KNOB_BLUE, track, 5, param.del_send);
+                drawKnob(COLOR_KNOB_BLUE, track, 5, param.del_send);
 
                 /*** Fc ***/
-                drawKnob(g, COLOR_KNOB_GREEN, track, 6, param.cutoff);
+                drawKnob(COLOR_KNOB_GREEN, track, 6, param.cutoff);
                 /*** Res. ***/
-                drawKnob(g, COLOR_KNOB_GREEN, track, 7, param.resonance);
+                drawKnob(COLOR_KNOB_GREEN, track, 7, param.resonance);
                 /*** Mod. ***/
-                drawKnob(g, COLOR_KNOB_GREEN, track, 8, param.mod);
+                drawKnob(COLOR_KNOB_GREEN, track, 8, param.mod);
 
                 /*** Preset name ***/
                 var bName = Encoding.ASCII.GetBytes(param.Name);
                 for (int i = 0; i < bName.Length && i < 20; i++) {
                     var cx = bName[i] % 16;
                     var cy = (bName[i] - 0x20) / 16;
-                    g.DrawImageUnscaled(BMP_FONT[cx, cy], new Rectangle(
+                    mG.DrawImageUnscaled(BMP_FONT[cx, cy], new Rectangle(
                         RECT_PRESET_NAME.X + FONT_WIDTH * i,
                         RECT_PRESET_NAME.Y + track_y,
                         FONT_WIDTH,
@@ -354,17 +341,17 @@ namespace EasySequencer {
                 }
             }
 
-            mBuffer.Render();
+            picMonitor.Image = picMonitor.Image;
         }
 
-        void drawKnob(Graphics g, Pen color, int track, int index, int value) {
+        void drawKnob(Pen color, int track, int index, int value) {
             var track_y = track * TRACK_HEIGHT;
             var knobX = POS_KNOB_ROT[value].X * KNOB_RADIUS;
             var knobY = POS_KNOB_ROT[value].Y * KNOB_RADIUS;
-            g.DrawLine(
+            mG.DrawLine(
                 color,
-                knobX * 0.25f + POS_KNOBS[index].X,
-                knobY * 0.25f + POS_KNOBS[index].Y + track_y,
+                knobX * 0.1f + POS_KNOBS[index].X,
+                knobY * 0.1f + POS_KNOBS[index].Y + track_y,
                 knobX + POS_KNOBS[index].X,
                 knobY + POS_KNOBS[index].Y + track_y
             );
