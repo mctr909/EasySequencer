@@ -1,87 +1,111 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup>
-    <ClCompile Include="dllmain.cpp" />
+    <ClCompile Include="dllmain.cpp">
+      <Filter>source</Filter>
+    </ClCompile>
+    <ClCompile Include="riff.cpp">
+      <Filter>source</Filter>
+    </ClCompile>
     <ClCompile Include="inst\dls.cpp">
-      <Filter>Inst</Filter>
+      <Filter>source\inst</Filter>
     </ClCompile>
     <ClCompile Include="inst\dls_art.cpp">
-      <Filter>Inst</Filter>
+      <Filter>source\inst</Filter>
     </ClCompile>
     <ClCompile Include="inst\dls_ins.cpp">
-      <Filter>Inst</Filter>
+      <Filter>source\inst</Filter>
     </ClCompile>
     <ClCompile Include="inst\dls_rgn.cpp">
-      <Filter>Inst</Filter>
+      <Filter>source\inst</Filter>
     </ClCompile>
     <ClCompile Include="inst\dls_wave.cpp">
-      <Filter>Inst</Filter>
+      <Filter>source\inst</Filter>
     </ClCompile>
     <ClCompile Include="inst\inst_list.cpp">
-      <Filter>Inst</Filter>
+      <Filter>source\inst</Filter>
     </ClCompile>
     <ClCompile Include="synth\channel.cpp">
-      <Filter>Synth</Filter>
+      <Filter>source\synth</Filter>
     </ClCompile>
     <ClCompile Include="synth\filter.cpp">
-      <Filter>Synth</Filter>
+      <Filter>source\synth</Filter>
     </ClCompile>
     <ClCompile Include="synth\sampler.cpp">
-      <Filter>Synth</Filter>
+      <Filter>source\synth</Filter>
     </ClCompile>
     <ClCompile Include="synth\synth.cpp">
-      <Filter>Synth</Filter>
+      <Filter>source\synth</Filter>
     </ClCompile>
-    <ClCompile Include="riff.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="type.h" />
-    <ClInclude Include="dllmain.h" />
+    <ClInclude Include="dllmain.h">
+      <Filter>header</Filter>
+    </ClInclude>
+    <ClInclude Include="riff.h">
+      <Filter>header</Filter>
+    </ClInclude>
+    <ClInclude Include="type.h">
+      <Filter>header</Filter>
+    </ClInclude>
+    <ClInclude Include="riff_struct.h">
+      <Filter>header</Filter>
+    </ClInclude>
     <ClInclude Include="inst\dls.h">
-      <Filter>Inst</Filter>
+      <Filter>header\inst</Filter>
     </ClInclude>
     <ClInclude Include="inst\dls_art.h">
-      <Filter>Inst</Filter>
+      <Filter>header\inst</Filter>
     </ClInclude>
     <ClInclude Include="inst\dls_ins.h">
-      <Filter>Inst</Filter>
+      <Filter>header\inst</Filter>
     </ClInclude>
     <ClInclude Include="inst\dls_rgn.h">
-      <Filter>Inst</Filter>
+      <Filter>header\inst</Filter>
     </ClInclude>
     <ClInclude Include="inst\dls_struct.h">
-      <Filter>Inst</Filter>
+      <Filter>header\inst</Filter>
     </ClInclude>
     <ClInclude Include="inst\dls_wave.h">
-      <Filter>Inst</Filter>
+      <Filter>header\inst</Filter>
     </ClInclude>
     <ClInclude Include="inst\inst_list.h">
-      <Filter>Inst</Filter>
+      <Filter>header\inst</Filter>
     </ClInclude>
     <ClInclude Include="synth\channel.h">
-      <Filter>Synth</Filter>
-    </ClInclude>
-    <ClInclude Include="synth\filter.h">
-      <Filter>Synth</Filter>
-    </ClInclude>
-    <ClInclude Include="synth\sampler.h">
-      <Filter>Synth</Filter>
-    </ClInclude>
-    <ClInclude Include="synth\synth.h">
-      <Filter>Synth</Filter>
+      <Filter>header\synth</Filter>
     </ClInclude>
     <ClInclude Include="synth\channel_params.h">
-      <Filter>Synth</Filter>
+      <Filter>header\synth</Filter>
     </ClInclude>
-    <ClInclude Include="riff.h" />
-    <ClInclude Include="riff_struct.h" />
+    <ClInclude Include="synth\filter.h">
+      <Filter>header\synth</Filter>
+    </ClInclude>
+    <ClInclude Include="synth\sampler.h">
+      <Filter>header\synth</Filter>
+    </ClInclude>
+    <ClInclude Include="synth\synth.h">
+      <Filter>header\synth</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
-    <Filter Include="Inst">
-      <UniqueIdentifier>{7061774c-522d-40ac-a213-5c9d767294ac}</UniqueIdentifier>
+    <Filter Include="header">
+      <UniqueIdentifier>{ca8a1f3c-90e4-4fc9-b673-e09f0c64175b}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Synth">
-      <UniqueIdentifier>{4b568a3e-1c06-4cdf-8cac-8f0c528ddca6}</UniqueIdentifier>
+    <Filter Include="header\inst">
+      <UniqueIdentifier>{da9a1a1b-068d-4c91-ae73-c0c21a0450c4}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="header\synth">
+      <UniqueIdentifier>{bdbbdea2-0994-4477-8c7d-e3963e3120ea}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="source">
+      <UniqueIdentifier>{37a6fcfc-9db5-4bb3-8d3c-769eed5fa7a3}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="source\inst">
+      <UniqueIdentifier>{d79ea36d-3efa-4b36-b2fc-ac5b25a9fbb5}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="source\synth">
+      <UniqueIdentifier>{4b61dbfb-8425-4352-9904-ea99c347dcc9}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
 </Project>
