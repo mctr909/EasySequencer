@@ -3,7 +3,6 @@
 
 #include "../type.h"
 #include "filter.h"
-#include "channel_params.h"
 
 /******************************************************************************/
 #define CHANNEL_COUNT 256
@@ -31,6 +30,46 @@ const double SEMITONE[128] = {
 /******************************************************************************/
 class Synth;
 typedef struct INST_INFO INST_INFO;
+
+/******************************************************************************/
+#pragma pack(push, 4)
+struct CHANNEL_PARAM {
+    byte is_drum;
+    byte bank_msb;
+    byte bank_lsb;
+    byte prog_num;
+    byte enable;
+    byte vol;
+    byte exp;
+    byte pan;
+
+    byte rev_send;
+    byte del_send;
+    byte cho_send;
+    byte mod;
+    byte damper;
+    byte cutoff;
+    byte resonance;
+    byte attack;
+
+    byte release;
+    byte vib_rate;
+    byte vib_depth;
+    byte vib_delay;
+    byte bend_range;
+    byte reserved1;
+    byte reserved2;
+    byte reserved3;
+
+    int32 pitch;
+
+    double rms_l;
+    double rms_r;
+
+    byte* p_keyboard = nullptr;
+    byte* p_name = nullptr;
+};
+#pragma pack(pop)
 
 /******************************************************************************/
 class Channel {

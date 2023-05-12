@@ -1,6 +1,5 @@
 #include <math.h>
 
-#include "channel_params.h"
 #include "filter.h"
 #include "sampler.h"
 #include "synth.h"

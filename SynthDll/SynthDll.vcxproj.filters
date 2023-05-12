@@ -75,9 +75,6 @@
     <ClInclude Include="synth\channel.h">
       <Filter>header\synth</Filter>
     </ClInclude>
-    <ClInclude Include="synth\channel_params.h">
-      <Filter>header\synth</Filter>
-    </ClInclude>
     <ClInclude Include="synth\filter.h">
       <Filter>header\synth</Filter>
     </ClInclude>
