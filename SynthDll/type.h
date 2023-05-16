@@ -4,14 +4,6 @@
 #define WAVE_MAX 32767.0
 
 /******************************************************************************/
-enum struct E_LOAD_STATUS : int {
-    SUCCESS,
-    FILE_OPEN_FAILED,
-    ALLOCATE_FAILED,
-    UNKNOWN_FILE
-};
-
-/******************************************************************************/
 typedef unsigned char  byte;
 typedef unsigned short uint16;
 typedef unsigned int   uint32;
@@ -30,9 +22,17 @@ typedef struct {
 #pragma pack(pop)
 
 /******************************************************************************/
+enum struct E_LOAD_STATUS : int32 {
+    SUCCESS,
+    FILE_OPEN_FAILED,
+    ALLOCATE_FAILED,
+    UNKNOWN_FILE
+};
+
+/******************************************************************************/
 inline void
 int24_set(int24 *output, double value) {
-    int tmp = (int)(value * 0x7FFFFFFF);
+    auto tmp = (int32)(value * 0x7FFFFFFF);
     output->lsb = (tmp & 0x0000FF00) >> 8;
     output->msb = (tmp & 0xFFFF0000) >> 16;
 }

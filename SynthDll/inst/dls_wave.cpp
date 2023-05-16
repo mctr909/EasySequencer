@@ -1,6 +1,5 @@
 #include <string.h>
 #include "../riff.h"
-#include "../riff_struct.h"
 
 #include "dls_struct.h"
 

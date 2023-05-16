@@ -7,6 +7,18 @@
 #include <windows.h>
 
 /******************************************************************************/
+#pragma pack(push, 4)
+typedef struct WAVE_FMT {
+    uint16 tag;
+    uint16 channels;
+    uint32 sampleRate;
+    uint32 bytesPerSec;
+    uint16 blockAlign;
+    uint16 bits;
+} WAVE_FMT;
+#pragma pack(pop)
+
+/******************************************************************************/
 class Riff {
 public:
     Riff() {}

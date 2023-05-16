@@ -48,9 +48,6 @@
     <ClInclude Include="type.h">
       <Filter>header</Filter>
     </ClInclude>
-    <ClInclude Include="riff_struct.h">
-      <Filter>header</Filter>
-    </ClInclude>
     <ClInclude Include="inst\dls.h">
       <Filter>header\inst</Filter>
     </ClInclude>

@@ -1,5 +1,4 @@
 #include "../riff.h"
-#include "../riff_struct.h"
 
 #include "dls_struct.h"
 #include "dls_ins.h"
@@ -378,8 +377,8 @@ uint32 InstList::writeWaveTable16(FILE *fp, byte* pData, uint32 size) {
 }
 
 uint32 InstList::writeWaveTable24(FILE *fp, byte* pData, uint32 size) {
-    uint32 samples = size / sizeof(RIFFint24);
-    auto pInt24 = (RIFFint24*)pData;
+    uint32 samples = size / sizeof(int24);
+    auto pInt24 = (int24*)pData;
     for (uint32 i = 0; i < samples; i++) {
         auto tmp = (WAVE_DATA)(pInt24[i].msb * WAVE_MAX / 0x8000);
         fwrite(&tmp, sizeof(WAVE_DATA), 1, fp);

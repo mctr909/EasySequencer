@@ -172,7 +172,6 @@
     <ClInclude Include="inst\dls_wave.h" />
     <ClInclude Include="inst\inst_list.h" />
     <ClInclude Include="riff.h" />
-    <ClInclude Include="riff_struct.h" />
     <ClInclude Include="synth\channel.h" />
     <ClInclude Include="synth\filter.h" />
     <ClInclude Include="synth\sampler.h" />
