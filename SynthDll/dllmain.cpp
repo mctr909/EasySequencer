@@ -25,14 +25,13 @@ struct SYSTEM_VALUE {
 /******************************************************************************/
 WaveOut*     gp_waveout = nullptr;
 Synth*       gp_synth = nullptr;
-InstList*    gp_inst_list = nullptr;
 int32        g_fileout_progress = 0;
 SYSTEM_VALUE g_system_value = { 0 };
 
 /******************************************************************************/
 byte* WINAPI
 synth_setup(
-    LPWSTR file_path,
+    LPWSTR wave_table_path,
     int32 sample_rate,
     int32 buffer_length,
     int32 buffer_count
@@ -42,9 +41,9 @@ synth_setup(
     } else {
         gp_waveout->close();
     }
-    /*** Load system value ***/
-    gp_inst_list = new InstList();
-    auto load_status = gp_inst_list->Load(file_path);
+    /*** Create system value ***/
+    gp_synth = new Synth();
+    auto load_status = gp_synth->setup(wave_table_path, sample_rate, buffer_length);
     auto caption_err = L"ウェーブテーブル読み込み失敗";
     switch (load_status) {
     case E_LOAD_STATUS::FILE_OPEN_FAILED:
@@ -60,12 +59,8 @@ synth_setup(
         break;
     }
     if (E_LOAD_STATUS::SUCCESS != load_status) {
-        delete gp_inst_list;
-        gp_inst_list = nullptr;
         return nullptr;
     }
-    /*** Create system value ***/
-    gp_synth = new Synth(gp_inst_list, sample_rate, buffer_length);
     /*** Open waveout ***/
     gp_waveout->open(sample_rate, buffer_length, buffer_count, &Synth::write_buffer, gp_synth);
     /*** Return system value ***/
@@ -89,11 +84,6 @@ synth_close() {
         delete gp_synth;
         gp_synth = nullptr;
     }
-    /*** Release inst list ***/
-    if (nullptr != gp_inst_list) {
-        delete gp_inst_list;
-        gp_inst_list = nullptr;
-    }
 }
 
 void WINAPI
@@ -105,8 +95,9 @@ fileout(
     uint32 event_size,
     byte* p_events
 ) {
-    auto p_inst_list = new InstList();
-    auto load_status = p_inst_list->Load(wave_table_path);
+    /* set system value */
+    auto p_synth = new Synth();
+    auto load_status = p_synth->setup(wave_table_path, sample_rate, 256);
     auto caption_err = L"ウェーブテーブル読み込み失敗";
     switch (load_status) {
     case E_LOAD_STATUS::FILE_OPEN_FAILED:
@@ -122,24 +113,18 @@ fileout(
         break;
     }
     if (E_LOAD_STATUS::SUCCESS != load_status) {
-        delete p_inst_list;
         return;
     }
 
-    /* set system value */
-    auto p_synth = new Synth(p_inst_list, sample_rate, 256);
-    
     //********************************
     // output wave
     //********************************
-    if (!p_synth->file_out(save_path, base_tick, event_size, p_events, &g_fileout_progress)) {
+    if (!p_synth->save_wav(save_path, base_tick, event_size, p_events, &g_fileout_progress)) {
         MessageBoxW(nullptr, L"wavファイル出力に失敗しました。", L"", 0);
     }
 
     /* dispose system value */
     delete p_synth;
-    /* dispose inst list */
-    delete p_inst_list;
 }
 
 void WINAPI

@@ -7,31 +7,6 @@
 #include "synth.h"
 
 /******************************************************************************/
-Synth::Synth(InstList* p_inst_list, int32 sample_rate, int32 buffer_length) {
-    m_sample_rate = sample_rate;
-    m_delta_time = 1.0 / sample_rate;
-    m_buffer_length = buffer_length;
-    /* inst wave */
-    mp_inst_list = p_inst_list;
-    mp_wave_table = p_inst_list->mpWaveTable;
-    /* allocate output buffer */
-    mp_buffer_l = (double*)calloc(buffer_length, sizeof(double));
-    mp_buffer_r = (double*)calloc(buffer_length, sizeof(double));
-    /* allocate samplers */
-    mpp_samplers = (Sampler**)malloc(sizeof(Sampler*) * SAMPLER_COUNT);
-    for (uint32 i = 0; i < SAMPLER_COUNT; i++) {
-        mpp_samplers[i] = new Sampler(this);
-    }
-    /* allocate channel params */
-    mpp_channel_params = (CHANNEL_PARAM**)malloc(sizeof(CHANNEL_PARAM*) * CHANNEL_COUNT);
-    /* allocate channels */
-    mpp_channels = (Channel**)malloc(sizeof(Channel*) * CHANNEL_COUNT);
-    for (int32 i = 0; i < CHANNEL_COUNT; i++) {
-        mpp_channels[i] = new Channel(this, i);
-        mpp_channel_params[i] = &mpp_channels[i]->m_param;
-    }
-}
-
 Synth::~Synth() {
     /* dispose channels */
     if (nullptr != mpp_channels) {
@@ -63,6 +38,44 @@ Synth::~Synth() {
         free(mp_buffer_r);
         mp_buffer_r = nullptr;
     }
+    /*** dispose inst list ***/
+    if (nullptr != mp_inst_list) {
+        delete mp_inst_list;
+        mp_inst_list = nullptr;
+    }
+}
+
+E_LOAD_STATUS
+Synth::setup(LPWSTR wave_table_path, int32 sample_rate, int32 buffer_length) {
+    m_sample_rate = sample_rate;
+    m_delta_time = 1.0 / sample_rate;
+    m_buffer_length = buffer_length;
+    /* Create inst list */
+    mp_inst_list = new InstList();
+    auto load_status = mp_inst_list->Load(wave_table_path);
+    if (E_LOAD_STATUS::SUCCESS != load_status) {
+        delete mp_inst_list;
+        mp_inst_list = nullptr;
+        return load_status;
+    }
+    mp_wave_table = mp_inst_list->mpWaveTable;
+    /* allocate output buffer */
+    mp_buffer_l = (double*)calloc(buffer_length, sizeof(double));
+    mp_buffer_r = (double*)calloc(buffer_length, sizeof(double));
+    /* allocate samplers */
+    mpp_samplers = (Sampler**)malloc(sizeof(Sampler*) * SAMPLER_COUNT);
+    for (uint32 i = 0; i < SAMPLER_COUNT; i++) {
+        mpp_samplers[i] = new Sampler(this);
+    }
+    /* allocate channel params */
+    mpp_channel_params = (CHANNEL_PARAM**)malloc(sizeof(CHANNEL_PARAM*) * CHANNEL_COUNT);
+    /* allocate channels */
+    mpp_channels = (Channel**)malloc(sizeof(Channel*) * CHANNEL_COUNT);
+    for (int32 i = 0; i < CHANNEL_COUNT; i++) {
+        mpp_channels[i] = new Channel(this, i);
+        mpp_channel_params[i] = &mpp_channels[i]->m_param;
+    }
+    return load_status;
 }
 
 void
@@ -111,7 +124,7 @@ Synth::write_buffer(WAVE_DATA* p_pcm, void* p_param) {
 }
 
 bool
-Synth::file_out(LPWSTR save_path, uint32 base_tick, uint32 event_size, byte* p_events, int32 *p_progress) {
+Synth::save_wav(LPWSTR save_path, uint32 base_tick, uint32 event_size, byte* p_events, int32 *p_progress) {
     const uint32 RIFF_ID = 0x46464952;
     const uint32 FILE_ID = 0x45564157;
     const uint32 FMT_ID = 0x20746D66;
@@ -126,7 +139,7 @@ Synth::file_out(LPWSTR save_path, uint32 base_tick, uint32 event_size, byte* p_e
     fmt.wBitsPerSample = (uint16)(sizeof(WAVE_DATA) << 3);
     fmt.nBlockAlign = fmt.nChannels * fmt.wBitsPerSample >> 3;
     fmt.nAvgBytesPerSec = fmt.nSamplesPerSec * fmt.nBlockAlign;
-    
+
     /* allocate pcm buffer */
     auto p_pcm_buffer = (WAVE_DATA*)calloc(m_buffer_length, fmt.nBlockAlign);
     if (nullptr == p_pcm_buffer) {

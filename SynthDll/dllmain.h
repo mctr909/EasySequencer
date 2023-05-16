@@ -7,7 +7,7 @@
 extern "C" {
 #endif
     __declspec(dllexport) byte* WINAPI synth_setup(
-        LPWSTR file_path,
+        LPWSTR wave_table_path,
         int32 sample_rate,
         int32 buffer_length,
         int32 buffer_count

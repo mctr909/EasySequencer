@@ -64,14 +64,14 @@ private:
     double* mp_buffer_r = nullptr;
 
 public:
-    Synth(InstList* p_inst_list, int32 sample_rate, int32 buffer_length);
+    Synth() {}
     ~Synth();
+    E_LOAD_STATUS setup(LPWSTR wave_table_path, int32 sample_rate, int32 buffer_length);
     static void write_buffer(WAVE_DATA* p_pcm, void* p_param);
-    bool file_out(LPWSTR save_path, uint32 base_tick, uint32 event_size, byte* p_events, int32* p_progress);
+    bool save_wav(LPWSTR save_path, uint32 base_tick, uint32 event_size, byte* p_events, int32* p_progress);
     int32 send_message(byte port, byte* p_msg);
 
 private:
-    Synth() {}
     int32 sys_ex(byte* p_data);
     int32 meta_data(byte* p_data);
 };
