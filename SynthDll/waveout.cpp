@@ -39,7 +39,8 @@ WaveOut::callback(HWAVEOUT hwo, UINT uMsg, DWORD_PTR dwInstance, DWORD dwParam1,
 
 DWORD CALLBACK
 WaveOut::buffer_writing_task(LPVOID* param) {
-    auto p_this = (WaveOut*)param;
+    auto p_hdr = (WAVEHDR*)param;
+    auto p_this = (WaveOut*)p_hdr->dwUser;
     while (true) {
         if (p_this->m_dostop) {
             p_this->m_thread_stopped = true;
@@ -53,7 +54,7 @@ WaveOut::buffer_writing_task(LPVOID* param) {
             continue;
         } else {
             /*** Write Buffer ***/
-            auto p_buff = (WAVE_DATA*)p_this->mp_hdr[p_this->m_write_index].lpData;
+            auto p_buff = (WAVE_DATA*)(p_hdr + p_this->m_write_index)->lpData;
             memset(p_buff, 0, p_this->m_fmt.nBlockAlign * p_this->m_buffer_length);
             p_this->mfp_buffer_writer(p_buff, p_this->mp_buffer_writer_param);
             p_this->m_write_index = (p_this->m_write_index + 1) % p_this->m_buffer_count;
@@ -98,6 +99,21 @@ WaveOut::open(
     m_fmt.nSamplesPerSec = (DWORD)sample_rate;
     m_fmt.nBlockAlign = m_fmt.nChannels * m_fmt.wBitsPerSample / 8;
     m_fmt.nAvgBytesPerSec = m_fmt.nSamplesPerSec * m_fmt.nBlockAlign;
+    /*** Allocate wave header ***/
+    mp_hdr = (WAVEHDR*)calloc(m_buffer_count, sizeof(WAVEHDR));
+    if (nullptr == mp_hdr) {
+        return;
+    }
+    for (int32 i = 0; i < m_buffer_count; ++i) {
+        auto pWaveHdr = mp_hdr + i;
+        pWaveHdr->dwBufferLength = (DWORD)buffer_length * m_fmt.nBlockAlign;
+        pWaveHdr->dwFlags = WHDR_BEGINLOOP | WHDR_ENDLOOP;
+        pWaveHdr->dwLoops = 0;
+        pWaveHdr->dwUser = (DWORD_PTR)this;
+        pWaveHdr->lpData = (LPSTR)calloc(buffer_length, m_fmt.nBlockAlign);
+    }
+    /*** Init buffer locker ***/
+    InitializeCriticalSection(&m_buffer_lock);
     /*** Open waveout ***/
     if (MMSYSERR_NOERROR != waveOutOpen(
         &mp_handle,
@@ -107,34 +123,20 @@ WaveOut::open(
         (DWORD_PTR)mp_hdr,
         CALLBACK_FUNCTION
     )) {
+        close();
         return;
-    }
-    /*** Init buffer locker ***/
-    InitializeCriticalSection(&m_buffer_lock);
-    /*** Allocate wave header ***/
-    mp_hdr = (WAVEHDR*)calloc(m_buffer_count, sizeof(WAVEHDR));
-    if (nullptr == mp_hdr) {
-        return;
-    }
-    for (int32 i = 0; i < m_buffer_count; ++i) {
-        auto pWaveHdr = &mp_hdr[i];
-        pWaveHdr->dwBufferLength = (DWORD)buffer_length * m_fmt.nBlockAlign;
-        pWaveHdr->dwFlags = WHDR_BEGINLOOP | WHDR_ENDLOOP;
-        pWaveHdr->dwLoops = 0;
-        pWaveHdr->dwUser = (DWORD_PTR)this;
-        pWaveHdr->lpData = (LPSTR)calloc(buffer_length, m_fmt.nBlockAlign);
     }
     /*** Prepare wave header ***/
     for (int32 i = 0; i < m_buffer_count; ++i) {
-        waveOutPrepareHeader(mp_handle, &mp_hdr[i], sizeof(WAVEHDR));
-        waveOutWrite(mp_handle, &mp_hdr[i], sizeof(WAVEHDR));
+        waveOutPrepareHeader(mp_handle, mp_hdr + i, sizeof(WAVEHDR));
+        waveOutWrite(mp_handle, mp_hdr + i, sizeof(WAVEHDR));
     }
     /*** Create buffer writing proc thread ***/
     m_thread = CreateThread(
         nullptr,
         0,
         (LPTHREAD_START_ROUTINE)buffer_writing_task,
-        this,
+        mp_hdr,
         0,
         &m_thread_id
     );
