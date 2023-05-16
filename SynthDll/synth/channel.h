@@ -177,13 +177,13 @@ private:
     };
 
 public:
-    E_STATE state = E_STATE::FREE;
-    byte number = 0;
-    CHANNEL_PARAM param = { 0 };
-    double pitch = 1.0;
-    double* p_input_l = nullptr;
-    double* p_input_r = nullptr;
-    INST_INFO* p_inst = nullptr;
+    byte m_num = 0;
+    E_STATE m_state = E_STATE::FREE;
+    CHANNEL_PARAM m_param = { 0 };
+    double m_pitch = 1.0;
+    double* mp_input_l = nullptr;
+    double* mp_input_r = nullptr;
+    INST_INFO* mp_inst = nullptr;
 
 private:
     byte m_rpn_lsb = 0xFF;

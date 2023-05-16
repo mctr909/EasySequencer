@@ -2,6 +2,7 @@
 #define __SYNTH_H__
 
 #include "../type.h"
+#include <windows.h>
 
 /******************************************************************************/
 struct CHANNEL_PARAM;
@@ -47,16 +48,16 @@ private:
     };
 
 public:
-    int32 active_count = 0;
-    int32 buffer_length = 256;
-    int32 sample_rate = 44100;
-    double delta_time = 1.0 / 44100;
-    double bpm = 120.0;
-    InstList* p_inst_list = nullptr;
-    WAVE_DATA* p_wave_table = nullptr;
-    Sampler** pp_samplers = nullptr;
-    Channel** pp_channels = nullptr;
-    CHANNEL_PARAM** pp_channel_params = nullptr;
+    int32 m_active_count = 0;
+    int32 m_buffer_length = 256;
+    int32 m_sample_rate = 44100;
+    double m_delta_time = 1.0 / 44100;
+    double m_bpm = 120.0;
+    InstList* mp_inst_list = nullptr;
+    WAVE_DATA* mp_wave_table = nullptr;
+    Sampler** mpp_samplers = nullptr;
+    Channel** mpp_channels = nullptr;
+    CHANNEL_PARAM** mpp_channel_params = nullptr;
 
 private:
     double* mp_buffer_l = nullptr;
@@ -66,6 +67,7 @@ public:
     Synth(InstList* p_inst_list, int32 sample_rate, int32 buffer_length);
     ~Synth();
     static void write_buffer(WAVE_DATA* p_pcm, void* p_param);
+    bool file_out(LPWSTR save_path, uint32 base_tick, uint32 event_size, byte* p_events, int32* p_progress);
     int32 send_message(byte port, byte* p_msg);
 
 private:

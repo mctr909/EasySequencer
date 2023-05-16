@@ -53,10 +53,10 @@ private:
     };
 
 public:
-    E_STATE state = E_STATE::FREE;
-    byte channel_num = 0;
-    byte note_num = 0;
-    bool loop_enable = false;
+    E_STATE m_state = E_STATE::FREE;
+    byte m_channel_num = 0;
+    byte m_note_num = 0;
+    bool m_loop_enable = false;
 
 private:
     double m_gain = 1.0;
@@ -83,7 +83,7 @@ public:
 
 private:
     inline void gen_envelope() {
-        switch (state) {
+        switch (m_state) {
         case E_STATE::PRESS:
             if (m_time <= m_eg_amp.hold) {
                 m_amp += (1.0 - m_amp) * m_eg_amp.attack;

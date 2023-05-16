@@ -69,11 +69,11 @@ synth_setup(
     /*** Open waveout ***/
     gp_waveout->open(sample_rate, buffer_length, buffer_count, &Synth::write_buffer, gp_synth);
     /*** Return system value ***/
-    auto inst_list = gp_synth->p_inst_list->GetInstList();
+    auto inst_list = gp_synth->mp_inst_list->GetInstList();
     g_system_value.inst_count = inst_list->count;
     g_system_value.p_inst_list = (byte*)inst_list->ppData;
-    g_system_value.p_channel_params = (byte*)gp_synth->pp_channel_params;
-    g_system_value.p_active_counter = &gp_synth->active_count;
+    g_system_value.p_channel_params = (byte*)gp_synth->mpp_channel_params;
+    g_system_value.p_active_counter = &gp_synth->m_active_count;
     g_system_value.p_fileout_progress = &g_fileout_progress;
     return (byte*)&g_system_value;
 }
@@ -128,91 +128,18 @@ fileout(
 
     /* set system value */
     auto p_synth = new Synth(p_inst_list, sample_rate, 256);
-
-    /* riff wave format */
-    uint32 riff_id = 0x46464952;
-    uint32 file_size = 0;
-    uint32 file_id = 0x45564157;
-    const uint32 fmt_id = 0x20746D66;
-    const uint32 fmt_size = 18;
-    WAVEFORMATEX fmt;
-    fmt.wFormatTag = 1;
-    fmt.nChannels = 2;
-    fmt.nSamplesPerSec = sample_rate;
-    fmt.wBitsPerSample = (uint16)(sizeof(WAVE_DATA) << 3);
-    fmt.nBlockAlign = fmt.nChannels * fmt.wBitsPerSample >> 3;
-    fmt.nAvgBytesPerSec = fmt.nSamplesPerSec * fmt.nBlockAlign;
-    const uint32 data_id = 0x61746164;
-    uint32 data_size = 0;
-
-    /* allocate pcm buffer */
-    auto p_pcm_buffer = (WAVE_DATA*)calloc(p_synth->buffer_length, fmt.nBlockAlign);
-    if (nullptr == p_pcm_buffer) {
-        delete p_synth;
-        delete p_inst_list;
-        return;
-    }
-
-    /* open file */
-    FILE* fp_out = nullptr;
-    _wfopen_s(&fp_out, save_path, L"wb");
-    if (nullptr == fp_out) {
-        delete p_synth;
-        delete p_inst_list;
-        free(p_pcm_buffer);
-        MessageBoxW(nullptr, L"wavファイルが作成できませんでした。", L"wavファイル出力エラー", 0);
-        return;
-    }
-    fwrite(&riff_id, sizeof(riff_id), 1, fp_out);
-    fwrite(&file_size, sizeof(file_size), 1, fp_out);
-    fwrite(&file_id, sizeof(file_id), 1, fp_out);
-    fwrite(&fmt_id, sizeof(fmt_id), 1, fp_out);
-    fwrite(&fmt_size, sizeof(fmt_size), 1, fp_out);
-    fwrite(&fmt, sizeof(fmt), 1, fp_out);
-    fwrite(&data_id, sizeof(data_id), 1, fp_out);
-    fwrite(&data_size, sizeof(data_size), 1, fp_out);
-
+    
     //********************************
     // output wave
     //********************************
-    const int32 buff_size = p_synth->buffer_length * fmt.nBlockAlign;
-    const double delta_sec = p_synth->buffer_length * p_synth->delta_time;
-    uint32 event_pos = 0;
-    double time = 0.0;
-    while (event_pos < event_size) {
-        auto ev_time = (double)(*(int32*)(p_events + event_pos)) / base_tick;
-        event_pos += 4;
-        auto ev_value = p_events + event_pos;
-        while (time < ev_time) {
-            Synth::write_buffer(p_pcm_buffer, p_synth);
-            fwrite(p_pcm_buffer, buff_size, 1, fp_out);
-            data_size += buff_size;
-            time += p_synth->bpm * delta_sec / 60.0;
-            g_fileout_progress = event_pos;
-        }
-        event_pos += p_synth->send_message(0, ev_value);
+    if (!p_synth->file_out(save_path, base_tick, event_size, p_events, &g_fileout_progress)) {
+        MessageBoxW(nullptr, L"wavファイル出力に失敗しました。", L"", 0);
     }
-    g_fileout_progress = event_size;
-
-    /* close file */
-    file_size = data_size + sizeof(fmt) + 4;
-    fseek(fp_out, 0, SEEK_SET);
-    fwrite(&riff_id, sizeof(riff_id), 1, fp_out);
-    fwrite(&file_size, sizeof(file_size), 1, fp_out);
-    fwrite(&file_id, sizeof(file_id), 1, fp_out);
-    fwrite(&fmt_id, sizeof(fmt_id), 1, fp_out);
-    fwrite(&fmt_size, sizeof(fmt_size), 1, fp_out);
-    fwrite(&fmt, sizeof(fmt), 1, fp_out);
-    fwrite(&data_id, sizeof(data_id), 1, fp_out);
-    fwrite(&data_size, sizeof(data_size), 1, fp_out);
-    fclose(fp_out);
 
     /* dispose system value */
     delete p_synth;
     /* dispose inst list */
     delete p_inst_list;
-    /* dispose pcm buffer */
-    free(p_pcm_buffer);
 }
 
 void WINAPI
