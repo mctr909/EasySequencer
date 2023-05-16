@@ -37,6 +37,9 @@
     <ClCompile Include="synth\synth.cpp">
       <Filter>source\synth</Filter>
     </ClCompile>
+    <ClCompile Include="waveout.cpp">
+      <Filter>source</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="dllmain.h">
@@ -80,6 +83,9 @@
     </ClInclude>
     <ClInclude Include="synth\synth.h">
       <Filter>header\synth</Filter>
+    </ClInclude>
+    <ClInclude Include="waveout.h">
+      <Filter>header</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
