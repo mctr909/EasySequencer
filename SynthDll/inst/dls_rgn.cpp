@@ -1,5 +1,8 @@
+#include <stdio.h>
+#include <stdlib.h>
 #include <string.h>
-#include "../riff.h"
+
+#include "riff.h"
 
 #include "dls_art.h"
 

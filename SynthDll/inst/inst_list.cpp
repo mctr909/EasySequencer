@@ -1,4 +1,4 @@
-#include "../riff.h"
+#include "riff.h"
 
 #include "dls_struct.h"
 #include "dls_ins.h"

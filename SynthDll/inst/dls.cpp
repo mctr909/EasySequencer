@@ -1,5 +1,7 @@
 #include <string.h>
-#include "../riff.h"
+#include <windows.h>
+
+#include "riff.h"
 
 #include "dls_ins.h"
 #include "dls_wave.h"

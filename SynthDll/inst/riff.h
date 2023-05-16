@@ -1,7 +1,7 @@
 #ifndef __RIFF_H__
 #define __RIFF_H__
 
-#include "type.h"
+#include "../type.h"
 
 #include <stdio.h>
 #include <windows.h>

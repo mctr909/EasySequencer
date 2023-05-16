@@ -4,9 +4,6 @@
     <ClCompile Include="dllmain.cpp">
       <Filter>source</Filter>
     </ClCompile>
-    <ClCompile Include="riff.cpp">
-      <Filter>source</Filter>
-    </ClCompile>
     <ClCompile Include="inst\dls.cpp">
       <Filter>source\inst</Filter>
     </ClCompile>
@@ -40,12 +37,12 @@
     <ClCompile Include="waveout.cpp">
       <Filter>source</Filter>
     </ClCompile>
+    <ClCompile Include="inst\riff.cpp">
+      <Filter>source\inst</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="dllmain.h">
-      <Filter>header</Filter>
-    </ClInclude>
-    <ClInclude Include="riff.h">
       <Filter>header</Filter>
     </ClInclude>
     <ClInclude Include="type.h">
@@ -86,6 +83,9 @@
     </ClInclude>
     <ClInclude Include="waveout.h">
       <Filter>header</Filter>
+    </ClInclude>
+    <ClInclude Include="inst\riff.h">
+      <Filter>header\inst</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
