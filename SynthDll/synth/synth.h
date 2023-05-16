@@ -65,7 +65,7 @@ private:
 public:
     Synth(InstList* p_inst_list, int32 sample_rate, int32 buffer_length);
     ~Synth();
-    void write_buffer(WAVE_DATA* p_pcm);
+    static void write_buffer(WAVE_DATA* p_pcm, void* p_param);
     int32 send_message(byte port, byte* p_msg);
 
 private:

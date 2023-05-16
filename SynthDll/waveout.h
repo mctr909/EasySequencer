@@ -24,7 +24,8 @@ private:
     int32 m_buffer_count = 0;
     int32 m_buffer_length = 0;
 
-    void (*mfp_write_buffer)(WAVE_DATA*) = nullptr;
+    void (*mfp_buffer_writer)(WAVE_DATA* p_data, void* p_param) = nullptr;
+    void* mp_buffer_writer_param = NULL;
 
 private:
     static void callback(HWAVEOUT hwo, UINT uMsg, DWORD_PTR dwInstance, DWORD dwParam1, DWORD dwParam);
@@ -32,6 +33,12 @@ private:
     void stop();
 
 public:
-    void open(int32 sample_rate, int32 buffer_length, int32 buffer_count, void (*fp_write_buffer)(WAVE_DATA*));
+    void open(
+        int32 sample_rate,
+        int32 buffer_length,
+        int32 buffer_count,
+        void (*fp_buffer_writer)(WAVE_DATA* p_data, void* p_param),
+        void* p_buffer_writer_param
+    );
     void close();
 };

@@ -55,7 +55,7 @@ WaveOut::buffer_writing_task(LPVOID* param) {
             /*** Write Buffer ***/
             auto p_buff = (WAVE_DATA*)p_this->mp_hdr[p_this->m_write_index].lpData;
             memset(p_buff, 0, p_this->m_fmt.nBlockAlign * p_this->m_buffer_length);
-            p_this->mfp_write_buffer(p_buff);
+            p_this->mfp_buffer_writer(p_buff, p_this->mp_buffer_writer_param);
             p_this->m_write_index = (p_this->m_write_index + 1) % p_this->m_buffer_count;
             p_this->m_write_count++;
         }
@@ -73,17 +73,24 @@ WaveOut::stop() {
 }
 
 void
-WaveOut::open(int32 sample_rate, int32 buffer_length, int32 buffer_count, void (*fp_write_buffer)(WAVE_DATA*)) {
+WaveOut::open(
+    int32 sample_rate,
+    int32 buffer_length,
+    int32 buffer_count,
+    void (*fp_buffer_writer)(WAVE_DATA* p_data, void* p_param),
+    void* p_buffer_writer_param
+) {
     if (nullptr != mp_handle) {
         close();
     }
-    /*** Init buffer counter ***/
+    /*** Init buffer counter/writer ***/
     m_write_count = 0;
     m_write_index = 0;
     m_read_index = 0;
     m_buffer_count = buffer_count;
     m_buffer_length = buffer_length;
-    mfp_write_buffer = fp_write_buffer;
+    mfp_buffer_writer = fp_buffer_writer;
+    mp_buffer_writer_param = p_buffer_writer_param;
     /*** Set wave fmt ***/
     m_fmt.wFormatTag = 1;
     m_fmt.nChannels = 2;

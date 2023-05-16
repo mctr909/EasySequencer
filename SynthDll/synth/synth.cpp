@@ -66,30 +66,31 @@ Synth::~Synth() {
 }
 
 void
-Synth::write_buffer(WAVE_DATA* p_pcm) {
+Synth::write_buffer(WAVE_DATA* p_pcm, void* p_param) {
+    auto p_this = (Synth*)p_param;
     /* sampler loop */
     int32 active_count = 0;
     for (int32 i = 0; i < SAMPLER_COUNT; i++) {
-        auto p_smpl = pp_samplers[i];
+        auto p_smpl = p_this->pp_samplers[i];
         if (p_smpl->state < Sampler::E_STATE::PURGE) {
             continue;
         }
         p_smpl->step();
         active_count++;
     }
-    this->active_count = active_count;
+    p_this->active_count = active_count;
     /* channel loop */
     for (int32 i = 0; i < CHANNEL_COUNT; i++) {
-        auto p_ch = pp_channels[i];
+        auto p_ch = p_this->pp_channels[i];
         if (Channel::E_STATE::FREE == p_ch->state) {
             continue;
         }
-        p_ch->step(mp_buffer_l, mp_buffer_r);
+        p_ch->step(p_this->mp_buffer_l, p_this->mp_buffer_r);
     }
     /* write buffer */
-    for (int32 i = 0, j = 0; i < buffer_length; i++, j += 2) {
-        auto p_l = &mp_buffer_l[i];
-        auto p_r = &mp_buffer_r[i];
+    for (int32 i = 0, j = 0; i < p_this->buffer_length; i++, j += 2) {
+        auto p_l = p_this->mp_buffer_l + i;
+        auto p_r = p_this->mp_buffer_r + i;
         if (*p_l < -1.0) {
             *p_l = -1.0;
         }
