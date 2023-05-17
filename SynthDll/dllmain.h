@@ -19,7 +19,8 @@ extern "C" {
         uint32 sample_rate,
         uint32 base_tick,
         uint32 event_size,
-        byte* p_events
+        byte* p_events,
+        int32* p_progress
     );
     __declspec(dllexport) void WINAPI send_message(byte port, byte* p_msg);
 #ifdef __cplusplus

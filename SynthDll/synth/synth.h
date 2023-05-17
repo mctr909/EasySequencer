@@ -11,7 +11,6 @@ struct SYSTEM_VALUE {
     byte* p_inst_list;
     byte* p_channel_params;
     int32* p_active_counter;
-    int32* p_fileout_progress;
 };
 #pragma pack(pop)
 

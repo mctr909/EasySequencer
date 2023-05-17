@@ -12,7 +12,6 @@
 /******************************************************************************/
 WaveOut* gp_waveout = nullptr;
 Synth*   gp_synth = nullptr;
-int32    g_fileout_progress = 0;
 
 /******************************************************************************/
 byte* WINAPI
@@ -49,7 +48,6 @@ synth_setup(
     gp_waveout = new WaveOut();
     gp_waveout->open(sample_rate, buffer_length, buffer_count, &Synth::write_buffer, gp_synth);
     /*** Return system value ***/
-    gp_synth->m_system_value.p_fileout_progress = &g_fileout_progress;
     return (byte*)&gp_synth->m_system_value;
 }
 
@@ -75,7 +73,8 @@ fileout(
     uint32 sample_rate,
     uint32 base_tick,
     uint32 event_size,
-    byte* p_events
+    byte* p_events,
+    int32* p_progress
 ) {
     /* set system value */
     auto p_synth = new Synth();
@@ -101,7 +100,7 @@ fileout(
     //********************************
     // output wave
     //********************************
-    if (!p_synth->save_wav(save_path, base_tick, event_size, p_events, &g_fileout_progress)) {
+    if (!p_synth->save_wav(save_path, base_tick, event_size, p_events, p_progress)) {
         MessageBoxW(nullptr, L"wavファイル出力に失敗しました。", L"", 0);
     }
     /* dispose system value */

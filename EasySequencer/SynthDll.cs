@@ -72,7 +72,6 @@ namespace SynthDll {
         public IntPtr p_inst_list;
         public IntPtr p_channel_params;
         public IntPtr p_active_counter;
-        public IntPtr p_fileout_progress;
     };
     #endregion
 
@@ -103,13 +102,12 @@ namespace SynthDll {
             uint sampleRate,
             uint baseTick,
             uint eventSize,
-            IntPtr pEvents
+            IntPtr pEvents,
+            IntPtr pProgress
         );
         [DllImport("synth.dll")]
         static extern void send_message(byte port, IntPtr pMsg);
         #endregion
-
-        public static bool IsFileOutput { get; private set; }
 
         private SYSTEM_VALUE mSysValue;
         private IntPtr[] mpInstList;
@@ -155,8 +153,6 @@ namespace SynthDll {
         }
 
         public void FileOut(string wavetablePath, string filePath, SMF.File smf) {
-            IsFileOutput = true;
-
             var ms = new MemoryStream();
             var bw = new BinaryWriter(ms);
             foreach (var ev in smf.EventList) {
@@ -171,9 +167,11 @@ namespace SynthDll {
                 bw.Write(ev.Data);
             }
             var evArr = ms.ToArray();
-            var fm = new StatusWindow((int)ms.Length, mSysValue.p_fileout_progress);
-            int initProg = 0;
-            Marshal.StructureToPtr(initProg, mSysValue.p_fileout_progress, false);
+
+            int prog = 0;
+            var ptrProg = Marshal.AllocHGlobal(sizeof(int));
+            Marshal.StructureToPtr(prog, ptrProg, true);
+            var fm = new StatusWindow((int)ms.Length, ptrProg);
             fm.Show();
 
             Task.Factory.StartNew(() => {
@@ -182,11 +180,12 @@ namespace SynthDll {
                 fileout(
                     Marshal.StringToHGlobalAuto(wavetablePath),
                     Marshal.StringToHGlobalAuto(filePath),
-                    48000, 960, (uint)evArr.Length, ptrEvents
+                    48000, 960, (uint)evArr.Length, ptrEvents, ptrProg
                 );
                 Marshal.FreeHGlobal(ptrEvents);
-                IsFileOutput = false;
             });
+
+            Marshal.FreeHGlobal(ptrProg);
         }
 
         public void Send(byte port, Event msg) {

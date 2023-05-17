@@ -145,7 +145,7 @@ namespace Player {
         }
 
         private void wavファイル出力ToolStripMenuItem_Click(object sender, EventArgs e) {
-            if (null == mSMF || null == mMidiSender || Sender.IsFileOutput) {
+            if (null == mSMF || null == mMidiSender) {
                 return;
             }
 
