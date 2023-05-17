@@ -36,11 +36,7 @@ synth_setup(
     int32 buffer_length,
     int32 buffer_count
 ) {
-    if (nullptr == gp_waveout) {
-        gp_waveout = new WaveOut();
-    } else {
-        gp_waveout->close();
-    }
+    synth_close();
     /*** Create system value ***/
     gp_synth = new Synth();
     auto load_status = gp_synth->setup(wave_table_path, sample_rate, buffer_length);
@@ -62,6 +58,7 @@ synth_setup(
         return nullptr;
     }
     /*** Open waveout ***/
+    gp_waveout = new WaveOut();
     gp_waveout->open(sample_rate, buffer_length, buffer_count, &Synth::write_buffer, gp_synth);
     /*** Return system value ***/
     auto inst_list = gp_synth->mp_inst_list->GetInstList();
@@ -75,10 +72,12 @@ synth_setup(
 
 void WINAPI
 synth_close() {
-    if (nullptr == gp_waveout) {
-        return;
+    /*** Release waveout ***/
+    if (nullptr != gp_waveout) {
+        gp_waveout->close();
+        delete gp_waveout;
+        gp_waveout = nullptr;
     }
-    gp_waveout->close();
     /*** Release system value ***/
     if (nullptr != gp_synth) {
         delete gp_synth;

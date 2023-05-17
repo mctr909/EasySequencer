@@ -63,17 +63,18 @@ private:
     double* mp_buffer_l = nullptr;
     double* mp_buffer_r = nullptr;
 
+private:
+    int32 sys_ex(byte* p_data);
+    int32 meta_data(byte* p_data);
+    void dispose();
+
 public:
     Synth() {}
-    ~Synth();
+    ~Synth() { dispose(); }
     E_LOAD_STATUS setup(LPWSTR wave_table_path, int32 sample_rate, int32 buffer_length);
     static void write_buffer(WAVE_DATA* p_pcm, void* p_param);
     bool save_wav(LPWSTR save_path, uint32 base_tick, uint32 event_size, byte* p_events, int32* p_progress);
     int32 send_message(byte port, byte* p_msg);
-
-private:
-    int32 sys_ex(byte* p_data);
-    int32 meta_data(byte* p_data);
 };
 
 #endif /* __SYNTH_H__ */

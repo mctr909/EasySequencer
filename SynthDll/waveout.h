@@ -25,10 +25,10 @@ private:
     int32 m_buffer_length = 0;
 
     void (*mfp_buffer_writer)(WAVE_DATA* p_data, void* p_param) = nullptr;
-    void* mp_buffer_writer_param = NULL;
+    void* mp_buffer_writer_param = nullptr;
 
 private:
-    static void callback(HWAVEOUT hwo, UINT uMsg, DWORD_PTR dwInstance, DWORD dwParam1, DWORD dwParam);
+    static void callback(HWAVEOUT hwo, UINT uMsg, DWORD_PTR dwInstance, DWORD dwParam1, DWORD dwParam2);
     static DWORD buffer_writing_task(LPVOID* param);
     void stop();
 

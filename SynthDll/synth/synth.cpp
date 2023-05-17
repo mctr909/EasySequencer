@@ -6,8 +6,8 @@
 
 #include "synth.h"
 
-/******************************************************************************/
-Synth::~Synth() {
+void
+Synth::dispose() {
     /* dispose channels */
     if (nullptr != mpp_channels) {
         for (int32 i = 0; i < CHANNEL_COUNT; i++) {
@@ -54,23 +54,38 @@ Synth::setup(LPWSTR wave_table_path, int32 sample_rate, int32 buffer_length) {
     mp_inst_list = new InstList();
     auto load_status = mp_inst_list->Load(wave_table_path);
     if (E_LOAD_STATUS::SUCCESS != load_status) {
-        delete mp_inst_list;
-        mp_inst_list = nullptr;
+        dispose();
         return load_status;
     }
     mp_wave_table = mp_inst_list->mpWaveTable;
     /* allocate output buffer */
     mp_buffer_l = (double*)calloc(buffer_length, sizeof(double));
     mp_buffer_r = (double*)calloc(buffer_length, sizeof(double));
+    if (nullptr == mp_buffer_l || nullptr == mp_buffer_r) {
+        dispose();
+        return E_LOAD_STATUS::ALLOCATE_FAILED;
+    }
     /* allocate samplers */
     mpp_samplers = (Sampler**)malloc(sizeof(Sampler*) * SAMPLER_COUNT);
+    if (nullptr == mpp_samplers) {
+        dispose();
+        return E_LOAD_STATUS::ALLOCATE_FAILED;
+    }
     for (uint32 i = 0; i < SAMPLER_COUNT; i++) {
         mpp_samplers[i] = new Sampler(this);
     }
     /* allocate channel params */
     mpp_channel_params = (CHANNEL_PARAM**)malloc(sizeof(CHANNEL_PARAM*) * CHANNEL_COUNT);
+    if (nullptr == mpp_channel_params) {
+        dispose();
+        return E_LOAD_STATUS::ALLOCATE_FAILED;
+    }
     /* allocate channels */
     mpp_channels = (Channel**)malloc(sizeof(Channel*) * CHANNEL_COUNT);
+    if (nullptr == mpp_channels) {
+        dispose();
+        return E_LOAD_STATUS::ALLOCATE_FAILED;
+    }
     for (int32 i = 0; i < CHANNEL_COUNT; i++) {
         mpp_channels[i] = new Channel(this, i);
         mpp_channel_params[i] = &mpp_channels[i]->m_param;
@@ -125,37 +140,34 @@ Synth::write_buffer(WAVE_DATA* p_pcm, void* p_param) {
 
 bool
 Synth::save_wav(LPWSTR save_path, uint32 base_tick, uint32 event_size, byte* p_events, int32 *p_progress) {
-    const uint32 RIFF_ID = 0x46464952;
-    const uint32 FILE_ID = 0x45564157;
-    const uint32 FMT_ID = 0x20746D66;
-    const uint32 FMT_SIZE = 18;
-    const uint32 DATA_ID = 0x61746164;
-
+    const byte RIFF_ID[] = { 'R', 'I', 'F', 'F' };
+    const byte FILE_ID[] = { 'W', 'A', 'V', 'E' };
+    const byte FMT_ID[] = { 'f', 'm', 't', ' ' };
+    const byte DATA_ID[] = { 'd', 'a', 't', 'a' };
     /* set riff wave format */
-    WAVEFORMATEX fmt;
+    const uint32 FMT_SIZE = sizeof(WAVEFORMATEX);
+    WAVEFORMATEX fmt = { 0 };
     fmt.wFormatTag = 1;
     fmt.nChannels = 2;
     fmt.nSamplesPerSec = m_sample_rate;
     fmt.wBitsPerSample = (uint16)(sizeof(WAVE_DATA) << 3);
     fmt.nBlockAlign = fmt.nChannels * fmt.wBitsPerSample >> 3;
     fmt.nAvgBytesPerSec = fmt.nSamplesPerSec * fmt.nBlockAlign;
-
-    /* allocate pcm buffer */
-    auto p_pcm_buffer = (WAVE_DATA*)calloc(m_buffer_length, fmt.nBlockAlign);
-    if (nullptr == p_pcm_buffer) {
+    /* allocate output buffer */
+    const int32 BUFFER_SIZE = m_buffer_length * fmt.nBlockAlign;
+    auto p_buffer = (WAVE_DATA*)calloc(m_buffer_length, fmt.nBlockAlign);
+    if (nullptr == p_buffer) {
         return false;
     }
-
     /* open file */
     uint32 file_size = 0;
     uint32 data_size = 0;
     FILE* fp_out = nullptr;
     _wfopen_s(&fp_out, save_path, L"wb");
     if (nullptr == fp_out) {
-        free(p_pcm_buffer);
+        free(p_buffer);
         return false;
     }
-
     /* write header */
     fwrite(&RIFF_ID, sizeof(RIFF_ID), 1, fp_out);
     fwrite(&file_size, sizeof(file_size), 1, fp_out);
@@ -165,29 +177,26 @@ Synth::save_wav(LPWSTR save_path, uint32 base_tick, uint32 event_size, byte* p_e
     fwrite(&fmt, sizeof(fmt), 1, fp_out);
     fwrite(&DATA_ID, sizeof(DATA_ID), 1, fp_out);
     fwrite(&data_size, sizeof(data_size), 1, fp_out);
-
     //********************************
     // output wave
     //********************************
-    const int32 BUFF_SIZE = m_buffer_length * fmt.nBlockAlign;
-    const double DELTA_SEC = m_buffer_length * m_delta_time;
+    const double DELTA_MINUTES = m_buffer_length * m_delta_time / 60.0;
     uint32 event_pos = 0;
-    double time = 0.0;
+    double tick = 0.0;
     while (event_pos < event_size) {
-        auto ev_time = (double)(*(int32*)(p_events + event_pos)) / base_tick;
+        auto ev_tick = *(int32*)(p_events + event_pos) / (double)base_tick;
         event_pos += 4;
         auto ev_value = p_events + event_pos;
-        while (time < ev_time) {
-            Synth::write_buffer(p_pcm_buffer, this);
-            fwrite(p_pcm_buffer, BUFF_SIZE, 1, fp_out);
-            data_size += BUFF_SIZE;
-            time += m_bpm * DELTA_SEC / 60.0;
+        while (tick < ev_tick) {
+            Synth::write_buffer(p_buffer, this);
+            fwrite(p_buffer, BUFFER_SIZE, 1, fp_out);
+            data_size += BUFFER_SIZE;
+            tick += m_bpm * DELTA_MINUTES;
             *p_progress = event_pos;
         }
         event_pos += send_message(0, ev_value);
     }
     *p_progress = event_size;
-
     /* close file */
     file_size = data_size + sizeof(fmt) + 4;
     fseek(fp_out, 0, SEEK_SET);
@@ -200,10 +209,8 @@ Synth::save_wav(LPWSTR save_path, uint32 base_tick, uint32 event_size, byte* p_e
     fwrite(&DATA_ID, sizeof(DATA_ID), 1, fp_out);
     fwrite(&data_size, sizeof(data_size), 1, fp_out);
     fclose(fp_out);
-
-    /* dispose pcm buffer */
-    free(p_pcm_buffer);
-
+    /* dispose output buffer */
+    free(p_buffer);
     return true;
 }
 
