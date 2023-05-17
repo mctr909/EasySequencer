@@ -5,6 +5,17 @@
 #include <windows.h>
 
 /******************************************************************************/
+#pragma pack(push, 4)
+struct SYSTEM_VALUE {
+    int32 inst_count;
+    byte* p_inst_list;
+    byte* p_channel_params;
+    int32* p_active_counter;
+    int32* p_fileout_progress;
+};
+#pragma pack(pop)
+
+/******************************************************************************/
 struct CHANNEL_PARAM;
 class InstList;
 class Channel;
@@ -53,6 +64,7 @@ public:
     int32 m_sample_rate = 44100;
     double m_delta_time = 1.0 / 44100;
     double m_bpm = 120.0;
+    SYSTEM_VALUE m_system_value = { 0 };
     InstList* mp_inst_list = nullptr;
     WAVE_DATA* mp_wave_table = nullptr;
     Sampler** mpp_samplers = nullptr;

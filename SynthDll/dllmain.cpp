@@ -2,9 +2,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-#include "inst/inst_list.h"
 #include "synth/synth.h"
-
 #include "waveout.h"
 #include "dllmain.h"
 
@@ -12,21 +10,9 @@
 #pragma comment (lib, "winmm.lib")
 
 /******************************************************************************/
-#pragma pack(push, 4)
-struct SYSTEM_VALUE {
-    int32 inst_count;
-    byte* p_inst_list;
-    byte* p_channel_params;
-    int32* p_active_counter;
-    int32* p_fileout_progress;
-};
-#pragma pack(pop)
-
-/******************************************************************************/
-WaveOut*     gp_waveout = nullptr;
-Synth*       gp_synth = nullptr;
-int32        g_fileout_progress = 0;
-SYSTEM_VALUE g_system_value = { 0 };
+WaveOut* gp_waveout = nullptr;
+Synth*   gp_synth = nullptr;
+int32    g_fileout_progress = 0;
 
 /******************************************************************************/
 byte* WINAPI
@@ -55,19 +41,16 @@ synth_setup(
         break;
     }
     if (E_LOAD_STATUS::SUCCESS != load_status) {
+        delete gp_synth;
+        gp_synth = nullptr;
         return nullptr;
     }
     /*** Open waveout ***/
     gp_waveout = new WaveOut();
     gp_waveout->open(sample_rate, buffer_length, buffer_count, &Synth::write_buffer, gp_synth);
     /*** Return system value ***/
-    auto inst_list = gp_synth->mp_inst_list->GetInstList();
-    g_system_value.inst_count = inst_list->count;
-    g_system_value.p_inst_list = (byte*)inst_list->ppData;
-    g_system_value.p_channel_params = (byte*)gp_synth->mpp_channel_params;
-    g_system_value.p_active_counter = &gp_synth->m_active_count;
-    g_system_value.p_fileout_progress = &g_fileout_progress;
-    return (byte*)&g_system_value;
+    gp_synth->m_system_value.p_fileout_progress = &g_fileout_progress;
+    return (byte*)&gp_synth->m_system_value;
 }
 
 void WINAPI
@@ -112,16 +95,15 @@ fileout(
         break;
     }
     if (E_LOAD_STATUS::SUCCESS != load_status) {
+        delete p_synth;
         return;
     }
-
     //********************************
     // output wave
     //********************************
     if (!p_synth->save_wav(save_path, base_tick, event_size, p_events, &g_fileout_progress)) {
         MessageBoxW(nullptr, L"wavファイル出力に失敗しました。", L"", 0);
     }
-
     /* dispose system value */
     delete p_synth;
 }

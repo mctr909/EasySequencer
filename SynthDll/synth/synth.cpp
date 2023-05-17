@@ -90,6 +90,12 @@ Synth::setup(LPWSTR wave_table_path, int32 sample_rate, int32 buffer_length) {
         mpp_channels[i] = new Channel(this, i);
         mpp_channel_params[i] = &mpp_channels[i]->m_param;
     }
+    /* set system values */
+    auto inst_list = mp_inst_list->GetInstList();
+    m_system_value.inst_count = inst_list->count;
+    m_system_value.p_inst_list = (byte*)inst_list->ppData;
+    m_system_value.p_channel_params = (byte*)mpp_channel_params;
+    m_system_value.p_active_counter = &m_active_count;
     return load_status;
 }
 
@@ -139,7 +145,7 @@ Synth::write_buffer(WAVE_DATA* p_pcm, void* p_param) {
 }
 
 bool
-Synth::save_wav(LPWSTR save_path, uint32 base_tick, uint32 event_size, byte* p_events, int32 *p_progress) {
+Synth::save_wav(LPWSTR save_path, uint32 base_tick, uint32 event_size, byte* p_events, int32* p_progress) {
     const byte RIFF_ID[] = { 'R', 'I', 'F', 'F' };
     const byte FILE_ID[] = { 'W', 'A', 'V', 'E' };
     const byte FMT_ID[] = { 'f', 'm', 't', ' ' };
