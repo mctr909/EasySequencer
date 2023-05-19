@@ -158,7 +158,6 @@
     <ClCompile Include="inst\inst_list.cpp" />
     <ClCompile Include="inst\riff.cpp" />
     <ClCompile Include="synth\channel.cpp" />
-    <ClCompile Include="synth\filter.cpp" />
     <ClCompile Include="synth\sampler.cpp" />
     <ClCompile Include="synth\synth.cpp" />
     <ClCompile Include="dllmain.cpp" />

@@ -25,9 +25,6 @@
     <ClCompile Include="synth\channel.cpp">
       <Filter>source\synth</Filter>
     </ClCompile>
-    <ClCompile Include="synth\filter.cpp">
-      <Filter>source\synth</Filter>
-    </ClCompile>
     <ClCompile Include="synth\sampler.cpp">
       <Filter>source\synth</Filter>
     </ClCompile>
