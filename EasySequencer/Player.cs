@@ -114,9 +114,6 @@ namespace Player {
 
             reset();
 
-            mMonitor = new EasySequencer.Monitor(mMidiSender);
-            mMonitor.Show();
-
             picPlayer.Image = new Bitmap(picPlayer.Width, picPlayer.Height);
             mG = Graphics.FromImage(picPlayer.Image);
 
@@ -155,6 +152,23 @@ namespace Player {
             var filePath = saveFileDialog1.FileName;
 
             mMidiSender.FileOut(mDlsFilePath, filePath, mSMF);
+        }
+
+        private void ピアノロールPToolStripMenuItem_Click(object sender, EventArgs e) {
+
+        }
+
+        private void トラック編集TToolStripMenuItem_Click(object sender, EventArgs e) {
+
+        }
+
+        private void 演奏モニタMToolStripMenuItem_Click(object sender, EventArgs e) {
+            if (null == mMonitor || mMonitor.IsDisposed) {
+                mMonitor = new EasySequencer.Monitor(mMidiSender);
+                mMonitor.Show();
+            } else {
+                mMonitor.Close();
+            }
         }
 
         private void picPlayer_MouseDown(object sender, MouseEventArgs e) {

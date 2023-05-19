@@ -39,9 +39,13 @@
             this.名前を付けて保存ToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.toolStripSeparator3 = new System.Windows.Forms.ToolStripSeparator();
             this.wavファイル出力ToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.ウィンドウWToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.ピアノロールPToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.演奏モニタMToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.saveFileDialog1 = new System.Windows.Forms.SaveFileDialog();
             this.timer1 = new System.Windows.Forms.Timer(this.components);
             this.picPlayer = new System.Windows.Forms.PictureBox();
+            this.トラック編集TToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.menuStrip1.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.picPlayer)).BeginInit();
             this.SuspendLayout();
@@ -54,7 +58,8 @@
             // 
             this.menuStrip1.ImageScalingSize = new System.Drawing.Size(32, 32);
             this.menuStrip1.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
-            this.ファイルFToolStripMenuItem});
+            this.ファイルFToolStripMenuItem,
+            this.ウィンドウWToolStripMenuItem});
             this.menuStrip1.Location = new System.Drawing.Point(0, 0);
             this.menuStrip1.Name = "menuStrip1";
             this.menuStrip1.Size = new System.Drawing.Size(354, 24);
@@ -125,6 +130,32 @@
             this.wavファイル出力ToolStripMenuItem.Text = "wavファイル出力(W)";
             this.wavファイル出力ToolStripMenuItem.Click += new System.EventHandler(this.wavファイル出力ToolStripMenuItem_Click);
             // 
+            // ウィンドウWToolStripMenuItem
+            // 
+            this.ウィンドウWToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.ピアノロールPToolStripMenuItem,
+            this.トラック編集TToolStripMenuItem,
+            this.演奏モニタMToolStripMenuItem});
+            this.ウィンドウWToolStripMenuItem.Name = "ウィンドウWToolStripMenuItem";
+            this.ウィンドウWToolStripMenuItem.Size = new System.Drawing.Size(80, 20);
+            this.ウィンドウWToolStripMenuItem.Text = "ウィンドウ(W)";
+            // 
+            // ピアノロールPToolStripMenuItem
+            // 
+            this.ピアノロールPToolStripMenuItem.Name = "ピアノロールPToolStripMenuItem";
+            this.ピアノロールPToolStripMenuItem.ShortcutKeys = ((System.Windows.Forms.Keys)((System.Windows.Forms.Keys.Control | System.Windows.Forms.Keys.P)));
+            this.ピアノロールPToolStripMenuItem.Size = new System.Drawing.Size(188, 22);
+            this.ピアノロールPToolStripMenuItem.Text = "ピアノロール(P)";
+            this.ピアノロールPToolStripMenuItem.Click += new System.EventHandler(this.ピアノロールPToolStripMenuItem_Click);
+            // 
+            // 演奏モニタMToolStripMenuItem
+            // 
+            this.演奏モニタMToolStripMenuItem.Name = "演奏モニタMToolStripMenuItem";
+            this.演奏モニタMToolStripMenuItem.ShortcutKeys = ((System.Windows.Forms.Keys)((System.Windows.Forms.Keys.Control | System.Windows.Forms.Keys.M)));
+            this.演奏モニタMToolStripMenuItem.Size = new System.Drawing.Size(188, 22);
+            this.演奏モニタMToolStripMenuItem.Text = "演奏モニタ(M)";
+            this.演奏モニタMToolStripMenuItem.Click += new System.EventHandler(this.演奏モニタMToolStripMenuItem_Click);
+            // 
             // timer1
             // 
             this.timer1.Tick += new System.EventHandler(this.timer1_Tick);
@@ -140,6 +171,14 @@
             this.picPlayer.TabStop = false;
             this.picPlayer.MouseDown += new System.Windows.Forms.MouseEventHandler(this.picPlayer_MouseDown);
             this.picPlayer.MouseUp += new System.Windows.Forms.MouseEventHandler(this.picPlayer_MouseUp);
+            // 
+            // トラック編集TToolStripMenuItem
+            // 
+            this.トラック編集TToolStripMenuItem.Name = "トラック編集TToolStripMenuItem";
+            this.トラック編集TToolStripMenuItem.ShortcutKeys = ((System.Windows.Forms.Keys)((System.Windows.Forms.Keys.Control | System.Windows.Forms.Keys.T)));
+            this.トラック編集TToolStripMenuItem.Size = new System.Drawing.Size(188, 22);
+            this.トラック編集TToolStripMenuItem.Text = "トラック編集(T)";
+            this.トラック編集TToolStripMenuItem.Click += new System.EventHandler(this.トラック編集TToolStripMenuItem_Click);
             // 
             // Player
             // 
@@ -178,6 +217,10 @@
 		private System.Windows.Forms.SaveFileDialog saveFileDialog1;
 		private System.Windows.Forms.Timer timer1;
         private System.Windows.Forms.PictureBox picPlayer;
+        private System.Windows.Forms.ToolStripMenuItem ウィンドウWToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem ピアノロールPToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem 演奏モニタMToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem トラック編集TToolStripMenuItem;
     }
 }
 
