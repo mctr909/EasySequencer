@@ -2,10 +2,7 @@
 #define __SAMPLER_H__
 
 #include "../type.h"
-
-/******************************************************************************/
-#define SAMPLER_COUNT 64
-#define PURGE_SPEED 0.02
+#include "synth.h"
 
 /******************************************************************************/
 typedef struct INST_LAYER INST_LAYER;

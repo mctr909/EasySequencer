@@ -1,12 +1,7 @@
-#include "channel.h"
-#include "synth.h"
 #include "../inst/inst_list.h"
 
+#include "channel.h"
 #include "sampler.h"
-
-/******************************************************************************/
-#define PURGE_THRESHOLD 0.0005
-#define OVER_SAMPLING   8
 
 /******************************************************************************/
 Sampler::Sampler(Synth* p_synth) {
@@ -102,8 +97,8 @@ Sampler::note_on(Channel* p_channel, INST_LAYER* p_layer, INST_REGION* p_region,
 
 void
 Sampler::step() {
-    auto p_output_l = mp_channel->mp_input_l;
-    auto p_output_r = mp_channel->mp_input_r;
+    auto p_output_l = mp_channel->mp_buffer_l;
+    auto p_output_r = mp_channel->mp_buffer_r;
     for (int32 i = 0; i < mp_synth->m_buffer_length; i++) {
         /*** generate wave ***/
         double smoothed_wave = 0.0;
@@ -130,7 +125,7 @@ Sampler::step() {
         gen_envelope();
         m_time += mp_synth->m_delta_time;
         /*** purge threshold ***/
-        if (E_STATE::PRESS != m_state && m_amp < PURGE_THRESHOLD) {
+        if (E_STATE::PRESS != m_state && m_amp < FREE_THRESHOLD) {
             m_state = E_STATE::FREE;
             return;
         }

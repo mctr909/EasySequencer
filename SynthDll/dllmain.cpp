@@ -48,7 +48,7 @@ synth_setup(
     gp_waveout = new WaveOut();
     gp_waveout->open(sample_rate, buffer_length, buffer_count, &Synth::write_buffer, gp_synth);
     /*** Return system value ***/
-    return (byte*)&gp_synth->m_system_value;
+    return (byte*)&gp_synth->m_export_values;
 }
 
 void WINAPI

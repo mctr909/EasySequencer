@@ -17,9 +17,9 @@ Synth::dispose() {
         mpp_channels = nullptr;
     }
     /* dispose channel params */
-    if (nullptr != mpp_channel_params) {
-        free(mpp_channel_params);
-        mpp_channel_params = nullptr;
+    if (nullptr != m_export_values.pp_channel_params) {
+        free(m_export_values.pp_channel_params);
+        m_export_values.pp_channel_params = nullptr;
     }
     /* dispose samplers */
     if (nullptr != mpp_samplers) {
@@ -75,8 +75,8 @@ Synth::setup(LPWSTR wave_table_path, int32 sample_rate, int32 buffer_length) {
         mpp_samplers[i] = new Sampler(this);
     }
     /* allocate channel params */
-    mpp_channel_params = (CHANNEL_PARAM**)malloc(sizeof(CHANNEL_PARAM*) * CHANNEL_COUNT);
-    if (nullptr == mpp_channel_params) {
+    m_export_values.pp_channel_params = (CHANNEL_PARAM**)malloc(sizeof(CHANNEL_PARAM*) * CHANNEL_COUNT);
+    if (nullptr == m_export_values.pp_channel_params) {
         dispose();
         return E_LOAD_STATUS::ALLOCATE_FAILED;
     }
@@ -88,14 +88,13 @@ Synth::setup(LPWSTR wave_table_path, int32 sample_rate, int32 buffer_length) {
     }
     for (int32 i = 0; i < CHANNEL_COUNT; i++) {
         mpp_channels[i] = new Channel(this, i);
-        mpp_channel_params[i] = &mpp_channels[i]->m_param;
+        m_export_values.pp_channel_params[i] = &mpp_channels[i]->m_param;
     }
     /* set system values */
     auto inst_list = mp_inst_list->GetInstList();
-    m_system_value.inst_count = inst_list->count;
-    m_system_value.p_inst_list = (byte*)inst_list->ppData;
-    m_system_value.p_channel_params = (byte*)mpp_channel_params;
-    m_system_value.p_active_counter = &m_active_count;
+    m_export_values.inst_count = inst_list->count;
+    m_export_values.pp_inst_list = inst_list->ppData;
+    m_export_values.p_active_counter = &m_active_count;
     return load_status;
 }
 

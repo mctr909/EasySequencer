@@ -7,13 +7,44 @@
 
 #include "channel.h"
 
+/******************************************************************************/
+const double Channel::PITCH_MSB[64] = {
+    1.00000000, 1.00090294, 1.00180670, 1.00271128, 1.00361667, 1.00452287, 1.00542990, 1.00633775,
+    1.00724641, 1.00815590, 1.00906621, 1.00997733, 1.01088929, 1.01180206, 1.01271566, 1.01363008,
+    1.01454533, 1.01546141, 1.01637831, 1.01729605, 1.01821461, 1.01913400, 1.02005422, 1.02097527,
+    1.02189715, 1.02281986, 1.02374341, 1.02466779, 1.02559301, 1.02651906, 1.02744595, 1.02837367,
+    1.02930224, 1.03023164, 1.03116188, 1.03209296, 1.03302488, 1.03395764, 1.03489125, 1.03582569,
+    1.03676098, 1.03769712, 1.03863410, 1.03957193, 1.04051060, 1.04145012, 1.04239049, 1.04333171,
+    1.04427378, 1.04521670, 1.04616047, 1.04710510, 1.04805057, 1.04899690, 1.04994409, 1.05089213,
+    1.05184102, 1.05279077, 1.05374138, 1.05469285, 1.05564518, 1.05659837, 1.05755241, 1.05850732
+};
+const double Channel::PITCH_LSB[128] = {
+    1.00000000, 1.00000705, 1.00001410, 1.00002115, 1.00002820, 1.00003526, 1.00004231, 1.00004936,
+    1.00005641, 1.00006346, 1.00007051, 1.00007756, 1.00008462, 1.00009167, 1.00009872, 1.00010577,
+    1.00011282, 1.00011988, 1.00012693, 1.00013398, 1.00014103, 1.00014808, 1.00015514, 1.00016219,
+    1.00016924, 1.00017629, 1.00018334, 1.00019040, 1.00019745, 1.00020450, 1.00021155, 1.00021861,
+    1.00022566, 1.00023271, 1.00023976, 1.00024682, 1.00025387, 1.00026092, 1.00026798, 1.00027503,
+    1.00028208, 1.00028914, 1.00029619, 1.00030324, 1.00031029, 1.00031735, 1.00032440, 1.00033145,
+    1.00033851, 1.00034556, 1.00035262, 1.00035967, 1.00036672, 1.00037378, 1.00038083, 1.00038788,
+    1.00039494, 1.00040199, 1.00040904, 1.00041610, 1.00042315, 1.00043021, 1.00043726, 1.00044432,
+    1.00045137, 1.00045842, 1.00046548, 1.00047253, 1.00047959, 1.00048664, 1.00049370, 1.00050075,
+    1.00050781, 1.00051486, 1.00052191, 1.00052897, 1.00053602, 1.00054308, 1.00055013, 1.00055719,
+    1.00056424, 1.00057130, 1.00057835, 1.00058541, 1.00059246, 1.00059952, 1.00060657, 1.00061363,
+    1.00062069, 1.00062774, 1.00063480, 1.00064185, 1.00064891, 1.00065596, 1.00066302, 1.00067007,
+    1.00067713, 1.00068419, 1.00069124, 1.00069830, 1.00070535, 1.00071241, 1.00071947, 1.00072652,
+    1.00073358, 1.00074064, 1.00074769, 1.00075475, 1.00076180, 1.00076886, 1.00077592, 1.00078297,
+    1.00079003, 1.00079709, 1.00080414, 1.00081120, 1.00081826, 1.00082531, 1.00083237, 1.00083943,
+    1.00084648, 1.00085354, 1.00086060, 1.00086766, 1.00087471, 1.00088177, 1.00088883, 1.00089589
+};
+
+/******************************************************************************/
 Channel::Channel(Synth* p_synth, int32 number) {
     mp_synth = p_synth;
     m_param.enable = 1;
     m_param.p_keyboard = (byte*)calloc(128, sizeof(byte));
     m_num = (byte)number;
-    mp_input_l = (double*)calloc(p_synth->m_buffer_length, sizeof(double));
-    mp_input_r = (double*)calloc(p_synth->m_buffer_length, sizeof(double));
+    mp_buffer_l = (double*)calloc(p_synth->m_buffer_length, sizeof(double));
+    mp_buffer_r = (double*)calloc(p_synth->m_buffer_length, sizeof(double));
     m_delay.index = 0;
     m_delay.tap_length = p_synth->m_sample_rate;
     m_delay.p_tap_l = (double*)calloc(m_delay.tap_length, sizeof(double));
@@ -30,13 +61,13 @@ Channel::~Channel() {
         free(m_param.p_keyboard);
         m_param.p_keyboard = nullptr;
     }
-    if (nullptr != mp_input_l) {
-        free(mp_input_l);
-        mp_input_l = nullptr;
+    if (nullptr != mp_buffer_l) {
+        free(mp_buffer_l);
+        mp_buffer_l = nullptr;
     }
-    if (nullptr != mp_input_r) {
-        free(mp_input_r);
-        mp_input_r = nullptr;
+    if (nullptr != mp_buffer_r) {
+        free(mp_buffer_r);
+        mp_buffer_r = nullptr;
     }
     if (nullptr != m_delay.p_tap_l) {
         free(m_delay.p_tap_l);
@@ -174,7 +205,7 @@ void
 Channel::note_off(byte note_num) {
     for (int32 i = 0; i < SAMPLER_COUNT; ++i) {
         auto p_smpl = mp_synth->mpp_samplers[i];
-        auto ch_param = *mp_synth->mpp_channel_params[p_smpl->m_channel_num];
+        auto ch_param = *mp_synth->m_export_values.pp_channel_params[p_smpl->m_channel_num];
         if (p_smpl->m_state < Sampler::E_STATE::PRESS ||
             (ch_param.is_drum && !p_smpl->m_loop_enable)) {
             continue;
@@ -361,15 +392,15 @@ Channel::pitch_bend(byte lsb, byte msb) {
 void
 Channel::step(double* p_output_l, double* p_output_r) {
     for (int32 i = 0; i < mp_synth->m_buffer_length; i++) {
-        auto output_l = mp_input_l[i] * m_current_pan_re - mp_input_r[i] * m_current_pan_im;
-        auto output_r = mp_input_l[i] * m_current_pan_im + mp_input_r[i] * m_current_pan_re;
+        auto output_l = mp_buffer_l[i] * m_current_pan_re - mp_buffer_r[i] * m_current_pan_im;
+        auto output_r = mp_buffer_l[i] * m_current_pan_im + mp_buffer_r[i] * m_current_pan_re;
         output_l *= m_current_amp;
         output_r *= m_current_amp;
         m_current_amp += (m_target_amp - m_current_amp) * 0.02;
         m_current_pan_re += (m_target_pan_re - m_current_pan_re) * 0.02;
         m_current_pan_im += (m_target_pan_im - m_current_pan_im) * 0.02;
-        mp_input_l[i] = 0.0;
-        mp_input_r[i] = 0.0;
+        mp_buffer_l[i] = 0.0;
+        mp_buffer_r[i] = 0.0;
 
         /* delay */
         {
@@ -454,12 +485,12 @@ Channel::step(double* p_output_l, double* p_output_r) {
 
         switch (m_state) {
         case E_STATE::STANDBY:
-            if (START_AMP <= sqrt(m_param.rms_l) || START_AMP <= sqrt(m_param.rms_r)) {
+            if (ACTIVE_THRESHOLD <= sqrt(m_param.rms_l) || ACTIVE_THRESHOLD <= sqrt(m_param.rms_r)) {
                 m_state = E_STATE::ACTIVE;
             }
             break;
         case E_STATE::ACTIVE:
-            if (sqrt(m_param.rms_l) < STOP_AMP && sqrt(m_param.rms_r) < STOP_AMP) {
+            if (sqrt(m_param.rms_l) < FREE_THRESHOLD && sqrt(m_param.rms_r) < FREE_THRESHOLD) {
                 m_state = E_STATE::FREE;
             }
             break;
