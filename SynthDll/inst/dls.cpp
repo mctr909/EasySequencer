@@ -21,7 +21,7 @@ DLS::~DLS() {
     }
 }
 
-E_LOAD_STATUS DLS::Load(LPWSTR path) {
+E_LOAD_STATUS DLS::Load(STRING path) {
     return Riff::Load(path, 0);
 }
 

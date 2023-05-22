@@ -2,7 +2,6 @@
 #define __INST_LIST_H__
 
 #include "../type.h"
-#include <windows.h>
 #include <stdio.h>
 
 /******************************************************************************/
@@ -117,7 +116,7 @@ class LART;
 class InstList {
 private:
     INST_LIST mInstList;
-    WCHAR mWaveTablePath[256] = { 0 };
+    CHAR_W mWaveTablePath[256] = { 0 };
     uint32 mWaveCount = 0;
     uint32 mLayerCount = 0;
     uint32 mRegionCount = 0;
@@ -135,12 +134,12 @@ public:
     ~InstList();
 
 public:
-    E_LOAD_STATUS Load(LPWSTR path);
+    E_LOAD_STATUS Load(STRING path);
     INST_LIST *GetInstList();
     INST_INFO *GetInstInfo(byte is_drum, byte bank_lsb, byte bank_msb, byte prog_num);
 
 private:
-    E_LOAD_STATUS loadDls(LPWSTR path);
+    E_LOAD_STATUS loadDls(STRING path);
     E_LOAD_STATUS loadDlsWave(DLS *cDls);
     void loadDlsArt(LART *cLart, INST_ART *pArt);
     uint32 writeWaveTable8(FILE *fp, byte* pData, uint32 size);

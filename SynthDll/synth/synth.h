@@ -2,7 +2,6 @@
 #define __SYNTH_H__
 
 #include "../type.h"
-#include <windows.h>
 
 /******************************************************************************/
 #define CHANNEL_COUNT    256
@@ -145,9 +144,9 @@ private:
 public:
     Synth() {}
     ~Synth() { dispose(); }
-    E_LOAD_STATUS setup(LPWSTR wave_table_path, int32 sample_rate, int32 buffer_length);
+    E_LOAD_STATUS setup(STRING wave_table_path, int32 sample_rate, int32 buffer_length);
     static void write_buffer(WAVE_DATA* p_pcm, void* p_param);
-    bool save_wav(LPWSTR save_path, uint32 base_tick, uint32 event_size, byte* p_events, int32* p_progress);
+    bool save_wav(STRING save_path, uint32 base_tick, uint32 event_size, byte* p_events, int32* p_progress);
     int32 send_message(byte port, byte* p_msg);
 };
 

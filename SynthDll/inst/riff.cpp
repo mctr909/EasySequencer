@@ -1,9 +1,10 @@
-#include "riff.h"
-
 #include <string.h>
 
+#include "riff.h"
+
+/******************************************************************************/
 E_LOAD_STATUS
-Riff::Load(LPWSTR path, long offset) {
+Riff::Load(STRING path, long offset) {
     FILE *fp = nullptr;
     _wfopen_s(&fp, path, L"rb");
     if (nullptr == fp) {
@@ -31,7 +32,8 @@ Riff::Load(LPWSTR path, long offset) {
     return E_LOAD_STATUS::SUCCESS;
 }
 
-void Riff::Load(FILE* fp, long size) {
+void
+Riff::Load(FILE* fp, long size) {
     char chunkId[5] = { 0 };
     unsigned int chunkSize;
     char listType[5] = { 0 };
@@ -55,6 +57,7 @@ void Riff::Load(FILE* fp, long size) {
     }
 }
 
+/******************************************************************************/
 void
 Riff::infoLoop(FILE *fp, long size) {
     char infoType[5] = { 0 };

@@ -2,6 +2,7 @@
 
 /******************************************************************************/
 #define WAVE_MAX 32767.0
+#define INVALID_INDEX 0xFFFFFFFF
 
 /******************************************************************************/
 typedef unsigned char  byte;
@@ -10,6 +11,8 @@ typedef unsigned int   uint32;
 typedef signed   char  sbyte;
 typedef signed   short int16;
 typedef signed   int   int32;
+typedef wchar_t        CHAR_W;
+typedef CHAR_W*        STRING;
 
 typedef int16 WAVE_DATA;
 

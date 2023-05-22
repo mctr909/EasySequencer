@@ -31,13 +31,13 @@ Sampler::note_on(Channel* p_channel, INST_LAYER* p_layer, INST_REGION* p_region,
     m_hold = mp_synth->m_delta_time;
 
     INST_ART *p_art = nullptr;
-    if (UINT_MAX != p_inst_info->artIndex) {
+    if (INVALID_INDEX != p_inst_info->artIndex) {
         p_art = p_inst_list->mppArtList[p_inst_info->artIndex];
     }
-    if (UINT_MAX != p_layer->artIndex) {
+    if (INVALID_INDEX != p_layer->artIndex) {
         p_art = p_inst_list->mppArtList[p_layer->artIndex];
     }
-    if (UINT_MAX != p_region->artIndex) {
+    if (INVALID_INDEX != p_region->artIndex) {
         p_art = p_inst_list->mppArtList[p_region->artIndex];
     }
 
@@ -74,7 +74,7 @@ Sampler::note_on(Channel* p_channel, INST_LAYER* p_layer, INST_REGION* p_region,
     }
 
     auto diff_note = 0;
-    if (UINT_MAX == p_region->wsmpIndex) {
+    if (INVALID_INDEX == p_region->wsmpIndex) {
         diff_note = note_num - p_wave_info->unityNote;
         m_pitch *= p_wave_info->pitch;
         m_gain *= p_wave_info->gain;

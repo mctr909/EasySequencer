@@ -16,7 +16,7 @@ Synth*   gp_synth = nullptr;
 /******************************************************************************/
 byte* WINAPI
 synth_setup(
-    LPWSTR wave_table_path,
+    STRING wave_table_path,
     int32 sample_rate,
     int32 buffer_length,
     int32 buffer_count
@@ -68,8 +68,8 @@ synth_close() {
 
 void WINAPI
 fileout(
-    LPWSTR wave_table_path,
-    LPWSTR save_path,
+    STRING wave_table_path,
+    STRING save_path,
     uint32 sample_rate,
     uint32 base_tick,
     uint32 event_size,

@@ -1,4 +1,6 @@
 #include <stdio.h>
+#include <stdlib.h>
+#include <windows.h>
 
 #include "channel.h"
 #include "sampler.h"
@@ -46,7 +48,7 @@ Synth::dispose() {
 }
 
 E_LOAD_STATUS
-Synth::setup(LPWSTR wave_table_path, int32 sample_rate, int32 buffer_length) {
+Synth::setup(STRING wave_table_path, int32 sample_rate, int32 buffer_length) {
     m_sample_rate = sample_rate;
     m_delta_time = 1.0 / sample_rate;
     m_buffer_length = buffer_length;
@@ -144,7 +146,7 @@ Synth::write_buffer(WAVE_DATA* p_pcm, void* p_param) {
 }
 
 bool
-Synth::save_wav(LPWSTR save_path, uint32 base_tick, uint32 event_size, byte* p_events, int32* p_progress) {
+Synth::save_wav(STRING save_path, uint32 base_tick, uint32 event_size, byte* p_events, int32* p_progress) {
     const byte RIFF_ID[] = { 'R', 'I', 'F', 'F' };
     const byte FILE_ID[] = { 'W', 'A', 'V', 'E' };
     const byte FMT_ID[] = { 'f', 'm', 't', ' ' };

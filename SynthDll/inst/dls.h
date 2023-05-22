@@ -16,7 +16,7 @@ public:
 public:
     DLS();
     ~DLS();
-    E_LOAD_STATUS Load(LPWSTR path);
+    E_LOAD_STATUS Load(STRING path);
 
 protected:
     bool CheckFileType(const char *type, long size) override;

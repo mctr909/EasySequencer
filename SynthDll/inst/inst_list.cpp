@@ -1,3 +1,6 @@
+#include <stdlib.h>
+#include <string.h>
+
 #include "riff.h"
 
 #include "dls_struct.h"
@@ -55,7 +58,7 @@ InstList::~InstList() {
     }
 }
 
-E_LOAD_STATUS InstList::Load(LPWSTR path) {
+E_LOAD_STATUS InstList::Load(STRING path) {
     return loadDls(path);
 }
 
@@ -95,7 +98,7 @@ INST_INFO *InstList::GetInstInfo(byte is_drum, byte bank_lsb, byte bank_msb, byt
 }
 
 /******************************************************************************/
-E_LOAD_STATUS InstList::loadDls(LPWSTR path) {
+E_LOAD_STATUS InstList::loadDls(STRING path) {
     auto cDls = new DLS();
     auto loadState = cDls->Load(path);
     if (E_LOAD_STATUS::SUCCESS != loadState) {

@@ -1,10 +1,9 @@
 #ifndef __RIFF_H__
 #define __RIFF_H__
 
-#include "../type.h"
-
 #include <stdio.h>
-#include <windows.h>
+
+#include "../type.h"
 
 /******************************************************************************/
 #pragma pack(push, 4)
@@ -24,7 +23,7 @@ public:
     Riff() {}
 
 protected:
-    E_LOAD_STATUS Load(LPWSTR path, long offset);
+    E_LOAD_STATUS Load(STRING path, long offset);
     void Load(FILE* fp, long size);
     virtual bool CheckFileType(const char *type, long size) { return false; }
     virtual void LoadChunk(FILE *fp, const char *type, long size) { fseek(fp, size, SEEK_CUR); }
