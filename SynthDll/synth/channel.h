@@ -1,10 +1,9 @@
 #ifndef __CHANNEL_H__
 #define __CHANNEL_H__
 
-#include "../type.h"
+#include "synth.h"
 
 /******************************************************************************/
-class Synth;
 typedef struct INST_INFO INST_INFO;
 
 /******************************************************************************/

@@ -2,10 +2,10 @@
 #include <stdlib.h>
 #include <windows.h>
 
-#include "channel.h"
-#include "sampler.h"
 #include "../inst/inst_list.h"
 
+#include "channel.h"
+#include "sampler.h"
 #include "synth.h"
 
 void

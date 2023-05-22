@@ -1,11 +1,10 @@
 #include <stdlib.h>
 #include <math.h>
 
-#include "filter.h"
-#include "sampler.h"
-#include "synth.h"
 #include "../inst/inst_list.h"
 
+#include "filter.h"
+#include "sampler.h"
 #include "channel.h"
 
 /******************************************************************************/
