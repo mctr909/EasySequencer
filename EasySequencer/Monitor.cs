@@ -15,11 +15,12 @@ namespace EasySequencer {
 
         Point mMouseDownPos;
         bool mIsDrag;
-        bool mIsMove;
         bool mIsParamChg;
         int mTrackNum;
         int mKnobNum;
         int mChangeValue;
+        string[] mPresetNames = new string[DISP_TRACKS];
+        Bitmap[] mBmpPresetNames = new Bitmap[DISP_TRACKS];
 
         static readonly Pen COLOR_KNOB_BLACK = new Pen(Brushes.Black, 3) {
             StartCap = System.Drawing.Drawing2D.LineCap.Round,
@@ -123,6 +124,7 @@ namespace EasySequencer {
             picMonitor.Height = Height;
             picMonitor.Image = new Bitmap(picMonitor.Width, picMonitor.Height);
             mG = Graphics.FromImage(picMonitor.Image);
+            mG.SmoothingMode = System.Drawing.Drawing2D.SmoothingMode.None;
             mSender = sender;
 
             for (int by = 0; by < 6; by++) {
@@ -144,7 +146,7 @@ namespace EasySequencer {
 
         private void Monitor_Shown(object sender, EventArgs e) {
             timer1.Enabled = true;
-            timer1.Interval = 16;
+            timer1.Interval = 33;
             timer1.Start();
         }
 
@@ -175,7 +177,6 @@ namespace EasySequencer {
                 }
             }
 
-            mIsMove = mMouseDownPos.Y < TAB_HEIGHT;
             mIsDrag = 0 <= knobX && TAB_HEIGHT <= mMouseDownPos.Y;
 
             if (TAB_HEIGHT <= mMouseDownPos.Y && RECT_ON_OFF.X <= mMouseDownPos.X && mMouseDownPos.X < RECT_ON_OFF.X + RECT_ON_OFF.Width) {
@@ -207,7 +208,6 @@ namespace EasySequencer {
         }
 
         void picMonitor_MouseUp(object sender, MouseEventArgs e) {
-            mIsMove = false;
             mIsDrag = false;
         }
 
@@ -237,12 +237,28 @@ namespace EasySequencer {
 
                 mIsParamChg = true;
             }
-            if (mIsMove) {
-                var pos = Cursor.Position;
-                pos.X -= mMouseDownPos.X;
-                pos.Y -= mMouseDownPos.Y;
-                Location = pos;
+        }
+
+        void setPresetName(CHANNEL_PARAM param, int chNum) {
+            var bmp = mBmpPresetNames[chNum];
+            if (null != bmp) {
+                bmp.Dispose();
             }
+            bmp = new Bitmap(FONT_WIDTH * 20, FONT_HEIGHT);
+            var g = Graphics.FromImage(bmp);
+            var bName = Encoding.ASCII.GetBytes(param.Name);
+            g.Clear(Color.Transparent);
+            for (int i = 0; i < bName.Length && i < 20; i++) {
+                var cx = bName[i] % 16;
+                var cy = (bName[i] - 0x20) / 16;
+                g.DrawImageUnscaled(BMP_FONT[cx, cy], new Rectangle(
+                    FONT_WIDTH * i, 0,
+                    FONT_WIDTH, FONT_HEIGHT
+                ));
+            }
+            g.Dispose();
+            mBmpPresetNames[chNum] = bmp;
+            mPresetNames[chNum] = param.Name;
         }
 
         void draw() {
@@ -328,16 +344,14 @@ namespace EasySequencer {
                 drawKnob(COLOR_KNOB_GREEN, track, 8, param.mod);
 
                 /*** Preset name ***/
-                var bName = Encoding.ASCII.GetBytes(param.Name);
-                for (int i = 0; i < bName.Length && i < 20; i++) {
-                    var cx = bName[i] % 16;
-                    var cy = (bName[i] - 0x20) / 16;
-                    mG.DrawImageUnscaled(BMP_FONT[cx, cy], new Rectangle(
-                        RECT_PRESET_NAME.X + FONT_WIDTH * i,
-                        RECT_PRESET_NAME.Y + track_y,
-                        FONT_WIDTH,
-                        FONT_HEIGHT
-                    ));
+                if (mPresetNames[chNum] != param.Name) {
+                    setPresetName(param, chNum);
+                }
+                if (null != mBmpPresetNames[chNum]) {
+                    mG.DrawImageUnscaled(mBmpPresetNames[chNum],
+                        RECT_PRESET_NAME.X,
+                        RECT_PRESET_NAME.Y + track_y
+                    );
                 }
             }
 

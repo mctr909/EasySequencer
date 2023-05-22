@@ -58,7 +58,8 @@ namespace EasySequencer {
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(1237, 551);
             this.Controls.Add(this.picMonitor);
-            this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.None;
+            this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.FixedSingle;
+            this.MaximizeBox = false;
             this.Name = "Monitor";
             this.Text = "Monitor";
             this.Shown += new System.EventHandler(this.Monitor_Shown);
