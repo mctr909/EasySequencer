@@ -2,7 +2,6 @@
 #define __CHANNEL_H__
 
 #include "../type.h"
-#include "filter.h"
 
 /******************************************************************************/
 class Synth;

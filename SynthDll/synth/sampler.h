@@ -1,13 +1,11 @@
 #ifndef __SAMPLER_H__
 #define __SAMPLER_H__
 
-#include "../type.h"
 #include "synth.h"
 
 /******************************************************************************/
 typedef struct INST_LAYER INST_LAYER;
 typedef struct INST_REGION INST_REGION;
-class Synth;
 class Channel;
 
 /******************************************************************************/
