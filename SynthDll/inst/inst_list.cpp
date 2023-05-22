@@ -212,7 +212,7 @@ E_LOAD_STATUS InstList::loadDls(STRING path) {
                     auto cDlsWave = cDls->cWvpl->pcWave[pRegion->waveIndex];
                     pWave->loopEnable = 0;
                     pWave->loopBegin = 0;
-                    pWave->loopLength = cDlsWave->DataSize * 8 / cDlsWave->Format.bits;
+                    pWave->loopLength = cDlsWave->DataSize * 8 / cDlsWave->Format.wBitsPerSample;
                 } else {
                     auto pLoop = cDlsRgn->ppWaveLoop[0];
                     pWave->loopEnable = 1;
@@ -253,14 +253,14 @@ E_LOAD_STATUS InstList::loadDlsWave(DLS *cDls) {
         auto cDlsWave = cDls->cWvpl->pcWave[idxW];
 
         pWave->offset = wavePos;
-        pWave->sampleRate = cDlsWave->Format.sampleRate;
+        pWave->sampleRate = cDlsWave->Format.nSamplesPerSec;
         if (nullptr == cDlsWave->pWaveSmpl) {
             pWave->unityNote = 64;
             pWave->pitch = 1.0;
             pWave->gain = 1.0;
             pWave->loopEnable = 0;
             pWave->loopBegin = 0;
-            pWave->loopLength = cDlsWave->DataSize * 8 / cDlsWave->Format.bits;
+            pWave->loopLength = cDlsWave->DataSize * 8 / cDlsWave->Format.wBitsPerSample;
         } else {
             pWave->unityNote = (byte)cDlsWave->pWaveSmpl->unityNote;
             pWave->pitch = cDlsWave->pWaveSmpl->getFileTune();
@@ -272,12 +272,12 @@ E_LOAD_STATUS InstList::loadDlsWave(DLS *cDls) {
             } else {
                 pWave->loopEnable = 0;
                 pWave->loopBegin = 0;
-                pWave->loopLength = cDlsWave->DataSize * 8 / cDlsWave->Format.bits;
+                pWave->loopLength = cDlsWave->DataSize * 8 / cDlsWave->Format.wBitsPerSample;
             }
         }
 
         /* output wave table */
-        switch (cDlsWave->Format.bits) {
+        switch (cDlsWave->Format.wBitsPerSample) {
         case 8:
             wavePos += writeWaveTable8(fpWave, cDlsWave->pData, cDlsWave->DataSize);
             break;
@@ -288,7 +288,7 @@ E_LOAD_STATUS InstList::loadDlsWave(DLS *cDls) {
             wavePos += writeWaveTable24(fpWave, cDlsWave->pData, cDlsWave->DataSize);
             break;
         case 32:
-            if (3 == cDlsWave->Format.tag) {
+            if (3 == cDlsWave->Format.wFormatTag) {
                 wavePos += writeWaveTableFloat(fpWave, cDlsWave->pData, cDlsWave->DataSize);
             } else {
                 wavePos += writeWaveTable32(fpWave, cDlsWave->pData, cDlsWave->DataSize);

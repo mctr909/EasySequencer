@@ -24,6 +24,18 @@ typedef struct {
 } int24;
 #pragma pack(pop)
 
+#pragma pack(push, 2)
+typedef struct {
+    uint16 wFormatTag;
+    uint16 nChannels;
+    uint32 nSamplesPerSec;
+    uint32 nAvgBytesPerSec;
+    uint16 nBlockAlign;
+    uint16 wBitsPerSample;
+    uint16 cbSize;
+} WAVE_FMT;
+#pragma pack(pop)
+
 /******************************************************************************/
 enum struct E_LOAD_STATUS : int32 {
     SUCCESS,

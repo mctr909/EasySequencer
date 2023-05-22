@@ -1,6 +1,5 @@
 #include <stdio.h>
 #include <stdlib.h>
-#include <windows.h>
 
 #include "../inst/inst_list.h"
 
@@ -152,8 +151,8 @@ Synth::save_wav(STRING save_path, uint32 base_tick, uint32 event_size, byte* p_e
     const byte FMT_ID[] = { 'f', 'm', 't', ' ' };
     const byte DATA_ID[] = { 'd', 'a', 't', 'a' };
     /* set riff wave format */
-    const uint32 FMT_SIZE = sizeof(WAVEFORMATEX);
-    WAVEFORMATEX fmt = { 0 };
+    const uint32 FMT_SIZE = sizeof(WAVE_FMT);
+    WAVE_FMT fmt = { 0 };
     fmt.wFormatTag = 1;
     fmt.nChannels = 2;
     fmt.nSamplesPerSec = m_sample_rate;
