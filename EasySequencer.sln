@@ -1,7 +1,7 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio 15
-VisualStudioVersion = 15.0.26228.9
+# Visual Studio Version 17
+VisualStudioVersion = 17.7.34024.191
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "EasySequencer", "EasySequencer\EasySequencer.csproj", "{56F87CFB-9D65-4AD0-9DA3-6B1CE67E44E2}"
 	ProjectSection(ProjectDependencies) = postProject
@@ -9,6 +9,11 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "EasySequencer", "EasySequen
 	EndProjectSection
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "SynthDll", "SynthDll\SynthDll.vcxproj", "{B9BF6C69-07C8-4DB3-9DA6-1B62D9F9D915}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PianoRoll", "PianoRoll\PianoRoll.csproj", "{F24FBE54-D686-4170-9B52-8E4237DB1F08}"
+	ProjectSection(ProjectDependencies) = postProject
+		{56F87CFB-9D65-4AD0-9DA3-6B1CE67E44E2} = {56F87CFB-9D65-4AD0-9DA3-6B1CE67E44E2}
+	EndProjectSection
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -42,6 +47,18 @@ Global
 		{B9BF6C69-07C8-4DB3-9DA6-1B62D9F9D915}.Release|x64.Build.0 = Release|x64
 		{B9BF6C69-07C8-4DB3-9DA6-1B62D9F9D915}.Release|x86.ActiveCfg = Release|Win32
 		{B9BF6C69-07C8-4DB3-9DA6-1B62D9F9D915}.Release|x86.Build.0 = Release|Win32
+		{F24FBE54-D686-4170-9B52-8E4237DB1F08}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{F24FBE54-D686-4170-9B52-8E4237DB1F08}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{F24FBE54-D686-4170-9B52-8E4237DB1F08}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{F24FBE54-D686-4170-9B52-8E4237DB1F08}.Debug|x64.Build.0 = Debug|Any CPU
+		{F24FBE54-D686-4170-9B52-8E4237DB1F08}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{F24FBE54-D686-4170-9B52-8E4237DB1F08}.Debug|x86.Build.0 = Debug|Any CPU
+		{F24FBE54-D686-4170-9B52-8E4237DB1F08}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{F24FBE54-D686-4170-9B52-8E4237DB1F08}.Release|Any CPU.Build.0 = Release|Any CPU
+		{F24FBE54-D686-4170-9B52-8E4237DB1F08}.Release|x64.ActiveCfg = Release|Any CPU
+		{F24FBE54-D686-4170-9B52-8E4237DB1F08}.Release|x64.Build.0 = Release|Any CPU
+		{F24FBE54-D686-4170-9B52-8E4237DB1F08}.Release|x86.ActiveCfg = Release|Any CPU
+		{F24FBE54-D686-4170-9B52-8E4237DB1F08}.Release|x86.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

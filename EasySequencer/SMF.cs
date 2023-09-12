@@ -443,7 +443,7 @@ namespace SMF {
             }
         }
 
-        public uint Int {
+        public uint UInt {
             get {
                 switch (Type) {
                 case E_META.SEQ_NUM:
@@ -767,7 +767,7 @@ namespace SMF {
             if (E_STATUS.META == ev.Type && E_META.PORT == ev.Meta.Type) {
                 switch (ev.Meta.Type) {
                 case E_META.PORT:
-                    Tracks[trackNum].Port = (byte)ev.Meta.Int;
+                    Tracks[trackNum].Port = (byte)ev.Meta.UInt;
                     break;
                 case E_META.TRACK_NAME:
                     Tracks[trackNum].Name = ev.Meta.String;
@@ -797,7 +797,7 @@ namespace SMF {
                 if (E_STATUS.META == ev.Type) {
                     switch(ev.Meta.Type) {
                     case E_META.PORT:
-                        Tracks[trackNum].Port = (byte)ev.Meta.Int;
+                        Tracks[trackNum].Port = (byte)ev.Meta.UInt;
                         break;
                     case E_META.TRACK_NAME:
                         Tracks[trackNum].Name = ev.Meta.String;

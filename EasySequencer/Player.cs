@@ -420,7 +420,7 @@ namespace Player {
                 case E_STATUS.META:
                     switch (ev.Meta.Type) {
                     case E_META.MEASURE:
-                        var m = new Mesure(ev.Meta.Int);
+                        var m = new Mesure(ev.Meta.UInt);
                         mMeasureNumer = m.numerator;
                         mMeasureDenomi = m.denominator;
                         break;
@@ -501,10 +501,10 @@ namespace Player {
                 case E_STATUS.META:
                     switch (ev.Meta.Type) {
                     case E_META.TEMPO:
-                        mBPM = 60000000.0 / ev.Meta.Int;
+                        mBPM = 60000000.0 / ev.Meta.UInt;
                         break;
                     case E_META.MEASURE:
-                        var m = new Mesure(ev.Meta.Int);
+                        var m = new Mesure(ev.Meta.UInt);
                         mMeasureNumer = m.numerator;
                         mMeasureDenomi = m.denominator;
                         break;
