@@ -155,7 +155,7 @@ namespace Player {
 
         private void ピアノロールPToolStripMenuItem_Click(object sender, EventArgs e) {
             if (null == mPianoRoll || mPianoRoll.IsDisposed) {
-                mPianoRoll = new EasySequencer.PianoRoll();
+                mPianoRoll = new EasySequencer.PianoRoll(mEventList);
                 mPianoRoll.Show();
             } else {
                 mPianoRoll.Close();

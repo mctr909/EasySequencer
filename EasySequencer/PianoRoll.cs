@@ -74,7 +74,7 @@ namespace EasySequencer {
 
         EventEditor mEditor = new EventEditor();
 
-        public PianoRoll() {
+        public PianoRoll(Event[] eventList) {
             InitializeComponent();
             MouseWheel += new MouseEventHandler(PianoRoll_MouseWheel);
 
@@ -82,6 +82,8 @@ namespace EasySequencer {
             tsmEditMode_Click(tsmEditModeNote);
             tsbWriteSelect_Click(tsbSelect);
             tsmTick_Click(tsmTick240);
+
+            mEditor.LoadEvent(eventList);
 
             timer1.Interval = 50;
             timer1.Enabled = true;

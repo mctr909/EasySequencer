@@ -404,10 +404,12 @@ namespace EasySequencer {
             if (!System.IO.File.Exists(path)) {
                 return;
             }
-            
             var smf = new SMF.File(path);
-            var eventList = smf.EventList;
+            LoadEvent(smf.EventList);
+        }
 
+        public void LoadEvent(Event[] eventList) {
+            mEvents.Clear();
             var noteList = new List<DrawEvent>();
             for (int idxEv = 0; idxEv < eventList.Length; idxEv++) {
                 var ev = eventList[idxEv];
