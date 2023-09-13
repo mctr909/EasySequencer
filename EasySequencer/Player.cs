@@ -33,7 +33,6 @@ namespace Player {
         readonly Rectangle RECT_SEEK = new Rectangle(12, 76, 330, 19);
 
         SMF.File mSMF;
-        Sender mMidiSender;
         Stopwatch mSw;
         Task mTask;
         Event[] mEventList;
@@ -106,8 +105,7 @@ namespace Player {
         private void Player_Shown(object sender, EventArgs e) {
             mDlsFilePath = Path.GetDirectoryName(Application.ExecutablePath) + "\\gm.dls";
 
-            mMidiSender = new Sender();
-            if (!mMidiSender.Setup(mDlsFilePath, 44100)) {
+            if (!Synth.Setup(mDlsFilePath, 44100)) {
                 Close();
                 return;
             }
@@ -142,7 +140,7 @@ namespace Player {
         }
 
         private void wavファイル出力ToolStripMenuItem_Click(object sender, EventArgs e) {
-            if (null == mSMF || null == mMidiSender) {
+            if (null == mSMF) {
                 return;
             }
 
@@ -151,7 +149,7 @@ namespace Player {
             saveFileDialog1.ShowDialog();
             var filePath = saveFileDialog1.FileName;
 
-            mMidiSender.FileOut(mDlsFilePath, filePath, mSMF);
+            Synth.FileOut(mDlsFilePath, filePath, mSMF);
         }
 
         private void ピアノロールPToolStripMenuItem_Click(object sender, EventArgs e) {
@@ -164,7 +162,7 @@ namespace Player {
 
         private void 演奏モニタMToolStripMenuItem_Click(object sender, EventArgs e) {
             if (null == mMonitor || mMonitor.IsDisposed) {
-                mMonitor = new EasySequencer.Monitor(mMidiSender);
+                mMonitor = new EasySequencer.Monitor();
                 mMonitor.Show();
             } else {
                 mMonitor.Close();
@@ -366,13 +364,13 @@ namespace Player {
             while (!mTask.IsCompleted) {
                 Thread.Sleep(10);
             }
-            for (int track_num = 0; track_num < Sender.TRACK_COUNT; ++track_num) {
+            for (int track_num = 0; track_num < Synth.TRACK_COUNT; ++track_num) {
                 var port = (byte)(track_num / 16);
                 var chNum = track_num % 16;
                 for (byte noteNo = 0; noteNo < 128; ++noteNo) {
-                    mMidiSender.Send(port, new Event(chNum, E_STATUS.NOTE_OFF, noteNo));
+                    Synth.Send(port, new Event(chNum, E_STATUS.NOTE_OFF, noteNo));
                 }
-                mMidiSender.Send(port, new Event(chNum, E_CONTROL.ALL_RESET));
+                Synth.Send(port, new Event(chNum, E_CONTROL.ALL_RESET));
             }
         }
 
@@ -464,7 +462,7 @@ namespace Player {
 
                 switch (ev.Type) {
                 case E_STATUS.NOTE_OFF: {
-                    var param = mMidiSender.GetChannel(ev.Channel);
+                    var param = Synth.GetChannel(ev.Channel);
                     if (0 == param.is_drum) {
                         if ((ev.Data[1] + mTranspose) < 0 || 127 < (ev.Data[1] + mTranspose)) {
                             continue;
@@ -477,7 +475,7 @@ namespace Player {
                 }
                 break;
                 case E_STATUS.NOTE_ON: {
-                    var param = mMidiSender.GetChannel(ev.Channel);
+                    var param = Synth.GetChannel(ev.Channel);
                     if (ev.Data[2] != 0) {
                         if (0.25 * 960 < (mCurrentTick - ev.Tick)) {
                             continue;
@@ -515,7 +513,7 @@ namespace Player {
                 }
 
                 /*** send message ***/
-                mMidiSender.Send(port, ev);
+                Synth.Send(port, ev);
             }
         }
     }

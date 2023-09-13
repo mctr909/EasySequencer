@@ -7,7 +7,6 @@ using EasySequencer;
 using SMF;
 
 namespace SynthDll {
-    #region struct
     [StructLayout(LayoutKind.Sequential, Pack = 4)]
     public struct INST_INFO {
         public byte is_drum;
@@ -66,14 +65,6 @@ namespace SynthDll {
 
         public string Name { get { return Marshal.PtrToStringAnsi(p_name); } }
     }
-    [StructLayout(LayoutKind.Sequential, Pack = 4)]
-    struct SYSTEM_VALUE {
-        public int inst_count;
-        public IntPtr p_inst_list;
-        public IntPtr p_channel_params;
-        public IntPtr p_active_counter;
-    };
-    #endregion
 
     public enum E_KEY_STATE : byte {
         FREE,
@@ -81,11 +72,12 @@ namespace SynthDll {
         HOLD
     };
 
-    public class Sender : IDisposable {
-        #region synth.dll
+    public static class Synth {
+        const int MSG_BUFF_LEN = 1024;
         public const int TRACK_COUNT = 256;
         public const int SAMPLER_COUNT = 64;
 
+        #region [synth.dll]
         [DllImport("synth.dll")]
         static extern IntPtr synth_setup(
             IntPtr filePath,
@@ -109,41 +101,41 @@ namespace SynthDll {
         static extern void send_message(byte port, IntPtr pMsg);
         #endregion
 
-        private SYSTEM_VALUE mSysValue;
-        private IntPtr[] mpInstList;
-        private IntPtr[] mpChParam;
-        private IntPtr mpMessage;
+        [StructLayout(LayoutKind.Sequential, Pack = 4)]
+        struct SYSTEM_VALUE {
+            public int inst_count;
+            public IntPtr p_inst_list;
+            public IntPtr p_channel_params;
+            public IntPtr p_active_counter;
+        };
+        static SYSTEM_VALUE mSysValue;
+        static IntPtr[] mpInstList;
+        static IntPtr[] mpChParam;
+        static IntPtr mpMsgBuff = Marshal.AllocHGlobal(MSG_BUFF_LEN);
 
-        public int ActiveCount { get { return Marshal.PtrToStructure<int>(mSysValue.p_active_counter); } }
-        public int InstCount { get { return mSysValue.inst_count; } }
-        public INST_INFO Instruments(int num) {
+        public static int ActiveCount { get { return Marshal.PtrToStructure<int>(mSysValue.p_active_counter); } }
+        public static int InstCount { get { return mSysValue.inst_count; } }
+
+        public static INST_INFO Instruments(int num) {
             return Marshal.PtrToStructure<INST_INFO>(mpInstList[num]);
         }
-        public CHANNEL_PARAM GetChannel(int num) {
+        public static CHANNEL_PARAM GetChannel(int num) {
             return Marshal.PtrToStructure<CHANNEL_PARAM>(mpChParam[num]);
         }
-        public void MuteChannel(int num, bool mute) {
+        public static void MuteChannel(int num, bool mute) {
             Send((byte)(num / 16), new Event(num % 16, E_CONTROL.ALL_NOTE_OFF, mute ? 127 : 0));
         }
-        public void RythmChannel(byte port, int chNum, bool isDrum) {
+        public static void RythmChannel(byte port, int chNum, bool isDrum) {
             Send(port, new Event(chNum, E_CONTROL.DRUM, isDrum ? 127 : 0));
         }
 
-        public Sender() {
-            mpMessage = Marshal.AllocHGlobal(1024);
-        }
-        
-        public void Dispose() {
-            synth_close();
-            Marshal.FreeHGlobal(mpMessage);
-        }
-
-        public bool Setup(string waveTablePath, int sampleRate) {
+        public static bool Setup(string waveTablePath, int sampleRate) {
             var ptrSysVal = synth_setup(Marshal.StringToHGlobalAuto(waveTablePath), sampleRate, 256, 32);
             if (IntPtr.Zero == ptrSysVal) {
                 synth_close();
                 return false;
             }
+            Marshal.Copy(new byte[MSG_BUFF_LEN], 0, mpMsgBuff, MSG_BUFF_LEN);
             mSysValue = Marshal.PtrToStructure<SYSTEM_VALUE>(ptrSysVal);
             mpInstList = new IntPtr[InstCount];
             Marshal.Copy(mSysValue.p_inst_list, mpInstList, 0, InstCount);
@@ -152,7 +144,7 @@ namespace SynthDll {
             return true;
         }
 
-        public void FileOut(string wavetablePath, string filePath, SMF.File smf) {
+        public static void FileOut(string wavetablePath, string filePath, SMF.File smf) {
             var ms = new MemoryStream();
             var bw = new BinaryWriter(ms);
             foreach (var ev in smf.EventList) {
@@ -188,9 +180,9 @@ namespace SynthDll {
             Marshal.FreeHGlobal(ptrProg);
         }
 
-        public void Send(byte port, Event msg) {
-            Marshal.Copy(msg.Data, 0, mpMessage, msg.Data.Length);
-            send_message(port, mpMessage);
+        public static void Send(byte port, Event msg) {
+            Marshal.Copy(msg.Data, 0, mpMsgBuff, msg.Data.Length);
+            send_message(port, mpMsgBuff);
         }
     }
 }

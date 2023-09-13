@@ -11,7 +11,6 @@ using SynthDll;
 namespace EasySequencer {
     public partial class Monitor : Form {
         Graphics mG;
-        Sender mSender;
 
         Point mMouseDownPos;
         bool mIsDrag;
@@ -115,7 +114,7 @@ namespace EasySequencer {
 
         static readonly int OCT_WIDTH = (RECT_KEYS[0].Width + 1) * 7;
 
-        public Monitor(Sender sender) {
+        public Monitor() {
             InitializeComponent();
 
             Width = Resources.Monitor.Width;
@@ -125,7 +124,6 @@ namespace EasySequencer {
             picMonitor.Image = new Bitmap(picMonitor.Width, picMonitor.Height);
             mG = Graphics.FromImage(picMonitor.Image);
             mG.SmoothingMode = System.Drawing.Drawing2D.SmoothingMode.None;
-            mSender = sender;
 
             for (int by = 0; by < 6; by++) {
                 for (int bx = 0; bx < 16; bx++) {
@@ -159,7 +157,7 @@ namespace EasySequencer {
             mMouseDownPos = picMonitor.PointToClient(Cursor.Position);
             var channel = (mMouseDownPos.Y - TAB_HEIGHT) / TRACK_HEIGHT;
             if (RECT_PRESET_NAME.X <= mMouseDownPos.X && channel < 16) {
-                var fm = new InstList(mSender, channel);
+                var fm = new InstList(channel);
                 fm.ShowDialog();
             }
         }
@@ -181,25 +179,25 @@ namespace EasySequencer {
 
             if (TAB_HEIGHT <= mMouseDownPos.Y && RECT_ON_OFF.X <= mMouseDownPos.X && mMouseDownPos.X < RECT_ON_OFF.X + RECT_ON_OFF.Width) {
                 if (e.Button == MouseButtons.Right) {
-                    if (1 == mSender.GetChannel(knobY).enable) {
+                    if (1 == Synth.GetChannel(knobY).enable) {
                         for (int i = 0, chNum = 0; i < DISP_TRACKS; ++i, ++chNum) {
                             if (knobY == i) {
-                                mSender.MuteChannel(chNum, true);
+                                Synth.MuteChannel(chNum, true);
                             } else {
-                                mSender.MuteChannel(chNum, false);
+                                Synth.MuteChannel(chNum, false);
                             }
                         }
                     } else {
                         for (int i = 0, chNum = 0; i < DISP_TRACKS; ++i, ++chNum) {
                             if (knobY == i) {
-                                mSender.MuteChannel(chNum, false);
+                                Synth.MuteChannel(chNum, false);
                             } else {
-                                mSender.MuteChannel(chNum, true);
+                                Synth.MuteChannel(chNum, true);
                             }
                         }
                     }
                 } else {
-                    mSender.MuteChannel(knobY, 1 == mSender.GetChannel(knobY).enable);
+                    Synth.MuteChannel(knobY, 1 == Synth.GetChannel(knobY).enable);
                 }
             }
 
@@ -265,7 +263,7 @@ namespace EasySequencer {
             mG.Clear(Color.Transparent);
 
             for (int track = 0, chNum = 0; track < DISP_TRACKS; ++track, ++chNum) {
-                var param = mSender.GetChannel(chNum);
+                var param = Synth.GetChannel(chNum);
                 var track_y = TRACK_HEIGHT * track;
 
                 /*** Keyboard ***/
@@ -382,33 +380,33 @@ namespace EasySequencer {
             var port = (byte)(mTrackNum / 16);
 
             switch (mKnobNum) {
-                case 0:
-                    mSender.Send(port, new Event(chNum, E_CONTROL.VOLUME, mChangeValue));
-                    break;
-                case 1:
-                    mSender.Send(port, new Event(chNum, E_CONTROL.EXPRESSION, mChangeValue));
-                    break;
-                case 2:
-                    mSender.Send(port, new Event(chNum, E_CONTROL.PAN, mChangeValue));
-                    break;
-                case 3:
-                    mSender.Send(port, new Event(chNum, E_CONTROL.REVERB, mChangeValue));
-                    break;
-                case 4:
-                    mSender.Send(port, new Event(chNum, E_CONTROL.CHORUS, mChangeValue));
-                    break;
-                case 5:
-                    mSender.Send(port, new Event(chNum, E_CONTROL.DELAY, mChangeValue));
-                    break;
-                case 6:
-                    mSender.Send(port, new Event(chNum, E_CONTROL.CUTOFF, mChangeValue));
-                    break;
-                case 7:
-                    mSender.Send(port, new Event(chNum, E_CONTROL.RESONANCE, mChangeValue));
-                    break;
-                case 8:
-                    mSender.Send(port, new Event(chNum, E_CONTROL.MODULATION, mChangeValue));
-                    break;
+            case 0:
+                Synth.Send(port, new Event(chNum, E_CONTROL.VOLUME, mChangeValue));
+                break;
+            case 1:
+                Synth.Send(port, new Event(chNum, E_CONTROL.EXPRESSION, mChangeValue));
+                break;
+            case 2:
+                Synth.Send(port, new Event(chNum, E_CONTROL.PAN, mChangeValue));
+                break;
+            case 3:
+                Synth.Send(port, new Event(chNum, E_CONTROL.REVERB, mChangeValue));
+                break;
+            case 4:
+                Synth.Send(port, new Event(chNum, E_CONTROL.CHORUS, mChangeValue));
+                break;
+            case 5:
+                Synth.Send(port, new Event(chNum, E_CONTROL.DELAY, mChangeValue));
+                break;
+            case 6:
+                Synth.Send(port, new Event(chNum, E_CONTROL.CUTOFF, mChangeValue));
+                break;
+            case 7:
+                Synth.Send(port, new Event(chNum, E_CONTROL.RESONANCE, mChangeValue));
+                break;
+            case 8:
+                Synth.Send(port, new Event(chNum, E_CONTROL.MODULATION, mChangeValue));
+                break;
             }
         }
     }
