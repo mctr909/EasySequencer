@@ -3,7 +3,7 @@
 #include <mmsystem.h>
 #pragma comment (lib, "winmm.lib")
 
-void CALLBACK
+void
 WaveOut::callback(HWAVEOUT hwo, UINT uMsg, DWORD_PTR dwInstance, DWORD dwParam1, DWORD dwParam2) {
     auto p_hdr = (WAVEHDR*)dwInstance;
     auto p_this = (WaveOut*)p_hdr->dwUser;
@@ -37,7 +37,7 @@ WaveOut::callback(HWAVEOUT hwo, UINT uMsg, DWORD_PTR dwInstance, DWORD dwParam1,
     }
 }
 
-DWORD CALLBACK
+DWORD
 WaveOut::buffer_writing_task(LPVOID* param) {
     auto p_hdr = (WAVEHDR*)param;
     auto p_this = (WaveOut*)p_hdr->dwUser;
