@@ -2,7 +2,7 @@
 using System.Drawing;
 using System;
 
-namespace PianoRoll {
+namespace EasySequencer {
     static class Colors {
         public static readonly Pen OctBorder = new Pen(Color.FromArgb(0, 0, 0));
         public static readonly Pen KeyBorder = new Pen(Color.FromArgb(31, 31, 31));

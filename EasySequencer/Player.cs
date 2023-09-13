@@ -54,6 +54,7 @@ namespace Player {
         int mMaxTick;
 
         EasySequencer.Monitor mMonitor;
+        EasySequencer.PianoRoll mPianoRoll;
         Graphics mG;
         string mDlsFilePath;
         static readonly Bitmap[,] BMP_FONT = new Bitmap[16, 6];
@@ -153,7 +154,12 @@ namespace Player {
         }
 
         private void ピアノロールPToolStripMenuItem_Click(object sender, EventArgs e) {
-
+            if (null == mPianoRoll || mPianoRoll.IsDisposed) {
+                mPianoRoll = new EasySequencer.PianoRoll();
+                mPianoRoll.Show();
+            } else {
+                mPianoRoll.Close();
+            }
         }
 
         private void トラック編集TToolStripMenuItem_Click(object sender, EventArgs e) {

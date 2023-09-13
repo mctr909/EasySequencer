@@ -51,11 +51,20 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="ChordHelper.cs" />
+    <Compile Include="Colors.cs" />
+    <Compile Include="EventEditor.cs" />
     <Compile Include="Monitor.cs">
       <SubType>Form</SubType>
     </Compile>
     <Compile Include="Monitor.Designer.cs">
       <DependentUpon>Monitor.cs</DependentUpon>
+    </Compile>
+    <Compile Include="PianoRoll.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="PianoRoll.Designer.cs">
+      <DependentUpon>PianoRoll.cs</DependentUpon>
     </Compile>
     <Compile Include="Properties\Resources.Designer.cs">
       <AutoGen>True</AutoGen>
@@ -84,6 +93,9 @@
     <Compile Include="StatusWindow.Designer.cs">
       <DependentUpon>StatusWindow.cs</DependentUpon>
     </Compile>
+    <EmbeddedResource Include="PianoRoll.resx">
+      <DependentUpon>PianoRoll.cs</DependentUpon>
+    </EmbeddedResource>
     <EmbeddedResource Include="Player.resx">
       <DependentUpon>Player.cs</DependentUpon>
     </EmbeddedResource>
@@ -120,6 +132,55 @@
   <ItemGroup>
     <None Include="Resources\font_5x7.png" />
     <None Include="Resources\font_14seg.png" />
+    <Content Include="icon\disp.png" />
+    <None Include="icon\edit_attack.png" />
+    <None Include="icon\edit_cho.png" />
+    <None Include="icon\edit_del.png" />
+    <None Include="icon\edit_del_dep.png" />
+    <None Include="icon\edit_del_time.png" />
+    <None Include="icon\edit_exp.png" />
+    <None Include="icon\edit_fc.png" />
+    <None Include="icon\edit_fq.png" />
+    <None Include="icon\edit_inst.png" />
+    <None Include="icon\edit_measure.png" />
+    <None Include="icon\edit_note.png" />
+    <None Include="icon\edit_pan.png" />
+    <None Include="icon\edit_pitch.png" />
+    <None Include="icon\edit_release.png" />
+    <None Include="icon\edit_rev.png" />
+    <None Include="icon\edit_tempo.png" />
+    <None Include="icon\edit_vib.png" />
+    <None Include="icon\edit_vib_delay.png" />
+    <None Include="icon\edit_vib_dep.png" />
+    <None Include="icon\edit_vib_rate.png" />
+    <None Include="icon\edit_vol.png" />
+    <None Include="icon\select.png" />
+    <None Include="icon\select_disable.png" />
+    <None Include="icon\select_multi.png" />
+    <None Include="icon\select_multi_disable.png" />
+    <None Include="icon\tick024.png" />
+    <None Include="icon\tick040.png" />
+    <None Include="icon\tick048.png" />
+    <None Include="icon\tick060.png" />
+    <None Include="icon\tick080.png" />
+    <None Include="icon\tick096.png" />
+    <None Include="icon\tick120.png" />
+    <None Include="icon\tick160.png" />
+    <None Include="icon\tick192.png" />
+    <None Include="icon\tick240.png" />
+    <None Include="icon\tick320.png" />
+    <None Include="icon\tick480.png" />
+    <None Include="icon\time_zoom.png" />
+    <None Include="icon\time_zoomout.png" />
+    <None Include="icon\tone_zoom.png" />
+    <None Include="icon\tone_zoomout.png" />
+    <None Include="icon\write.png" />
+    <None Include="icon\write_disable.png" />
+    <None Include="icon\edit_accent.png" />
+    <None Include="icon\scroll_down.png" />
+    <None Include="icon\scroll_next.png" />
+    <None Include="icon\scroll_prev.png" />
+    <None Include="icon\scroll_up.png" />
     <Content Include="Resources\Monitor.png" />
     <Content Include="Resources\player.png" />
     <Content Include="Resources\player_down.png" />

@@ -1,6 +1,6 @@
 ﻿using System.Windows.Forms;
 
-namespace PianoRoll {
+namespace EasySequencer {
     partial class PianoRoll {
         /// <summary>
         /// 必要なデザイナー変数です。
@@ -179,7 +179,7 @@ namespace PianoRoll {
             this.toolStripSeparator10,
             this.tsmToneZoomout,
             this.tsmToneZoom});
-            this.tsdDisp.Image = global::PianoRoll.Properties.Resources.disp;
+            this.tsdDisp.Image = global::EasySequencer.Properties.Resources.disp;
             this.tsdDisp.ImageScaling = System.Windows.Forms.ToolStripItemImageScaling.None;
             this.tsdDisp.ImageTransparentColor = System.Drawing.Color.Magenta;
             this.tsdDisp.Name = "tsdDisp";
@@ -188,7 +188,7 @@ namespace PianoRoll {
             // 
             // tsmScrollNext
             // 
-            this.tsmScrollNext.Image = global::PianoRoll.Properties.Resources.scroll_next;
+            this.tsmScrollNext.Image = global::EasySequencer.Properties.Resources.scroll_next;
             this.tsmScrollNext.ImageScaling = System.Windows.Forms.ToolStripItemImageScaling.None;
             this.tsmScrollNext.ImageTransparentColor = System.Drawing.Color.Magenta;
             this.tsmScrollNext.Name = "tsmScrollNext";
@@ -199,7 +199,7 @@ namespace PianoRoll {
             // 
             // tsmScrollPrev
             // 
-            this.tsmScrollPrev.Image = global::PianoRoll.Properties.Resources.scroll_prev;
+            this.tsmScrollPrev.Image = global::EasySequencer.Properties.Resources.scroll_prev;
             this.tsmScrollPrev.ImageScaling = System.Windows.Forms.ToolStripItemImageScaling.None;
             this.tsmScrollPrev.ImageTransparentColor = System.Drawing.Color.Magenta;
             this.tsmScrollPrev.Name = "tsmScrollPrev";
@@ -215,7 +215,7 @@ namespace PianoRoll {
             // 
             // tsmScrollDown
             // 
-            this.tsmScrollDown.Image = global::PianoRoll.Properties.Resources.scroll_down;
+            this.tsmScrollDown.Image = global::EasySequencer.Properties.Resources.scroll_down;
             this.tsmScrollDown.ImageScaling = System.Windows.Forms.ToolStripItemImageScaling.None;
             this.tsmScrollDown.ImageTransparentColor = System.Drawing.Color.Magenta;
             this.tsmScrollDown.Name = "tsmScrollDown";
@@ -226,7 +226,7 @@ namespace PianoRoll {
             // 
             // tsmScrollUp
             // 
-            this.tsmScrollUp.Image = global::PianoRoll.Properties.Resources.scroll_up;
+            this.tsmScrollUp.Image = global::EasySequencer.Properties.Resources.scroll_up;
             this.tsmScrollUp.ImageScaling = System.Windows.Forms.ToolStripItemImageScaling.None;
             this.tsmScrollUp.ImageTransparentColor = System.Drawing.Color.Magenta;
             this.tsmScrollUp.Name = "tsmScrollUp";
@@ -242,7 +242,7 @@ namespace PianoRoll {
             // 
             // tsmTimeZoomout
             // 
-            this.tsmTimeZoomout.Image = global::PianoRoll.Properties.Resources.time_zoomout;
+            this.tsmTimeZoomout.Image = global::EasySequencer.Properties.Resources.time_zoomout;
             this.tsmTimeZoomout.ImageScaling = System.Windows.Forms.ToolStripItemImageScaling.None;
             this.tsmTimeZoomout.ImageTransparentColor = System.Drawing.Color.Magenta;
             this.tsmTimeZoomout.Name = "tsmTimeZoomout";
@@ -253,7 +253,7 @@ namespace PianoRoll {
             // 
             // tsmTimeZoom
             // 
-            this.tsmTimeZoom.Image = global::PianoRoll.Properties.Resources.time_zoom;
+            this.tsmTimeZoom.Image = global::EasySequencer.Properties.Resources.time_zoom;
             this.tsmTimeZoom.ImageScaling = System.Windows.Forms.ToolStripItemImageScaling.None;
             this.tsmTimeZoom.ImageTransparentColor = System.Drawing.Color.Magenta;
             this.tsmTimeZoom.Name = "tsmTimeZoom";
@@ -269,7 +269,7 @@ namespace PianoRoll {
             // 
             // tsmToneZoomout
             // 
-            this.tsmToneZoomout.Image = global::PianoRoll.Properties.Resources.tone_zoomout;
+            this.tsmToneZoomout.Image = global::EasySequencer.Properties.Resources.tone_zoomout;
             this.tsmToneZoomout.ImageScaling = System.Windows.Forms.ToolStripItemImageScaling.None;
             this.tsmToneZoomout.ImageTransparentColor = System.Drawing.Color.Magenta;
             this.tsmToneZoomout.Name = "tsmToneZoomout";
@@ -280,7 +280,7 @@ namespace PianoRoll {
             // 
             // tsmToneZoom
             // 
-            this.tsmToneZoom.Image = global::PianoRoll.Properties.Resources.tone_zoom;
+            this.tsmToneZoom.Image = global::EasySequencer.Properties.Resources.tone_zoom;
             this.tsmToneZoom.ImageScaling = System.Windows.Forms.ToolStripItemImageScaling.None;
             this.tsmToneZoom.ImageTransparentColor = System.Drawing.Color.Magenta;
             this.tsmToneZoom.Name = "tsmToneZoom";
@@ -297,7 +297,7 @@ namespace PianoRoll {
             // tsbWrite
             // 
             this.tsbWrite.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Image;
-            this.tsbWrite.Image = global::PianoRoll.Properties.Resources.write;
+            this.tsbWrite.Image = global::EasySequencer.Properties.Resources.write;
             this.tsbWrite.ImageScaling = System.Windows.Forms.ToolStripItemImageScaling.None;
             this.tsbWrite.ImageTransparentColor = System.Drawing.Color.Magenta;
             this.tsbWrite.Name = "tsbWrite";
@@ -308,7 +308,7 @@ namespace PianoRoll {
             // tsbSelect
             // 
             this.tsbSelect.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Image;
-            this.tsbSelect.Image = global::PianoRoll.Properties.Resources.select;
+            this.tsbSelect.Image = global::EasySequencer.Properties.Resources.select;
             this.tsbSelect.ImageScaling = System.Windows.Forms.ToolStripItemImageScaling.None;
             this.tsbSelect.ImageTransparentColor = System.Drawing.Color.Magenta;
             this.tsbSelect.Name = "tsbSelect";
@@ -352,7 +352,7 @@ namespace PianoRoll {
             this.toolStripSeparator13,
             this.tsmEditModeTempo,
             this.tsmEditModeMeasure});
-            this.tsdEditMode.Image = global::PianoRoll.Properties.Resources.edit_note;
+            this.tsdEditMode.Image = global::EasySequencer.Properties.Resources.edit_note;
             this.tsdEditMode.ImageScaling = System.Windows.Forms.ToolStripItemImageScaling.None;
             this.tsdEditMode.ImageTransparentColor = System.Drawing.Color.Magenta;
             this.tsdEditMode.Name = "tsdEditMode";
@@ -361,7 +361,7 @@ namespace PianoRoll {
             // 
             // tsmEditModeNote
             // 
-            this.tsmEditModeNote.Image = global::PianoRoll.Properties.Resources.edit_note;
+            this.tsmEditModeNote.Image = global::EasySequencer.Properties.Resources.edit_note;
             this.tsmEditModeNote.ImageScaling = System.Windows.Forms.ToolStripItemImageScaling.None;
             this.tsmEditModeNote.Name = "tsmEditModeNote";
             this.tsmEditModeNote.ShortcutKeys = System.Windows.Forms.Keys.F5;
@@ -381,7 +381,7 @@ namespace PianoRoll {
             // 
             // tsmEditModeExp
             // 
-            this.tsmEditModeExp.Image = global::PianoRoll.Properties.Resources.edit_exp;
+            this.tsmEditModeExp.Image = global::EasySequencer.Properties.Resources.edit_exp;
             this.tsmEditModeExp.ImageScaling = System.Windows.Forms.ToolStripItemImageScaling.None;
             this.tsmEditModeExp.Name = "tsmEditModeExp";
             this.tsmEditModeExp.ShortcutKeys = System.Windows.Forms.Keys.F7;
@@ -391,7 +391,7 @@ namespace PianoRoll {
             // 
             // tsmEditModePitch
             // 
-            this.tsmEditModePitch.Image = global::PianoRoll.Properties.Resources.edit_pitch;
+            this.tsmEditModePitch.Image = global::EasySequencer.Properties.Resources.edit_pitch;
             this.tsmEditModePitch.ImageScaling = System.Windows.Forms.ToolStripItemImageScaling.None;
             this.tsmEditModePitch.Name = "tsmEditModePitch";
             this.tsmEditModePitch.ShortcutKeys = System.Windows.Forms.Keys.F8;
@@ -414,7 +414,7 @@ namespace PianoRoll {
             this.toolStripSeparator6,
             this.tsmEditModeFc,
             this.tsmEditModeFq});
-            this.tsmEditModeInst.Image = global::PianoRoll.Properties.Resources.edit_inst;
+            this.tsmEditModeInst.Image = global::EasySequencer.Properties.Resources.edit_inst;
             this.tsmEditModeInst.ImageScaling = System.Windows.Forms.ToolStripItemImageScaling.None;
             this.tsmEditModeInst.Name = "tsmEditModeInst";
             this.tsmEditModeInst.Size = new System.Drawing.Size(146, 30);
@@ -422,7 +422,7 @@ namespace PianoRoll {
             // 
             // tsmEditModePreset
             // 
-            this.tsmEditModePreset.Image = global::PianoRoll.Properties.Resources.edit_inst;
+            this.tsmEditModePreset.Image = global::EasySequencer.Properties.Resources.edit_inst;
             this.tsmEditModePreset.ImageScaling = System.Windows.Forms.ToolStripItemImageScaling.None;
             this.tsmEditModePreset.Name = "tsmEditModePreset";
             this.tsmEditModePreset.Size = new System.Drawing.Size(160, 30);
@@ -436,7 +436,7 @@ namespace PianoRoll {
             // 
             // tsmEditModeAttack
             // 
-            this.tsmEditModeAttack.Image = global::PianoRoll.Properties.Resources.edit_attack;
+            this.tsmEditModeAttack.Image = global::EasySequencer.Properties.Resources.edit_attack;
             this.tsmEditModeAttack.ImageScaling = System.Windows.Forms.ToolStripItemImageScaling.None;
             this.tsmEditModeAttack.Name = "tsmEditModeAttack";
             this.tsmEditModeAttack.Size = new System.Drawing.Size(160, 30);
@@ -445,7 +445,7 @@ namespace PianoRoll {
             // 
             // tsmEditModeRelease
             // 
-            this.tsmEditModeRelease.Image = global::PianoRoll.Properties.Resources.edit_release;
+            this.tsmEditModeRelease.Image = global::EasySequencer.Properties.Resources.edit_release;
             this.tsmEditModeRelease.ImageScaling = System.Windows.Forms.ToolStripItemImageScaling.None;
             this.tsmEditModeRelease.Name = "tsmEditModeRelease";
             this.tsmEditModeRelease.Size = new System.Drawing.Size(160, 30);
@@ -459,7 +459,7 @@ namespace PianoRoll {
             // 
             // tsmEditModeFc
             // 
-            this.tsmEditModeFc.Image = global::PianoRoll.Properties.Resources.edit_fc;
+            this.tsmEditModeFc.Image = global::EasySequencer.Properties.Resources.edit_fc;
             this.tsmEditModeFc.ImageScaling = System.Windows.Forms.ToolStripItemImageScaling.None;
             this.tsmEditModeFc.Name = "tsmEditModeFc";
             this.tsmEditModeFc.Size = new System.Drawing.Size(160, 30);
@@ -468,7 +468,7 @@ namespace PianoRoll {
             // 
             // tsmEditModeFq
             // 
-            this.tsmEditModeFq.Image = global::PianoRoll.Properties.Resources.edit_fq;
+            this.tsmEditModeFq.Image = global::EasySequencer.Properties.Resources.edit_fq;
             this.tsmEditModeFq.ImageScaling = System.Windows.Forms.ToolStripItemImageScaling.None;
             this.tsmEditModeFq.Name = "tsmEditModeFq";
             this.tsmEditModeFq.Size = new System.Drawing.Size(160, 30);
@@ -477,7 +477,7 @@ namespace PianoRoll {
             // 
             // tsmEditModeVol
             // 
-            this.tsmEditModeVol.Image = global::PianoRoll.Properties.Resources.edit_vol;
+            this.tsmEditModeVol.Image = global::EasySequencer.Properties.Resources.edit_vol;
             this.tsmEditModeVol.ImageScaling = System.Windows.Forms.ToolStripItemImageScaling.None;
             this.tsmEditModeVol.Name = "tsmEditModeVol";
             this.tsmEditModeVol.Size = new System.Drawing.Size(146, 30);
@@ -486,7 +486,7 @@ namespace PianoRoll {
             // 
             // tsmEditModePan
             // 
-            this.tsmEditModePan.Image = global::PianoRoll.Properties.Resources.edit_pan;
+            this.tsmEditModePan.Image = global::EasySequencer.Properties.Resources.edit_pan;
             this.tsmEditModePan.ImageScaling = System.Windows.Forms.ToolStripItemImageScaling.None;
             this.tsmEditModePan.Name = "tsmEditModePan";
             this.tsmEditModePan.Size = new System.Drawing.Size(146, 30);
@@ -504,7 +504,7 @@ namespace PianoRoll {
             this.tsmEditModeVibDep,
             this.tsmEditModeVibRate,
             this.tsmEditModeVibDelay});
-            this.tsmEditModeVib.Image = global::PianoRoll.Properties.Resources.edit_vib;
+            this.tsmEditModeVib.Image = global::EasySequencer.Properties.Resources.edit_vib;
             this.tsmEditModeVib.ImageScaling = System.Windows.Forms.ToolStripItemImageScaling.None;
             this.tsmEditModeVib.Name = "tsmEditModeVib";
             this.tsmEditModeVib.Size = new System.Drawing.Size(146, 30);
@@ -512,7 +512,7 @@ namespace PianoRoll {
             // 
             // tsmEditModeVibDep
             // 
-            this.tsmEditModeVibDep.Image = global::PianoRoll.Properties.Resources.edit_vib_dep;
+            this.tsmEditModeVibDep.Image = global::EasySequencer.Properties.Resources.edit_vib_dep;
             this.tsmEditModeVibDep.ImageScaling = System.Windows.Forms.ToolStripItemImageScaling.None;
             this.tsmEditModeVibDep.Name = "tsmEditModeVibDep";
             this.tsmEditModeVibDep.Size = new System.Drawing.Size(106, 30);
@@ -521,7 +521,7 @@ namespace PianoRoll {
             // 
             // tsmEditModeVibRate
             // 
-            this.tsmEditModeVibRate.Image = global::PianoRoll.Properties.Resources.edit_vib_rate;
+            this.tsmEditModeVibRate.Image = global::EasySequencer.Properties.Resources.edit_vib_rate;
             this.tsmEditModeVibRate.ImageScaling = System.Windows.Forms.ToolStripItemImageScaling.None;
             this.tsmEditModeVibRate.Name = "tsmEditModeVibRate";
             this.tsmEditModeVibRate.Size = new System.Drawing.Size(106, 30);
@@ -530,7 +530,7 @@ namespace PianoRoll {
             // 
             // tsmEditModeVibDelay
             // 
-            this.tsmEditModeVibDelay.Image = global::PianoRoll.Properties.Resources.edit_vib_delay;
+            this.tsmEditModeVibDelay.Image = global::EasySequencer.Properties.Resources.edit_vib_delay;
             this.tsmEditModeVibDelay.ImageScaling = System.Windows.Forms.ToolStripItemImageScaling.None;
             this.tsmEditModeVibDelay.Name = "tsmEditModeVibDelay";
             this.tsmEditModeVibDelay.Size = new System.Drawing.Size(106, 30);
@@ -542,7 +542,7 @@ namespace PianoRoll {
             this.tsmEditModeDel.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.tsmEditModeDelDep,
             this.tsmEditModeDelTime});
-            this.tsmEditModeDel.Image = global::PianoRoll.Properties.Resources.edit_del;
+            this.tsmEditModeDel.Image = global::EasySequencer.Properties.Resources.edit_del;
             this.tsmEditModeDel.ImageScaling = System.Windows.Forms.ToolStripItemImageScaling.None;
             this.tsmEditModeDel.Name = "tsmEditModeDel";
             this.tsmEditModeDel.Size = new System.Drawing.Size(146, 30);
@@ -550,7 +550,7 @@ namespace PianoRoll {
             // 
             // tsmEditModeDelDep
             // 
-            this.tsmEditModeDelDep.Image = global::PianoRoll.Properties.Resources.edit_del;
+            this.tsmEditModeDelDep.Image = global::EasySequencer.Properties.Resources.edit_del;
             this.tsmEditModeDelDep.ImageScaling = System.Windows.Forms.ToolStripItemImageScaling.None;
             this.tsmEditModeDelDep.Name = "tsmEditModeDelDep";
             this.tsmEditModeDelDep.Size = new System.Drawing.Size(106, 30);
@@ -559,7 +559,7 @@ namespace PianoRoll {
             // 
             // tsmEditModeDelTime
             // 
-            this.tsmEditModeDelTime.Image = global::PianoRoll.Properties.Resources.edit_del_time;
+            this.tsmEditModeDelTime.Image = global::EasySequencer.Properties.Resources.edit_del_time;
             this.tsmEditModeDelTime.ImageScaling = System.Windows.Forms.ToolStripItemImageScaling.None;
             this.tsmEditModeDelTime.Name = "tsmEditModeDelTime";
             this.tsmEditModeDelTime.Size = new System.Drawing.Size(106, 30);
@@ -568,7 +568,7 @@ namespace PianoRoll {
             // 
             // tsmEditModeRev
             // 
-            this.tsmEditModeRev.Image = global::PianoRoll.Properties.Resources.edit_rev;
+            this.tsmEditModeRev.Image = global::EasySequencer.Properties.Resources.edit_rev;
             this.tsmEditModeRev.ImageScaling = System.Windows.Forms.ToolStripItemImageScaling.None;
             this.tsmEditModeRev.Name = "tsmEditModeRev";
             this.tsmEditModeRev.Size = new System.Drawing.Size(146, 30);
@@ -577,7 +577,7 @@ namespace PianoRoll {
             // 
             // tsmEditModeCho
             // 
-            this.tsmEditModeCho.Image = global::PianoRoll.Properties.Resources.edit_cho;
+            this.tsmEditModeCho.Image = global::EasySequencer.Properties.Resources.edit_cho;
             this.tsmEditModeCho.ImageScaling = System.Windows.Forms.ToolStripItemImageScaling.None;
             this.tsmEditModeCho.Name = "tsmEditModeCho";
             this.tsmEditModeCho.Size = new System.Drawing.Size(146, 30);
@@ -591,7 +591,7 @@ namespace PianoRoll {
             // 
             // tsmEditModeTempo
             // 
-            this.tsmEditModeTempo.Image = global::PianoRoll.Properties.Resources.edit_tempo;
+            this.tsmEditModeTempo.Image = global::EasySequencer.Properties.Resources.edit_tempo;
             this.tsmEditModeTempo.ImageScaling = System.Windows.Forms.ToolStripItemImageScaling.None;
             this.tsmEditModeTempo.Name = "tsmEditModeTempo";
             this.tsmEditModeTempo.Size = new System.Drawing.Size(146, 30);
@@ -600,7 +600,7 @@ namespace PianoRoll {
             // 
             // tsmEditModeMeasure
             // 
-            this.tsmEditModeMeasure.Image = global::PianoRoll.Properties.Resources.edit_measure;
+            this.tsmEditModeMeasure.Image = global::EasySequencer.Properties.Resources.edit_measure;
             this.tsmEditModeMeasure.ImageScaling = System.Windows.Forms.ToolStripItemImageScaling.None;
             this.tsmEditModeMeasure.Name = "tsmEditModeMeasure";
             this.tsmEditModeMeasure.Size = new System.Drawing.Size(146, 30);
@@ -625,7 +625,7 @@ namespace PianoRoll {
             this.tsmTick096,
             this.tsmTick048,
             this.tsmTick024});
-            this.tsdTimeDiv.Image = global::PianoRoll.Properties.Resources.tick240;
+            this.tsdTimeDiv.Image = global::EasySequencer.Properties.Resources.tick240;
             this.tsdTimeDiv.ImageScaling = System.Windows.Forms.ToolStripItemImageScaling.None;
             this.tsdTimeDiv.ImageTransparentColor = System.Drawing.Color.Magenta;
             this.tsdTimeDiv.Name = "tsdTimeDiv";
@@ -634,7 +634,7 @@ namespace PianoRoll {
             // 
             // tsmTick480
             // 
-            this.tsmTick480.Image = global::PianoRoll.Properties.Resources.tick480;
+            this.tsmTick480.Image = global::EasySequencer.Properties.Resources.tick480;
             this.tsmTick480.ImageScaling = System.Windows.Forms.ToolStripItemImageScaling.None;
             this.tsmTick480.Name = "tsmTick480";
             this.tsmTick480.ShortcutKeys = System.Windows.Forms.Keys.F9;
@@ -646,7 +646,7 @@ namespace PianoRoll {
             // 
             this.tsmTick240.Checked = true;
             this.tsmTick240.CheckState = System.Windows.Forms.CheckState.Checked;
-            this.tsmTick240.Image = global::PianoRoll.Properties.Resources.tick240;
+            this.tsmTick240.Image = global::EasySequencer.Properties.Resources.tick240;
             this.tsmTick240.ImageScaling = System.Windows.Forms.ToolStripItemImageScaling.None;
             this.tsmTick240.Name = "tsmTick240";
             this.tsmTick240.ShortcutKeys = System.Windows.Forms.Keys.F10;
@@ -656,7 +656,7 @@ namespace PianoRoll {
             // 
             // tsmTick120
             // 
-            this.tsmTick120.Image = global::PianoRoll.Properties.Resources.tick120;
+            this.tsmTick120.Image = global::EasySequencer.Properties.Resources.tick120;
             this.tsmTick120.ImageScaling = System.Windows.Forms.ToolStripItemImageScaling.None;
             this.tsmTick120.Name = "tsmTick120";
             this.tsmTick120.ShortcutKeys = System.Windows.Forms.Keys.F11;
@@ -666,7 +666,7 @@ namespace PianoRoll {
             // 
             // tsmTick060
             // 
-            this.tsmTick060.Image = global::PianoRoll.Properties.Resources.tick060;
+            this.tsmTick060.Image = global::EasySequencer.Properties.Resources.tick060;
             this.tsmTick060.ImageScaling = System.Windows.Forms.ToolStripItemImageScaling.None;
             this.tsmTick060.Name = "tsmTick060";
             this.tsmTick060.ShortcutKeys = System.Windows.Forms.Keys.F12;
@@ -681,7 +681,7 @@ namespace PianoRoll {
             // 
             // tsmTick320
             // 
-            this.tsmTick320.Image = global::PianoRoll.Properties.Resources.tick320;
+            this.tsmTick320.Image = global::EasySequencer.Properties.Resources.tick320;
             this.tsmTick320.ImageScaling = System.Windows.Forms.ToolStripItemImageScaling.None;
             this.tsmTick320.Name = "tsmTick320";
             this.tsmTick320.ShortcutKeys = ((System.Windows.Forms.Keys)((System.Windows.Forms.Keys.Control | System.Windows.Forms.Keys.F9)));
@@ -691,7 +691,7 @@ namespace PianoRoll {
             // 
             // tsmTick160
             // 
-            this.tsmTick160.Image = global::PianoRoll.Properties.Resources.tick160;
+            this.tsmTick160.Image = global::EasySequencer.Properties.Resources.tick160;
             this.tsmTick160.ImageScaling = System.Windows.Forms.ToolStripItemImageScaling.None;
             this.tsmTick160.Name = "tsmTick160";
             this.tsmTick160.ShortcutKeys = ((System.Windows.Forms.Keys)((System.Windows.Forms.Keys.Control | System.Windows.Forms.Keys.F10)));
@@ -701,7 +701,7 @@ namespace PianoRoll {
             // 
             // tsmTick080
             // 
-            this.tsmTick080.Image = global::PianoRoll.Properties.Resources.tick080;
+            this.tsmTick080.Image = global::EasySequencer.Properties.Resources.tick080;
             this.tsmTick080.ImageScaling = System.Windows.Forms.ToolStripItemImageScaling.None;
             this.tsmTick080.Name = "tsmTick080";
             this.tsmTick080.ShortcutKeys = ((System.Windows.Forms.Keys)((System.Windows.Forms.Keys.Control | System.Windows.Forms.Keys.F11)));
@@ -711,7 +711,7 @@ namespace PianoRoll {
             // 
             // tsmTick040
             // 
-            this.tsmTick040.Image = global::PianoRoll.Properties.Resources.tick040;
+            this.tsmTick040.Image = global::EasySequencer.Properties.Resources.tick040;
             this.tsmTick040.ImageScaling = System.Windows.Forms.ToolStripItemImageScaling.None;
             this.tsmTick040.Name = "tsmTick040";
             this.tsmTick040.ShortcutKeys = ((System.Windows.Forms.Keys)((System.Windows.Forms.Keys.Control | System.Windows.Forms.Keys.F12)));
@@ -726,7 +726,7 @@ namespace PianoRoll {
             // 
             // tsmTick192
             // 
-            this.tsmTick192.Image = global::PianoRoll.Properties.Resources.tick192;
+            this.tsmTick192.Image = global::EasySequencer.Properties.Resources.tick192;
             this.tsmTick192.ImageScaling = System.Windows.Forms.ToolStripItemImageScaling.None;
             this.tsmTick192.Name = "tsmTick192";
             this.tsmTick192.ShortcutKeys = ((System.Windows.Forms.Keys)((System.Windows.Forms.Keys.Alt | System.Windows.Forms.Keys.F9)));
@@ -736,7 +736,7 @@ namespace PianoRoll {
             // 
             // tsmTick096
             // 
-            this.tsmTick096.Image = global::PianoRoll.Properties.Resources.tick096;
+            this.tsmTick096.Image = global::EasySequencer.Properties.Resources.tick096;
             this.tsmTick096.ImageScaling = System.Windows.Forms.ToolStripItemImageScaling.None;
             this.tsmTick096.Name = "tsmTick096";
             this.tsmTick096.ShortcutKeys = ((System.Windows.Forms.Keys)((System.Windows.Forms.Keys.Alt | System.Windows.Forms.Keys.F10)));
@@ -746,7 +746,7 @@ namespace PianoRoll {
             // 
             // tsmTick048
             // 
-            this.tsmTick048.Image = global::PianoRoll.Properties.Resources.tick048;
+            this.tsmTick048.Image = global::EasySequencer.Properties.Resources.tick048;
             this.tsmTick048.ImageScaling = System.Windows.Forms.ToolStripItemImageScaling.None;
             this.tsmTick048.Name = "tsmTick048";
             this.tsmTick048.ShortcutKeys = ((System.Windows.Forms.Keys)((System.Windows.Forms.Keys.Alt | System.Windows.Forms.Keys.F11)));
@@ -756,7 +756,7 @@ namespace PianoRoll {
             // 
             // tsmTick024
             // 
-            this.tsmTick024.Image = global::PianoRoll.Properties.Resources.tick024;
+            this.tsmTick024.Image = global::EasySequencer.Properties.Resources.tick024;
             this.tsmTick024.ImageScaling = System.Windows.Forms.ToolStripItemImageScaling.None;
             this.tsmTick024.Name = "tsmTick024";
             this.tsmTick024.ShortcutKeys = ((System.Windows.Forms.Keys)((System.Windows.Forms.Keys.Alt | System.Windows.Forms.Keys.F12)));

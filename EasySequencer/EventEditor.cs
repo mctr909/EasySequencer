@@ -1,8 +1,7 @@
 ﻿using System.Collections.Generic;
-using System.IO;
 using SMF;
 
-namespace PianoRoll {
+namespace EasySequencer {
     struct DrawEvent {
         public bool Selected;
         public bool IsHide;

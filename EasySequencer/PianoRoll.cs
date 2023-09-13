@@ -5,7 +5,7 @@ using System.Windows.Forms;
 
 using SMF;
 
-namespace PianoRoll {
+namespace EasySequencer {
     public partial class PianoRoll : Form {
         enum E_SELECT {
             NONE,

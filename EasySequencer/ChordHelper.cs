@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 
-namespace PianoRoll {
+namespace EasySequencer {
     class ChordHelper {
         static readonly string[,] NoteNames = {
             { "C", "Db", "D", "Eb", "E", "F", "Gb", "G", "Ab", "A", "Bb", "B" },
