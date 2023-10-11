@@ -4,25 +4,31 @@ using System;
 
 namespace EasySequencer {
     static class Colors {
-        public static readonly Pen OctBorder = new Pen(Color.FromArgb(0, 0, 0));
-        public static readonly Pen KeyBorder = new Pen(Color.FromArgb(31, 31, 31));
-        public static readonly Pen MeasureBorder = new Pen(Color.FromArgb(127, 111, 111));
-        public static readonly Pen BeatBorder = new Pen(Color.FromArgb(71, 71, 71));
-        public static readonly Pen SelectBorder = new Pen(Color.FromArgb(63, 167, 167)) {
-            Width = 1.0f,
-            DashStyle = DashStyle.Dot
-        };
-
-        public static readonly Color Roll = Color.FromArgb(63, 63, 63);
-        public static readonly Brush OctText = Brushes.White;
-        public static readonly Brush MeasureText = Brushes.Black;
-        public static readonly Brush BlackKey = new Pen(Color.FromArgb(15, 23, 23)).Brush;
-        public static readonly Brush MeasureArea = new Pen(Color.FromArgb(191, 191, 191)).Brush;
-        public static readonly Brush SelectArea = new Pen(Color.FromArgb(23, 255, 255, 127)).Brush;
-
+        public static readonly Color CRoll = Color.FromArgb(63, 63, 63);
+        static readonly Color CMeasureBorder = Color.FromArgb(127, 111, 111);
+        static readonly Color CMeasureArea = Color.FromArgb(191, 191, 191);
+        static readonly Color CBeatBorder = Color.FromArgb(71, 71, 71);
+        static readonly Color CSelectBorder = Color.FromArgb(63, 167, 167);
+        static readonly Color CSelectArea = Color.FromArgb(23, 255, 255, 127);
+        static readonly Color CBlackKey = Color.FromArgb(15, 23, 23);
         static readonly Color CSolidNote = Color.FromArgb(63, 127, 63);
         static readonly Color CSelectedNote = Color.FromArgb(147, 63, 63);
         static readonly Color COtherNote = Color.FromArgb(111, 111, 111);
+
+        public static readonly Pen OctBorder = new Pen(Color.FromArgb(0, 0, 0));
+        public static readonly Pen KeyBorder = new Pen(CBlackKey);
+        public static readonly Pen MeasureBorder = new Pen(CMeasureBorder);
+        public static readonly Pen BeatBorder = new Pen(CBeatBorder);
+        public static readonly Pen SelectBorder = new Pen(CSelectBorder)
+        {
+            Width = 1.0f,
+            DashStyle = DashStyle.Dot
+        };
+        public static readonly Brush OctText = Brushes.White;
+        public static readonly Brush MeasureText = Brushes.Black;
+        public static readonly Brush BlackKey = new Pen(CBlackKey).Brush;
+        public static readonly Brush MeasureArea = new Pen(CMeasureArea).Brush;
+        public static readonly Brush SelectArea = new Pen(CSelectArea).Brush;
 
         static readonly Color CSolidNoteH = ToLight(CSolidNote);
         static readonly Color CSolidNoteL = ToDark(CSolidNote);

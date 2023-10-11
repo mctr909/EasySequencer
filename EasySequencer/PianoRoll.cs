@@ -707,7 +707,7 @@ namespace EasySequencer {
 
             var scrollTickBegin = getScrollTick();
             var scrollTickEnd = getScrollTick(mBmpRoll.Width);
-            mgRoll.Clear(Colors.Roll);
+            mgRoll.Clear(Colors.CRoll);
             drawRoll();
             drawMeasure(scrollTickBegin, scrollTickEnd);
             drawNote(scrollTickBegin, scrollTickEnd);
