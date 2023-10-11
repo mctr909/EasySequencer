@@ -5,12 +5,12 @@ using System;
 namespace EasySequencer {
     static class Colors {
         public static readonly Color CRoll = Color.FromArgb(63, 63, 63);
-        static readonly Color CMeasureBorder = Color.FromArgb(127, 111, 111);
+        static readonly Color CMeasureBorder = Color.FromArgb(167, 167, 167);
         static readonly Color CMeasureArea = Color.FromArgb(191, 191, 191);
         static readonly Color CBeatBorder = Color.FromArgb(71, 71, 71);
         static readonly Color CSelectBorder = Color.FromArgb(63, 167, 167);
         static readonly Color CSelectArea = Color.FromArgb(23, 255, 255, 127);
-        static readonly Color CBlackKey = Color.FromArgb(15, 23, 23);
+        static readonly Color CBlackKey = Color.FromArgb(15, 15, 15);
         static readonly Color CSolidNote = Color.FromArgb(63, 127, 63);
         static readonly Color CSelectedNote = Color.FromArgb(147, 63, 63);
         static readonly Color COtherNote = Color.FromArgb(111, 111, 111);
@@ -62,10 +62,10 @@ namespace EasySequencer {
         static readonly Pen OtherNoteL = new Pen(ToDark(COtherNote));
 
         public static Color ToDark(Color c) {
-            return FromHSV(GetHue(c), 1.0, 0.33, c.A);
+            return FromHSV(GetHue(c), 0.66, 0.33, c.A);
         }
         public static Color ToLight(Color c) {
-            return FromHSV(GetHue(c), 0.75, 0.5, c.A);
+            return FromHSV(GetHue(c), 0.66, 0.6, c.A);
         }
         public static double GetHue(Color c) {
             var x = c.R * 2 / 3.0 - c.G / 3.0 - c.B / 3.0;
