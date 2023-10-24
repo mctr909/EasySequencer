@@ -117,8 +117,8 @@ namespace EasySequencer {
         public Monitor() {
             InitializeComponent();
 
-            Width = Resources.Monitor.Width;
-            Height = Resources.Monitor.Height;
+            Width = Resources.Monitor.Width + 16;
+            Height = Resources.Monitor.Height + 39;
             picMonitor.Width = Width;
             picMonitor.Height = Height;
             picMonitor.Image = new Bitmap(picMonitor.Width, picMonitor.Height);
