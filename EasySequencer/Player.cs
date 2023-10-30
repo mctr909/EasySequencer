@@ -35,7 +35,7 @@ namespace Player {
         SMF.File mSMF;
         Stopwatch mSw;
         Task mTask;
-        Event[] mEventList;
+        Event[] mEventList = new Event[0];
 
         bool mIsPlay = false;
         bool mIsSeek = false;
