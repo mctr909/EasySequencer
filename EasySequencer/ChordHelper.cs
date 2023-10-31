@@ -123,17 +123,6 @@ namespace EasySequencer {
             new Tuple<I[], string>(new I[] { I.M3, I.P5, I.M7, I.M9 }, "Δ9")
         };
 
-        static readonly string[,] NoteNames = {
-            { "C", "Db", "D", "Eb", "E", "F", "Gb", "G", "Ab", "A", "Bb", "B" },
-            { "C", "C#", "D", "D#", "E", "F", "F#", "G", "G#", "A", "A#", "B" }
-        };
-        static readonly string[,] DegreeNames = {
-            { "Ⅰ", "♭Ⅱ", "Ⅱ", "♭Ⅲ", "Ⅲ", "Ⅳ", "♭V",  "Ⅴ", "♭Ⅵ", "Ⅵ", "♭Ⅶ", "Ⅶ" },
-            { "ⅰ", "♯ⅰ", "ⅱ", "♯ⅱ", "ⅲ", "ⅳ", "♯ⅳ", "ⅴ", "♯ⅴ", "ⅵ", "♭ⅶ", "ⅶ" }
-        };
-        static readonly int[] KeyIndex = {
-            11, 6, 1, 8, 3, 10, 5, 0, 7, 2, 9, 4, 11, 6, 1
-        };
         static readonly Tuple<int[], string>[] ChordStructs = new Tuple<int[], string>[] {
             new Tuple<int[], string>(new int[] {  0, 3           }, "m(omit5)"),
             new Tuple<int[], string>(new int[] {  0, 4           }, "(omit5)"),
@@ -210,18 +199,17 @@ namespace EasySequencer {
             new Tuple<int[], string>(new int[] { 11, 1, 5, 8     }, "")
         };
 
-        public static string[] GetName(int[] notes, int key) {
-            key += 7;
-            var baseNote = 127;
+        public static string[] GetName(int[] notes) {
+            var lowestTone = 127;
             foreach (var n in notes) {
-                if (n < baseNote) {
-                    baseNote = n;
+                if (n < lowestTone) {
+                    lowestTone = n;
                 }
             }
-            baseNote %= 12;
+            lowestTone %= 12;
 
             for (int i = 0; i < notes.Length; i++) {
-                notes[i] -= baseNote;
+                notes[i] -= lowestTone;
                 notes[i] %= 12;
             }
             Array.Sort(notes);
@@ -245,17 +233,15 @@ namespace EasySequencer {
                     }
                 }
                 if (isMatch) {
-                    var keyOffset = KeyIndex[key];
                     var structure = st.Item2;
-                    var root = (12 + baseNote - st.Item1[0]) % 12;
-                    var majMin = 0 == structure.IndexOf("m") ? 1 : 0;
-                    var degreeName = DegreeNames[majMin, (12 + root - keyOffset) % 12];
-                    var sf = 0 <= degreeName.IndexOf("♭") ? 0 : 1;
-                    var rootName = NoteNames[sf, root];
+                    var rootTone = (12 + lowestTone - st.Item1[0]) % 12;
+                    var maj = 0 != structure.IndexOf("m");
+                    var root = SCALE.GetName(rootTone, maj);
                     if (0 == st.Item1[0]) {
-                        return new string[] { degreeName, rootName, structure };
+                        return new string[] { root.Degree, root.Tone, structure };
                     } else {
-                        return new string[] { degreeName, rootName, structure + " on " + NoteNames[sf, baseNote] };
+                        var bass = SCALE.GetName(lowestTone, maj);
+                        return new string[] { root.Degree, root.Tone, structure + " on " + bass.Tone };
                     }
                 }
             }

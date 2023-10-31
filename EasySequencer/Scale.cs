@@ -1,7 +1,7 @@
 ﻿using SMF;
 using System.Collections.Generic;
 
-class Scale {
+class SCALE {
     struct Degree {
         public readonly int[] Index;
         public readonly string[] Name;
@@ -28,36 +28,55 @@ class Scale {
             new Degree(15,     "VII")
         };
     }
-    static readonly Dictionary<E_KEY, Scale> Scales = new Dictionary<E_KEY, Scale>() {
+    static readonly Dictionary<E_KEY, SCALE> Scales = new Dictionary<E_KEY, SCALE>() {
         //                               1     #1    b2    2     #2    b3    3     4     #4    b5    5     #5    b6    6     b7    7
-        { E_KEY.CF_MAJOR, new Scale(11, "Cb", "C",  "C",  "Db", "D",  "D",  "Eb", "Fb", "F",  "F",  "Gb", "G",  "G",  "Ab", "A",  "Bb" ) },
-        { E_KEY.C_MAJOR,  new Scale(0,  "C",  "C#", "Db", "D",  "D#", "Eb", "E",  "F",  "F#", "Gb", "G",  "G#", "Ab", "A",  "Bb", "B"  ) },
-        { E_KEY.CS_MAJOR, new Scale(1,  "C#", "D",  "D",  "D#", "E",  "E",  "E#", "F#", "G",  "G",  "G#", "A",  "A",  "A#", "B",  "B#" ) },
-        { E_KEY.DF_MAJOR, new Scale(1,  "Db", "D",  "D",  "Eb", "E",  "E",  "F",  "Gb", "G",  "G",  "Ab", "A",  "A",  "Bb", "B",  "C"  ) },
-        { E_KEY.D_MAJOR,  new Scale(2,  "D",  "D#", "Eb", "E",  "F",  "F",  "F#", "G",  "G#", "Ab", "A",  "A#", "Bb", "B",  "C",  "C#" ) },
-        { E_KEY.EF_MAJOR, new Scale(3,  "Eb", "E",  "E",  "F",  "F#", "Gb", "G",  "Ab", "A",  "A",  "Bb", "B",  "B",  "C",  "Db", "D"  ) },
-        { E_KEY.E_MAJOR,  new Scale(4,  "E",  "F",  "F",  "F#", "G",  "G",  "G#", "A",  "A#", "Bb", "B",  "C",  "C",  "C#", "D",  "D#" ) },
-        { E_KEY.F_MAJOR,  new Scale(5,  "F",  "F#", "Gb", "G",  "G#", "Ab", "A",  "Bb", "B",  "B",  "C",  "C#", "Db", "D",  "Eb", "E"  ) },
-        { E_KEY.FS_MAJOR, new Scale(6,  "F#", "G",  "G",  "G#", "A",  "A",  "A#", "B",  "C",  "C",  "C#", "D",  "D",  "D#", "E",  "E#" ) },
-        { E_KEY.GF_MAJOR, new Scale(6,  "Gb", "G",  "G",  "Ab", "A",  "A",  "Bb", "Cb", "C",  "C",  "Db", "D",  "D",  "Eb", "E",  "F"  ) },
-        { E_KEY.G_MAJOR,  new Scale(7,  "G",  "G#", "Ab", "A",  "A#", "Bb", "B",  "C",  "C#", "Db", "D",  "D#", "Eb", "E",  "F" , "F#" ) },
-        { E_KEY.AF_MAJOR, new Scale(8,  "Ab", "A",  "A",  "Bb", "B",  "B",  "C",  "Db", "D",  "D",  "Eb", "E",  "E",  "F",  "Gb", "G"  ) },
-        { E_KEY.A_MAJOR,  new Scale(9,  "A",  "A#", "Bb", "B",  "C",  "C",  "C#", "D",  "D#", "Eb", "E",  "F",  "F",  "F#", "G",  "G#" ) },
-        { E_KEY.BF_MAJOR, new Scale(10, "Bb", "B",  "B",  "C",  "C#", "Db", "D",  "Eb", "E",  "E",  "F",  "F#", "Gb", "G",  "Ab", "A"  ) },
-        { E_KEY.B_MAJOR,  new Scale(11, "B",  "C",  "C",  "C#", "D",  "D",  "D#", "E",  "F",  "F",  "F#", "G",  "G",  "G#", "A",  "A#" ) }
+        { E_KEY.Cb_MAJOR, new SCALE(11, "Cb", "C",  "C",  "Db", "D",  "D",  "Eb", "Fb", "F",  "F",  "Gb", "G",  "G",  "Ab", "A",  "Bb" ) },
+        { E_KEY.C_MAJOR,  new SCALE(0,  "C",  "C#", "Db", "D",  "D#", "Eb", "E",  "F",  "F#", "Gb", "G",  "G#", "Ab", "A",  "Bb", "B"  ) },
+        { E_KEY.Cs_MAJOR, new SCALE(1,  "C#", "D",  "D",  "D#", "E",  "E",  "E#", "F#", "G",  "G",  "G#", "A",  "A",  "A#", "B",  "B#" ) },
+        { E_KEY.Db_MAJOR, new SCALE(1,  "Db", "D",  "D",  "Eb", "E",  "E",  "F",  "Gb", "G",  "G",  "Ab", "A",  "A",  "Bb", "B",  "C"  ) },
+        { E_KEY.D_MAJOR,  new SCALE(2,  "D",  "D#", "Eb", "E",  "F",  "F",  "F#", "G",  "G#", "Ab", "A",  "A#", "Bb", "B",  "C",  "C#" ) },
+        { E_KEY.Eb_MAJOR, new SCALE(3,  "Eb", "E",  "E",  "F",  "F#", "Gb", "G",  "Ab", "A",  "A",  "Bb", "B",  "B",  "C",  "Db", "D"  ) },
+        { E_KEY.E_MAJOR,  new SCALE(4,  "E",  "F",  "F",  "F#", "G",  "G",  "G#", "A",  "A#", "Bb", "B",  "C",  "C",  "C#", "D",  "D#" ) },
+        { E_KEY.F_MAJOR,  new SCALE(5,  "F",  "F#", "Gb", "G",  "G#", "Ab", "A",  "Bb", "B",  "B",  "C",  "C#", "Db", "D",  "Eb", "E"  ) },
+        { E_KEY.Fs_MAJOR, new SCALE(6,  "F#", "G",  "G",  "G#", "A",  "A",  "A#", "B",  "C",  "C",  "C#", "D",  "D",  "D#", "E",  "E#" ) },
+        { E_KEY.Gb_MAJOR, new SCALE(6,  "Gb", "G",  "G",  "Ab", "A",  "A",  "Bb", "Cb", "C",  "C",  "Db", "D",  "D",  "Eb", "E",  "F"  ) },
+        { E_KEY.G_MAJOR,  new SCALE(7,  "G",  "G#", "Ab", "A",  "A#", "Bb", "B",  "C",  "C#", "Db", "D",  "D#", "Eb", "E",  "F" , "F#" ) },
+        { E_KEY.Ab_MAJOR, new SCALE(8,  "Ab", "A",  "A",  "Bb", "B",  "B",  "C",  "Db", "D",  "D",  "Eb", "E",  "E",  "F",  "Gb", "G"  ) },
+        { E_KEY.A_MAJOR,  new SCALE(9,  "A",  "A#", "Bb", "B",  "C",  "C",  "C#", "D",  "D#", "Eb", "E",  "F",  "F",  "F#", "G",  "G#" ) },
+        { E_KEY.Bb_MAJOR, new SCALE(10, "Bb", "B",  "B",  "C",  "C#", "Db", "D",  "Eb", "E",  "E",  "F",  "F#", "Gb", "G",  "Ab", "A"  ) },
+        { E_KEY.B_MAJOR,  new SCALE(11, "B",  "C",  "C",  "C#", "D",  "D",  "D#", "E",  "F",  "F",  "F#", "G",  "G",  "G#", "A",  "A#" ) }
     };
 
     int mOffset;
     string[] mNames;
-    Scale(int offset, params string[] names) {
+    SCALE(int offset, params string[] names) {
         mOffset = offset;
         mNames = names;
     }
 
-    public static Scale Get(E_KEY key) {
-        return Scales[(E_KEY)((int)key & 0xFF00)];
+    static E_KEY mCurrentKey = E_KEY.C_MAJOR;
+    static SCALE mCurrentScale = Scales[E_KEY.C_MAJOR];
+    public static string KeyName { get; private set; } = GetKeyName();
+
+    static string GetKeyName() {
+        var keyMaj = (E_KEY)((int)mCurrentKey & 0xFF00);
+        var keyMin = (E_KEY)(((int)mCurrentKey & 0xFF00) | 1);
+        return keyMaj.ToString()
+            .Replace("S", "#")
+            .Replace("_MAJOR", "")
+             + "/" + keyMin.ToString()
+            .Replace("S", "#")
+            .Replace("_MINOR", "m");
     }
 
+    public static void SetKey(E_KEY key) {
+        if (key != mCurrentKey) {
+            mCurrentKey = key;
+            var ikey = (E_KEY)((int)key & 0xFF00);
+            mCurrentScale = Scales[ikey];
+            KeyName = GetKeyName();
+        }
+    }
     public struct Values {
         public readonly string Degree;
         public readonly string Tone;
@@ -66,13 +85,14 @@ class Scale {
             Tone = tone;
         }
     }
-    public Values GetName(int tone, bool maj) {
-        var t = (tone - mOffset + 12) % 12;
+    public static Values GetName(int tone, bool maj) {
+        var s = mCurrentScale;
+        var t = (tone - s.mOffset + 12) % 12;
         var deg = Degree.List[t];
         if (2 <= deg.Index.Length && maj) {
-            return new Values(deg.Name[1], mNames[deg.Index[1]]);
+            return new Values(deg.Name[1], s.mNames[deg.Index[1]]);
         } else {
-            return new Values(deg.Name[0], mNames[deg.Index[0]]);
+            return new Values(deg.Name[0], s.mNames[deg.Index[0]]);
         }
     }
 }

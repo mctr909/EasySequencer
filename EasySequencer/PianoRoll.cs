@@ -693,14 +693,16 @@ namespace EasySequencer {
             }
 
             var measureList = mEditor.GetMeasureList(mSnappedTick, mSnappedTick + 960 * 4);
+            SCALE.SetKey(measureList[0].Key);
+
             if (mEditor.Selected) {
-                var code = mEditor.SelectedChordName(mSnappedTick, measureList[0].Key);
-                tslKey.Text = measureList[0].KeyName;
+                var code = mEditor.SelectedChordName(mSnappedTick);
+                tslKey.Text = SCALE.KeyName;
                 tslDegree.Text = code[0];
                 tslChord.Text = code[1] + code[2];
             } else {
-                var code = mEditor.CurrentChordName(mSnappedTick, measureList[0].Key);
-                tslKey.Text = measureList[0].KeyName;
+                var code = mEditor.CurrentChordName(mSnappedTick);
+                tslKey.Text = SCALE.KeyName;
                 tslDegree.Text = code[0];
                 tslChord.Text = code[1] + code[2];
             }

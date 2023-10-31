@@ -103,21 +103,7 @@ namespace EasySequencer {
         public int Beat;
         public int Nume;
         public int Deno;
-        public int Key;
-        public string KeyName {
-            get {
-                var keyMaj = (E_KEY)((byte)Key << 8);
-                var keyMin = (E_KEY)(1 + ((byte)Key << 8));
-                return keyMaj.ToString()
-                    .Replace("s", "#")
-                    .Replace("f", "b")
-                    .Replace("_MAJOR", "")
-                     + "/" + keyMin.ToString()
-                    .Replace("s", "#")
-                    .Replace("f", "b")
-                    .Replace("_MINOR", "m");
-            }
-        }
+        public E_KEY Key;
     }
 
     class EventEditor {
@@ -244,7 +230,7 @@ namespace EasySequencer {
             return cursorTick - mExpandingNote.End;
         }
 
-        public string[] SelectedChordName(int currentTick, int key = 0) {
+        public string[] SelectedChordName(int currentTick) {
             var notes = new List<int>();
             foreach (var ev in mEvents) {
                 if (!ev.Selected || ev.Type != E_STATUS.NOTE_ON) {
@@ -253,12 +239,12 @@ namespace EasySequencer {
                 notes.Add(ev.NoteNumber);
             }
             if (notes.Count < 2) {
-                return CurrentChordName(currentTick, key);
+                return CurrentChordName(currentTick);
             } else {
-                return ChordHelper.GetName(notes.ToArray(), key);
+                return ChordHelper.GetName(notes.ToArray());
             }
         }
-        public string[] CurrentChordName(int currentTick, int key = 0) {
+        public string[] CurrentChordName(int currentTick) {
             var notes = new List<int>();
             foreach (var ev in mEvents) {
                 if (ev.Type != E_STATUS.NOTE_ON) {
@@ -268,7 +254,7 @@ namespace EasySequencer {
                     notes.Add(ev.NoteNumber);
                 }
             }
-            return ChordHelper.GetName(notes.ToArray(), key);
+            return ChordHelper.GetName(notes.ToArray());
         }
 
         public void AddNote(int note, int velocity, int tickBegin, int tickEnd) {
@@ -443,14 +429,14 @@ namespace EasySequencer {
             var measureInterval = 3840;
             var beatInterval = 960;
             var eventTick = 0;
-            var key = 0;
+            var key = E_KEY.C_MAJOR;
             var measureList = new List<DrawMeasure>();
             foreach (var ev in mEvents) {
                 if (E_STATUS.META != ev.Type) {
                     continue;
                 }
                 if (E_META.KEY == ev.Meta.Type) {
-                    key = ((short)ev.Meta.UInt) >> 8;
+                    key = (E_KEY)ev.Meta.UInt;
                     continue;
                 }
                 if (E_META.MEASURE != ev.Meta.Type) {

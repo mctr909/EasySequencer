@@ -87,12 +87,12 @@ namespace SMF {
     }
 
     public enum E_KEY {
-        CF_MAJOR = 0xF900,
-        GF_MAJOR = 0xFA00,
-        DF_MAJOR = 0xFB00,
-        AF_MAJOR = 0xFC00,
-        EF_MAJOR = 0xFD00,
-        BF_MAJOR = 0xFE00,
+        Cb_MAJOR = 0xF900,
+        Gb_MAJOR = 0xFA00,
+        Db_MAJOR = 0xFB00,
+        Ab_MAJOR = 0xFC00,
+        Eb_MAJOR = 0xFD00,
+        Bb_MAJOR = 0xFE00,
         F_MAJOR  = 0xFF00,
         C_MAJOR  = 0x0000,
         G_MAJOR  = 0x0100,
@@ -100,12 +100,12 @@ namespace SMF {
         A_MAJOR  = 0x0300,
         E_MAJOR  = 0x0400,
         B_MAJOR  = 0x0500,
-        FS_MAJOR = 0x0600,
-        CS_MAJOR = 0x0700,
+        Fs_MAJOR = 0x0600,
+        Cs_MAJOR = 0x0700,
 
-        AF_MINOR = 0xF901,
-        EF_MINOR = 0xFA01,
-        BF_MINOR = 0xFB01,
+        Ab_MINOR = 0xF901,
+        Eb_MINOR = 0xFA01,
+        Bb_MINOR = 0xFB01,
         F_MINOR  = 0xFC01,
         C_MINOR  = 0xFD01,
         G_MINOR  = 0xFE01,
@@ -113,11 +113,11 @@ namespace SMF {
         A_MINOR  = 0x0001,
         E_MINOR  = 0x0101,
         B_MINOR  = 0x0201,
-        FS_MINOR = 0x0301,
-        CS_MINOR = 0x0401,
-        GS_MINOR = 0x0501,
-        DS_MINOR = 0x0601,
-        AS_MINOR = 0x0701,
+        Fs_MINOR = 0x0301,
+        Cs_MINOR = 0x0401,
+        Gs_MINOR = 0x0501,
+        Ds_MINOR = 0x0601,
+        As_MINOR = 0x0701,
 
         INVALID = 0xFFFF
     }

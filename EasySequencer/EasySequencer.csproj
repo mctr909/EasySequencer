@@ -83,7 +83,7 @@
     <Compile Include="InstList.Designer.cs">
       <DependentUpon>InstList.cs</DependentUpon>
     </Compile>
-    <Compile Include="Scale.cs" />
+    <Compile Include="SCALE.cs" />
     <Compile Include="SynthDll.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
