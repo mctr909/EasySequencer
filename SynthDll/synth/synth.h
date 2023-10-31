@@ -10,7 +10,7 @@
 #define PURGE_SPEED      0.125
 #define FREE_THRESHOLD   (1 / 32768.0) /* -90db */
 #define ACTIVE_THRESHOLD (1 / 1024.0)  /* -60db */
-#define RMS_ATTENUTE     9.24          /* -40db/sec * -0.2310 */
+#define RMS_ATTENUTE     6.93          /* -30db/sec * -0.2310 */
 
 /******************************************************************************/
 enum struct E_EVENT_TYPE : byte {
