@@ -240,7 +240,7 @@ namespace EasySequencer {
                     if (0 == st.Item1[0]) {
                         return new string[] { root.Degree, root.Tone, structure };
                     } else {
-                        var bass = SCALE.GetName(lowestTone, maj);
+                        var bass = SCALE.GetName(lowestTone, 1 != root.Tone.IndexOf("#") && root.Tone != "B");
                         return new string[] { root.Degree, root.Tone, structure + " on " + bass.Tone };
                     }
                 }

@@ -24,27 +24,27 @@ class SCALE {
             new Degree(10,     "V"),
             new Degree(11, 12, "#V",  "bVI"),
             new Degree(13,     "VI"),
-            new Degree(14,     "bVII"),
-            new Degree(15,     "VII")
+            new Degree(14, 15, "#VI", "bVII"),
+            new Degree(16,     "VII")
         };
     }
     static readonly Dictionary<E_KEY, SCALE> Scales = new Dictionary<E_KEY, SCALE>() {
-        //                               1     #1    b2    2     #2    b3    3     4     #4    b5    5     #5    b6    6     b7    7
-        { E_KEY.Cb_MAJOR, new SCALE(11, "Cb", "C",  "C",  "Db", "D",  "D",  "Eb", "Fb", "F",  "F",  "Gb", "G",  "G",  "Ab", "A",  "Bb" ) },
-        { E_KEY.C_MAJOR,  new SCALE(0,  "C",  "C#", "Db", "D",  "D#", "Eb", "E",  "F",  "F#", "Gb", "G",  "G#", "Ab", "A",  "Bb", "B"  ) },
-        { E_KEY.Cs_MAJOR, new SCALE(1,  "C#", "D",  "D",  "D#", "E",  "E",  "E#", "F#", "G",  "G",  "G#", "A",  "A",  "A#", "B",  "B#" ) },
-        { E_KEY.Db_MAJOR, new SCALE(1,  "Db", "D",  "D",  "Eb", "E",  "E",  "F",  "Gb", "G",  "G",  "Ab", "A",  "A",  "Bb", "B",  "C"  ) },
-        { E_KEY.D_MAJOR,  new SCALE(2,  "D",  "D#", "Eb", "E",  "F",  "F",  "F#", "G",  "G#", "Ab", "A",  "A#", "Bb", "B",  "C",  "C#" ) },
-        { E_KEY.Eb_MAJOR, new SCALE(3,  "Eb", "E",  "E",  "F",  "F#", "Gb", "G",  "Ab", "A",  "A",  "Bb", "B",  "B",  "C",  "Db", "D"  ) },
-        { E_KEY.E_MAJOR,  new SCALE(4,  "E",  "F",  "F",  "F#", "G",  "G",  "G#", "A",  "A#", "Bb", "B",  "C",  "C",  "C#", "D",  "D#" ) },
-        { E_KEY.F_MAJOR,  new SCALE(5,  "F",  "F#", "Gb", "G",  "G#", "Ab", "A",  "Bb", "B",  "B",  "C",  "C#", "Db", "D",  "Eb", "E"  ) },
-        { E_KEY.Fs_MAJOR, new SCALE(6,  "F#", "G",  "G",  "G#", "A",  "A",  "A#", "B",  "C",  "C",  "C#", "D",  "D",  "D#", "E",  "E#" ) },
-        { E_KEY.Gb_MAJOR, new SCALE(6,  "Gb", "G",  "G",  "Ab", "A",  "A",  "Bb", "Cb", "C",  "C",  "Db", "D",  "D",  "Eb", "E",  "F"  ) },
-        { E_KEY.G_MAJOR,  new SCALE(7,  "G",  "G#", "Ab", "A",  "A#", "Bb", "B",  "C",  "C#", "Db", "D",  "D#", "Eb", "E",  "F" , "F#" ) },
-        { E_KEY.Ab_MAJOR, new SCALE(8,  "Ab", "A",  "A",  "Bb", "B",  "B",  "C",  "Db", "D",  "D",  "Eb", "E",  "E",  "F",  "Gb", "G"  ) },
-        { E_KEY.A_MAJOR,  new SCALE(9,  "A",  "A#", "Bb", "B",  "C",  "C",  "C#", "D",  "D#", "Eb", "E",  "F",  "F",  "F#", "G",  "G#" ) },
-        { E_KEY.Bb_MAJOR, new SCALE(10, "Bb", "B",  "B",  "C",  "C#", "Db", "D",  "Eb", "E",  "E",  "F",  "F#", "Gb", "G",  "Ab", "A"  ) },
-        { E_KEY.B_MAJOR,  new SCALE(11, "B",  "C",  "C",  "C#", "D",  "D",  "D#", "E",  "F",  "F",  "F#", "G",  "G",  "G#", "A",  "A#" ) }
+        //                               1     #1    b2    2     #2    b3    3     4     #4    b5    5     #5    b6    6     #6    b7    7
+        { E_KEY.Cb_MAJOR, new SCALE(11, "Cb", "C",  "C",  "Db", "D",  "D",  "Eb", "Fb", "F",  "F",  "Gb", "G",  "G",  "Ab", "A",  "A",  "Bb" ) },
+        { E_KEY.C_MAJOR,  new SCALE(0,  "C",  "C#", "Db", "D",  "D#", "Eb", "E",  "F",  "F#", "Gb", "G",  "G#", "Ab", "A",  "A#", "Bb", "B"  ) },
+        { E_KEY.Cs_MAJOR, new SCALE(1,  "C#", "D",  "D",  "D#", "E",  "E",  "E#", "F#", "G",  "G",  "G#", "A",  "A",  "A#", "B",  "B",  "B#" ) },
+        { E_KEY.Db_MAJOR, new SCALE(1,  "Db", "D",  "D",  "Eb", "E",  "E",  "F",  "Gb", "G",  "G",  "Ab", "A",  "A",  "Bb", "B",  "B",  "C"  ) },
+        { E_KEY.D_MAJOR,  new SCALE(2,  "D",  "D#", "Eb", "E",  "F",  "F",  "F#", "G",  "G#", "Ab", "A",  "A#", "Bb", "B",  "C",  "C",  "C#" ) },
+        { E_KEY.Eb_MAJOR, new SCALE(3,  "Eb", "E",  "E",  "F",  "F#", "Gb", "G",  "Ab", "A",  "A",  "Bb", "B",  "B",  "C",  "C#", "Db", "D"  ) },
+        { E_KEY.E_MAJOR,  new SCALE(4,  "E",  "F",  "F",  "F#", "G",  "G",  "G#", "A",  "A#", "Bb", "B",  "C",  "C",  "C#", "D",  "D",  "D#" ) },
+        { E_KEY.F_MAJOR,  new SCALE(5,  "F",  "F#", "Gb", "G",  "G#", "Ab", "A",  "Bb", "B",  "B",  "C",  "C#", "Db", "D",  "D#", "Eb", "E"  ) },
+        { E_KEY.Fs_MAJOR, new SCALE(6,  "F#", "G",  "G",  "G#", "A",  "A",  "A#", "B",  "C",  "C",  "C#", "D",  "D",  "D#", "E",  "E",  "E#" ) },
+        { E_KEY.Gb_MAJOR, new SCALE(6,  "Gb", "G",  "G",  "Ab", "A",  "A",  "Bb", "Cb", "C",  "C",  "Db", "D",  "D",  "Eb", "E",  "E",  "F"  ) },
+        { E_KEY.G_MAJOR,  new SCALE(7,  "G",  "G#", "Ab", "A",  "A#", "Bb", "B",  "C",  "C#", "Db", "D",  "D#", "Eb", "E",  "F",  "F" , "F#" ) },
+        { E_KEY.Ab_MAJOR, new SCALE(8,  "Ab", "A",  "A",  "Bb", "B",  "B",  "C",  "Db", "D",  "D",  "Eb", "E",  "E",  "F",  "F#", "Gb", "G"  ) },
+        { E_KEY.A_MAJOR,  new SCALE(9,  "A",  "A#", "Bb", "B",  "C",  "C",  "C#", "D",  "D#", "Eb", "E",  "F",  "F",  "F#", "G",  "G",  "G#" ) },
+        { E_KEY.Bb_MAJOR, new SCALE(10, "Bb", "B",  "B",  "C",  "C#", "Db", "D",  "Eb", "E",  "E",  "F",  "F#", "Gb", "G",  "G#", "Ab", "A"  ) },
+        { E_KEY.B_MAJOR,  new SCALE(11, "B",  "C",  "C",  "C#", "D",  "D",  "D#", "E",  "F",  "F",  "F#", "G",  "G",  "G#", "A",  "A",  "A#" ) }
     };
 
     int mOffset;
