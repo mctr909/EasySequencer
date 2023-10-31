@@ -14,18 +14,18 @@ class SCALE {
             Name = new string[] { nSharp, nFlat };
         }
         public static readonly Degree[] List = new Degree[] {
-            new Degree(0,      "I"),
-            new Degree(1,   2, "#I",  "bII"),
-            new Degree(3,      "II"),
-            new Degree(4,   5, "#II", "bIII"),
-            new Degree(6,      "III"),
-            new Degree(7,      "IV"),
-            new Degree(8,   9, "#IV", "bV"),
-            new Degree(10,     "V"),
-            new Degree(11, 12, "#V",  "bVI"),
-            new Degree(13,     "VI"),
-            new Degree(14, 15, "#VI", "bVII"),
-            new Degree(16,     "VII")
+            new Degree(0,      "Ⅰ"),
+            new Degree(1,   2, "#Ⅰ", "bⅡ"),
+            new Degree(3,      "Ⅱ"),
+            new Degree(4,   5, "#Ⅱ", "bⅢ"),
+            new Degree(6,      "Ⅲ"),
+            new Degree(7,      "Ⅳ"),
+            new Degree(8,   9, "#Ⅳ", "bⅤ"),
+            new Degree(10,     "Ⅴ"),
+            new Degree(11, 12, "#Ⅴ", "bⅥ"),
+            new Degree(13,     "Ⅵ"),
+            new Degree(14, 15, "#Ⅵ", "bⅦ"),
+            new Degree(16,     "Ⅶ")
         };
     }
     static readonly Dictionary<E_KEY, SCALE> Scales = new Dictionary<E_KEY, SCALE>() {
@@ -62,10 +62,10 @@ class SCALE {
         var keyMaj = (E_KEY)((int)mCurrentKey & 0xFF00);
         var keyMin = (E_KEY)(((int)mCurrentKey & 0xFF00) | 1);
         return keyMaj.ToString()
-            .Replace("S", "#")
+            .Replace("s", "#")
             .Replace("_MAJOR", "")
              + "/" + keyMin.ToString()
-            .Replace("S", "#")
+            .Replace("s", "#")
             .Replace("_MINOR", "m");
     }
 

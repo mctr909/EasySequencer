@@ -4,16 +4,16 @@ using System;
 
 namespace EasySequencer {
     static class Colors {
-        public static readonly Color CRoll = Color.FromArgb(63, 63, 63);
-        static readonly Color CMeasureBorder = Color.FromArgb(167, 167, 167);
+        public static readonly Color CRoll = Color.FromArgb(211, 211, 211);
+        static readonly Color CMeasureBorder = Color.FromArgb(47, 47, 47);
         static readonly Color CMeasureArea = Color.FromArgb(191, 191, 191);
-        static readonly Color CBeatBorder = Color.FromArgb(71, 71, 71);
+        static readonly Color CBeatBorder = Color.FromArgb(191, 191, 191);
         static readonly Color CSelectBorder = Color.FromArgb(63, 167, 167);
         static readonly Color CSelectArea = Color.FromArgb(23, 255, 255, 127);
-        static readonly Color CBlackKey = Color.FromArgb(15, 15, 15);
-        static readonly Color CSolidNote = Color.FromArgb(63, 127, 63);
-        static readonly Color CSelectedNote = Color.FromArgb(147, 63, 63);
-        static readonly Color COtherNote = Color.FromArgb(111, 111, 111);
+        static readonly Color CBlackKey = Color.FromArgb(127, 127, 127);
+        static readonly Color CSolidNote = Color.FromArgb(63, 211, 63);
+        static readonly Color CSelectedNote = Color.FromArgb(235, 71, 71);
+        static readonly Color COtherNote = Color.FromArgb(235, 235, 235);
 
         public static readonly Pen OctBorder = new Pen(Color.FromArgb(0, 0, 0));
         public static readonly Pen KeyBorder = new Pen(CBlackKey);
@@ -62,10 +62,10 @@ namespace EasySequencer {
         static readonly Pen OtherNoteL = new Pen(ToDark(COtherNote));
 
         public static Color ToDark(Color c) {
-            return FromHSV(GetHue(c), 0.66, 0.33, c.A);
+            return FromHSV(GetHue(c), 0.75, 0.5, c.A);
         }
         public static Color ToLight(Color c) {
-            return FromHSV(GetHue(c), 0.66, 0.6, c.A);
+            return FromHSV(GetHue(c), 0.75, 1.0, c.A);
         }
         public static double GetHue(Color c) {
             var x = c.R * 2 / 3.0 - c.G / 3.0 - c.B / 3.0;
