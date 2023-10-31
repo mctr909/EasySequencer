@@ -1,22 +1,34 @@
-﻿using System.Collections.Generic;
-using SMF;
+﻿using SMF;
+using System.Collections.Generic;
 
 class Scale {
-    static readonly int[][] ToneToDeg = new int[][] {
-        new int[] { 0 },
-        new int[] { 1, 2 },
-        new int[] { 3 },
-        new int[] { 4, 5 },
-        new int[] { 6 },
-        new int[] { 7 },
-        new int[] { 8, 9 },
-        new int[] { 10 },
-        new int[] { 11, 12 },
-        new int[] { 13 },
-        new int[] { 14 },
-        new int[] { 15 }
-    };
-    static readonly Dictionary<E_KEY, Scale> NAMES = new Dictionary<E_KEY, Scale>() {
+    struct Degree {
+        public readonly int[] Index;
+        public readonly string[] Name;
+        Degree(int index, string name) {
+            Index = new int[] { index };
+            Name = new string[] { name };
+        }
+        Degree(int iSharp, int iFlat, string nSharp, string nFlat) {
+            Index = new int[] { iSharp, iFlat };
+            Name = new string[] { nSharp, nFlat };
+        }
+        public static readonly Degree[] List = new Degree[] {
+            new Degree(0,      "I"),
+            new Degree(1,   2, "#I",  "bII"),
+            new Degree(3,      "II"),
+            new Degree(4,   5, "#II", "bIII"),
+            new Degree(6,      "III"),
+            new Degree(7,      "IV"),
+            new Degree(8,   9, "#IV", "bV"),
+            new Degree(10,     "V"),
+            new Degree(11, 12, "#V",  "bVI"),
+            new Degree(13,     "VI"),
+            new Degree(14,     "bVII"),
+            new Degree(15,     "VII")
+        };
+    }
+    static readonly Dictionary<E_KEY, Scale> Scales = new Dictionary<E_KEY, Scale>() {
         //                               1     #1    b2    2     #2    b3    3     4     #4    b5    5     #5    b6    6     b7    7
         { E_KEY.CF_MAJOR, new Scale(11, "Cb", "C",  "C",  "Db", "D",  "D",  "Eb", "Fb", "F",  "F",  "Gb", "G",  "G",  "Ab", "A",  "Bb" ) },
         { E_KEY.C_MAJOR,  new Scale(0,  "C",  "C#", "Db", "D",  "D#", "Eb", "E",  "F",  "F#", "Gb", "G",  "G#", "Ab", "A",  "Bb", "B"  ) },
@@ -34,22 +46,33 @@ class Scale {
         { E_KEY.BF_MAJOR, new Scale(10, "Bb", "B",  "B",  "C",  "C#", "Db", "D",  "Eb", "E",  "E",  "F",  "F#", "Gb", "G",  "Ab", "A"  ) },
         { E_KEY.B_MAJOR,  new Scale(11, "B",  "C",  "C",  "C#", "D",  "D",  "D#", "E",  "F",  "F",  "F#", "G",  "G",  "G#", "A",  "A#" ) }
     };
+
     int mOffset;
     string[] mNames;
     Scale(int offset, params string[] names) {
         mOffset = offset;
         mNames = names;
     }
+
     public static Scale Get(E_KEY key) {
-        return NAMES[(E_KEY)((int)key & 0xFF00)];
+        return Scales[(E_KEY)((int)key & 0xFF00)];
     }
-    public string GetName(int tone, bool maj) {
-        var k = (tone - mOffset + 12) % 12;
-        var d = ToneToDeg[k];
-        if (2 <= d.Length && maj) {
-            return mNames[d[1]];
+
+    public struct Values {
+        public readonly string Degree;
+        public readonly string Tone;
+        public Values(string degree, string tone) {
+            Degree = degree;
+            Tone = tone;
+        }
+    }
+    public Values GetName(int tone, bool maj) {
+        var t = (tone - mOffset + 12) % 12;
+        var deg = Degree.List[t];
+        if (2 <= deg.Index.Length && maj) {
+            return new Values(deg.Name[1], mNames[deg.Index[1]]);
         } else {
-            return mNames[d[0]];
+            return new Values(deg.Name[0], mNames[deg.Index[0]]);
         }
     }
 }
