@@ -121,19 +121,19 @@ namespace EasySequencer {
                 new Structure(ToArray(I.M3, I.s5), "aug"),
                 new Structure(ToArray(I.P4, I.P5), "sus4"),
 
-                new Structure(ToArray(I.m3, I.b5, I.b7), "dim7", "m(b5)"),
-                new Structure(ToArray(I.m3, I.b5, I.m7), "m7(b5)", "m(b5)"),
                 new Structure(ToArray(I.m3, I.P5, I.M6), "m6", "m"),
                 new Structure(ToArray(I.m3, I.P5, I.m7), "m7", "m"),
                 new Structure(ToArray(I.m3, I.P5, I.M7), "mΔ7", "m"),
                 new Structure(ToArray(I.m3, I.P5, I.M9), "m(add9)", "m"),
                 new Structure(ToArray(I.m3, I.P5, I.P11), "m(add11)", "m"),
-                new Structure(ToArray(I.M3, I.b5, I.m7), "7(b5)", "(b5)"),
+                new Structure(ToArray(I.m3, I.b5, I.b7), "dim7", "m(b5)"),
+                new Structure(ToArray(I.m3, I.b5, I.m7), "m7(b5)", "m(b5)"),
                 new Structure(ToArray(I.M3, I.P5, I.M6), "6", ""),
                 new Structure(ToArray(I.M3, I.P5, I.m7), "7", ""),
                 new Structure(ToArray(I.M3, I.P5, I.M7), "Δ7", ""),
                 new Structure(ToArray(I.M3, I.P5, I.M9), "(add9)", ""),
                 new Structure(ToArray(I.M3, I.P5, I.P11), "(add11)", ""),
+                new Structure(ToArray(I.M3, I.b5, I.m7), "7(b5)", "(b5)"),
                 new Structure(ToArray(I.M3, I.s5, I.m7), "aug7"),
                 new Structure(ToArray(I.P4, I.P5, I.m7), "7sus4"),
 
@@ -178,14 +178,13 @@ namespace EasySequencer {
 
             var noteCount = noteList.Count;
             for (var t = 0; t < noteCount; t++) {
-                var transList = new int[noteCount - 1];
-                for (int i = 0; i < transList.Length; i++) {
-                    transList[i] = (noteList[(i + t + 1) % noteCount] - noteList[t] + 12) % 12;
-                }
-                var rootTone = (bassTone + noteList[t]) % 12;
                 foreach (var structure in Structure.List) {
-                    if (transList.Length != structure.Intervals.Length) {
+                    if ((noteCount - 1) != structure.Intervals.Length) {
                         continue;
+                    }
+                    var transList = new int[noteCount - 1];
+                    for (int i = 0; i < transList.Length; i++) {
+                        transList[i] = (noteList[(i + t + 1) % noteCount] - noteList[t] + 12) % 12;
                     }
                     var unmatch = false;
                     for (int i = 0; i < structure.Intervals.Length; i++) {
@@ -197,18 +196,22 @@ namespace EasySequencer {
                     if (unmatch) {
                         continue;
                     }
+                    var rootTone = (bassTone + noteList[t]) % 12;
                     var structureName = structure.Names[0];
                     var maj = 0 != structureName.IndexOf("m");
                     var root = SCALE.GetName(rootTone, maj);
                     if (t == 0) {
                         return new string[] { root.Degree, root.Tone, structureName };
                     } else {
-                        var sharp = 1 == root.Tone.IndexOf("#") ||
-                            root.Tone == "D" ||
-                            root.Tone == "E" ||
-                            root.Tone == "A" ||
-                            root.Tone == "B";
-                        var bass = SCALE.GetName(bassTone, !sharp);
+                        var flat = false;
+                        foreach (var inter in structure.Intervals) {
+                            if (inter.Tone == bassTone) {
+                                var v = (int)inter.Id;
+                                flat = 0 < (v & (int)I.MIN) || 0 < (v & (int)I.DIM);
+                                break;
+                            }
+                        }
+                        var bass = SCALE.GetName(bassTone, flat);
                         return new string[] { root.Degree, root.Tone, structureName + " on " + bass.Tone };
                     }
                 }
