@@ -709,7 +709,7 @@ namespace EasySequencer {
 
             var scrollTickBegin = getScrollTick();
             var scrollTickEnd = getScrollTick(mBmpRoll.Width);
-            mgRoll.Clear(Colors.CRoll);
+            mgRoll.Clear(Colors.Roll);
             drawRoll();
             drawMeasure(scrollTickBegin, scrollTickEnd);
             drawNote(scrollTickBegin, scrollTickEnd);
@@ -739,7 +739,7 @@ namespace EasySequencer {
                 case 6:
                 case 8:
                 case 10:
-                    mgRoll.FillRectangle(Colors.BlackKey, 0, py + 1, mBmpRoll.Width, mNoteHeight);
+                    mgRoll.FillRectangle(Colors.KeyBorder.Brush, 0, py + 1, mBmpRoll.Width, mNoteHeight);
                     break;
                 case 4:
                     mgRoll.DrawLine(Colors.KeyBorder, 0, py, mBmpRoll.Width, py);
