@@ -95,10 +95,10 @@ namespace EasySequencer {
         }
         struct Structure {
             public Interval[] Intervals;
-            public string Name;
-            Structure(Interval[] intervals, string name) {
+            public string[] Names;
+            Structure(Interval[] intervals, params string[] names) {
                 Intervals = intervals;
-                Name = name;
+                Names = names;
             }
             static Interval[] ToArray(params I[] structure) {
                 var list = new List<Interval>();
@@ -121,19 +121,19 @@ namespace EasySequencer {
                 new Structure(ToArray(I.M3, I.s5), "aug"),
                 new Structure(ToArray(I.P4, I.P5), "sus4"),
 
-                new Structure(ToArray(I.m3, I.b5, I.b7), "dim7"),
-                new Structure(ToArray(I.m3, I.b5, I.m7), "m7(b5)"),
-                new Structure(ToArray(I.m3, I.P5, I.M6), "m6"),
-                new Structure(ToArray(I.m3, I.P5, I.m7), "m7"),
-                new Structure(ToArray(I.m3, I.P5, I.M7), "mΔ7"),
-                new Structure(ToArray(I.m3, I.P5, I.M9), "m(add9)"),
-                new Structure(ToArray(I.m3, I.P5, I.P11), "m(add11)"),
-                new Structure(ToArray(I.M3, I.b5, I.m7), "7(b5)"),
-                new Structure(ToArray(I.M3, I.P5, I.M6), "6"),
-                new Structure(ToArray(I.M3, I.P5, I.m7), "7"),
-                new Structure(ToArray(I.M3, I.P5, I.M7), "Δ7"),
-                new Structure(ToArray(I.M3, I.P5, I.M9), "(add9)"),
-                new Structure(ToArray(I.M3, I.P5, I.P11), "(add11)"),
+                new Structure(ToArray(I.m3, I.b5, I.b7), "dim7", "m(b5)"),
+                new Structure(ToArray(I.m3, I.b5, I.m7), "m7(b5)", "m(b5)"),
+                new Structure(ToArray(I.m3, I.P5, I.M6), "m6", "m"),
+                new Structure(ToArray(I.m3, I.P5, I.m7), "m7", "m"),
+                new Structure(ToArray(I.m3, I.P5, I.M7), "mΔ7", "m"),
+                new Structure(ToArray(I.m3, I.P5, I.M9), "m(add9)", "m"),
+                new Structure(ToArray(I.m3, I.P5, I.P11), "m(add11)", "m"),
+                new Structure(ToArray(I.M3, I.b5, I.m7), "7(b5)", "(b5)"),
+                new Structure(ToArray(I.M3, I.P5, I.M6), "6", ""),
+                new Structure(ToArray(I.M3, I.P5, I.m7), "7", ""),
+                new Structure(ToArray(I.M3, I.P5, I.M7), "Δ7", ""),
+                new Structure(ToArray(I.M3, I.P5, I.M9), "(add9)", ""),
+                new Structure(ToArray(I.M3, I.P5, I.P11), "(add11)", ""),
                 new Structure(ToArray(I.M3, I.s5, I.m7), "aug7"),
                 new Structure(ToArray(I.P4, I.P5, I.m7), "7sus4"),
 
@@ -197,10 +197,11 @@ namespace EasySequencer {
                     if (unmatch) {
                         continue;
                     }
-                    var maj = 0 != structure.Name.IndexOf("m");
+                    var structureName = structure.Names[0];
+                    var maj = 0 != structureName.IndexOf("m");
                     var root = SCALE.GetName(rootTone, maj);
                     if (t == 0) {
-                        return new string[] { root.Degree, root.Tone, structure.Name };
+                        return new string[] { root.Degree, root.Tone, structureName };
                     } else {
                         var sharp = 1 == root.Tone.IndexOf("#") ||
                             root.Tone == "D" ||
@@ -208,7 +209,7 @@ namespace EasySequencer {
                             root.Tone == "A" ||
                             root.Tone == "B";
                         var bass = SCALE.GetName(bassTone, !sharp);
-                        return new string[] { root.Degree, root.Tone, structure.Name + " on " + bass.Tone };
+                        return new string[] { root.Degree, root.Tone, structureName + " on " + bass.Tone };
                     }
                 }
             }
