@@ -230,6 +230,14 @@ namespace EasySequencer {
             return cursorTick - mExpandingNote.End;
         }
 
+        public bool IsExpandingNote(DrawEvent ev) {
+            return mExpandingNote.Type == E_STATUS.NOTE_ON &&
+                ev.Channel == mExpandingNote.Channel &&
+                ev.NoteNumber == mExpandingNote.NoteNumber &&
+                ev.Begin == mExpandingNote.Begin &&
+                ev.End == mExpandingNote.End;
+        }
+
         public string[] SelectedChordName(int currentTick) {
             var notes = new List<int>();
             foreach (var ev in mEvents) {

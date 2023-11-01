@@ -62,7 +62,7 @@ namespace EasySequencer {
         int mMouseTick;
         int mMouseNote;
         int mSnappedTick;
-        int mSnappedX;
+        int mCursorX;
         int mTickBegin;
         int mTickEnd;
         int mNoteBegin;
@@ -649,8 +649,8 @@ namespace EasySequencer {
             }
 
             var snapDivX = EventEditor.TickSnap * mQuarterNoteWidth / mTimeScale;
-            mSnappedX = pos.X / snapDivX * snapDivX;
-            mSnappedTick = getScrollTick(mSnappedX);
+            mCursorX = pos.X / snapDivX * snapDivX;
+            mSnappedTick = getScrollTick(mCursorX);
             mMouseTick = getScrollTick(pos.X);
             var ofsY = MeasureTabHeight + mBmpRoll.Height % mNoteHeight;
             var snappedY = (pos.Y - ofsY) / mNoteHeight * mNoteHeight;
@@ -715,7 +715,7 @@ namespace EasySequencer {
             drawNote(scrollTickBegin, scrollTickEnd);
             drawClipBoardNote(scrollTickBegin, scrollTickEnd);
             drawEditingNote(scrollTickBegin);
-            mgRoll.DrawLine(Pens.Red, mSnappedX, 0, mSnappedX, mBmpRoll.Height); // Draw cursor
+            mgRoll.DrawLine(Pens.Red, mCursorX, 0, mCursorX, mBmpRoll.Height);
             picRoll.Image = picRoll.Image;
         }
 
@@ -731,7 +731,7 @@ namespace EasySequencer {
                 case 0: {
                     var name = "C" + (noteNumber / 12 - 1).ToString();
                     var fsize = mgRoll.MeasureString(name, mOctNameFont).Height - 3;
-                    mgRoll.DrawString(name, mOctNameFont, Colors.OctText, 0, py + mNoteHeight - fsize);
+                    mgRoll.DrawString(name, mOctNameFont, Colors.Text, 0, py + mNoteHeight - fsize);
                 }
                 break;
                 case 1:
@@ -755,22 +755,22 @@ namespace EasySequencer {
 
         void drawMeasure(int begin, int end) {
             var measureList = mEditor.GetMeasureList(begin, end);
-            mgRoll.FillRectangle(Colors.MeasureArea, 0, 0, mBmpRoll.Width, MeasureTabHeight);
-            mgRoll.DrawRectangle(Colors.MeasureBorder, 0, 0, mBmpRoll.Width, MeasureTabHeight);
+            mgRoll.FillRectangle(Colors.MeasureTab, 0, 0, mBmpRoll.Width, MeasureTabHeight);
+            mgRoll.DrawRectangle(Colors.Measure, 0, 0, mBmpRoll.Width, MeasureTabHeight);
             foreach (var ev in measureList) {
                 if (ev.DispTick < begin || end <= ev.DispTick) {
                     continue;
                 }
                 var x = (ev.DispTick - begin) * mQuarterNoteWidth / mTimeScale;
                 if (ev.IsBar) {
-                    mgRoll.DrawLine(Colors.MeasureBorder, x, 0, x, mBmpRoll.Height);
-                    mgRoll.DrawString(ev.Bar.ToString(), mMeasureFont, Colors.MeasureText, x, 0);
+                    mgRoll.DrawLine(Colors.Measure, x, 0, x, mBmpRoll.Height);
+                    mgRoll.DrawString(ev.Bar.ToString(), mMeasureFont, Colors.Text, x, 0);
                 } else {
-                    mgRoll.DrawLine(Colors.BeatBorder, x, MeasureTabHeight + 1, x, mBmpRoll.Height);
+                    mgRoll.DrawLine(Colors.Beat, x, MeasureTabHeight + 1, x, mBmpRoll.Height);
                 }
             }
         }
-        
+
         void drawNote(int begin, int end) {
             var ofsY = MeasureTabHeight + mBmpRoll.Height % mNoteHeight;
             var mouseCursor = Cursors.Default;
@@ -834,6 +834,7 @@ namespace EasySequencer {
         void drawClipBoardNote(int begin, int end) {
             var ofsY = MeasureTabHeight + mBmpRoll.Height % mNoteHeight;
             var expandTick = mEditor.GetExpandTick(mSnappedTick);
+            var expandingNoteEnd = mCursorX;
             foreach (var ev in mEditor.ClipBoardEvents) {
                 if (ev.Type != E_STATUS.NOTE_ON) {
                     continue;
@@ -870,8 +871,12 @@ namespace EasySequencer {
                 if (y1 < MeasureTabHeight) {
                     continue;
                 }
+                if (mEditor.IsExpandingNote(ev)) {
+                    expandingNoteEnd = x2;
+                }
                 Colors.DrawClipBoardNote(mgRoll, x1, y1, x2, y2);
             }
+            mCursorX = expandingNoteEnd;
         }
 
         void drawEditingNote(int begin) {
@@ -905,6 +910,7 @@ namespace EasySequencer {
                 y2 = y1;
                 y1 = tmp;
             }
+            mCursorX = x2;
             if (mSelectState == E_SELECT.NOTE_SELECT) {
                 mgRoll.FillRectangle(Colors.SelectArea, x1, y1, x2 - x1, y2 - y1);
                 mgRoll.DrawRectangle(Colors.SelectBorder, x1, y1, x2 - x1, y2 - y1);

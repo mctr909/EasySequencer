@@ -4,69 +4,51 @@ using System;
 
 namespace EasySequencer {
     static class Colors {
-        public static readonly Color CRoll = Color.FromArgb(211, 211, 211);
-        static readonly Color CMeasureBorder = Color.FromArgb(47, 47, 47);
-        static readonly Color CMeasureArea = Color.FromArgb(191, 191, 191);
-        static readonly Color CBeatBorder = Color.FromArgb(191, 191, 191);
+        public static readonly Color CRoll = Color.FromArgb(255, 255, 255);
+        static readonly Color CText = Color.FromArgb(0, 0, 0);
+        static readonly Color CMeasureTab = Color.FromArgb(221, 221, 221);
+        static readonly Color CMeasure = Color.FromArgb(47, 47, 47);
+        static readonly Color CBeat = Color.FromArgb(191, 191, 191);
+        static readonly Color CBlackKey = Color.FromArgb(147, 147, 147);
+        static readonly Color COctBorder = Color.FromArgb(0, 0, 0);
         static readonly Color CSelectBorder = Color.FromArgb(63, 167, 167);
-        static readonly Color CSelectArea = Color.FromArgb(23, 255, 255, 127);
-        static readonly Color CBlackKey = Color.FromArgb(127, 127, 127);
-        static readonly Color CSolidNote = Color.FromArgb(63, 211, 63);
-        static readonly Color CSelectedNote = Color.FromArgb(235, 71, 71);
-        static readonly Color COtherNote = Color.FromArgb(235, 235, 235);
+        static readonly Color CSelectArea = Color.FromArgb(47, 255, 255, 127);
 
-        public static readonly Pen OctBorder = new Pen(Color.FromArgb(0, 0, 0));
+        static readonly Color CNote = Color.FromArgb(0, 255, 0);
+        static readonly Color CSelectedNote = Color.FromArgb(255, 0, 0);
+        static readonly Color COtherNote = Color.FromArgb(191, 255, 255);
+
+        static Color Dark(Color c) { return FromHSV(GetHue(c), 0.6, 0.5, c.A); }
+        static Color Solid(Color c) { return FromHSV(GetHue(c), 1.0, 0.85, c.A); }
+        static Color Light(Color c) { return FromHSV(GetHue(c), 0.6, 0.9, c.A); }
+        static Color Thin(Color c) { return FromHSV(GetHue(c), 0.6, 0.6, c.A); }
+
+        public static readonly Pen Measure = new Pen(CMeasure);
+        public static readonly Pen Beat = new Pen(CBeat);
         public static readonly Pen KeyBorder = new Pen(CBlackKey);
-        public static readonly Pen MeasureBorder = new Pen(CMeasureBorder);
-        public static readonly Pen BeatBorder = new Pen(CBeatBorder);
-        public static readonly Pen SelectBorder = new Pen(CSelectBorder)
-        {
-            Width = 1.0f,
-            DashStyle = DashStyle.Dot
-        };
-        public static readonly Brush OctText = Brushes.White;
-        public static readonly Brush MeasureText = Brushes.Black;
+        public static readonly Pen OctBorder = new Pen(COctBorder);
+        public static readonly Pen SelectBorder = new Pen(CSelectBorder) { DashStyle = DashStyle.Dot };
+        public static readonly Brush Text = new Pen(CText).Brush;
         public static readonly Brush BlackKey = new Pen(CBlackKey).Brush;
-        public static readonly Brush MeasureArea = new Pen(CMeasureArea).Brush;
+        public static readonly Brush MeasureTab = new Pen(CMeasureTab).Brush;
         public static readonly Brush SelectArea = new Pen(CSelectArea).Brush;
 
-        static readonly Color CSolidNoteH = ToLight(CSolidNote);
-        static readonly Color CSolidNoteL = ToDark(CSolidNote);
-        static readonly Color CSolidNoteThin = FromHSV(GetHue(CSolidNote), 1, 0.8);
-        static readonly Brush SolidNote = new Pen(CSolidNote).Brush;
-        static readonly Pen SolidNoteH = new Pen(CSolidNoteH);
-        static readonly Pen SolidNoteL = new Pen(CSolidNoteL);
-        static readonly Pen SolidNoteThin = new Pen(CSolidNoteThin);
-        static readonly Brush ClipBoardNote = new Pen(Color.Black) {
-            Color = Color.FromArgb(111, CSolidNote.R, CSolidNote.G, CSolidNote.B),
-            Width = 1.0f
-        }.Brush;
-        static readonly Pen ClipBoardNoteH = new Pen(Color.Black) {
-            Color = Color.FromArgb(111, CSolidNoteH.R, CSolidNoteH.G, CSolidNoteH.B),
-            Width = 1.0f
-        };
-        static readonly Pen ClipBoardNoteL = new Pen(Color.Black) {
-            Color = Color.FromArgb(111, CSolidNoteL.R, CSolidNoteL.G, CSolidNoteL.B),
-            Width = 1.0f
-        };
-        static readonly Pen ClipBoardNoteThin = new Pen(Color.Black) {
-            Color = Color.FromArgb(111, CSolidNoteThin.R, CSolidNoteThin.G, CSolidNoteThin.B),
-            Width = 1.0f
-        };
-        static readonly Brush SelectedNote = new Pen(CSelectedNote).Brush;
-        static readonly Pen SelectedNoteH = new Pen(ToLight(CSelectedNote));
-        static readonly Pen SelectedNoteL = new Pen(ToDark(CSelectedNote));
-        static readonly Pen SelectedNoteThin = new Pen(FromHSV(GetHue(CSelectedNote), 1, 0.8));
-        static readonly Brush OtherNote = new Pen(COtherNote).Brush;
-        static readonly Pen OtherNoteH = new Pen(ToLight(COtherNote));
-        static readonly Pen OtherNoteL = new Pen(ToDark(COtherNote));
+        static readonly Brush Note = new Pen(Solid(CNote)).Brush;
+        static readonly Pen NoteH = new Pen(Light(CNote));
+        static readonly Pen NoteL = new Pen(Dark(CNote));
+        static readonly Pen NoteThin = new Pen(Thin(CNote));
+        static readonly Brush SelectedNote = new Pen(Solid(CSelectedNote)).Brush;
+        static readonly Pen SelectedNoteH = new Pen(Light(CSelectedNote));
+        static readonly Pen SelectedNoteL = new Pen(Dark(CSelectedNote));
+        static readonly Pen SelectedNoteThin = new Pen(Thin(CSelectedNote));
+        static readonly Brush OtherNote = new Pen(Solid(COtherNote)).Brush;
+        static readonly Pen OtherNoteH = new Pen(Light(COtherNote));
+        static readonly Pen OtherNoteL = new Pen(Dark(COtherNote));
+        static readonly Brush ClipBoardNote = new Pen(Color.FromArgb(111, CNote.R, CNote.G, CNote.B)).Brush;
+        static readonly Pen ClipBoardNoteH = new Pen(Color.FromArgb(111, NoteH.Color.R, NoteH.Color.G, NoteH.Color.B));
+        static readonly Pen ClipBoardNoteL = new Pen(Color.FromArgb(111, NoteL.Color.R, NoteL.Color.G, NoteL.Color.B));
+        static readonly Pen ClipBoardNoteThin = new Pen(Color.FromArgb(111, NoteThin.Color.R, NoteThin.Color.G, NoteThin.Color.B));
 
-        public static Color ToDark(Color c) {
-            return FromHSV(GetHue(c), 0.75, 0.5, c.A);
-        }
-        public static Color ToLight(Color c) {
-            return FromHSV(GetHue(c), 0.75, 1.0, c.A);
-        }
         public static double GetHue(Color c) {
             var x = c.R * 2 / 3.0 - c.G / 3.0 - c.B / 3.0;
             var y = c.G / Math.Sqrt(3) - c.B / Math.Sqrt(3);
@@ -105,37 +87,18 @@ namespace EasySequencer {
             y1++;
             var w = x2 - x1;
             if (2 <= w) {
-                g.FillRectangle(SolidNote, x1, y1, w, y2 - y1 + 1);
-                g.DrawLine(SolidNoteL, x1, y2, x2, y2);
-                g.DrawLine(SolidNoteH, x1, y1, x2, y1);
-                g.DrawLine(SolidNoteL, x2, y2, x2, y1);
-                g.DrawLine(SolidNoteH, x1, y1, x1, y2 - 1);
+                g.FillRectangle(Note, x1, y1, w, y2 - y1 + 1);
+                g.DrawLine(NoteL, x1, y2, x2, y2);
+                g.DrawLine(NoteH, x1, y1, x2, y1);
+                g.DrawLine(NoteL, x2, y2, x2, y1);
+                g.DrawLine(NoteH, x1, y1, x1, y2 - 1);
             } else {
-                g.DrawLine(SolidNoteThin, x1, y2, x2, y2);
-                g.DrawLine(SolidNoteThin, x1, y1, x2, y1);
-                g.DrawLine(SolidNoteThin, x2, y2, x2, y1);
-                g.DrawLine(SolidNoteThin, x1, y1, x1, y2 - 1);
+                g.DrawLine(NoteThin, x1, y2, x2, y2);
+                g.DrawLine(NoteThin, x1, y1, x2, y1);
+                g.DrawLine(NoteThin, x2, y2, x2, y1);
+                g.DrawLine(NoteThin, x1, y1, x1, y2 - 1);
             }
         }
-
-        public static void DrawClipBoardNote(Graphics g, int x1, int y1, int x2, int y2) {
-            x1++;
-            y1++;
-            var w = x2 - x1;
-            if (2 <= w) {
-                g.FillRectangle(ClipBoardNote, x1, y1, w, y2 - y1 + 1);
-                g.DrawLine(ClipBoardNoteL, x1, y2, x2, y2);
-                g.DrawLine(ClipBoardNoteH, x1, y1, x2, y1);
-                g.DrawLine(ClipBoardNoteL, x2, y2, x2, y1);
-                g.DrawLine(ClipBoardNoteH, x1, y1, x1, y2 - 1);
-            } else {
-                g.DrawLine(ClipBoardNoteThin, x1, y2, x2, y2);
-                g.DrawLine(ClipBoardNoteThin, x1, y1, x2, y1);
-                g.DrawLine(ClipBoardNoteThin, x2, y2, x2, y1);
-                g.DrawLine(ClipBoardNoteThin, x1, y1, x1, y2 - 1);
-            }
-        }
-
         public static void DrawSelectedNote(Graphics g, int x1, int y1, int x2, int y2) {
             x1++;
             y1++;
@@ -153,7 +116,6 @@ namespace EasySequencer {
                 g.DrawLine(SelectedNoteThin, x1, y1, x1, y2 - 1);
             }
         }
-
         public static void DrawOtherNote(Graphics g, int x1, int y1, int x2, int y2) {
             x1++;
             y1++;
@@ -169,6 +131,23 @@ namespace EasySequencer {
                 g.DrawLine(OtherNoteL, x1, y1, x2, y1);
                 g.DrawLine(OtherNoteL, x2, y2, x2, y1);
                 g.DrawLine(OtherNoteL, x1, y1, x1, y2 - 1);
+            }
+        }
+        public static void DrawClipBoardNote(Graphics g, int x1, int y1, int x2, int y2) {
+            x1++;
+            y1++;
+            var w = x2 - x1;
+            if (2 <= w) {
+                g.FillRectangle(ClipBoardNote, x1, y1, w, y2 - y1 + 1);
+                g.DrawLine(ClipBoardNoteL, x1, y2, x2, y2);
+                g.DrawLine(ClipBoardNoteH, x1, y1, x2, y1);
+                g.DrawLine(ClipBoardNoteL, x2, y2, x2, y1);
+                g.DrawLine(ClipBoardNoteH, x1, y1, x1, y2 - 1);
+            } else {
+                g.DrawLine(ClipBoardNoteThin, x1, y2, x2, y2);
+                g.DrawLine(ClipBoardNoteThin, x1, y1, x2, y1);
+                g.DrawLine(ClipBoardNoteThin, x2, y2, x2, y1);
+                g.DrawLine(ClipBoardNoteThin, x1, y1, x1, y2 - 1);
             }
         }
     }
