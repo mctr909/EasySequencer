@@ -85,11 +85,11 @@ class SCALE {
             Tone = tone;
         }
     }
-    public static Values GetName(int tone, bool maj) {
+    public static Values GetName(int tone, bool flat) {
         var s = mCurrentScale;
         var t = (tone - s.mOffset + 12) % 12;
         var deg = Degree.List[t];
-        if (2 <= deg.Index.Length && maj) {
+        if (2 <= deg.Index.Length && flat) {
             return new Values(deg.Name[1], s.mNames[deg.Index[1]]);
         } else {
             return new Values(deg.Name[0], s.mNames[deg.Index[0]]);

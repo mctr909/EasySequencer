@@ -1,24 +1,23 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
 
 namespace EasySequencer {
     class ChordHelper {
         enum I {
             /// <summary>完全1度</summary>
-            P1 = 0,
+            P1 = 0x0,
             /// <summary>長2度</summary>
-            M2 = 2,
+            M2 = 0x2,
             /// <summary>長3度</summary>
-            M3 = 4,
+            M3 = 0x4,
             /// <summary>完全4度</summary>
-            P4 = 5,
+            P4 = 0x5,
             /// <summary>完全5度</summary>
-            P5 = 7,
+            P5 = 0x7,
             /// <summary>長6度</summary>
-            M6 = 9,
+            M6 = 0x9,
             /// <summary>長7度</summary>
-            M7 = 11,
+            M7 = 0xB,
             /// <summary>短音程</summary>
             MIN = 0x10,
             /// <summary>短2度</summary>
@@ -76,144 +75,100 @@ namespace EasySequencer {
             /// <summary>長13度</summary>
             M13 = T | M6
         }
-        static readonly Tuple<I[], string>[] Structs = new Tuple<I[], string>[] {
-            new Tuple<I[], string>(new I[] { I.m3 }, "m(omit5)"),
-            new Tuple<I[], string>(new I[] { I.M3 }, "(omit5)"),
-            new Tuple<I[], string>(new I[] { I.P5 }, "5"),
-
-            new Tuple<I[], string>(new I[] { I.M2, I.P5 }, "sus2"),
-            new Tuple<I[], string>(new I[] { I.m3, I.b5 }, "m(b5)"),
-            new Tuple<I[], string>(new I[] { I.m3, I.P5 }, "m"),
-            new Tuple<I[], string>(new I[] { I.M3, I.b5 }, "(b5)"),
-            new Tuple<I[], string>(new I[] { I.M3, I.P5 }, ""),
-            new Tuple<I[], string>(new I[] { I.M3, I.s5 }, "aug"),
-            new Tuple<I[], string>(new I[] { I.P4, I.P5 }, "sus4"),
-
-            new Tuple<I[], string>(new I[] { I.m3, I.b5, I.b7 }, "dim7"),
-            new Tuple<I[], string>(new I[] { I.m3, I.b5, I.m7 }, "m7(b5)"),
-            new Tuple<I[], string>(new I[] { I.m3, I.P5, I.M6 }, "m6"),
-            new Tuple<I[], string>(new I[] { I.m3, I.P5, I.m7 }, "m7"),
-            new Tuple<I[], string>(new I[] { I.m3, I.P5, I.M7 }, "mΔ7"),
-            new Tuple<I[], string>(new I[] { I.m3, I.P5, I.M9 }, "m(add9)"),
-            new Tuple<I[], string>(new I[] { I.m3, I.P5, I.P11 }, "m(add11)"),
-            new Tuple<I[], string>(new I[] { I.M3, I.b5, I.m7 }, "7(b5)"),
-            new Tuple<I[], string>(new I[] { I.M3, I.P5, I.M6 }, "6"),
-            new Tuple<I[], string>(new I[] { I.M3, I.P5, I.m7 }, "7"),
-            new Tuple<I[], string>(new I[] { I.M3, I.P5, I.M7 }, "Δ7"),
-            new Tuple<I[], string>(new I[] { I.M3, I.P5, I.M9 }, "(add9)"),
-            new Tuple<I[], string>(new I[] { I.M3, I.P5, I.P11 }, "(add11)"),
-            new Tuple<I[], string>(new I[] { I.M3, I.s5, I.m7 }, "aug7"),
-            new Tuple<I[], string>(new I[] { I.P4, I.P5, I.m7 }, "7sus4"),
-
-            new Tuple<I[], string>(new I[] { I.m3, I.P5, I.M6, I.M9 }, "m69"),
-            new Tuple<I[], string>(new I[] { I.m3, I.P5, I.m7, I.m9 }, "m7(b9)"),
-            new Tuple<I[], string>(new I[] { I.m3, I.P5, I.m7, I.M9 }, "m7(9)"),
-            new Tuple<I[], string>(new I[] { I.m3, I.P5, I.m7, I.P11 }, "m7(11)"),
-            new Tuple<I[], string>(new I[] { I.m3, I.P5, I.m7, I.s11 }, "m7(#11)"),
-            new Tuple<I[], string>(new I[] { I.m3, I.P5, I.m7, I.m13 }, "m7(b13)"),
-            new Tuple<I[], string>(new I[] { I.m3, I.P5, I.m7, I.M13 }, "m7(13)"),
-            new Tuple<I[], string>(new I[] { I.m3, I.P5, I.M7, I.M9 }, "mΔ9"),
-            new Tuple<I[], string>(new I[] { I.M3, I.P5, I.M6, I.M9 }, "69"),
-            new Tuple<I[], string>(new I[] { I.M3, I.P5, I.m7, I.m9 }, "7(b9)"),
-            new Tuple<I[], string>(new I[] { I.M3, I.P5, I.m7, I.M9 }, "7(9)"),
-            new Tuple<I[], string>(new I[] { I.M3, I.P5, I.m7, I.P11 }, "7(11)"),
-            new Tuple<I[], string>(new I[] { I.M3, I.P5, I.m7, I.s11 }, "7(#11)"),
-            new Tuple<I[], string>(new I[] { I.M3, I.P5, I.m7, I.m13 }, "7(b13)"),
-            new Tuple<I[], string>(new I[] { I.M3, I.P5, I.m7, I.M13 }, "7(13)"),
-            new Tuple<I[], string>(new I[] { I.M3, I.P5, I.M7, I.M9 }, "Δ9")
-        };
-
-        static readonly Tuple<int[], string>[] ChordStructs = new Tuple<int[], string>[] {
-            new Tuple<int[], string>(new int[] {  0, 3           }, "m(omit5)"),
-            new Tuple<int[], string>(new int[] {  0, 4           }, "(omit5)"),
-            new Tuple<int[], string>(new int[] {  0, 7           }, "5"),
-            new Tuple<int[], string>(new int[] {  7, 5           }, "5"),
-            new Tuple<int[], string>(new int[] {  0, 1, 3, 7, 10 }, "m7(b9)"),
-            new Tuple<int[], string>(new int[] {  0, 1, 3, 7, 11 }, "mΔ7(b9)"),
-            new Tuple<int[], string>(new int[] {  0, 1, 4, 7, 10 }, "7(b9)"),
-            new Tuple<int[], string>(new int[] {  0, 1, 4, 7, 11 }, "Δ7(b9)"),
-            new Tuple<int[], string>(new int[] {  0, 2, 3, 7     }, "m(add9)"),
-            new Tuple<int[], string>(new int[] {  0, 2, 3, 7, 9  }, "m69"),
-            new Tuple<int[], string>(new int[] {  0, 2, 3, 7, 10 }, "m9"),
-            new Tuple<int[], string>(new int[] {  0, 2, 3, 7, 11 }, "mΔ9"),
-            new Tuple<int[], string>(new int[] {  0, 2, 4, 7     }, "(add9)"),
-            new Tuple<int[], string>(new int[] {  0, 2, 4, 7, 9  }, "69"),
-            new Tuple<int[], string>(new int[] {  0, 2, 4, 7, 10 }, "9"),
-            new Tuple<int[], string>(new int[] {  0, 2, 4, 7, 11 }, "Δ9"),
-            new Tuple<int[], string>(new int[] {  0, 2, 7        }, "sus2"),
-            new Tuple<int[], string>(new int[] {  0, 3, 4, 7, 10 }, "(#9)"),
-            new Tuple<int[], string>(new int[] {  0, 3, 4, 7, 11 }, "Δ(#9)"),
-            new Tuple<int[], string>(new int[] {  0, 3, 6        }, "m(b5)"),
-            new Tuple<int[], string>(new int[] {  0, 3, 6, 9     }, "dim7"),
-            new Tuple<int[], string>(new int[] {  0, 3, 6, 10    }, "m7(b5)"),
-            new Tuple<int[], string>(new int[] {  0, 3, 5, 7     }, "m(add11)"),
-            new Tuple<int[], string>(new int[] {  0, 3, 5, 7, 10 }, "m7(11)"),
-            new Tuple<int[], string>(new int[] {  0, 3, 5, 7, 11 }, "mΔ7(11)"),
-            new Tuple<int[], string>(new int[] {  0, 3, 6, 7, 10 }, "m7(#11)"),
-            new Tuple<int[], string>(new int[] {  0, 3, 6, 7, 11 }, "mΔ7(#11)"),
-            new Tuple<int[], string>(new int[] {  0, 3, 7        }, "m"),
-            new Tuple<int[], string>(new int[] {  0, 3, 7, 9     }, "m6"),
-            new Tuple<int[], string>(new int[] {  0, 3, 7, 10    }, "m7"),
-            new Tuple<int[], string>(new int[] {  0, 3, 7, 11    }, "mΔ7"),
-            new Tuple<int[], string>(new int[] {  0, 4, 5, 7     }, "(add11)"),
-            new Tuple<int[], string>(new int[] {  0, 4, 5, 7, 10 }, "7(11)"),
-            new Tuple<int[], string>(new int[] {  0, 4, 5, 7, 11 }, "Δ7(11)"),
-            new Tuple<int[], string>(new int[] {  0, 4, 6, 7, 10 }, "7(#11)"),
-            new Tuple<int[], string>(new int[] {  0, 4, 6, 7, 11 }, "Δ7(#11)"),
-            new Tuple<int[], string>(new int[] {  0, 4, 7        }, ""),
-            new Tuple<int[], string>(new int[] {  0, 4, 7, 9     }, "6"),
-            new Tuple<int[], string>(new int[] {  0, 4, 7, 10    }, "7"),
-            new Tuple<int[], string>(new int[] {  0, 4, 7, 11    }, "Δ7"),
-            new Tuple<int[], string>(new int[] {  0, 4, 8        }, "aug"),
-            new Tuple<int[], string>(new int[] {  0, 4, 8, 10    }, "aug7"),
-            new Tuple<int[], string>(new int[] {  0, 5, 7        }, "sus4"),
-            new Tuple<int[], string>(new int[] {  0, 5, 7, 10    }, "7sus4"),
-            new Tuple<int[], string>(new int[] {  2, 1, 5, 10    }, "m"),
-            new Tuple<int[], string>(new int[] {  2, 2, 5, 10    }, ""),
-            new Tuple<int[], string>(new int[] {  3, 3, 9        }, "m(b5)"),
-            new Tuple<int[], string>(new int[] {  3, 4, 6, 9     }, "m6"),
-            new Tuple<int[], string>(new int[] {  3, 4, 8, 9     }, "mΔ7"),
-            new Tuple<int[], string>(new int[] {  3, 4, 9        }, "m"),
-            new Tuple<int[], string>(new int[] {  3, 4, 9, 11    }, "m(add9)"),
-            new Tuple<int[], string>(new int[] {  4, 3, 6, 8     }, "7"),
-            new Tuple<int[], string>(new int[] {  4, 3, 7, 8     }, "Δ7"),
-            new Tuple<int[], string>(new int[] {  4, 3, 8        }, ""),
-            new Tuple<int[], string>(new int[] {  4, 3, 8, 10    }, "(add9)"),
-            new Tuple<int[], string>(new int[] {  5, 2, 5, 7     }, "7sus4"),
-            new Tuple<int[], string>(new int[] {  6, 6, 9        }, "m(b5)"),
-            new Tuple<int[], string>(new int[] {  7, 2, 5, 8     }, "m6"),
-            new Tuple<int[], string>(new int[] {  7, 3, 5, 8     }, "m7"),
-            new Tuple<int[], string>(new int[] {  7, 3, 5, 9     }, "7"),
-            new Tuple<int[], string>(new int[] {  7, 3, 5, 10    }, "7sus4"),
-            new Tuple<int[], string>(new int[] {  7, 4, 5, 8     }, "mΔ7"),
-            new Tuple<int[], string>(new int[] {  7, 4, 5, 9     }, "Δ7"),
-            new Tuple<int[], string>(new int[] {  7, 5, 7, 8     }, "m(add9)"),
-            new Tuple<int[], string>(new int[] {  7, 5, 7, 9     }, "(add9)"),
-            new Tuple<int[], string>(new int[] {  7, 5, 8        }, "m"),
-            new Tuple<int[], string>(new int[] {  7, 5, 9        }, ""),
-            new Tuple<int[], string>(new int[] {  7, 5, 10       }, "sus4"),
-            new Tuple<int[], string>(new int[] { 10, 2, 5, 9     }, "m"),
-            new Tuple<int[], string>(new int[] { 10, 2, 6, 9     }, ""),
-            new Tuple<int[], string>(new int[] { 10, 2, 7, 9     }, "sus4"),
-            new Tuple<int[], string>(new int[] { 11, 1, 4, 8     }, "m"),
-            new Tuple<int[], string>(new int[] { 11, 1, 5, 8     }, "")
-        };
-
-        public static string[] GetName(int[] notes) {
-            var lowestTone = 127;
-            foreach (var n in notes) {
-                if (n < lowestTone) {
-                    lowestTone = n;
+        struct Interval {
+            public I Id;
+            public int Tone;
+            public Interval(I id) {
+                Id = id;
+                var v = (int)id;
+                Tone = v & 0xF;
+                if (0 < (v & (int)I.MIN)) {
+                    Tone--;
+                }
+                if (0 < (v & (int)I.DIM)) {
+                    Tone--;
+                }
+                if (0 < (v & (int)I.AUG)) {
+                    Tone++;
                 }
             }
-            lowestTone %= 12;
+        }
+        struct Structure {
+            public Interval[] Intervals;
+            public string Name;
+            Structure(Interval[] intervals, string name) {
+                Intervals = intervals;
+                Name = name;
+            }
+            static Interval[] ToArray(params I[] structure) {
+                var list = new List<Interval>();
+                for (int i = 0; i < structure.Length; i++) {
+                    list.Add(new Interval(structure[i]));
+                }
+                list.Sort((a, b) => { return a.Tone - b.Tone; });
+                return list.ToArray();
+            }
+            public static readonly Structure[] List = new Structure[] {
+                new Structure(ToArray(I.m3), "m(omit5)"),
+                new Structure(ToArray(I.M3), "(omit5)"),
+                new Structure(ToArray(I.P5), "5"),
 
+                new Structure(ToArray(I.M2, I.P5), "sus2"),
+                new Structure(ToArray(I.m3, I.b5), "m(b5)"),
+                new Structure(ToArray(I.m3, I.P5), "m"),
+                new Structure(ToArray(I.M3, I.b5), "(b5)"),
+                new Structure(ToArray(I.M3, I.P5), ""),
+                new Structure(ToArray(I.M3, I.s5), "aug"),
+                new Structure(ToArray(I.P4, I.P5), "sus4"),
+
+                new Structure(ToArray(I.m3, I.b5, I.b7), "dim7"),
+                new Structure(ToArray(I.m3, I.b5, I.m7), "m7(b5)"),
+                new Structure(ToArray(I.m3, I.P5, I.M6), "m6"),
+                new Structure(ToArray(I.m3, I.P5, I.m7), "m7"),
+                new Structure(ToArray(I.m3, I.P5, I.M7), "mΔ7"),
+                new Structure(ToArray(I.m3, I.P5, I.M9), "m(add9)"),
+                new Structure(ToArray(I.m3, I.P5, I.P11), "m(add11)"),
+                new Structure(ToArray(I.M3, I.b5, I.m7), "7(b5)"),
+                new Structure(ToArray(I.M3, I.P5, I.M6), "6"),
+                new Structure(ToArray(I.M3, I.P5, I.m7), "7"),
+                new Structure(ToArray(I.M3, I.P5, I.M7), "Δ7"),
+                new Structure(ToArray(I.M3, I.P5, I.M9), "(add9)"),
+                new Structure(ToArray(I.M3, I.P5, I.P11), "(add11)"),
+                new Structure(ToArray(I.M3, I.s5, I.m7), "aug7"),
+                new Structure(ToArray(I.P4, I.P5, I.m7), "7sus4"),
+
+                new Structure(ToArray(I.m3, I.P5, I.M6, I.M9), "m69"),
+                new Structure(ToArray(I.m3, I.P5, I.m7, I.m9), "m7(b9)"),
+                new Structure(ToArray(I.m3, I.P5, I.m7, I.M9), "m7(9)"),
+                new Structure(ToArray(I.m3, I.P5, I.m7, I.P11), "m7(11)"),
+                new Structure(ToArray(I.m3, I.P5, I.m7, I.s11), "m7(#11)"),
+                new Structure(ToArray(I.m3, I.P5, I.m7, I.m13), "m7(b13)"),
+                new Structure(ToArray(I.m3, I.P5, I.m7, I.M13), "m7(13)"),
+                new Structure(ToArray(I.m3, I.P5, I.M7, I.M9), "mΔ9"),
+                new Structure(ToArray(I.M3, I.P5, I.M6, I.M9), "69"),
+                new Structure(ToArray(I.M3, I.P5, I.m7, I.m9), "7(b9)"),
+                new Structure(ToArray(I.M3, I.P5, I.m7, I.M9), "7(9)"),
+                new Structure(ToArray(I.M3, I.P5, I.m7, I.P11), "7(11)"),
+                new Structure(ToArray(I.M3, I.P5, I.m7, I.s11), "7(#11)"),
+                new Structure(ToArray(I.M3, I.P5, I.m7, I.m13), "7(b13)"),
+                new Structure(ToArray(I.M3, I.P5, I.m7, I.M13), "7(13)"),
+                new Structure(ToArray(I.M3, I.P5, I.M7, I.M9), "Δ9")
+            };
+        }
+
+        public static string[] GetName(int[] notes) {
+            var bassTone = 127;
+            foreach (var n in notes) {
+                if (n < bassTone) {
+                    bassTone = n;
+                }
+            }
+            bassTone %= 12;
             for (int i = 0; i < notes.Length; i++) {
-                notes[i] -= lowestTone;
+                notes[i] -= bassTone;
                 notes[i] %= 12;
             }
             Array.Sort(notes);
-
             var noteList = new List<int>();
             foreach (var n in notes) {
                 if (!noteList.Contains(n)) {
@@ -221,27 +176,39 @@ namespace EasySequencer {
                 }
             }
 
-            foreach (var st in ChordStructs) {
-                if (noteList.Count != st.Item1.Count()) {
-                    continue;
+            var noteCount = noteList.Count;
+            for (var t = 0; t < noteCount; t++) {
+                var transList = new int[noteCount - 1];
+                for (int i = 0; i < transList.Length; i++) {
+                    transList[i] = (noteList[(i + t + 1) % noteCount] - noteList[t] + 12) % 12;
                 }
-                var isMatch = true;
-                for (int i = 1; i < noteList.Count; i++) {
-                    if (noteList[i] != st.Item1[i]) {
-                        isMatch = false;
-                        break;
+                var rootTone = (bassTone + noteList[t]) % 12;
+                foreach (var structure in Structure.List) {
+                    if (transList.Length != structure.Intervals.Length) {
+                        continue;
                     }
-                }
-                if (isMatch) {
-                    var structure = st.Item2;
-                    var rootTone = (12 + lowestTone - st.Item1[0]) % 12;
-                    var maj = 0 != structure.IndexOf("m");
+                    var unmatch = false;
+                    for (int i = 0; i < structure.Intervals.Length; i++) {
+                        if (transList[i] != structure.Intervals[i].Tone) {
+                            unmatch = true;
+                            break;
+                        }
+                    }
+                    if (unmatch) {
+                        continue;
+                    }
+                    var maj = 0 != structure.Name.IndexOf("m");
                     var root = SCALE.GetName(rootTone, maj);
-                    if (0 == st.Item1[0]) {
-                        return new string[] { root.Degree, root.Tone, structure };
+                    if (t == 0) {
+                        return new string[] { root.Degree, root.Tone, structure.Name };
                     } else {
-                        var bass = SCALE.GetName(lowestTone, 1 != root.Tone.IndexOf("#") && root.Tone != "B");
-                        return new string[] { root.Degree, root.Tone, structure + " on " + bass.Tone };
+                        var sharp = 1 == root.Tone.IndexOf("#") ||
+                            root.Tone == "D" ||
+                            root.Tone == "E" ||
+                            root.Tone == "A" ||
+                            root.Tone == "B";
+                        var bass = SCALE.GetName(bassTone, !sharp);
+                        return new string[] { root.Degree, root.Tone, structure.Name + " on " + bass.Tone };
                     }
                 }
             }
