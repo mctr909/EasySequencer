@@ -7,10 +7,9 @@ namespace EasySequencer {
         public static readonly Color Roll = SystemColors.ButtonHighlight;
         public static readonly Brush Text = new Pen(SystemColors.ControlText).Brush;
         public static readonly Brush MeasureTab = new Pen(SystemColors.Control).Brush;
-        public static readonly Pen Measure = new Pen(SystemColors.ControlText);
+        public static readonly Pen Border = new Pen(SystemColors.ControlText);
         public static readonly Pen Beat = new Pen(Color.FromArgb(191, 191, 191));
-        public static readonly Pen KeyBorder = new Pen(SystemColors.ButtonShadow);
-        public static readonly Pen OctBorder = new Pen(SystemColors.ControlText);
+        public static readonly Pen BlackKey = new Pen(SystemColors.ButtonShadow);
         public static readonly Brush SelectArea = new Pen(Alpha(SystemColors.Highlight)).Brush;
         public static readonly Pen SelectBorder = new Pen(SystemColors.HighlightText) { DashStyle = DashStyle.Dot };
 

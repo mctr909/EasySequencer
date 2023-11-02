@@ -42,7 +42,7 @@ namespace EasySequencer {
             24, 20, 18, 15, 12, 10, 9, 8, 7
         };
 
-        const int MeasureTabHeight = 19;
+        const int MeasureTabHeight = 17;
 
         Bitmap mBmpRoll;
         Graphics mgRoll;
@@ -739,13 +739,13 @@ namespace EasySequencer {
                 case 6:
                 case 8:
                 case 10:
-                    mgRoll.FillRectangle(Colors.KeyBorder.Brush, 0, py + 1, mBmpRoll.Width, mNoteHeight);
+                    mgRoll.FillRectangle(Colors.BlackKey.Brush, 0, py + 1, mBmpRoll.Width, mNoteHeight);
                     break;
                 case 4:
-                    mgRoll.DrawLine(Colors.KeyBorder, 0, py, mBmpRoll.Width, py);
+                    mgRoll.DrawLine(Colors.BlackKey, 0, py, mBmpRoll.Width, py);
                     break;
                 case 11:
-                    mgRoll.DrawLine(Colors.OctBorder, 0, py, mBmpRoll.Width, py);
+                    mgRoll.DrawLine(Colors.Border, 0, py, mBmpRoll.Width, py);
                     break;
                 default:
                     break;
@@ -756,15 +756,15 @@ namespace EasySequencer {
         void drawMeasure(int begin, int end) {
             var measureList = mEditor.GetMeasureList(begin, end);
             mgRoll.FillRectangle(Colors.MeasureTab, 0, 0, mBmpRoll.Width, MeasureTabHeight);
-            mgRoll.DrawRectangle(Colors.Measure, 0, 0, mBmpRoll.Width, MeasureTabHeight);
+            mgRoll.DrawRectangle(Colors.Border, 0, 0, mBmpRoll.Width, MeasureTabHeight);
             foreach (var ev in measureList) {
                 if (ev.DispTick < begin || end <= ev.DispTick) {
                     continue;
                 }
                 var x = (ev.DispTick - begin) * mQuarterNoteWidth / mTimeScale;
                 if (ev.IsBar) {
-                    mgRoll.DrawLine(Colors.Measure, x, 0, x, mBmpRoll.Height);
-                    mgRoll.DrawString(ev.Bar.ToString(), mMeasureFont, Colors.Text, x, 0);
+                    mgRoll.DrawLine(Colors.Border, x, 0, x, mBmpRoll.Height);
+                    mgRoll.DrawString(ev.Bar.ToString(), mMeasureFont, Colors.Text, x, -2);
                 } else {
                     mgRoll.DrawLine(Colors.Beat, x, MeasureTabHeight + 1, x, mBmpRoll.Height);
                 }
