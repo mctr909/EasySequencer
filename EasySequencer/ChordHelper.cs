@@ -197,12 +197,11 @@ namespace EasySequencer {
                         continue;
                     }
                     var rootTone = (bassTone + toneList[t]) % 12;
-                    var structureName = structure.Names[0];
-                    var maj = 0 != structureName.IndexOf("m");
-                    var root = SCALE.GetName(rootTone, maj);
+                    var root = SCALE.GetName(rootTone, structure.Intervals[0].Id != I.m3);
                     if (t == 0) {
-                        return new string[] { root.Degree, root.Tone, structureName };
+                        return new string[] { root.Degree, root.Tone, structure.Names[0] };
                     } else {
+                        var structureName = structure.Names[0];
                         foreach (var interval in structure.Intervals) {
                             if (interval.Tone != (bassTone - rootTone + 12) % 12) {
                                 continue;
