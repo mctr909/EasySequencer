@@ -788,7 +788,7 @@ namespace EasySequencer {
 			this.tslDegree.AutoSize = false;
 			this.tslDegree.Font = new System.Drawing.Font("Meiryo UI", 14.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(128)));
 			this.tslDegree.Name = "tslDegree";
-			this.tslDegree.Size = new System.Drawing.Size(42, 28);
+			this.tslDegree.Size = new System.Drawing.Size(38, 28);
 			this.tslDegree.Text = "bⅦ";
 			this.tslDegree.ToolTipText = "ディグリーネーム";
 			// 

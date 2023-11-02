@@ -4,15 +4,15 @@ using System;
 
 namespace EasySequencer {
     static class Colors {
-        public static readonly Color Roll = Color.FromArgb(255, 255, 255);
-        public static readonly Brush Text = new Pen(Color.FromArgb(0, 0, 0)).Brush;
-        public static readonly Brush MeasureTab = new Pen(Color.FromArgb(221, 221, 221)).Brush;
-        public static readonly Pen Measure = new Pen(Color.FromArgb(47, 47, 47));
+        public static readonly Color Roll = SystemColors.ButtonHighlight;
+        public static readonly Brush Text = new Pen(SystemColors.ControlText).Brush;
+        public static readonly Brush MeasureTab = new Pen(SystemColors.Control).Brush;
+        public static readonly Pen Measure = new Pen(SystemColors.ControlText);
         public static readonly Pen Beat = new Pen(Color.FromArgb(191, 191, 191));
-        public static readonly Pen KeyBorder = new Pen(Color.FromArgb(147, 147, 147));
-        public static readonly Pen OctBorder = new Pen(Color.FromArgb(0, 0, 0));
-        public static readonly Brush SelectArea = new Pen(Color.FromArgb(47, 255, 255, 127)).Brush;
-        public static readonly Pen SelectBorder = new Pen(Color.FromArgb(63, 167, 167)) { DashStyle = DashStyle.Dot };
+        public static readonly Pen KeyBorder = new Pen(SystemColors.ButtonShadow);
+        public static readonly Pen OctBorder = new Pen(SystemColors.ControlText);
+        public static readonly Brush SelectArea = new Pen(Alpha(SystemColors.Highlight)).Brush;
+        public static readonly Pen SelectBorder = new Pen(SystemColors.HighlightText) { DashStyle = DashStyle.Dot };
 
         static readonly Color CNote = Color.FromArgb(0, 255, 0);
         static readonly Color CSelectedNote = Color.FromArgb(255, 0, 0);
@@ -22,7 +22,7 @@ namespace EasySequencer {
         static Color Solid(Color c) { return FromHSV(GetHue(c), 1.0, 0.85, c.A); }
         static Color Light(Color c) { return FromHSV(GetHue(c), 0.6, 0.9, c.A); }
         static Color Thin(Color c) { return FromHSV(GetHue(c), 0.6, 0.6, c.A); }
-        static Color Alpha(Color c) { return Color.FromArgb(111, c.R, c.G, c.B); }
+        static Color Alpha(Color c) { return Color.FromArgb(115, c.R, c.G, c.B); }
 
         static readonly Brush Note = new Pen(Solid(CNote)).Brush;
         static readonly Pen NoteH = new Pen(Light(CNote));
