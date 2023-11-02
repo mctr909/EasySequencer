@@ -140,7 +140,7 @@ namespace EasySequencer {
 
                 new Structure(ToArray(I.m3, I.P5, I.M6, I.M9), "m69", "m(add9)", "m6"),
                 new Structure(ToArray(I.m3, I.P5, I.m7, I.m9), "m7(b9)"),
-                new Structure(ToArray(I.m3, I.P5, I.m7, I.M9), "m7(9)", "m(add9)", "m7"),
+                new Structure(ToArray(I.m3, I.P5, I.m7, I.M9), "m9", "m(add9)", "m7"),
                 new Structure(ToArray(I.m3, I.P5, I.m7, I.P11), "m7(11)", "m(add11)", "m7"),
                 new Structure(ToArray(I.m3, I.P5, I.m7, I.s11), "m7(#11)"),
                 new Structure(ToArray(I.m3, I.P5, I.m7, I.m13), "m7(b13)"),
@@ -148,7 +148,7 @@ namespace EasySequencer {
                 new Structure(ToArray(I.m3, I.P5, I.M7, I.M9), "mΔ9", "m(add9)", "mΔ"),
                 new Structure(ToArray(I.M3, I.P5, I.M6, I.M9), "69", "(add9)", "6"),
                 new Structure(ToArray(I.M3, I.P5, I.m7, I.m9), "7(b9)"),
-                new Structure(ToArray(I.M3, I.P5, I.m7, I.M9), "7(9)", "(add9)", "7"),
+                new Structure(ToArray(I.M3, I.P5, I.m7, I.M9), "9", "(add9)", "7"),
                 new Structure(ToArray(I.M3, I.P5, I.m7, I.P11), "7(11)", "(add11)", "7"),
                 new Structure(ToArray(I.M3, I.P5, I.m7, I.s11), "7(#11)"),
                 new Structure(ToArray(I.M3, I.P5, I.m7, I.m13), "7(b13)"),
