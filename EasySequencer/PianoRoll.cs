@@ -35,7 +35,10 @@ namespace EasySequencer {
         };
 
         static readonly int[] TimeScales = {
-            480, 960, 960 * 2, 960 * 4
+            480,
+            480 * 2,
+            480 * 4,
+            480 * 8
         };
 
         static readonly int[] ToneHeights = {
@@ -416,6 +419,7 @@ namespace EasySequencer {
             tsmEditModeCho.Checked = false;
             tsmEditModeTempo.Checked = false;
             tsmEditModeMeasure.Checked = false;
+            tsmEditModeKey.Checked = false;
 
             var obj = (ToolStripMenuItem)sender;
             obj.Checked = true;
@@ -693,16 +697,16 @@ namespace EasySequencer {
             }
 
             var measureList = mEditor.GetMeasureList(mSnappedTick, mSnappedTick + 960 * 4);
-            SCALE.SetKey(measureList[0].Key);
+            ChordHelper.Scale.SetKey(measureList[0].Key);
 
             if (mEditor.Selected) {
                 var code = mEditor.SelectedChordName(mSnappedTick);
-                tslKey.Text = SCALE.KeyName;
+                tslKey.Text = ChordHelper.Scale.KeyName;
                 tslDegree.Text = code[0];
                 tslChord.Text = code[1] + code[2];
             } else {
                 var code = mEditor.CurrentChordName(mSnappedTick);
-                tslKey.Text = SCALE.KeyName;
+                tslKey.Text = ChordHelper.Scale.KeyName;
                 tslDegree.Text = code[0];
                 tslChord.Text = code[1] + code[2];
             }
@@ -919,6 +923,6 @@ namespace EasySequencer {
                 Colors.DrawNote(mgRoll, x1, y1, x2, y2);
             }
         }
-        #endregion
-    }
+		#endregion
+	}
 }

@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using ChordHelper;
 using SMF;
 
 namespace EasySequencer {
@@ -249,7 +250,7 @@ namespace EasySequencer {
             if (notes.Count < 2) {
                 return CurrentChordName(currentTick);
             } else {
-                return ChordHelper.GetName(notes.ToArray());
+                return Chord.GetName(notes.ToArray());
             }
         }
         public string[] CurrentChordName(int currentTick) {
@@ -262,7 +263,7 @@ namespace EasySequencer {
                     notes.Add(ev.NoteNumber);
                 }
             }
-            return ChordHelper.GetName(notes.ToArray());
+            return Chord.GetName(notes.ToArray());
         }
 
         public void AddNote(int note, int velocity, int tickBegin, int tickEnd) {

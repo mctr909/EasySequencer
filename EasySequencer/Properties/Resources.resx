@@ -118,83 +118,11 @@
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
   <assembly alias="System.Windows.Forms" name="System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089" />
-  <data name="player" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\Resources\player.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
-  </data>
-  <data name="Meter" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\Resources\Meter.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
-  </data>
-  <data name="Monitor" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\Resources\Monitor.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
-  </data>
-  <data name="track_on" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\Resources\track_on.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
-  </data>
-  <data name="player_down" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\Resources\player_down.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
-  </data>
-  <data name="player_ff" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\Resources\player_ff.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
-  </data>
-  <data name="player_play" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\Resources\player_play.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  <data name="scroll_down" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\icon\scroll_down.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
   </data>
   <data name="player_prev" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>..\Resources\player_prev.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
-  </data>
-  <data name="player_rew" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\Resources\player_rew.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
-  </data>
-  <data name="player_seek" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\Resources\player_seek.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
-  </data>
-  <data name="player_stop" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\Resources\player_stop.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
-  </data>
-  <data name="player_up" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\Resources\player_up.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
-  </data>
-  <data name="font_14seg" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\Resources\font_14seg.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
-  </data>
-  <data name="font_5x7" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\Resources\font_5x7.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
-  </data>
-  <data name="disp" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\icon\disp.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
-  </data>
-  <data name="edit_accent" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\icon\edit_accent.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
-  </data>
-  <data name="edit_attack" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\icon\edit_attack.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
-  </data>
-  <data name="edit_cho" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\icon\edit_cho.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
-  </data>
-  <data name="edit_del" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\icon\edit_del.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
-  </data>
-  <data name="edit_del_dep" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\icon\edit_del_dep.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
-  </data>
-  <data name="edit_del_time" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\icon\edit_del_time.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
-  </data>
-  <data name="edit_exp" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\icon\edit_exp.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
-  </data>
-  <data name="edit_fc" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\icon\edit_fc.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
-  </data>
-  <data name="edit_fq" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\icon\edit_fq.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
-  </data>
-  <data name="edit_inst" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\icon\edit_inst.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
-  </data>
-  <data name="edit_measure" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\icon\edit_measure.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
   </data>
   <data name="edit_note" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>..\icon\edit_note.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
@@ -202,109 +130,184 @@
   <data name="edit_pan" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>..\icon\edit_pan.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
   </data>
-  <data name="edit_pitch" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\icon\edit_pitch.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
-  </data>
-  <data name="edit_release" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\icon\edit_release.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
-  </data>
-  <data name="edit_rev" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\icon\edit_rev.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
-  </data>
-  <data name="edit_tempo" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\icon\edit_tempo.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
-  </data>
-  <data name="edit_vib" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\icon\edit_vib.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  <data name="edit_measure" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\icon\edit_measure.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
   </data>
   <data name="edit_vib_delay" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>..\icon\edit_vib_delay.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
   </data>
-  <data name="edit_vib_dep" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\icon\edit_vib_dep.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  <data name="player" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\player.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
   </data>
-  <data name="edit_vib_rate" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\icon\edit_vib_rate.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
-  </data>
-  <data name="edit_vol" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\icon\edit_vol.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
-  </data>
-  <data name="scroll_down" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\icon\scroll_down.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
-  </data>
-  <data name="scroll_next" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\icon\scroll_next.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
-  </data>
-  <data name="scroll_prev" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\icon\scroll_prev.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
-  </data>
-  <data name="scroll_up" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\icon\scroll_up.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
-  </data>
-  <data name="select" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\icon\select.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
-  </data>
-  <data name="select_disable" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\icon\select_disable.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
-  </data>
-  <data name="select_multi" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\icon\select_multi.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
-  </data>
-  <data name="select_multi_disable" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\icon\select_multi_disable.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
-  </data>
-  <data name="tick024" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\icon\tick024.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
-  </data>
-  <data name="tick040" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\icon\tick040.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
-  </data>
-  <data name="tick048" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\icon\tick048.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
-  </data>
-  <data name="tick060" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\icon\tick060.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
-  </data>
-  <data name="tick080" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\icon\tick080.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
-  </data>
-  <data name="tick096" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\icon\tick096.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
-  </data>
-  <data name="tick120" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\icon\tick120.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
-  </data>
-  <data name="tick160" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\icon\tick160.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
-  </data>
-  <data name="tick192" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\icon\tick192.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
-  </data>
-  <data name="tick240" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\icon\tick240.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
-  </data>
-  <data name="tick320" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\icon\tick320.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
-  </data>
-  <data name="tick480" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\icon\tick480.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
-  </data>
-  <data name="time_zoom" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\icon\time_zoom.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
-  </data>
-  <data name="time_zoomout" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\icon\time_zoomout.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  <data name="write_disable" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\icon\write_disable.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
   </data>
   <data name="tone_zoom" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>..\icon\tone_zoom.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
   </data>
-  <data name="tone_zoomout" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\icon\tone_zoomout.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  <data name="time_zoom" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\icon\time_zoom.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="track_on" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\track_on.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="scroll_up" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\icon\scroll_up.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="edit_release" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\icon\edit_release.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="player_up" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\player_up.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="edit_del_dep" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\icon\edit_del_dep.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="edit_tempo" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\icon\edit_tempo.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="edit_accent" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\icon\edit_accent.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="tick024" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\icon\tick024.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="tick096" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\icon\tick096.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="disp" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\icon\disp.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="player_down" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\player_down.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="edit_vib" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\icon\edit_vib.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="edit_inst" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\icon\edit_inst.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="select_multi" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\icon\select_multi.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="tick480" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\icon\tick480.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="tick192" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\icon\tick192.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
   </data>
   <data name="write" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>..\icon\write.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
   </data>
-  <data name="write_disable" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\icon\write_disable.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  <data name="tick080" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\icon\tick080.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="tone_zoomout" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\icon\tone_zoomout.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="tick160" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\icon\tick160.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="player_seek" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\player_seek.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="select_multi_disable" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\icon\select_multi_disable.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="select_disable" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\icon\select_disable.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="edit_del" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\icon\edit_del.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="scroll_prev" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\icon\scroll_prev.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="Monitor" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\Monitor.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="edit_exp" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\icon\edit_exp.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="player_play" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\player_play.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="edit_del_time" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\icon\edit_del_time.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="player_ff" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\player_ff.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="edit_fc" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\icon\edit_fc.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="Meter" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\Meter.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="font_5x7" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\font_5x7.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="font_14seg" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\font_14seg.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="select" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\icon\select.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="edit_vib_dep" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\icon\edit_vib_dep.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="tick060" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\icon\tick060.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="edit_cho" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\icon\edit_cho.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="tick120" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\icon\tick120.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="scroll_next" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\icon\scroll_next.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="edit_rev" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\icon\edit_rev.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="edit_vol" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\icon\edit_vol.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="player_stop" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\player_stop.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="time_zoomout" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\icon\time_zoomout.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="tick040" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\icon\tick040.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="edit_attack" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\icon\edit_attack.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="tick048" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\icon\tick048.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="edit_fq" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\icon\edit_fq.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="tick240" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\icon\tick240.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="edit_vib_rate" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\icon\edit_vib_rate.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="tick320" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\icon\tick320.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="edit_pitch" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\icon\edit_pitch.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="player_rew" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\player_rew.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="key_symbol" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\icon\key_symbol.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
   </data>
 </root>

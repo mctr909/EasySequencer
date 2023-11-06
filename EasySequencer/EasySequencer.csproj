@@ -51,9 +51,10 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="ChordHelper.cs" />
+    <Compile Include="ChordHelper\Chord.cs" />
     <Compile Include="Colors.cs" />
     <Compile Include="EventEditor.cs" />
+    <Compile Include="ChordHelper\Interval.cs" />
     <Compile Include="Monitor.cs">
       <SubType>Form</SubType>
     </Compile>
@@ -83,7 +84,7 @@
     <Compile Include="InstList.Designer.cs">
       <DependentUpon>InstList.cs</DependentUpon>
     </Compile>
-    <Compile Include="SCALE.cs" />
+    <Compile Include="ChordHelper\Scale.cs" />
     <Compile Include="SynthDll.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
@@ -182,6 +183,7 @@
     <None Include="icon\scroll_next.png" />
     <None Include="icon\scroll_prev.png" />
     <None Include="icon\scroll_up.png" />
+    <None Include="icon\key_symbol.png" />
     <Content Include="Resources\Monitor.png" />
     <Content Include="Resources\player.png" />
     <Content Include="Resources\player_down.png" />

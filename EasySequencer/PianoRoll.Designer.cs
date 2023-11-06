@@ -78,6 +78,7 @@ namespace EasySequencer {
 			this.toolStripSeparator13 = new System.Windows.Forms.ToolStripSeparator();
 			this.tsmEditModeTempo = new System.Windows.Forms.ToolStripMenuItem();
 			this.tsmEditModeMeasure = new System.Windows.Forms.ToolStripMenuItem();
+			this.tsmEditModeKey = new System.Windows.Forms.ToolStripMenuItem();
 			this.tsdTimeDiv = new System.Windows.Forms.ToolStripDropDownButton();
 			this.tsmTick480 = new System.Windows.Forms.ToolStripMenuItem();
 			this.tsmTick240 = new System.Windows.Forms.ToolStripMenuItem();
@@ -100,6 +101,8 @@ namespace EasySequencer {
 			this.toolStripSeparator15 = new System.Windows.Forms.ToolStripSeparator();
 			this.tslChord = new System.Windows.Forms.ToolStripLabel();
 			this.timer1 = new System.Windows.Forms.Timer(this.components);
+			this.toolStripSeparator16 = new System.Windows.Forms.ToolStripSeparator();
+			this.toolStripSeparator17 = new System.Windows.Forms.ToolStripSeparator();
 			this.pnlRoll.SuspendLayout();
 			((System.ComponentModel.ISupportInitialize)(this.picRoll)).BeginInit();
 			this.toolStrip1.SuspendLayout();
@@ -150,10 +153,12 @@ namespace EasySequencer {
             this.tsbWrite,
             this.tsbSelect,
             this.tsbMultiSelect,
-            this.toolStripSeparator3,
+            this.toolStripSeparator16,
             this.tsdEditMode,
-            this.tsdTimeDiv,
             this.toolStripSeparator11,
+            this.tsdTimeDiv,
+            this.toolStripSeparator3,
+            this.toolStripSeparator17,
             this.tslKey,
             this.toolStripSeparator12,
             this.tslDegree,
@@ -351,6 +356,7 @@ namespace EasySequencer {
             this.tsmEditModeCho,
             this.toolStripSeparator13,
             this.tsmEditModeTempo,
+            this.tsmEditModeKey,
             this.tsmEditModeMeasure});
 			this.tsdEditMode.Image = global::EasySequencer.Properties.Resources.edit_note;
 			this.tsdEditMode.ImageScaling = System.Windows.Forms.ToolStripItemImageScaling.None;
@@ -365,7 +371,7 @@ namespace EasySequencer {
 			this.tsmEditModeNote.ImageScaling = System.Windows.Forms.ToolStripItemImageScaling.None;
 			this.tsmEditModeNote.Name = "tsmEditModeNote";
 			this.tsmEditModeNote.ShortcutKeys = System.Windows.Forms.Keys.F5;
-			this.tsmEditModeNote.Size = new System.Drawing.Size(146, 30);
+			this.tsmEditModeNote.Size = new System.Drawing.Size(188, 30);
 			this.tsmEditModeNote.Text = "音符";
 			this.tsmEditModeNote.Click += new System.EventHandler(this.tsmEditMode_Click);
 			// 
@@ -375,7 +381,7 @@ namespace EasySequencer {
 			this.tsmEditModeAccent.ImageScaling = System.Windows.Forms.ToolStripItemImageScaling.None;
 			this.tsmEditModeAccent.Name = "tsmEditModeAccent";
 			this.tsmEditModeAccent.ShortcutKeys = System.Windows.Forms.Keys.F6;
-			this.tsmEditModeAccent.Size = new System.Drawing.Size(146, 30);
+			this.tsmEditModeAccent.Size = new System.Drawing.Size(188, 30);
 			this.tsmEditModeAccent.Text = "アクセント";
 			this.tsmEditModeAccent.Click += new System.EventHandler(this.tsmEditMode_Click);
 			// 
@@ -385,7 +391,7 @@ namespace EasySequencer {
 			this.tsmEditModeExp.ImageScaling = System.Windows.Forms.ToolStripItemImageScaling.None;
 			this.tsmEditModeExp.Name = "tsmEditModeExp";
 			this.tsmEditModeExp.ShortcutKeys = System.Windows.Forms.Keys.F7;
-			this.tsmEditModeExp.Size = new System.Drawing.Size(146, 30);
+			this.tsmEditModeExp.Size = new System.Drawing.Size(188, 30);
 			this.tsmEditModeExp.Text = "強弱";
 			this.tsmEditModeExp.Click += new System.EventHandler(this.tsmEditMode_Click);
 			// 
@@ -395,14 +401,14 @@ namespace EasySequencer {
 			this.tsmEditModePitch.ImageScaling = System.Windows.Forms.ToolStripItemImageScaling.None;
 			this.tsmEditModePitch.Name = "tsmEditModePitch";
 			this.tsmEditModePitch.ShortcutKeys = System.Windows.Forms.Keys.F8;
-			this.tsmEditModePitch.Size = new System.Drawing.Size(146, 30);
+			this.tsmEditModePitch.Size = new System.Drawing.Size(188, 30);
 			this.tsmEditModePitch.Text = "ピッチ";
 			this.tsmEditModePitch.Click += new System.EventHandler(this.tsmEditMode_Click);
 			// 
 			// toolStripSeparator8
 			// 
 			this.toolStripSeparator8.Name = "toolStripSeparator8";
-			this.toolStripSeparator8.Size = new System.Drawing.Size(143, 6);
+			this.toolStripSeparator8.Size = new System.Drawing.Size(185, 6);
 			// 
 			// tsmEditModeInst
 			// 
@@ -417,7 +423,7 @@ namespace EasySequencer {
 			this.tsmEditModeInst.Image = global::EasySequencer.Properties.Resources.edit_inst;
 			this.tsmEditModeInst.ImageScaling = System.Windows.Forms.ToolStripItemImageScaling.None;
 			this.tsmEditModeInst.Name = "tsmEditModeInst";
-			this.tsmEditModeInst.Size = new System.Drawing.Size(146, 30);
+			this.tsmEditModeInst.Size = new System.Drawing.Size(188, 30);
 			this.tsmEditModeInst.Text = "音色";
 			// 
 			// tsmEditModePreset
@@ -480,7 +486,7 @@ namespace EasySequencer {
 			this.tsmEditModeVol.Image = global::EasySequencer.Properties.Resources.edit_vol;
 			this.tsmEditModeVol.ImageScaling = System.Windows.Forms.ToolStripItemImageScaling.None;
 			this.tsmEditModeVol.Name = "tsmEditModeVol";
-			this.tsmEditModeVol.Size = new System.Drawing.Size(146, 30);
+			this.tsmEditModeVol.Size = new System.Drawing.Size(188, 30);
 			this.tsmEditModeVol.Text = "音量";
 			this.tsmEditModeVol.Click += new System.EventHandler(this.tsmEditMode_Click);
 			// 
@@ -489,14 +495,14 @@ namespace EasySequencer {
 			this.tsmEditModePan.Image = global::EasySequencer.Properties.Resources.edit_pan;
 			this.tsmEditModePan.ImageScaling = System.Windows.Forms.ToolStripItemImageScaling.None;
 			this.tsmEditModePan.Name = "tsmEditModePan";
-			this.tsmEditModePan.Size = new System.Drawing.Size(146, 30);
+			this.tsmEditModePan.Size = new System.Drawing.Size(188, 30);
 			this.tsmEditModePan.Text = "定位";
 			this.tsmEditModePan.Click += new System.EventHandler(this.tsmEditMode_Click);
 			// 
 			// toolStripSeparator9
 			// 
 			this.toolStripSeparator9.Name = "toolStripSeparator9";
-			this.toolStripSeparator9.Size = new System.Drawing.Size(143, 6);
+			this.toolStripSeparator9.Size = new System.Drawing.Size(185, 6);
 			// 
 			// tsmEditModeVib
 			// 
@@ -507,7 +513,7 @@ namespace EasySequencer {
 			this.tsmEditModeVib.Image = global::EasySequencer.Properties.Resources.edit_vib;
 			this.tsmEditModeVib.ImageScaling = System.Windows.Forms.ToolStripItemImageScaling.None;
 			this.tsmEditModeVib.Name = "tsmEditModeVib";
-			this.tsmEditModeVib.Size = new System.Drawing.Size(146, 30);
+			this.tsmEditModeVib.Size = new System.Drawing.Size(188, 30);
 			this.tsmEditModeVib.Text = "ビブラート";
 			// 
 			// tsmEditModeVibDep
@@ -545,7 +551,7 @@ namespace EasySequencer {
 			this.tsmEditModeDel.Image = global::EasySequencer.Properties.Resources.edit_del;
 			this.tsmEditModeDel.ImageScaling = System.Windows.Forms.ToolStripItemImageScaling.None;
 			this.tsmEditModeDel.Name = "tsmEditModeDel";
-			this.tsmEditModeDel.Size = new System.Drawing.Size(146, 30);
+			this.tsmEditModeDel.Size = new System.Drawing.Size(188, 30);
 			this.tsmEditModeDel.Text = "ディレイ";
 			// 
 			// tsmEditModeDelDep
@@ -571,7 +577,7 @@ namespace EasySequencer {
 			this.tsmEditModeRev.Image = global::EasySequencer.Properties.Resources.edit_rev;
 			this.tsmEditModeRev.ImageScaling = System.Windows.Forms.ToolStripItemImageScaling.None;
 			this.tsmEditModeRev.Name = "tsmEditModeRev";
-			this.tsmEditModeRev.Size = new System.Drawing.Size(146, 30);
+			this.tsmEditModeRev.Size = new System.Drawing.Size(188, 30);
 			this.tsmEditModeRev.Text = "リバーブ";
 			this.tsmEditModeRev.Click += new System.EventHandler(this.tsmEditMode_Click);
 			// 
@@ -580,21 +586,21 @@ namespace EasySequencer {
 			this.tsmEditModeCho.Image = global::EasySequencer.Properties.Resources.edit_cho;
 			this.tsmEditModeCho.ImageScaling = System.Windows.Forms.ToolStripItemImageScaling.None;
 			this.tsmEditModeCho.Name = "tsmEditModeCho";
-			this.tsmEditModeCho.Size = new System.Drawing.Size(146, 30);
+			this.tsmEditModeCho.Size = new System.Drawing.Size(188, 30);
 			this.tsmEditModeCho.Text = "コーラス";
 			this.tsmEditModeCho.Click += new System.EventHandler(this.tsmEditMode_Click);
 			// 
 			// toolStripSeparator13
 			// 
 			this.toolStripSeparator13.Name = "toolStripSeparator13";
-			this.toolStripSeparator13.Size = new System.Drawing.Size(143, 6);
+			this.toolStripSeparator13.Size = new System.Drawing.Size(185, 6);
 			// 
 			// tsmEditModeTempo
 			// 
 			this.tsmEditModeTempo.Image = global::EasySequencer.Properties.Resources.edit_tempo;
 			this.tsmEditModeTempo.ImageScaling = System.Windows.Forms.ToolStripItemImageScaling.None;
 			this.tsmEditModeTempo.Name = "tsmEditModeTempo";
-			this.tsmEditModeTempo.Size = new System.Drawing.Size(146, 30);
+			this.tsmEditModeTempo.Size = new System.Drawing.Size(188, 30);
 			this.tsmEditModeTempo.Text = "テンポ";
 			this.tsmEditModeTempo.Click += new System.EventHandler(this.tsmEditMode_Click);
 			// 
@@ -603,9 +609,18 @@ namespace EasySequencer {
 			this.tsmEditModeMeasure.Image = global::EasySequencer.Properties.Resources.edit_measure;
 			this.tsmEditModeMeasure.ImageScaling = System.Windows.Forms.ToolStripItemImageScaling.None;
 			this.tsmEditModeMeasure.Name = "tsmEditModeMeasure";
-			this.tsmEditModeMeasure.Size = new System.Drawing.Size(146, 30);
+			this.tsmEditModeMeasure.Size = new System.Drawing.Size(188, 30);
 			this.tsmEditModeMeasure.Text = "拍子";
 			this.tsmEditModeMeasure.Click += new System.EventHandler(this.tsmEditMode_Click);
+			// 
+			// tsmEditModeKey
+			// 
+			this.tsmEditModeKey.Image = global::EasySequencer.Properties.Resources.key_symbol;
+			this.tsmEditModeKey.ImageScaling = System.Windows.Forms.ToolStripItemImageScaling.None;
+			this.tsmEditModeKey.Name = "tsmEditModeKey";
+			this.tsmEditModeKey.Size = new System.Drawing.Size(188, 30);
+			this.tsmEditModeKey.Text = "調号/キー";
+			this.tsmEditModeKey.Click += new System.EventHandler(this.tsmEditMode_Click);
 			// 
 			// tsdTimeDiv
 			// 
@@ -811,6 +826,16 @@ namespace EasySequencer {
 			// 
 			this.timer1.Tick += new System.EventHandler(this.timer1_Tick);
 			// 
+			// toolStripSeparator16
+			// 
+			this.toolStripSeparator16.Name = "toolStripSeparator16";
+			this.toolStripSeparator16.Size = new System.Drawing.Size(6, 31);
+			// 
+			// toolStripSeparator17
+			// 
+			this.toolStripSeparator17.Name = "toolStripSeparator17";
+			this.toolStripSeparator17.Size = new System.Drawing.Size(6, 31);
+			// 
 			// PianoRoll
 			// 
 			this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 12F);
@@ -909,6 +934,9 @@ namespace EasySequencer {
         private System.Windows.Forms.ToolStripSeparator toolStripSeparator12;
         private System.Windows.Forms.ToolStripSeparator toolStripSeparator14;
         private ToolStripSeparator toolStripSeparator15;
-    }
+		private ToolStripMenuItem tsmEditModeKey;
+		private ToolStripSeparator toolStripSeparator16;
+		private ToolStripSeparator toolStripSeparator17;
+	}
 }
 
