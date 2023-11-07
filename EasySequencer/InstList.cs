@@ -28,7 +28,12 @@ namespace EasySequencer {
             var selectedInst = 0;
             for (int i = 0; i < Synth.InstCount; i++) {
                 var inst = Synth.Instruments(i);
-                var nam = string.Format("{0} {1}", inst.prog_num, inst.Name);
+                var nam = string.Format("{0}-{1}-{2}:{3}",
+                    inst.prog_num.ToString("000"),
+                    inst.bank_msb.ToString("000"),
+                    inst.bank_lsb.ToString("000"),
+                    inst.Name
+                );
                 var cat = inst.Category;
                 if (!mInstList.ContainsKey(cat)) {
                     mInstList.Add(cat, new Dictionary<INST_ID, string>());
