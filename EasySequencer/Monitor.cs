@@ -45,8 +45,8 @@ namespace EasySequencer {
 
         static readonly Bitmap[,] BMP_FONT = new Bitmap[16, 6];
         static readonly Rectangle RECT_ON_OFF = new Rectangle(527, 33, 28, 30);
-        static readonly Rectangle RECT_METER_L = new Rectangle(563, 31, 144, 6);
-        static readonly Rectangle RECT_METER_R = new Rectangle(563, 40, 144, 6);
+        static readonly Rectangle RECT_RMS_L = new Rectangle(563, 32, 144, 6);
+        static readonly Rectangle RECT_RMS_R = new Rectangle(563, 46, 144, 6);
         static readonly Size SIZE_METER_CELL = new Size(4, 6);
         static readonly Rectangle RECT_PRESET_NAME = new Rectangle(1025, 36, 219, 13);
 
@@ -303,20 +303,18 @@ namespace EasySequencer {
                 }
                 rmsL = 20 * Math.Log10(rmsL);
                 rmsR = 20 * Math.Log10(rmsR);
-                rmsL = Math.Max(RMS_MIN, rmsL);
-                rmsR = Math.Max(RMS_MIN, rmsR);
-                rmsL = Math.Min(RMS_MAX, rmsL);
-                rmsR = Math.Min(RMS_MAX, rmsR);
                 var normL = 1.0 - (rmsL - RMS_MAX) / RMS_MIN;
                 var normR = 1.0 - (rmsR - RMS_MAX) / RMS_MIN;
-                var rmsLpx = (int)(normL * RECT_METER_L.Width + 1) / SIZE_METER_CELL.Width * SIZE_METER_CELL.Width;
-                var rmsRpx = (int)(normR * RECT_METER_R.Width + 1) / SIZE_METER_CELL.Width * SIZE_METER_CELL.Width;
+                var rmsLpx = (int)(normL * RECT_RMS_L.Width + 1) / SIZE_METER_CELL.Width * SIZE_METER_CELL.Width;
+                var rmsRpx = (int)(normR * RECT_RMS_R.Width + 1) / SIZE_METER_CELL.Width * SIZE_METER_CELL.Width;
+                rmsLpx = Math.Min(RECT_RMS_L.Width - 1, rmsLpx);
+                rmsRpx = Math.Min(RECT_RMS_R.Width - 1, rmsRpx);
                 mG.DrawImageUnscaledAndClipped(Resources.Meter, new Rectangle(
-                    RECT_METER_L.X, RECT_METER_L.Y + track_y,
+                    RECT_RMS_L.X, RECT_RMS_L.Y + track_y,
                     rmsLpx, SIZE_METER_CELL.Height
                 ));
                 mG.DrawImageUnscaledAndClipped(Resources.Meter, new Rectangle(
-                    RECT_METER_R.X, RECT_METER_R.Y + track_y,
+                    RECT_RMS_R.X, RECT_RMS_R.Y + track_y,
                     rmsRpx, SIZE_METER_CELL.Height
                 ));
 
