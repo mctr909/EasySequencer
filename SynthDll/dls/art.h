@@ -1,7 +1,6 @@
 #ifndef __DLS_ART_H__
 #define __DLS_ART_H__
 
-#include "../type.h"
 #include "../riff.h"
 
 class ART;
@@ -111,53 +110,7 @@ public:
         E_DST destination;
         E_TRN transform;
         int32 scale;
-
-        double getValue() {
-            switch (destination) {
-            case E_DST::ATTENUATION:
-            case E_DST::FILTER_Q:
-                return pow(10.0, scale / (200 * 65536.0));
-
-            case E_DST::PAN:
-                return (scale / 655360.0) - 0.5;
-
-            case E_DST::LFO_START_DELAY:
-            case E_DST::VIB_START_DELAY:
-            case E_DST::EG1_ATTACK_TIME:
-            case E_DST::EG1_DECAY_TIME:
-            case E_DST::EG1_RELEASE_TIME:
-            case E_DST::EG1_DELAY_TIME:
-            case E_DST::EG1_HOLD_TIME:
-            case E_DST::EG1_SHUTDOWN_TIME:
-            case E_DST::EG2_ATTACK_TIME:
-            case E_DST::EG2_DECAY_TIME:
-            case E_DST::EG2_RELEASE_TIME:
-            case E_DST::EG2_DELAY_TIME:
-            case E_DST::EG2_HOLD_TIME:
-            {
-                auto tmp = pow(2.0, scale / (1200 * 65536.0));
-                if (tmp < 0.001) {
-                    return 0.001;
-                }
-                else {
-                    return tmp;
-                }
-            }
-
-            case E_DST::EG1_SUSTAIN_LEVEL:
-            case E_DST::EG2_SUSTAIN_LEVEL:
-                return pow(2.0, -0.0005 * scale / 65536.0);
-
-            case E_DST::PITCH:
-            case E_DST::LFO_FREQUENCY:
-            case E_DST::VIB_FREQUENCY:
-            case E_DST::FILTER_CUTOFF:
-                return pow(2.0, (scale / 65536.0 - 6900) / 1200.0) * 440;
-
-            default:
-                return 0.0;
-            }
-        }
+        double getValue();
     };
 
 public:

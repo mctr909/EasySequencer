@@ -1,7 +1,6 @@
 #ifndef __DLS_INS_H__
 #define __DLS_INS_H__
 
-#include "../type.h"
 #include "../riff.h"
 
 class INS;

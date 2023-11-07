@@ -1,7 +1,6 @@
 #ifndef __DLS_H__
 #define __DLS_H__
 
-#include "../type.h"
 #include "../riff.h"
 
 #include "wsmp.h"
