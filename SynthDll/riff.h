@@ -59,21 +59,16 @@ public:
 		std::vector<KV> m_list;
 
 	public:
+		void load(FILE* fp, long size);
 		std::string get(const char key[]);
 		void set(const char key[], std::string value);
 		void copy_from(INFO* p_info);
-		void load(FILE* fp, long size);
-		size_t write(FILE* fp);
-
-	private:
-		uint32 put_text(FILE* fp, KV kv);
 	};
 
 private:
 	static const char RIFF_ID[5];
 	static const char LIST_ID[5];
 	static const char INFO_ID[5];
-	static const uint32 DEFAULT_SIZE;
 
 public:
 	INFO* mp_info;
@@ -84,10 +79,10 @@ public:
 	}
 
 protected:
-	E_LOAD_STATUS Load(STRING path, long offset);
-	void Load(FILE* fp, long size);
-	virtual bool CheckFileType(const char* type, long size) { return false; }
-	virtual void LoadChunk(FILE* fp, const char* type, long size) { fseek(fp, size, SEEK_CUR); }
+	E_LOAD_STATUS load(STRING path, long offset);
+	void load(FILE* fp, long size);
+	virtual bool check_file_type(const char* type, long size) { return false; }
+	virtual void load_chunk(FILE* fp, const char* type, long size) { fseek(fp, size, SEEK_CUR); }
 };
 
 #endif /* __RIFF_H__ */

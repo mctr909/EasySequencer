@@ -10,48 +10,48 @@ struct WSMP_LOOP;
 
 class LRGN : public RIFF {
 public:
-    int32 Count = 0;
-    RGN **pcRegion = nullptr;
+    int32 m_count = 0;
+    RGN **mpc_rgn = nullptr;
 
 public:
     LRGN(FILE *fp, long size, int32 count);
     ~LRGN();
 
 protected:
-    void LoadChunk(FILE *fp, const char *type, long size) override;
+    void load_chunk(FILE *fp, const char *type, long size) override;
 };
 
 class RGN : public RIFF {
 public:
     struct RGNH {
-        uint16 keyLow;
-        uint16 keyHigh;
-        uint16 velocityLow;
-        uint16 velocityHigh;
+        uint16 key_low;
+        uint16 key_high;
+        uint16 velo_low;
+        uint16 velo_high;
         uint16 options;
-        uint16 keyGroup;
+        uint16 key_group;
         uint16 layer;
     };
     struct WLNK {
         uint16 options;
-        uint16 phaseGroup;
+        uint16 phase_group;
         uint32 channel;
-        uint32 tableIndex;
+        uint32 table_index;
     };
 
 public:
-    RGNH Header = { 0 };
-    WLNK WaveLink = { 0 };
-    WSMP_VALUES *pWaveSmpl = nullptr;
-    WSMP_LOOP **ppWaveLoop = nullptr;
-    LART *cLart = nullptr;
+    RGNH m_rgnh = { 0 };
+    WLNK m_wlnk = { 0 };
+    WSMP_VALUES *mp_wsmp = nullptr;
+    WSMP_LOOP **mpp_loop = nullptr;
+    LART* mc_lart = nullptr;
 
 public:
     RGN(FILE *fp, long size);
     ~RGN();
 
 protected:
-    void LoadChunk(FILE *fp, const char *type, long size) override;
+    void load_chunk(FILE *fp, const char *type, long size) override;
 };
 
 #endif /* __DLS_RGN_H__ */

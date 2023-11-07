@@ -11,19 +11,19 @@
 
 class DLS : public RIFF {
 public:
-    LINS *cLins = nullptr;
-    WVPL *cWvpl = nullptr;
-    uint32 InstCount = 0;
-    uint32 WaveCount = 0;
+    uint32 m_inst_count = 0;
+    uint32 m_wave_count = 0;
+    LINS *mc_lins = nullptr;
+    WVPL *mc_wvpl = nullptr;
 
 public:
     DLS();
     ~DLS();
-    E_LOAD_STATUS Load(STRING path);
+    E_LOAD_STATUS load(STRING path);
 
 protected:
-    bool CheckFileType(const char *type, long size) override;
-    void LoadChunk(FILE *fp, const char *type, long size) override;
+    bool check_file_type(const char *type, long size) override;
+    void load_chunk(FILE *fp, const char *type, long size) override;
 };
 
 #endif /* __DLS_H__ */

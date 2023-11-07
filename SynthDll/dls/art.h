@@ -7,14 +7,14 @@ class ART;
 
 class LART : public RIFF {
 public:
-    ART *cArt = nullptr;
+    ART *mc_art = nullptr;
 
 public:
     LART(FILE *fp, long size);
     ~LART();
 
 protected:
-    void LoadChunk(FILE *fp, const char *type, long size) override;
+    void load_chunk(FILE *fp, const char *type, long size) override;
 };
 
 class ART {
@@ -109,13 +109,13 @@ public:
         E_SRC control;
         E_DST destination;
         E_TRN transform;
-        int32 scale;
-        double getValue();
+        int32 _value;
+        double value();
     };
 
 public:
-    uint32 Count = 0;
-    CONN **ppConnection = nullptr;
+    uint32 m_count = 0;
+    CONN **mpp_conn = nullptr;
 
 public:
     ART(FILE *fp, long size);

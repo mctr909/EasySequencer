@@ -5,13 +5,13 @@
 
 struct WSMP_VALUES {
     uint32 size;
-    uint16 unityNote;
-    int16 fineTune;
-    int32 gainInt;
+    uint16 unity_note;
+    int16 _fine_tune;
+    int32 _gain;
     uint32 options;
-    uint32 loopCount;
-    double getFineTune();
-    double getGain();
+    uint32 loop_count;
+    double fine_tune();
+    double gain();
 };
 
 struct WSMP_LOOP {

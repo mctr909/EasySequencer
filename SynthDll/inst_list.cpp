@@ -93,30 +93,30 @@ INST_INFO *InstList::GetInstInfo(byte is_drum, byte bank_lsb, byte bank_msb, byt
 /******************************************************************************/
 E_LOAD_STATUS InstList::loadDls(STRING path) {
     auto cDls = new DLS();
-    auto loadState = cDls->Load(path);
+    auto loadState = cDls->load(path);
     if (E_LOAD_STATUS::SUCCESS != loadState) {
         return loadState;
     }
 
     /* count layer/region/art/wave */
-    mWaveCount = cDls->WaveCount;
-    mInstList.count = cDls->InstCount;
+    mWaveCount = cDls->m_wave_count;
+    mInstList.count = cDls->m_inst_count;
     for (uint32 idxI = 0; idxI < mInstList.count; idxI++) {
-        auto cDlsInst = cDls->cLins->pcInst[idxI];
-        if (nullptr != cDlsInst->cLart) {
+        auto cDlsInst = cDls->mc_lins->mpc_ins[idxI];
+        if (nullptr != cDlsInst->mc_lart) {
             mArtCount++;
         }
         uint32 rgnLayer = 0;
-        for (int32 idxR = 0; idxR < cDlsInst->cLrgn->Count; idxR++) {
-            auto cDlsRgn = cDlsInst->cLrgn->pcRegion[idxR];
-            if (nullptr != cDlsRgn->cLart) {
+        for (int32 idxR = 0; idxR < cDlsInst->mc_lrgn->m_count; idxR++) {
+            auto cDlsRgn = cDlsInst->mc_lrgn->mpc_rgn[idxR];
+            if (nullptr != cDlsRgn->mc_lart) {
                 mArtCount++;
             }
-            if (nullptr != cDlsRgn->pWaveSmpl) {
+            if (nullptr != cDlsRgn->mp_wsmp) {
                 mWaveCount++;
             }
-            if (rgnLayer < static_cast<uint32>(cDlsRgn->Header.layer + 1)) {
-                rgnLayer = cDlsRgn->Header.layer + 1;
+            if (rgnLayer < static_cast<uint32>(cDlsRgn->m_rgnh.layer + 1)) {
+                rgnLayer = cDlsRgn->m_rgnh.layer + 1;
             }
             mRegionCount++;
         }
@@ -141,19 +141,19 @@ E_LOAD_STATUS InstList::loadDls(STRING path) {
     uint32 layerIndex = 0;
     uint32 regionIndex = 0;
     uint32 artIndex = 0;
-    uint32 waveIndex = cDls->WaveCount;
+    uint32 waveIndex = cDls->m_wave_count;
     for (uint32 idxI = 0; idxI < mInstList.count; idxI++) {
-        auto cDlsInst = cDls->cLins->pcInst[idxI];
+        auto cDlsInst = cDls->mc_lins->mpc_ins[idxI];
 
         INST_INFO inst;
         mInstList.ppData[idxI] = (INST_INFO*)calloc(1, sizeof(INST_INFO));
         memcpy_s(mInstList.ppData[idxI], sizeof(INST_INFO), &inst, sizeof(INST_INFO));
         auto pInst = mInstList.ppData[idxI];
 
-        pInst->id.isDrum = cDlsInst->Header.bankFlags >= 0x80 ? 1 : 0;
-        pInst->id.bankMSB = cDlsInst->Header.bankMSB;
-        pInst->id.bankLSB = cDlsInst->Header.bankLSB;
-        pInst->id.progNum = cDlsInst->Header.progNum;
+        pInst->id.isDrum = cDlsInst->m_insh.bank_flags >= 0x80 ? 1 : 0;
+        pInst->id.bankMSB = cDlsInst->m_insh.bank_msb;
+        pInst->id.bankLSB = cDlsInst->m_insh.bank_lsb;
+        pInst->id.progNum = cDlsInst->m_insh.prog_num;
         pInst->layerIndex = layerIndex;
         auto name = cDlsInst->mp_info->get(RIFF::INFO::INAM);
         auto name_len = name.size() + 1;
@@ -164,54 +164,54 @@ E_LOAD_STATUS InstList::loadDls(STRING path) {
         pInst->pCategory = (char*)calloc(category_len, 1);
         strcpy_s(pInst->pCategory, category_len, category.c_str());
 
-        if (nullptr == cDlsInst->cLart) {
+        if (nullptr == cDlsInst->mc_lart) {
             pInst->artIndex = UINT_MAX;
         } else {
             pInst->artIndex = artIndex;
             mppArtList[artIndex] = (INST_ART*)calloc(1, sizeof(INST_ART));
-            loadDlsArt(cDlsInst->cLart, mppArtList[artIndex]);
+            loadDlsArt(cDlsInst->mc_lart, mppArtList[artIndex]);
             artIndex++;
         }
 
         INST_LAYER *pLayer = nullptr;
-        for (int32 idxR = 0; idxR < cDlsInst->cLrgn->Count; idxR++) {
+        for (int32 idxR = 0; idxR < cDlsInst->mc_lrgn->m_count; idxR++) {
             INST_REGION region;
             mppRegionList[regionIndex] = (INST_REGION*)malloc(sizeof(INST_REGION));
             memcpy_s(mppRegionList[regionIndex], sizeof(INST_REGION), &region, sizeof(INST_REGION));
             auto pRegion = mppRegionList[regionIndex];
-            auto cDlsRgn = cDlsInst->cLrgn->pcRegion[idxR];
-            pRegion->keyLow = (byte)cDlsRgn->Header.keyLow;
-            pRegion->keyHigh = (byte)cDlsRgn->Header.keyHigh;
-            pRegion->velocityLow = (byte)cDlsRgn->Header.velocityLow;
-            pRegion->velocityHigh = (byte)cDlsRgn->Header.velocityHigh;
-            pRegion->waveIndex = cDlsRgn->WaveLink.tableIndex;
+            auto cDlsRgn = cDlsInst->mc_lrgn->mpc_rgn[idxR];
+            pRegion->keyLow = (byte)cDlsRgn->m_rgnh.key_low;
+            pRegion->keyHigh = (byte)cDlsRgn->m_rgnh.key_high;
+            pRegion->velocityLow = (byte)cDlsRgn->m_rgnh.velo_low;
+            pRegion->velocityHigh = (byte)cDlsRgn->m_rgnh.velo_high;
+            pRegion->waveIndex = cDlsRgn->m_wlnk.table_index;
 
-            if (nullptr == cDlsRgn->cLart) {
+            if (nullptr == cDlsRgn->mc_lart) {
                 pRegion->artIndex = UINT_MAX;
             } else {
                 mppArtList[artIndex] = (INST_ART*)calloc(1, sizeof(INST_ART));
-                loadDlsArt(cDlsRgn->cLart, mppArtList[artIndex]);
+                loadDlsArt(cDlsRgn->mc_lart, mppArtList[artIndex]);
                 pRegion->artIndex = artIndex;
                 artIndex++;
             }
 
-            if (nullptr == cDlsRgn->pWaveSmpl) {
+            if (nullptr == cDlsRgn->mp_wsmp) {
                 pRegion->wsmpIndex = UINT_MAX;
             } else {
                 INST_WAVE wave;
                 mppWaveList[waveIndex] = (INST_WAVE*)malloc(sizeof(INST_WAVE));
                 memcpy_s(mppWaveList[waveIndex], sizeof(INST_WAVE), &region, sizeof(INST_WAVE));
                 auto pWave = mppWaveList[waveIndex];
-                pWave->unityNote = (byte)cDlsRgn->pWaveSmpl->unityNote;
-                pWave->pitch = cDlsRgn->pWaveSmpl->getFineTune();
-                pWave->gain = cDlsRgn->pWaveSmpl->getGain();
-                if (0 == cDlsRgn->pWaveSmpl->loopCount) {
-                    auto cDlsWave = cDls->cWvpl->pcWave[pRegion->waveIndex];
+                pWave->unityNote = (byte)cDlsRgn->mp_wsmp->unity_note;
+                pWave->pitch = cDlsRgn->mp_wsmp->fine_tune();
+                pWave->gain = cDlsRgn->mp_wsmp->gain();
+                if (0 == cDlsRgn->mp_wsmp->loop_count) {
+                    auto cDlsWave = cDls->mc_wvpl->mpc_wave[pRegion->waveIndex];
                     pWave->loopEnable = 0;
                     pWave->loopBegin = 0;
-                    pWave->loopLength = cDlsWave->DataSize * 8 / cDlsWave->Format.wBitsPerSample;
+                    pWave->loopLength = cDlsWave->m_data_size * 8 / cDlsWave->m_fmt.wBitsPerSample;
                 } else {
-                    auto pLoop = cDlsRgn->ppWaveLoop[0];
+                    auto pLoop = cDlsRgn->mpp_loop[0];
                     pWave->loopEnable = 1;
                     pWave->loopBegin = pLoop->start;
                     pWave->loopLength = pLoop->length;
@@ -220,8 +220,8 @@ E_LOAD_STATUS InstList::loadDls(STRING path) {
                 waveIndex++;
             }
 
-            if (pInst->layerCount < static_cast<uint32>(cDlsRgn->Header.layer + 1)) {
-                pInst->layerCount = cDlsRgn->Header.layer + 1;
+            if (pInst->layerCount < static_cast<uint32>(cDlsRgn->m_rgnh.layer + 1)) {
+                pInst->layerCount = cDlsRgn->m_rgnh.layer + 1;
                 INST_LAYER layer;
                 mppLayerList[layerIndex] = (INST_LAYER*)malloc(sizeof(INST_LAYER));
                 memcpy_s(mppLayerList[layerIndex], sizeof(INST_LAYER), &layer, sizeof(INST_LAYER));
@@ -244,51 +244,51 @@ E_LOAD_STATUS InstList::loadDlsWave(DLS *cDls) {
     FILE *fpWave = nullptr;
     _wfopen_s(&fpWave, mWaveTablePath, L"wb");
     uint32 wavePos = 0;
-    for (uint32 idxW = 0; idxW < cDls->WaveCount; idxW++) {
+    for (uint32 idxW = 0; idxW < cDls->m_wave_count; idxW++) {
         mppWaveList[idxW] = (INST_WAVE*)calloc(1, sizeof(INST_WAVE));
         auto pWave = mppWaveList[idxW];
-        auto cDlsWave = cDls->cWvpl->pcWave[idxW];
+        auto cDlsWave = cDls->mc_wvpl->mpc_wave[idxW];
 
         pWave->offset = wavePos;
-        pWave->sampleRate = cDlsWave->Format.nSamplesPerSec;
-        if (nullptr == cDlsWave->pWaveSmpl) {
+        pWave->sampleRate = cDlsWave->m_fmt.nSamplesPerSec;
+        if (nullptr == cDlsWave->mp_wsmp) {
             pWave->unityNote = 64;
             pWave->pitch = 1.0;
             pWave->gain = 1.0;
             pWave->loopEnable = 0;
             pWave->loopBegin = 0;
-            pWave->loopLength = cDlsWave->DataSize * 8 / cDlsWave->Format.wBitsPerSample;
+            pWave->loopLength = cDlsWave->m_data_size * 8 / cDlsWave->m_fmt.wBitsPerSample;
         } else {
-            pWave->unityNote = (byte)cDlsWave->pWaveSmpl->unityNote;
-            pWave->pitch = cDlsWave->pWaveSmpl->getFineTune();
-            pWave->gain = cDlsWave->pWaveSmpl->getGain();
-            if (cDlsWave->pWaveSmpl->loopCount) {
+            pWave->unityNote = (byte)cDlsWave->mp_wsmp->unity_note;
+            pWave->pitch = cDlsWave->mp_wsmp->fine_tune();
+            pWave->gain = cDlsWave->mp_wsmp->gain();
+            if (cDlsWave->mp_wsmp->loop_count) {
                 pWave->loopEnable = 1;
-                pWave->loopBegin = cDlsWave->ppWaveLoop[0]->start;
-                pWave->loopLength = cDlsWave->ppWaveLoop[0]->length;
+                pWave->loopBegin = cDlsWave->mpp_loop[0]->start;
+                pWave->loopLength = cDlsWave->mpp_loop[0]->length;
             } else {
                 pWave->loopEnable = 0;
                 pWave->loopBegin = 0;
-                pWave->loopLength = cDlsWave->DataSize * 8 / cDlsWave->Format.wBitsPerSample;
+                pWave->loopLength = cDlsWave->m_data_size * 8 / cDlsWave->m_fmt.wBitsPerSample;
             }
         }
 
         /* output wave table */
-        switch (cDlsWave->Format.wBitsPerSample) {
+        switch (cDlsWave->m_fmt.wBitsPerSample) {
         case 8:
-            wavePos += writeWaveTable8(fpWave, cDlsWave->pData, cDlsWave->DataSize);
+            wavePos += writeWaveTable8(fpWave, cDlsWave->mp_data, cDlsWave->m_data_size);
             break;
         case 16:
-            wavePos += writeWaveTable16(fpWave, cDlsWave->pData, cDlsWave->DataSize);
+            wavePos += writeWaveTable16(fpWave, cDlsWave->mp_data, cDlsWave->m_data_size);
             break;
         case 24:
-            wavePos += writeWaveTable24(fpWave, cDlsWave->pData, cDlsWave->DataSize);
+            wavePos += writeWaveTable24(fpWave, cDlsWave->mp_data, cDlsWave->m_data_size);
             break;
         case 32:
-            if (3 == cDlsWave->Format.wFormatTag) {
-                wavePos += writeWaveTableFloat(fpWave, cDlsWave->pData, cDlsWave->DataSize);
+            if (3 == cDlsWave->m_fmt.wFormatTag) {
+                wavePos += writeWaveTableFloat(fpWave, cDlsWave->mp_data, cDlsWave->m_data_size);
             } else {
-                wavePos += writeWaveTable32(fpWave, cDlsWave->pData, cDlsWave->DataSize);
+                wavePos += writeWaveTable32(fpWave, cDlsWave->mp_data, cDlsWave->m_data_size);
             }
             break;
         default:
@@ -318,34 +318,34 @@ void InstList::loadDlsArt(LART *cLart, INST_ART *pArt) {
 
     auto ampA = 0.002;
 
-    for (uint32 idxC = 0; idxC < cLart->cArt->Count; idxC++) {
-        auto pConn = cLart->cArt->ppConnection[idxC];
+    for (uint32 idxC = 0; idxC < cLart->mc_art->m_count; idxC++) {
+        auto pConn = cLart->mc_art->mpp_conn[idxC];
         switch (pConn->destination) {
         case ART::E_DST::PAN:
-            pArt->pan = (short)pConn->getValue();
+            pArt->pan = (short)pConn->value();
             break;
         case ART::E_DST::PITCH:
-            pArt->pitch = pow(2.0, pConn->getValue() / 1200.0);
+            pArt->pitch = pow(2.0, pConn->value() / 1200.0);
             break;
         case ART::E_DST::ATTENUATION:
-            pArt->gain = pConn->getValue();
+            pArt->gain = pConn->value();
             break;
 
         case ART::E_DST::EG1_ATTACK_TIME:
-            ampA = pConn->getValue();
+            ampA = pConn->value();
             pArt->eg_amp.attack = 48.0 / ampA;
             break;
         case ART::E_DST::EG1_HOLD_TIME:
-            pArt->eg_amp.hold = pConn->getValue();
+            pArt->eg_amp.hold = pConn->value();
             break;
         case ART::E_DST::EG1_DECAY_TIME:
-            pArt->eg_amp.decay = 32.0 / pConn->getValue();
+            pArt->eg_amp.decay = 32.0 / pConn->value();
             break;
         case ART::E_DST::EG1_SUSTAIN_LEVEL:
-            pArt->eg_amp.sustain = pConn->getValue();
+            pArt->eg_amp.sustain = pConn->value();
             break;
         case ART::E_DST::EG1_RELEASE_TIME:
-            pArt->eg_amp.release = 24.0 / pConn->getValue();
+            pArt->eg_amp.release = 24.0 / pConn->value();
             break;
 
         default:

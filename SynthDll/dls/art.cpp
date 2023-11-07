@@ -4,18 +4,18 @@
 #include "art.h"
 
 LART::LART(FILE *fp, long size) : RIFF() {
-    Load(fp, size);
+    load(fp, size);
 }
 
 LART::~LART() {
-    delete cArt;
-    cArt = nullptr;
+    delete mc_art;
+    mc_art = nullptr;
 }
 
 void
-LART::LoadChunk(FILE *fp, const char *type, long size) {
+LART::load_chunk(FILE *fp, const char *type, long size) {
     if (0 == strcmp("art1", type) || 0 == strcmp("art2", type)) {
-        cArt = new ART(fp, size);
+        mc_art = new ART(fp, size);
         return;
     }
     fseek(fp, size, SEEK_CUR);
@@ -23,33 +23,31 @@ LART::LoadChunk(FILE *fp, const char *type, long size) {
 
 ART::ART(FILE *fp, long size) {
     fseek(fp, 4, SEEK_CUR);
-    fread_s(&Count, 4, 4, 1, fp);
-
-    ppConnection = (CONN**)calloc(Count, sizeof(CONN*));
-
-    for (uint32 i = 0; i < Count; i++) {
-        ppConnection[i] = (CONN*)malloc(sizeof(CONN));
-        fread_s(ppConnection[i], sizeof(CONN), sizeof(CONN), 1, fp);
+    fread_s(&m_count, 4, 4, 1, fp);
+    mpp_conn = (CONN**)calloc(m_count, sizeof(CONN*));
+    for (uint32 i = 0; i < m_count; i++) {
+        mpp_conn[i] = (CONN*)malloc(sizeof(CONN));
+        fread_s(mpp_conn[i], sizeof(CONN), sizeof(CONN), 1, fp);
     }
 }
 
 ART::~ART() {
-    for (uint32 i = 0; i < Count; i++) {
-        free(ppConnection[i]);
+    for (uint32 i = 0; i < m_count; i++) {
+        free(mpp_conn[i]);
     }
-    free(ppConnection);
-    ppConnection = nullptr;
+    free(mpp_conn);
+    mpp_conn = nullptr;
 }
 
 double
-ART::CONN::getValue() {
+ART::CONN::value() {
     switch (destination) {
     case E_DST::ATTENUATION:
     case E_DST::FILTER_Q:
-        return pow(10.0, scale / (200 * 65536.0));
+        return pow(10.0, _value / (200 * 65536.0));
 
     case E_DST::PAN:
-        return (scale / 655360.0) - 0.5;
+        return (_value / 655360.0) - 0.5;
 
     case E_DST::LFO_START_DELAY:
     case E_DST::VIB_START_DELAY:
@@ -64,7 +62,7 @@ ART::CONN::getValue() {
     case E_DST::EG2_RELEASE_TIME:
     case E_DST::EG2_DELAY_TIME:
     case E_DST::EG2_HOLD_TIME: {
-        auto tmp = pow(2.0, scale / (1200 * 65536.0));
+        auto tmp = pow(2.0, _value / (1200 * 65536.0));
         if (tmp < 0.001) {
             return 0.001;
         } else {
@@ -74,13 +72,13 @@ ART::CONN::getValue() {
 
     case E_DST::EG1_SUSTAIN_LEVEL:
     case E_DST::EG2_SUSTAIN_LEVEL:
-        return pow(2.0, -0.0005 * scale / 65536.0);
+        return pow(2.0, -0.0005 * _value / 65536.0);
 
     case E_DST::PITCH:
     case E_DST::LFO_FREQUENCY:
     case E_DST::VIB_FREQUENCY:
     case E_DST::FILTER_CUTOFF:
-        return pow(2.0, (scale / 65536.0 - 6900) / 1200.0) * 440;
+        return pow(2.0, (_value / 65536.0 - 6900) / 1200.0) * 440;
 
     default:
         return 0.0;

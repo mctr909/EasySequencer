@@ -9,42 +9,42 @@ class LART;
 
 class LINS : public RIFF {
 public:
-    int32 Count = 0;
-    INS **pcInst = nullptr;
+    int32 m_count = 0;
+    INS **mpc_ins = nullptr;
 
 public:
     LINS(FILE *fp, long size, int32 count);
     ~LINS();
 
 protected:
-    void LoadChunk(FILE *fp, const char *type, long size) override;
+    void load_chunk(FILE *fp, const char *type, long size) override;
 };
 
 class INS : public RIFF {
 public:
     struct INSH {
         uint32 regions;
-        byte bankLSB;
-        byte bankMSB;
-        byte reserve1;
-        byte bankFlags;
-        byte progNum;
-        byte reserve2;
-        byte reserve3;
-        byte reserve4;
+        byte bank_lsb;
+        byte bank_msb;
+        byte _reserve1;
+        byte bank_flags;
+        byte prog_num;
+        byte _reserve2;
+        byte _reserve3;
+        byte _reserve4;
     };
 
 public:
-    INSH Header = { 0 };
-    LRGN *cLrgn = nullptr;
-    LART *cLart = nullptr;
+    INSH m_insh = { 0 };
+    LRGN *mc_lrgn = nullptr;
+    LART *mc_lart = nullptr;
 
 public:
     INS(FILE *fp, long size);
     ~INS();
 
 protected:
-    void LoadChunk(FILE *fp, const char *type, long size) override;
+    void load_chunk(FILE *fp, const char *type, long size) override;
 };
 
 #endif /* __DLS_INS_H__ */
