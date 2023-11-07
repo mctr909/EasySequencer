@@ -321,30 +321,30 @@ void InstList::loadDlsArt(LART *cLart, INST_ART *pArt) {
     for (uint32 idxC = 0; idxC < cLart->cArt->Count; idxC++) {
         auto pConn = cLart->cArt->ppConnection[idxC];
         switch (pConn->destination) {
-        case ART_::E_DST::PAN:
+        case ART::E_DST::PAN:
             pArt->pan = (short)pConn->getValue();
             break;
-        case ART_::E_DST::PITCH:
+        case ART::E_DST::PITCH:
             pArt->pitch = pow(2.0, pConn->getValue() / 1200.0);
             break;
-        case ART_::E_DST::ATTENUATION:
+        case ART::E_DST::ATTENUATION:
             pArt->gain = pConn->getValue();
             break;
 
-        case ART_::E_DST::EG1_ATTACK_TIME:
+        case ART::E_DST::EG1_ATTACK_TIME:
             ampA = pConn->getValue();
             pArt->eg_amp.attack = 48.0 / ampA;
             break;
-        case ART_::E_DST::EG1_HOLD_TIME:
+        case ART::E_DST::EG1_HOLD_TIME:
             pArt->eg_amp.hold = pConn->getValue();
             break;
-        case ART_::E_DST::EG1_DECAY_TIME:
+        case ART::E_DST::EG1_DECAY_TIME:
             pArt->eg_amp.decay = 32.0 / pConn->getValue();
             break;
-        case ART_::E_DST::EG1_SUSTAIN_LEVEL:
+        case ART::E_DST::EG1_SUSTAIN_LEVEL:
             pArt->eg_amp.sustain = pConn->getValue();
             break;
-        case ART_::E_DST::EG1_RELEASE_TIME:
+        case ART::E_DST::EG1_RELEASE_TIME:
             pArt->eg_amp.release = 24.0 / pConn->getValue();
             break;
 

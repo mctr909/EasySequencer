@@ -10,7 +10,7 @@
 
 LRGN::LRGN(FILE *fp, long size, int32 count) : RIFF() {
     Count = 0;
-    pcRegion = (RGN_**)calloc(count, sizeof(RGN_*));
+    pcRegion = (RGN**)calloc(count, sizeof(RGN*));
     Load(fp, size);
 }
 
@@ -27,17 +27,17 @@ LRGN::~LRGN() {
 void
 LRGN::LoadChunk(FILE *fp, const char *type, long size) {
     if (0 == strcmp("rgn ", type)) {
-        pcRegion[Count++] = new RGN_(fp, size);
+        pcRegion[Count++] = new RGN(fp, size);
         return;
     }
     fseek(fp, size, SEEK_CUR);
 }
 
-RGN_::RGN_(FILE *fp, long size) : RIFF() {
+RGN::RGN(FILE *fp, long size) : RIFF() {
     Load(fp, size);
 }
 
-RGN_::~RGN_() {
+RGN::~RGN() {
     if (nullptr != ppWaveLoop) {
         for (uint32 i = 0; i < pWaveSmpl->loopCount; ++i) {
             free(ppWaveLoop[i]);
@@ -56,7 +56,7 @@ RGN_::~RGN_() {
 }
 
 void
-RGN_::LoadChunk(FILE *fp, const char *type, long size) {
+RGN::LoadChunk(FILE *fp, const char *type, long size) {
     if (0 == strcmp("rgnh", type)) {
         fread_s(&Header, sizeof(Header), size, 1, fp);
         Header.layer = 0;

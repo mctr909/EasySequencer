@@ -4,11 +4,11 @@
 #include "../type.h"
 #include "../riff.h"
 
-class ART_;
+class ART;
 
 class LART : public RIFF {
 public:
-    ART_ *cArt = nullptr;
+    ART *cArt = nullptr;
 
 public:
     LART(FILE *fp, long size);
@@ -18,7 +18,7 @@ protected:
     void LoadChunk(FILE *fp, const char *type, long size) override;
 };
 
-class ART_ {
+class ART {
 public:
     enum struct E_SRC : uint16 {
         // MODULATOR SOURCES
@@ -165,8 +165,8 @@ public:
     CONN **ppConnection = nullptr;
 
 public:
-    ART_(FILE *fp, long size);
-    ~ART_();
+    ART(FILE *fp, long size);
+    ~ART();
 };
 
 #endif /* __DLS_ART_H__ */

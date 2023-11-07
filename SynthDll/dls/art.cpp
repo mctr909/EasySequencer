@@ -15,13 +15,13 @@ LART::~LART() {
 void
 LART::LoadChunk(FILE *fp, const char *type, long size) {
     if (0 == strcmp("art1", type) || 0 == strcmp("art2", type)) {
-        cArt = new ART_(fp, size);
+        cArt = new ART(fp, size);
         return;
     }
     fseek(fp, size, SEEK_CUR);
 }
 
-ART_::ART_(FILE *fp, long size) {
+ART::ART(FILE *fp, long size) {
     fseek(fp, 4, SEEK_CUR);
     fread_s(&Count, 4, 4, 1, fp);
 
@@ -33,7 +33,7 @@ ART_::ART_(FILE *fp, long size) {
     }
 }
 
-ART_::~ART_() {
+ART::~ART() {
     for (uint32 i = 0; i < Count; i++) {
         free(ppConnection[i]);
     }

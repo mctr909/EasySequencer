@@ -8,7 +8,7 @@
 
 LINS::LINS(FILE *fp, long size, int32 count) : RIFF() {
     Count = 0;
-    pcInst = (INS_**)calloc(count, sizeof(INS_*));
+    pcInst = (INS**)calloc(count, sizeof(INS*));
     Load(fp, size);
 }
 
@@ -25,17 +25,17 @@ LINS::~LINS() {
 void
 LINS::LoadChunk(FILE *fp, const char *type, long size) {
     if (0 == strcmp("ins ", type)) {
-        pcInst[Count++] = new INS_(fp, size);
+        pcInst[Count++] = new INS(fp, size);
         return;
     }
     fseek(fp, size, SEEK_CUR);
 }
 
-INS_::INS_(FILE *fp, long size) : RIFF() {
+INS::INS(FILE *fp, long size) : RIFF() {
     Load(fp, size);
 }
 
-INS_::~INS_() {
+INS::~INS() {
     if (nullptr != cLrgn) {
         delete cLrgn;
         cLrgn = nullptr;
@@ -47,7 +47,7 @@ INS_::~INS_() {
 }
 
 void
-INS_::LoadChunk(FILE *fp, const char *type, long size) {
+INS::LoadChunk(FILE *fp, const char *type, long size) {
     if (0 == strcmp("insh", type)) {
         fread_s(&Header, sizeof(Header), size, 1, fp);
         return;

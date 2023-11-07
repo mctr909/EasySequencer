@@ -4,14 +4,14 @@
 #include "../type.h"
 #include "../riff.h"
 
-class INS_;
+class INS;
 class LRGN;
 class LART;
 
 class LINS : public RIFF {
 public:
     int32 Count = 0;
-    INS_ **pcInst = nullptr;
+    INS **pcInst = nullptr;
 
 public:
     LINS(FILE *fp, long size, int32 count);
@@ -21,7 +21,7 @@ protected:
     void LoadChunk(FILE *fp, const char *type, long size) override;
 };
 
-class INS_ : public RIFF {
+class INS : public RIFF {
 public:
     struct INSH {
         uint32 regions;
@@ -41,8 +41,8 @@ public:
     LART *cLart = nullptr;
 
 public:
-    INS_(FILE *fp, long size);
-    ~INS_();
+    INS(FILE *fp, long size);
+    ~INS();
 
 protected:
     void LoadChunk(FILE *fp, const char *type, long size) override;

@@ -4,7 +4,7 @@
 #include "../type.h"
 #include "../riff.h"
 
-class RGN_;
+class RGN;
 class LART;
 struct WSMP_VALUES;
 struct WSMP_LOOP;
@@ -12,7 +12,7 @@ struct WSMP_LOOP;
 class LRGN : public RIFF {
 public:
     int32 Count = 0;
-    RGN_ **pcRegion = nullptr;
+    RGN **pcRegion = nullptr;
 
 public:
     LRGN(FILE *fp, long size, int32 count);
@@ -22,7 +22,7 @@ protected:
     void LoadChunk(FILE *fp, const char *type, long size) override;
 };
 
-class RGN_ : public RIFF {
+class RGN : public RIFF {
 public:
     struct RGNH {
         uint16 keyLow;
@@ -48,8 +48,8 @@ public:
     LART *cLart = nullptr;
 
 public:
-    RGN_(FILE *fp, long size);
-    ~RGN_();
+    RGN(FILE *fp, long size);
+    ~RGN();
 
 protected:
     void LoadChunk(FILE *fp, const char *type, long size) override;
