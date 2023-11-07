@@ -1,11 +1,6 @@
 #include <stdlib.h>
 #include <string.h>
 
-#include "dls/struct.h"
-#include "dls/ins.h"
-#include "dls/rgn.h"
-#include "dls/art.h"
-#include "dls/wave.h"
 #include "dls/main.h"
 
 #include "inst_list.h"
@@ -208,7 +203,7 @@ E_LOAD_STATUS InstList::loadDls(STRING path) {
                 memcpy_s(mppWaveList[waveIndex], sizeof(INST_WAVE), &region, sizeof(INST_WAVE));
                 auto pWave = mppWaveList[waveIndex];
                 pWave->unityNote = (byte)cDlsRgn->pWaveSmpl->unityNote;
-                pWave->pitch = cDlsRgn->pWaveSmpl->getFileTune();
+                pWave->pitch = cDlsRgn->pWaveSmpl->getFineTune();
                 pWave->gain = cDlsRgn->pWaveSmpl->getGain();
                 if (0 == cDlsRgn->pWaveSmpl->loopCount) {
                     auto cDlsWave = cDls->cWvpl->pcWave[pRegion->waveIndex];
@@ -265,7 +260,7 @@ E_LOAD_STATUS InstList::loadDlsWave(DLS *cDls) {
             pWave->loopLength = cDlsWave->DataSize * 8 / cDlsWave->Format.wBitsPerSample;
         } else {
             pWave->unityNote = (byte)cDlsWave->pWaveSmpl->unityNote;
-            pWave->pitch = cDlsWave->pWaveSmpl->getFileTune();
+            pWave->pitch = cDlsWave->pWaveSmpl->getFineTune();
             pWave->gain = cDlsWave->pWaveSmpl->getGain();
             if (cDlsWave->pWaveSmpl->loopCount) {
                 pWave->loopEnable = 1;
@@ -326,30 +321,30 @@ void InstList::loadDlsArt(LART *cLart, INST_ART *pArt) {
     for (uint32 idxC = 0; idxC < cLart->cArt->Count; idxC++) {
         auto pConn = cLart->cArt->ppConnection[idxC];
         switch (pConn->destination) {
-        case E_DLS_DST::PAN:
+        case ART_::E_DST::PAN:
             pArt->pan = (short)pConn->getValue();
             break;
-        case E_DLS_DST::PITCH:
+        case ART_::E_DST::PITCH:
             pArt->pitch = pow(2.0, pConn->getValue() / 1200.0);
             break;
-        case E_DLS_DST::ATTENUATION:
+        case ART_::E_DST::ATTENUATION:
             pArt->gain = pConn->getValue();
             break;
 
-        case E_DLS_DST::EG1_ATTACK_TIME:
+        case ART_::E_DST::EG1_ATTACK_TIME:
             ampA = pConn->getValue();
             pArt->eg_amp.attack = 48.0 / ampA;
             break;
-        case E_DLS_DST::EG1_HOLD_TIME:
+        case ART_::E_DST::EG1_HOLD_TIME:
             pArt->eg_amp.hold = pConn->getValue();
             break;
-        case E_DLS_DST::EG1_DECAY_TIME:
+        case ART_::E_DST::EG1_DECAY_TIME:
             pArt->eg_amp.decay = 32.0 / pConn->getValue();
             break;
-        case E_DLS_DST::EG1_SUSTAIN_LEVEL:
+        case ART_::E_DST::EG1_SUSTAIN_LEVEL:
             pArt->eg_amp.sustain = pConn->getValue();
             break;
-        case E_DLS_DST::EG1_RELEASE_TIME:
+        case ART_::E_DST::EG1_RELEASE_TIME:
             pArt->eg_amp.release = 24.0 / pConn->getValue();
             break;
 

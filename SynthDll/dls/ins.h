@@ -3,7 +3,6 @@
 
 #include "../type.h"
 #include "../riff.h"
-#include "struct.h"
 
 class INS_;
 class LRGN;
@@ -24,7 +23,20 @@ protected:
 
 class INS_ : public RIFF {
 public:
-    DLS_INSH Header = { 0 };
+    struct INSH {
+        uint32 regions;
+        byte bankLSB;
+        byte bankMSB;
+        byte reserve1;
+        byte bankFlags;
+        byte progNum;
+        byte reserve2;
+        byte reserve3;
+        byte reserve4;
+    };
+
+public:
+    INSH Header = { 0 };
     LRGN *cLrgn = nullptr;
     LART *cLart = nullptr;
 

@@ -6,6 +6,8 @@
 
 class WAVE;
 class LART;
+struct WSMP_VALUES;
+struct WSMP_LOOP;
 
 class WVPL : public RIFF {
 public:
@@ -23,8 +25,8 @@ protected:
 class WAVE : public RIFF {
 public:
     WAVE_FMT Format = { 0 };
-    DLS_WSMP *pWaveSmpl = nullptr;
-    DLS_LOOP **ppWaveLoop = nullptr;
+    WSMP_VALUES *pWaveSmpl = nullptr;
+    WSMP_LOOP **ppWaveLoop = nullptr;
     uint32 DataSize = 0;
     byte *pData = nullptr;
 

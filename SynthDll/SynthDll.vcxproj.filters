@@ -37,6 +37,9 @@
     <ClCompile Include="inst_list.cpp">
       <Filter>source</Filter>
     </ClCompile>
+    <ClCompile Include="dls\wsmp.cpp">
+      <Filter>source\dls</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="dllmain.h">
@@ -75,7 +78,7 @@
     <ClInclude Include="dls\rgn.h">
       <Filter>header\dls</Filter>
     </ClInclude>
-    <ClInclude Include="dls\struct.h">
+    <ClInclude Include="dls\wsmp.h">
       <Filter>header\dls</Filter>
     </ClInclude>
     <ClInclude Include="dls\wave.h">

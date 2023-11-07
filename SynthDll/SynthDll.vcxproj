@@ -155,6 +155,7 @@
     <ClCompile Include="dls\ins.cpp" />
     <ClCompile Include="dls\rgn.cpp" />
     <ClCompile Include="dls\wave.cpp" />
+    <ClCompile Include="dls\wsmp.cpp" />
     <ClCompile Include="inst_list.cpp" />
     <ClCompile Include="riff.cpp" />
     <ClCompile Include="synth\channel.cpp" />
@@ -169,7 +170,7 @@
     <ClInclude Include="dls\ins.h" />
     <ClInclude Include="dls\rgn.h" />
     <ClInclude Include="dls\wave.h" />
-    <ClInclude Include="dls\struct.h" />
+    <ClInclude Include="dls\wsmp.h" />
     <ClInclude Include="inst_list.h" />
     <ClInclude Include="riff.h" />
     <ClInclude Include="synth\channel.h" />

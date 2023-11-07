@@ -25,11 +25,11 @@ ART_::ART_(FILE *fp, long size) {
     fseek(fp, 4, SEEK_CUR);
     fread_s(&Count, 4, 4, 1, fp);
 
-    ppConnection = (DLS_CONN**)calloc(Count, sizeof(DLS_CONN*));
+    ppConnection = (CONN**)calloc(Count, sizeof(CONN*));
 
     for (uint32 i = 0; i < Count; i++) {
-        ppConnection[i] = (DLS_CONN*)malloc(sizeof(DLS_CONN));
-        fread_s(ppConnection[i], sizeof(DLS_CONN), sizeof(DLS_CONN), 1, fp);
+        ppConnection[i] = (CONN*)malloc(sizeof(CONN));
+        fread_s(ppConnection[i], sizeof(CONN), sizeof(CONN), 1, fp);
     }
 }
 

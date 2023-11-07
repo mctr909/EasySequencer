@@ -3,7 +3,7 @@
 
 #include "../riff.h"
 
-#include "struct.h"
+#include "wsmp.h"
 #include "wave.h"
 
 WVPL::WVPL(FILE *fp, long size, int32 count) : RIFF() {
@@ -67,12 +67,12 @@ WAVE::LoadChunk(FILE *fp, const char *type, long size) {
         return;
     }
     if (0 == strcmp("wsmp", type)) {
-        pWaveSmpl = (DLS_WSMP*)malloc(sizeof(DLS_WSMP));
-        fread_s(pWaveSmpl, sizeof(DLS_WSMP), sizeof(DLS_WSMP), 1, fp);
-        ppWaveLoop = (DLS_LOOP**)calloc(pWaveSmpl->loopCount, sizeof(DLS_LOOP*));
+        pWaveSmpl = (WSMP_VALUES*)malloc(sizeof(WSMP_VALUES));
+        fread_s(pWaveSmpl, sizeof(WSMP_VALUES), sizeof(WSMP_VALUES), 1, fp);
+        ppWaveLoop = (WSMP_LOOP**)calloc(pWaveSmpl->loopCount, sizeof(WSMP_LOOP*));
         for (uint32 i = 0; i < pWaveSmpl->loopCount; ++i) {
-            ppWaveLoop[i] = (DLS_LOOP*)malloc(sizeof(DLS_LOOP));
-            fread_s(ppWaveLoop[i], sizeof(DLS_LOOP), sizeof(DLS_LOOP), 1, fp);
+            ppWaveLoop[i] = (WSMP_LOOP*)malloc(sizeof(WSMP_LOOP));
+            fread_s(ppWaveLoop[i], sizeof(WSMP_LOOP), sizeof(WSMP_LOOP), 1, fp);
         }
         return;
     }

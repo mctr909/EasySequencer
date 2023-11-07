@@ -3,10 +3,11 @@
 
 #include "../type.h"
 #include "../riff.h"
-#include "struct.h"
 
 class RGN_;
 class LART;
+struct WSMP_VALUES;
+struct WSMP_LOOP;
 
 class LRGN : public RIFF {
 public:
@@ -23,10 +24,27 @@ protected:
 
 class RGN_ : public RIFF {
 public:
-    DLS_RGNH Header = { 0 };
-    DLS_WLNK WaveLink = { 0 };
-    DLS_WSMP *pWaveSmpl = nullptr;
-    DLS_LOOP **ppWaveLoop = nullptr;
+    struct RGNH {
+        uint16 keyLow;
+        uint16 keyHigh;
+        uint16 velocityLow;
+        uint16 velocityHigh;
+        uint16 options;
+        uint16 keyGroup;
+        uint16 layer;
+    };
+    struct WLNK {
+        uint16 options;
+        uint16 phaseGroup;
+        uint32 channel;
+        uint32 tableIndex;
+    };
+
+public:
+    RGNH Header = { 0 };
+    WLNK WaveLink = { 0 };
+    WSMP_VALUES *pWaveSmpl = nullptr;
+    WSMP_LOOP **ppWaveLoop = nullptr;
     LART *cLart = nullptr;
 
 public:

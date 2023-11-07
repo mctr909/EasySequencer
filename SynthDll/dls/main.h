@@ -4,8 +4,11 @@
 #include "../type.h"
 #include "../riff.h"
 
-class LINS;
-class WVPL;
+#include "wsmp.h"
+#include "ins.h"
+#include "rgn.h"
+#include "art.h"
+#include "wave.h"
 
 class DLS : public RIFF {
 public:
