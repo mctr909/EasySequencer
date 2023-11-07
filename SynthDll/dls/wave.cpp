@@ -40,12 +40,9 @@ WAVE::~WAVE() {
         free(mp_data);
         mp_data = nullptr;
     }
-    if (nullptr != mpp_loop) {
-        for (uint32 i = 0; i < mp_wsmp->loop_count; ++i) {
-            free(mpp_loop[i]);
-        }
-        free(mpp_loop);
-        mpp_loop = nullptr;
+    if (nullptr != mp_loop) {
+        delete[] mp_loop;
+        mp_loop = nullptr;
     }
     if (nullptr != mp_wsmp) {
         free(mp_wsmp);
@@ -61,18 +58,34 @@ WAVE::load_chunk(FILE *fp, const char *type, long size) {
         return;
     }
     if (0 == strcmp("data", type)) {
-        m_data_size = (uint32)size;
         mp_data = (byte*)malloc(size);
-        fread_s(mp_data, size, size, 1, fp);
+        if (nullptr == mp_data) {
+            m_data_size = 0;
+            fseek(fp, size, SEEK_CUR);
+        } else {
+            m_data_size = (uint32)size;
+            fread_s(mp_data, size, size, 1, fp);
+        }
         return;
     }
     if (0 == strcmp("wsmp", type)) {
+        if (nullptr != mp_loop) {
+            delete[] mp_loop;
+            mp_loop = nullptr;
+        }
+        if (nullptr != mp_wsmp) {
+            free(mp_wsmp);
+            mp_wsmp = nullptr;
+        }
         mp_wsmp = (WSMP_VALUES*)malloc(sizeof(WSMP_VALUES));
+        if (nullptr == mp_wsmp) {
+            fseek(fp, size, SEEK_CUR);
+            return;
+        }
         fread_s(mp_wsmp, sizeof(WSMP_VALUES), sizeof(WSMP_VALUES), 1, fp);
-        mpp_loop = (WSMP_LOOP**)calloc(mp_wsmp->loop_count, sizeof(WSMP_LOOP*));
+        mp_loop = new WSMP_LOOP[mp_wsmp->loop_count];
         for (uint32 i = 0; i < mp_wsmp->loop_count; ++i) {
-            mpp_loop[i] = (WSMP_LOOP*)malloc(sizeof(WSMP_LOOP));
-            fread_s(mpp_loop[i], sizeof(WSMP_LOOP), sizeof(WSMP_LOOP), 1, fp);
+            fread_s(&mp_loop[i], sizeof(WSMP_LOOP), sizeof(WSMP_LOOP), 1, fp);
         }
         return;
     }

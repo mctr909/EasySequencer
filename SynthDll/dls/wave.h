@@ -25,7 +25,7 @@ class WAVE : public RIFF {
 public:
     WAVE_FMT m_fmt = { 0 };
     WSMP_VALUES *mp_wsmp = nullptr;
-    WSMP_LOOP **mpp_loop = nullptr;
+    WSMP_LOOP *mp_loop = nullptr;
     uint32 m_data_size = 0;
     byte *mp_data = nullptr;
 

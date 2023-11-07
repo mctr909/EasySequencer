@@ -24,19 +24,15 @@ LART::load_chunk(FILE *fp, const char *type, long size) {
 ART::ART(FILE *fp, long size) {
     fseek(fp, 4, SEEK_CUR);
     fread_s(&m_count, 4, 4, 1, fp);
-    mpp_conn = (CONN**)calloc(m_count, sizeof(CONN*));
+    mp_conn = new CONN[m_count];
     for (uint32 i = 0; i < m_count; i++) {
-        mpp_conn[i] = (CONN*)malloc(sizeof(CONN));
-        fread_s(mpp_conn[i], sizeof(CONN), sizeof(CONN), 1, fp);
+        fread_s(&mp_conn[i], sizeof(CONN), sizeof(CONN), 1, fp);
     }
 }
 
 ART::~ART() {
-    for (uint32 i = 0; i < m_count; i++) {
-        free(mpp_conn[i]);
-    }
-    free(mpp_conn);
-    mpp_conn = nullptr;
+    delete[] mp_conn;
+    mp_conn = nullptr;
 }
 
 double

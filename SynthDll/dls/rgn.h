@@ -43,7 +43,7 @@ public:
     RGNH m_rgnh = { 0 };
     WLNK m_wlnk = { 0 };
     WSMP_VALUES *mp_wsmp = nullptr;
-    WSMP_LOOP **mpp_loop = nullptr;
+    WSMP_LOOP *mp_loop = nullptr;
     LART* mc_lart = nullptr;
 
 public:

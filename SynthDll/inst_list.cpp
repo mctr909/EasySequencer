@@ -211,10 +211,10 @@ E_LOAD_STATUS InstList::loadDls(STRING path) {
                     pWave->loopBegin = 0;
                     pWave->loopLength = cDlsWave->m_data_size * 8 / cDlsWave->m_fmt.wBitsPerSample;
                 } else {
-                    auto pLoop = cDlsRgn->mpp_loop[0];
+                    auto loop = cDlsRgn->mp_loop[0];
                     pWave->loopEnable = 1;
-                    pWave->loopBegin = pLoop->start;
-                    pWave->loopLength = pLoop->length;
+                    pWave->loopBegin = loop.start;
+                    pWave->loopLength = loop.length;
                 }
                 pRegion->wsmpIndex = waveIndex;
                 waveIndex++;
@@ -264,8 +264,8 @@ E_LOAD_STATUS InstList::loadDlsWave(DLS *cDls) {
             pWave->gain = cDlsWave->mp_wsmp->gain();
             if (cDlsWave->mp_wsmp->loop_count) {
                 pWave->loopEnable = 1;
-                pWave->loopBegin = cDlsWave->mpp_loop[0]->start;
-                pWave->loopLength = cDlsWave->mpp_loop[0]->length;
+                pWave->loopBegin = cDlsWave->mp_loop[0].start;
+                pWave->loopLength = cDlsWave->mp_loop[0].length;
             } else {
                 pWave->loopEnable = 0;
                 pWave->loopBegin = 0;
@@ -319,33 +319,33 @@ void InstList::loadDlsArt(LART *cLart, INST_ART *pArt) {
     auto ampA = 0.002;
 
     for (uint32 idxC = 0; idxC < cLart->mc_art->m_count; idxC++) {
-        auto pConn = cLart->mc_art->mpp_conn[idxC];
-        switch (pConn->destination) {
+        auto conn = cLart->mc_art->mp_conn[idxC];
+        switch (conn.destination) {
         case ART::E_DST::PAN:
-            pArt->pan = (short)pConn->value();
+            pArt->pan = (short)conn.value();
             break;
         case ART::E_DST::PITCH:
-            pArt->pitch = pow(2.0, pConn->value() / 1200.0);
+            pArt->pitch = pow(2.0, conn.value() / 1200.0);
             break;
         case ART::E_DST::ATTENUATION:
-            pArt->gain = pConn->value();
+            pArt->gain = conn.value();
             break;
 
         case ART::E_DST::EG1_ATTACK_TIME:
-            ampA = pConn->value();
+            ampA = conn.value();
             pArt->eg_amp.attack = 48.0 / ampA;
             break;
         case ART::E_DST::EG1_HOLD_TIME:
-            pArt->eg_amp.hold = pConn->value();
+            pArt->eg_amp.hold = conn.value();
             break;
         case ART::E_DST::EG1_DECAY_TIME:
-            pArt->eg_amp.decay = 32.0 / pConn->value();
+            pArt->eg_amp.decay = 32.0 / conn.value();
             break;
         case ART::E_DST::EG1_SUSTAIN_LEVEL:
-            pArt->eg_amp.sustain = pConn->value();
+            pArt->eg_amp.sustain = conn.value();
             break;
         case ART::E_DST::EG1_RELEASE_TIME:
-            pArt->eg_amp.release = 24.0 / pConn->value();
+            pArt->eg_amp.release = 24.0 / conn.value();
             break;
 
         default:

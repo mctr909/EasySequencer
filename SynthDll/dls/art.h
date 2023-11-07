@@ -115,7 +115,7 @@ public:
 
 public:
     uint32 m_count = 0;
-    CONN **mpp_conn = nullptr;
+    CONN* mp_conn = nullptr;
 
 public:
     ART(FILE *fp, long size);
