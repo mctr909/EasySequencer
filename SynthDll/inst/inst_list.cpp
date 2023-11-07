@@ -162,10 +162,14 @@ E_LOAD_STATUS InstList::loadDls(STRING path) {
         pInst->id.bankLSB = cDlsInst->Header.bankLSB;
         pInst->id.progNum = cDlsInst->Header.progNum;
         pInst->layerIndex = layerIndex;
-        pInst->pName = (char*)malloc(sizeof(cDlsInst->Name));
-        memcpy_s(pInst->pName, sizeof(cDlsInst->Name), cDlsInst->Name, sizeof(cDlsInst->Name));
-        pInst->pCategory = (char*)malloc(sizeof(cDlsInst->Category));
-        memcpy_s(pInst->pCategory, sizeof(cDlsInst->Category), cDlsInst->Category, sizeof(cDlsInst->Category));
+        auto name = cDlsInst->mp_info->get(RIFF::INFO::INAM);
+        auto name_len = name.size() + 1;
+        pInst->pName = (char*)calloc(name_len, 1);
+        strcpy_s(pInst->pName, name_len, name.c_str());
+        auto category = cDlsInst->mp_info->get(RIFF::INFO::ICAT);
+        auto category_len = category.size() + 1;
+        pInst->pCategory = (char*)calloc(category_len, 1);
+        strcpy_s(pInst->pCategory, category_len, category.c_str());
 
         if (nullptr == cDlsInst->cLart) {
             pInst->artIndex = UINT_MAX;

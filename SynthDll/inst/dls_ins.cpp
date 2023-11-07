@@ -9,7 +9,7 @@
 
 #include "dls_ins.h"
 
-LINS::LINS(FILE *fp, long size, int32 count) : Riff() {
+LINS::LINS(FILE *fp, long size, int32 count) : RIFF() {
     Count = 0;
     pcInst = (INS_**)calloc(count, sizeof(INS_*));
     Load(fp, size);
@@ -34,7 +34,7 @@ LINS::LoadChunk(FILE *fp, const char *type, long size) {
     fseek(fp, size, SEEK_CUR);
 }
 
-INS_::INS_(FILE *fp, long size) : Riff() {
+INS_::INS_(FILE *fp, long size) : RIFF() {
     Load(fp, size);
 }
 
@@ -47,19 +47,6 @@ INS_::~INS_() {
         delete cLart;
         cLart = nullptr;
     }
-}
-
-void
-INS_::LoadInfo(FILE *fp, const char *type, long size) {
-    if (0 == strcmp("INAM", type)) {
-        fread_s(&Name, sizeof(Name), size, 1, fp);
-        return;
-    }
-    if (0 == strcmp("ICAT", type)) {
-        fread_s(&Category, sizeof(Category), size, 1, fp);
-        return;
-    }
-    fseek(fp, size, SEEK_CUR);
 }
 
 void

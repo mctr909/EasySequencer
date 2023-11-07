@@ -35,7 +35,7 @@
       <Filter>source</Filter>
     </ClCompile>
     <ClCompile Include="inst\riff.cpp">
-      <Filter>source\inst</Filter>
+      <Filter>source</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -82,7 +82,7 @@
       <Filter>header</Filter>
     </ClInclude>
     <ClInclude Include="inst\riff.h">
-      <Filter>header\inst</Filter>
+      <Filter>header</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

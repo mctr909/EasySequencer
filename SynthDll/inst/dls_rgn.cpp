@@ -8,7 +8,7 @@
 
 #include "dls_rgn.h"
 
-LRGN::LRGN(FILE *fp, long size, int32 count) : Riff() {
+LRGN::LRGN(FILE *fp, long size, int32 count) : RIFF() {
     Count = 0;
     pcRegion = (RGN_**)calloc(count, sizeof(RGN_*));
     Load(fp, size);
@@ -33,7 +33,7 @@ LRGN::LoadChunk(FILE *fp, const char *type, long size) {
     fseek(fp, size, SEEK_CUR);
 }
 
-RGN_::RGN_(FILE *fp, long size) : Riff() {
+RGN_::RGN_(FILE *fp, long size) : RIFF() {
     Load(fp, size);
 }
 
@@ -59,6 +59,7 @@ void
 RGN_::LoadChunk(FILE *fp, const char *type, long size) {
     if (0 == strcmp("rgnh", type)) {
         fread_s(&Header, sizeof(Header), size, 1, fp);
+        Header.layer = 0;
         return;
     }
     if (0 == strcmp("wlnk", type)) {

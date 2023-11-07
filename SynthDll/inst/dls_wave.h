@@ -6,7 +6,7 @@
 class WAVE;
 class LART;
 
-class WVPL : public Riff {
+class WVPL : public RIFF {
 public:
     int32 Count = 0;
     WAVE **pcWave = nullptr;
@@ -19,10 +19,8 @@ protected:
     void LoadChunk(FILE *fp, const char *type, long size) override;
 };
 
-class WAVE : public Riff {
+class WAVE : public RIFF {
 public:
-    char Name[32] = { 0 };
-    char Category[32] = { 0 };
     WAVE_FMT Format = { 0 };
     DLS_WSMP *pWaveSmpl = nullptr;
     DLS_LOOP **ppWaveLoop = nullptr;
@@ -34,7 +32,6 @@ public:
     ~WAVE();
 
 protected:
-    void LoadInfo(FILE *fp, const char *type, long size) override;
     void LoadChunk(FILE *fp, const char *type, long size) override;
 };
 

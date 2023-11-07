@@ -6,7 +6,7 @@
 
 class ART_;
 
-class LART : public Riff {
+class LART : public RIFF {
 public:
     ART_ *cArt = nullptr;
 

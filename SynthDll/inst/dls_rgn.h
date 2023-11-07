@@ -7,7 +7,7 @@
 class RGN_;
 class LART;
 
-class LRGN : public Riff {
+class LRGN : public RIFF {
 public:
     int32 Count = 0;
     RGN_ **pcRegion = nullptr;
@@ -20,7 +20,7 @@ protected:
     void LoadChunk(FILE *fp, const char *type, long size) override;
 };
 
-class RGN_ : public Riff {
+class RGN_ : public RIFF {
 public:
     DLS_RGNH Header = { 0 };
     DLS_WLNK WaveLink = { 0 };

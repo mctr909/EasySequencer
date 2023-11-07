@@ -7,7 +7,7 @@
 
 #include "dls.h"
 
-DLS::DLS() : Riff() { }
+DLS::DLS() : RIFF() { }
 
 DLS::~DLS() {
     if (nullptr != cLins) {
@@ -21,7 +21,7 @@ DLS::~DLS() {
 }
 
 E_LOAD_STATUS DLS::Load(STRING path) {
-    return Riff::Load(path, 0);
+    return RIFF::Load(path, 0);
 }
 
 bool

@@ -5,7 +5,7 @@
 
 #include "dls_art.h"
 
-LART::LART(FILE *fp, long size) : Riff() {
+LART::LART(FILE *fp, long size) : RIFF() {
     Load(fp, size);
 }
 

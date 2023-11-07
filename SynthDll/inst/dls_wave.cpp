@@ -7,7 +7,7 @@
 
 #include "dls_wave.h"
 
-WVPL::WVPL(FILE *fp, long size, int32 count) : Riff() {
+WVPL::WVPL(FILE *fp, long size, int32 count) : RIFF() {
     Count = 0;
     pcWave = (WAVE**)calloc(count, sizeof(WAVE*));
     Load(fp, size);
@@ -32,7 +32,7 @@ WVPL::LoadChunk(FILE *fp, const char *type, long size) {
     fseek(fp, size, SEEK_CUR);
 }
 
-WAVE::WAVE(FILE *fp, long size) : Riff() {
+WAVE::WAVE(FILE *fp, long size) : RIFF() {
     Load(fp, size);
 }
 
@@ -52,19 +52,6 @@ WAVE::~WAVE() {
         free(pWaveSmpl);
         pWaveSmpl = nullptr;
     }
-}
-
-void
-WAVE::LoadInfo(FILE *fp, const char *type, long size) {
-    if (0 == strcmp("INAM", type)) {
-        fread_s(&Name, sizeof(Name), size, 1, fp);
-        return;
-    }
-    if (0 == strcmp("ICAT", type)) {
-        fread_s(&Category, sizeof(Category), size, 1, fp);
-        return;
-    }
-    fseek(fp, size, SEEK_CUR);
 }
 
 void

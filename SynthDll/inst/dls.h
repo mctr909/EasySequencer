@@ -6,7 +6,7 @@
 class LINS;
 class WVPL;
 
-class DLS : public Riff {
+class DLS : public RIFF {
 public:
     LINS *cLins = nullptr;
     WVPL *cWvpl = nullptr;
