@@ -2,6 +2,7 @@
 #define __DLS_H__
 
 #include "../type.h"
+#include "../riff.h"
 
 class LINS;
 class WVPL;

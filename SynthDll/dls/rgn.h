@@ -2,7 +2,8 @@
 #define __DLS_RGN_H__
 
 #include "../type.h"
-#include "dls_struct.h"
+#include "../riff.h"
+#include "struct.h"
 
 class RGN_;
 class LART;

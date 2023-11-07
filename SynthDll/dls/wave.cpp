@@ -1,11 +1,10 @@
 #include <stdlib.h>
 #include <string.h>
 
-#include "riff.h"
+#include "../riff.h"
 
-#include "dls_struct.h"
-
-#include "dls_wave.h"
+#include "struct.h"
+#include "wave.h"
 
 WVPL::WVPL(FILE *fp, long size, int32 count) : RIFF() {
     Count = 0;

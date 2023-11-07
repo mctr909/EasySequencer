@@ -1,14 +1,12 @@
 #include <stdlib.h>
 #include <string.h>
 
-#include "riff.h"
-
-#include "dls_struct.h"
-#include "dls_ins.h"
-#include "dls_rgn.h"
-#include "dls_art.h"
-#include "dls_wave.h"
-#include "dls.h"
+#include "dls/struct.h"
+#include "dls/ins.h"
+#include "dls/rgn.h"
+#include "dls/art.h"
+#include "dls/wave.h"
+#include "dls/main.h"
 
 #include "inst_list.h"
 

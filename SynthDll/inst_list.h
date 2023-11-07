@@ -1,8 +1,8 @@
 #ifndef __INST_LIST_H__
 #define __INST_LIST_H__
 
-#include "../type.h"
 #include <stdio.h>
+#include "type.h"
 
 /******************************************************************************/
 #pragma pack(4)

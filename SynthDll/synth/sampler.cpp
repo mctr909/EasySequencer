@@ -1,4 +1,4 @@
-#include "../inst/inst_list.h"
+#include "../inst_list.h"
 
 #include "channel.h"
 #include "sampler.h"

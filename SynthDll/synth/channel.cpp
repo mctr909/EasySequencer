@@ -1,7 +1,7 @@
 #include <stdlib.h>
 #include <math.h>
 
-#include "../inst/inst_list.h"
+#include "../inst_list.h"
 
 #include "filter.h"
 #include "sampler.h"

@@ -1,11 +1,10 @@
 #include <string.h>
 
-#include "riff.h"
+#include "../riff.h"
 
-#include "dls_ins.h"
-#include "dls_wave.h"
-
-#include "dls.h"
+#include "ins.h"
+#include "wave.h"
+#include "main.h"
 
 DLS::DLS() : RIFF() { }
 

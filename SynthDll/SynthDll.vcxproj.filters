@@ -4,24 +4,6 @@
     <ClCompile Include="dllmain.cpp">
       <Filter>source</Filter>
     </ClCompile>
-    <ClCompile Include="inst\dls.cpp">
-      <Filter>source\inst</Filter>
-    </ClCompile>
-    <ClCompile Include="inst\dls_art.cpp">
-      <Filter>source\inst</Filter>
-    </ClCompile>
-    <ClCompile Include="inst\dls_ins.cpp">
-      <Filter>source\inst</Filter>
-    </ClCompile>
-    <ClCompile Include="inst\dls_rgn.cpp">
-      <Filter>source\inst</Filter>
-    </ClCompile>
-    <ClCompile Include="inst\dls_wave.cpp">
-      <Filter>source\inst</Filter>
-    </ClCompile>
-    <ClCompile Include="inst\inst_list.cpp">
-      <Filter>source\inst</Filter>
-    </ClCompile>
     <ClCompile Include="synth\channel.cpp">
       <Filter>source\synth</Filter>
     </ClCompile>
@@ -34,7 +16,25 @@
     <ClCompile Include="waveout.cpp">
       <Filter>source</Filter>
     </ClCompile>
-    <ClCompile Include="inst\riff.cpp">
+    <ClCompile Include="riff.cpp">
+      <Filter>source</Filter>
+    </ClCompile>
+    <ClCompile Include="dls\art.cpp">
+      <Filter>source\dls</Filter>
+    </ClCompile>
+    <ClCompile Include="dls\ins.cpp">
+      <Filter>source\dls</Filter>
+    </ClCompile>
+    <ClCompile Include="dls\main.cpp">
+      <Filter>source\dls</Filter>
+    </ClCompile>
+    <ClCompile Include="dls\rgn.cpp">
+      <Filter>source\dls</Filter>
+    </ClCompile>
+    <ClCompile Include="dls\wave.cpp">
+      <Filter>source\dls</Filter>
+    </ClCompile>
+    <ClCompile Include="inst_list.cpp">
       <Filter>source</Filter>
     </ClCompile>
   </ItemGroup>
@@ -44,27 +44,6 @@
     </ClInclude>
     <ClInclude Include="type.h">
       <Filter>header</Filter>
-    </ClInclude>
-    <ClInclude Include="inst\dls.h">
-      <Filter>header\inst</Filter>
-    </ClInclude>
-    <ClInclude Include="inst\dls_art.h">
-      <Filter>header\inst</Filter>
-    </ClInclude>
-    <ClInclude Include="inst\dls_ins.h">
-      <Filter>header\inst</Filter>
-    </ClInclude>
-    <ClInclude Include="inst\dls_rgn.h">
-      <Filter>header\inst</Filter>
-    </ClInclude>
-    <ClInclude Include="inst\dls_struct.h">
-      <Filter>header\inst</Filter>
-    </ClInclude>
-    <ClInclude Include="inst\dls_wave.h">
-      <Filter>header\inst</Filter>
-    </ClInclude>
-    <ClInclude Include="inst\inst_list.h">
-      <Filter>header\inst</Filter>
     </ClInclude>
     <ClInclude Include="synth\channel.h">
       <Filter>header\synth</Filter>
@@ -81,7 +60,28 @@
     <ClInclude Include="waveout.h">
       <Filter>header</Filter>
     </ClInclude>
-    <ClInclude Include="inst\riff.h">
+    <ClInclude Include="riff.h">
+      <Filter>header</Filter>
+    </ClInclude>
+    <ClInclude Include="dls\art.h">
+      <Filter>header\dls</Filter>
+    </ClInclude>
+    <ClInclude Include="dls\ins.h">
+      <Filter>header\dls</Filter>
+    </ClInclude>
+    <ClInclude Include="dls\main.h">
+      <Filter>header\dls</Filter>
+    </ClInclude>
+    <ClInclude Include="dls\rgn.h">
+      <Filter>header\dls</Filter>
+    </ClInclude>
+    <ClInclude Include="dls\struct.h">
+      <Filter>header\dls</Filter>
+    </ClInclude>
+    <ClInclude Include="dls\wave.h">
+      <Filter>header\dls</Filter>
+    </ClInclude>
+    <ClInclude Include="inst_list.h">
       <Filter>header</Filter>
     </ClInclude>
   </ItemGroup>
@@ -89,20 +89,20 @@
     <Filter Include="header">
       <UniqueIdentifier>{ca8a1f3c-90e4-4fc9-b673-e09f0c64175b}</UniqueIdentifier>
     </Filter>
-    <Filter Include="header\inst">
-      <UniqueIdentifier>{da9a1a1b-068d-4c91-ae73-c0c21a0450c4}</UniqueIdentifier>
-    </Filter>
     <Filter Include="header\synth">
       <UniqueIdentifier>{bdbbdea2-0994-4477-8c7d-e3963e3120ea}</UniqueIdentifier>
     </Filter>
     <Filter Include="source">
       <UniqueIdentifier>{37a6fcfc-9db5-4bb3-8d3c-769eed5fa7a3}</UniqueIdentifier>
     </Filter>
-    <Filter Include="source\inst">
-      <UniqueIdentifier>{d79ea36d-3efa-4b36-b2fc-ac5b25a9fbb5}</UniqueIdentifier>
-    </Filter>
     <Filter Include="source\synth">
       <UniqueIdentifier>{4b61dbfb-8425-4352-9904-ea99c347dcc9}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="source\dls">
+      <UniqueIdentifier>{d79ea36d-3efa-4b36-b2fc-ac5b25a9fbb5}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="header\dls">
+      <UniqueIdentifier>{da9a1a1b-068d-4c91-ae73-c0c21a0450c4}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
 </Project>

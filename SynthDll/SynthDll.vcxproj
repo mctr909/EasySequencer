@@ -150,13 +150,13 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClCompile Include="inst\dls.cpp" />
-    <ClCompile Include="inst\dls_art.cpp" />
-    <ClCompile Include="inst\dls_ins.cpp" />
-    <ClCompile Include="inst\dls_rgn.cpp" />
-    <ClCompile Include="inst\dls_wave.cpp" />
-    <ClCompile Include="inst\inst_list.cpp" />
-    <ClCompile Include="inst\riff.cpp" />
+    <ClCompile Include="dls\main.cpp" />
+    <ClCompile Include="dls\art.cpp" />
+    <ClCompile Include="dls\ins.cpp" />
+    <ClCompile Include="dls\rgn.cpp" />
+    <ClCompile Include="dls\wave.cpp" />
+    <ClCompile Include="inst_list.cpp" />
+    <ClCompile Include="riff.cpp" />
     <ClCompile Include="synth\channel.cpp" />
     <ClCompile Include="synth\sampler.cpp" />
     <ClCompile Include="synth\synth.cpp" />
@@ -164,14 +164,14 @@
     <ClCompile Include="waveout.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="inst\dls.h" />
-    <ClInclude Include="inst\dls_art.h" />
-    <ClInclude Include="inst\dls_ins.h" />
-    <ClInclude Include="inst\dls_rgn.h" />
-    <ClInclude Include="inst\dls_struct.h" />
-    <ClInclude Include="inst\dls_wave.h" />
-    <ClInclude Include="inst\inst_list.h" />
-    <ClInclude Include="inst\riff.h" />
+    <ClInclude Include="dls\main.h" />
+    <ClInclude Include="dls\art.h" />
+    <ClInclude Include="dls\ins.h" />
+    <ClInclude Include="dls\rgn.h" />
+    <ClInclude Include="dls\wave.h" />
+    <ClInclude Include="dls\struct.h" />
+    <ClInclude Include="inst_list.h" />
+    <ClInclude Include="riff.h" />
     <ClInclude Include="synth\channel.h" />
     <ClInclude Include="synth\filter.h" />
     <ClInclude Include="synth\sampler.h" />

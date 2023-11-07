@@ -5,7 +5,7 @@
 #include <string>
 #include <vector>
 
-#include "../type.h"
+#include "type.h"
 
 /******************************************************************************/
 class RIFF {

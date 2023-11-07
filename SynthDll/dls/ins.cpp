@@ -2,12 +2,9 @@
 #include <stdlib.h>
 #include <string.h>
 
-#include "riff.h"
-
-#include "dls_rgn.h"
-#include "dls_art.h"
-
-#include "dls_ins.h"
+#include "rgn.h"
+#include "art.h"
+#include "ins.h"
 
 LINS::LINS(FILE *fp, long size, int32 count) : RIFF() {
     Count = 0;

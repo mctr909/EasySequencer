@@ -2,6 +2,7 @@
 #define __DLS_WAVE_H__
 
 #include "../type.h"
+#include "../riff.h"
 
 class WAVE;
 class LART;
