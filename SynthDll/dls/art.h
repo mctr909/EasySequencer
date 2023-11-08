@@ -20,7 +20,6 @@ protected:
 class ART {
 public:
     enum struct E_SRC : uint16 {
-        // MODULATOR SOURCES
         NONE = 0x0000,
         LFO = 0x0001,
         KEY_ON_VELOCITY = 0x0002,
@@ -32,7 +31,6 @@ public:
         CHANNEL_PRESSURE = 0x0008,
         VIBRATO = 0x0009,
 
-        // MIDI CONTROLLER SOURCES
         CC1 = 0x0081,
         CC7 = 0x0087,
         CC10 = 0x008A,
@@ -40,14 +38,13 @@ public:
         CC91 = 0x00DB,
         CC93 = 0x00DD,
 
-        // REGISTERED PARAMETER NUMBERS
         RPN0 = 0x0100,
         RPN1 = 0x0101,
         RPN2 = 0x0102
     };
 
     enum struct E_DST : uint16 {
-        // GENERIC DESTINATIONS
+        /* GENERIC DESTINATIONS */
         NONE = 0x0000,
         ATTENUATION = 0x0001,
         RESERVED = 0x0002,
@@ -55,7 +52,7 @@ public:
         PAN = 0x0004,
         KEY_NUMBER = 0x0005,
 
-        // CHANNEL OUTPUT DESTINATIONS
+        /* CHANNEL OUTPUT DESTINATIONS */
         LEFT = 0x0010,
         RIGHT = 0x0011,
         CENTER = 0x0012,
@@ -65,15 +62,12 @@ public:
         CHORUS = 0x0080,
         REVERB = 0x0081,
 
-        // MODULATOR LFO DESTINATIONS
         LFO_FREQUENCY = 0x0104,
         LFO_START_DELAY = 0x0105,
 
-        // VIBRATO LFO DESTINATIONS
         VIB_FREQUENCY = 0x0114,
         VIB_START_DELAY = 0x0115,
 
-        // EG1 DESTINATIONS
         EG1_ATTACK_TIME = 0x0206,
         EG1_DECAY_TIME = 0x0207,
         EG1_RESERVED = 0x0208,
@@ -83,7 +77,6 @@ public:
         EG1_HOLD_TIME = 0x020C,
         EG1_SHUTDOWN_TIME = 0x020D,
 
-        // EG2 DESTINATIONS
         EG2_ATTACK_TIME = 0x030A,
         EG2_DECAY_TIME = 0x030B,
         EG2_RESERVED = 0x030C,
@@ -92,7 +85,6 @@ public:
         EG2_DELAY_TIME = 0x030F,
         EG2_HOLD_TIME = 0x0310,
 
-        // FILTER DESTINATIONS
         FILTER_CUTOFF = 0x0500,
         FILTER_Q = 0x0501
     };
@@ -104,6 +96,7 @@ public:
         SWITCH = 0x0003
     };
 
+#pragma pack(4)
     struct CONN {
         E_SRC source;
         E_SRC control;
@@ -112,6 +105,7 @@ public:
         int32 _value;
         double value();
     };
+#pragma pack()
 
 public:
     uint32 m_count = 0;

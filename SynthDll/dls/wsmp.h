@@ -3,6 +3,7 @@
 
 #include "../type.h"
 
+#pragma pack(4)
 struct WSMP_VALUES {
     uint32 size;
     uint16 unity_note;
@@ -13,12 +14,14 @@ struct WSMP_VALUES {
     double fine_tune();
     double gain();
 };
-
+#pragma pack()
+#pragma pack(8)
 struct WSMP_LOOP {
     uint32 size;
     uint32 type;
     uint32 start;
     uint32 length;
 };
+#pragma pack()
 
 #endif /* __DLS_WSMP_H__ */

@@ -23,6 +23,7 @@ protected:
 
 class RGN : public RIFF {
 public:
+#pragma pack(2)
     struct RGNH {
         uint16 key_low;
         uint16 key_high;
@@ -32,12 +33,15 @@ public:
         uint16 key_group;
         uint16 layer;
     };
+#pragma pack()
+#pragma pack(4)
     struct WLNK {
         uint16 options;
         uint16 phase_group;
         uint32 channel;
         uint32 table_index;
     };
+#pragma pack()
 
 public:
     RGNH m_rgnh = { 0 };

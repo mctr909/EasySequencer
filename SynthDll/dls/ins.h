@@ -22,6 +22,7 @@ protected:
 
 class INS : public RIFF {
 public:
+#pragma pack(4)
     struct INSH {
         uint32 regions;
         byte bank_lsb;
@@ -33,6 +34,7 @@ public:
         byte _reserve3;
         byte _reserve4;
     };
+#pragma pack()
 
 public:
     INSH m_insh = { 0 };
