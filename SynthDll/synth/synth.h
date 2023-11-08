@@ -8,9 +8,9 @@
 #define SAMPLER_COUNT    64
 #define OVER_SAMPLING    8
 #define PURGE_SPEED      0.125
-#define FREE_THRESHOLD   (1 / 32768.0) /* -90db */
+#define FREE_THRESHOLD   (1 / 10000.0) /* -80db */
 #define ACTIVE_THRESHOLD (1 / 1024.0)  /* -60db */
-#define RMS_ATTENUTE     6.93          /* -30db/sec * -0.2310 */
+#define RMS_ATTENUTE     4.62          /* -20db/sec * -0.2310 */
 
 /******************************************************************************/
 enum struct E_EVENT_TYPE : byte {

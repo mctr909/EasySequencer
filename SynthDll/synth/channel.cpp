@@ -477,10 +477,15 @@ Channel::step(double* p_output_l, double* p_output_r) {
         {
             auto delta = RMS_ATTENUTE * mp_synth->m_delta_time;
             auto attenute = 1.0 - delta;
-            auto rms_l = m_param.rms_l * attenute;
-            auto rms_r = m_param.rms_r * attenute;
-            m_param.rms_l = rms_l + output_l * output_l * delta;
-            m_param.rms_r = rms_r + output_r * output_r * delta;
+            auto l = m_param.rms_l * attenute;
+            auto r = m_param.rms_r * attenute;
+            m_param.rms_l = l + output_l * output_l * delta;
+            m_param.rms_r = r + output_r * output_r * delta;
+            attenute = 1.0 - mp_synth->m_delta_time;
+            m_param.peak_l *= attenute;
+            m_param.peak_r *= attenute;
+            m_param.peak_l = fmax(m_param.peak_l, output_l < 0 ? -output_l : output_l);
+            m_param.peak_r = fmax(m_param.peak_r, output_r < 0 ? -output_r : output_r);
         }
 
         switch (m_state) {
@@ -491,6 +496,8 @@ Channel::step(double* p_output_l, double* p_output_r) {
             break;
         case E_STATE::ACTIVE:
             if (sqrt(m_param.rms_l) < FREE_THRESHOLD && sqrt(m_param.rms_r) < FREE_THRESHOLD) {
+                m_param.peak_l = 0.0;
+                m_param.peak_r = 0.0;
                 m_state = E_STATE::FREE;
             }
             break;

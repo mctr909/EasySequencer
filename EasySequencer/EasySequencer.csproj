@@ -184,6 +184,7 @@
     <None Include="icon\scroll_prev.png" />
     <None Include="icon\scroll_up.png" />
     <None Include="icon\key_symbol.png" />
+    <Content Include="Resources\Meter_narrow.png" />
     <Content Include="Resources\Monitor.png" />
     <Content Include="Resources\player.png" />
     <Content Include="Resources\player_down.png" />

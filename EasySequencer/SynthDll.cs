@@ -59,6 +59,8 @@ namespace SynthDll {
 
         public double rms_l;
         public double rms_r;
+        public double peak_l;
+        public double peak_r;
 
         public IntPtr p_keyboard;
         IntPtr p_name;

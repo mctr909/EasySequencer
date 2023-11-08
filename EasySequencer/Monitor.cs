@@ -40,14 +40,17 @@ namespace EasySequencer {
         const int TAB_HEIGHT = 26;
         const int TRACK_HEIGHT = 32;
         const float KNOB_RADIUS = 11.0f;
-        const double RMS_MIN = -36.0;
-        const double RMS_MAX = 0.0;
+        const double METER_MIN = -36.0;
+        const double METER_MAX = 0.0;
 
         static readonly Bitmap[,] BMP_FONT = new Bitmap[16, 6];
         static readonly Rectangle RECT_ON_OFF = new Rectangle(527, 33, 28, 30);
         static readonly Rectangle RECT_RMS_L = new Rectangle(563, 32, 144, 6);
         static readonly Rectangle RECT_RMS_R = new Rectangle(563, 46, 144, 6);
-        static readonly Size SIZE_METER_CELL = new Size(4, 6);
+        static readonly Rectangle RECT_PEAK_L = new Rectangle(563, 39, 144, 2);
+        static readonly Rectangle RECT_PEAK_R = new Rectangle(563, 43, 144, 2);
+        static readonly Size SIZE_RMS_CELL = new Size(4, 6);
+        static readonly Size SIZE_PEAK_CELL = new Size(4, 2);
         static readonly Rectangle RECT_PRESET_NAME = new Rectangle(1025, 36, 219, 13);
 
         static readonly Rectangle[] RECT_KEYS = {
@@ -292,30 +295,42 @@ namespace EasySequencer {
                     mG.DrawImageUnscaled(Resources.track_on, RECT_ON_OFF.X, RECT_ON_OFF.Y + track_y);
                 }
 
-                /*** RMS meter ***/
+                /*** Meter ***/
                 var rmsL = Math.Sqrt(param.rms_l) * 2;
                 var rmsR = Math.Sqrt(param.rms_r) * 2;
-                if (rmsL < 0.0000001) {
-                    rmsL = 0.0000001;
-                }
-                if (rmsR < 0.0000001) {
-                    rmsR = 0.0000001;
-                }
-                rmsL = 20 * Math.Log10(rmsL);
-                rmsR = 20 * Math.Log10(rmsR);
-                var normL = 1.0 - (rmsL - RMS_MAX) / RMS_MIN;
-                var normR = 1.0 - (rmsR - RMS_MAX) / RMS_MIN;
-                var rmsLpx = (int)(normL * RECT_RMS_L.Width + 1) / SIZE_METER_CELL.Width * SIZE_METER_CELL.Width;
-                var rmsRpx = (int)(normR * RECT_RMS_R.Width + 1) / SIZE_METER_CELL.Width * SIZE_METER_CELL.Width;
-                rmsLpx = Math.Min(RECT_RMS_L.Width - 1, rmsLpx);
-                rmsRpx = Math.Min(RECT_RMS_R.Width - 1, rmsRpx);
+                var peakL = param.peak_l;
+                var peakR = param.peak_r;
+                rmsL = 20 * Math.Log10(Math.Max(rmsL, 0.0000001));
+                rmsR = 20 * Math.Log10(Math.Max(rmsR, 0.0000001));
+                peakL = 20 * Math.Log10(Math.Max(peakL, 0.0000001));
+                peakR = 20 * Math.Log10(Math.Max(peakR, 0.0000001));
+                var nrmsL = 1.0 - (rmsL - METER_MAX) / METER_MIN;
+                var nrmsR = 1.0 - (rmsR - METER_MAX) / METER_MIN;
+                var npeakL = 1.0 - (peakL - METER_MAX) / METER_MIN;
+                var npeakR = 1.0 - (peakR - METER_MAX) / METER_MIN;
+                var rmsLpx = (int)(nrmsL * RECT_RMS_L.Width + 1) / SIZE_RMS_CELL.Width * SIZE_RMS_CELL.Width;
+                var rmsRpx = (int)(nrmsR * RECT_RMS_R.Width + 1) / SIZE_RMS_CELL.Width * SIZE_RMS_CELL.Width;
+                var peakLpx = (int)(npeakL * RECT_PEAK_L.Width + 1) / SIZE_PEAK_CELL.Width * SIZE_PEAK_CELL.Width;
+                var peakRpx = (int)(npeakR * RECT_PEAK_R.Width + 1) / SIZE_PEAK_CELL.Width * SIZE_PEAK_CELL.Width;
+                rmsLpx = Math.Min(rmsLpx, RECT_RMS_L.Width - 1);
+                rmsRpx = Math.Min(rmsRpx, RECT_RMS_R.Width - 1);
+                peakLpx = Math.Min(peakLpx, RECT_PEAK_L.Width - 1);
+                peakRpx = Math.Min(peakRpx, RECT_PEAK_R.Width - 1);
                 mG.DrawImageUnscaledAndClipped(Resources.Meter, new Rectangle(
                     RECT_RMS_L.X, RECT_RMS_L.Y + track_y,
-                    rmsLpx, SIZE_METER_CELL.Height
+                    rmsLpx, SIZE_RMS_CELL.Height
                 ));
                 mG.DrawImageUnscaledAndClipped(Resources.Meter, new Rectangle(
                     RECT_RMS_R.X, RECT_RMS_R.Y + track_y,
-                    rmsRpx, SIZE_METER_CELL.Height
+                    rmsRpx, SIZE_RMS_CELL.Height
+                ));
+                mG.DrawImageUnscaledAndClipped(Resources.Meter_narrow, new Rectangle(
+                    RECT_PEAK_L.X, RECT_PEAK_L.Y + track_y,
+                    peakLpx, SIZE_PEAK_CELL.Height
+                ));
+                mG.DrawImageUnscaledAndClipped(Resources.Meter_narrow, new Rectangle(
+                    RECT_PEAK_R.X, RECT_PEAK_R.Y + track_y,
+                    peakRpx, SIZE_PEAK_CELL.Height
                 ));
 
                 /*** Vol. ***/

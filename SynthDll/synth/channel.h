@@ -40,6 +40,8 @@ struct CHANNEL_PARAM {
 
     double rms_l;
     double rms_r;
+    double peak_l;
+    double peak_r;
 
     byte* p_keyboard = nullptr;
     byte* p_name = nullptr;
