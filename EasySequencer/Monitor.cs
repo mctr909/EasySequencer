@@ -22,6 +22,8 @@ namespace EasySequencer {
 		int mChangeValue;
 		string[] mPresetNames = new string[DISP_TRACKS];
 		Bitmap[] mBmpPresetNames = new Bitmap[DISP_TRACKS];
+		Bitmap mBmpBlackKey;
+		Bitmap mBmpWhiteKey;
 		E_KEY_STATE[,] mKeyState = new E_KEY_STATE[16, 128];
 
 		static readonly Pen COLOR_KNOB_BLACK = new Pen(Brushes.Black, 3) {
@@ -147,6 +149,12 @@ namespace EasySequencer {
 			PicUI.Image = new Bitmap(PicUI.Width, PicUI.Height);
 			mGraphUI = Graphics.FromImage(PicUI.Image);
 			mGraphUI.SmoothingMode = System.Drawing.Drawing2D.SmoothingMode.None;
+			mBmpWhiteKey = new Bitmap(RECT_KEYS[0].Width, RECT_KEYS[0].Height);
+			mBmpBlackKey = new Bitmap(RECT_KEYS[1].Width, RECT_KEYS[1].Height);
+			Graphics.FromImage(mBmpWhiteKey)
+				.DrawImage(PicKeyboard.BackgroundImage, 0, 0, RECT_KEYS[0], GraphicsUnit.Pixel);
+			Graphics.FromImage(mBmpBlackKey)
+				.DrawImage(PicKeyboard.BackgroundImage, 0, 0, RECT_KEYS[1], GraphicsUnit.Pixel);
 			for (int by = 0; by < 6; by++) {
 				for (int bx = 0; bx < 16; bx++) {
 					BMP_FONT[bx, by] = new Bitmap(FONT_WIDTH, FONT_HEIGHT);
@@ -208,7 +216,11 @@ namespace EasySequencer {
 						mGraphKeyboard.FillRectangle(Brushes.Blue, rect);
 						break;
 					case E_KEY_STATE.FREE:
-						mGraphKeyboard.DrawImage(PicKeyboard.BackgroundImage, rect, rect, GraphicsUnit.Pixel);
+						if (key.Y == RECT_KEYS[0].Y) {
+							mGraphKeyboard.DrawImageUnscaled(mBmpWhiteKey, rect);
+						} else {
+							mGraphKeyboard.DrawImageUnscaled(mBmpBlackKey, rect);
+						}
 						break;
 					}
 				}
