@@ -343,9 +343,19 @@ namespace EasySequencer.Properties {
         /// <summary>
         ///   型 System.Drawing.Bitmap のローカライズされたリソースを検索します。
         /// </summary>
-        internal static System.Drawing.Bitmap Meter_narrow {
+        internal static System.Drawing.Bitmap meter_gauge {
             get {
-                object obj = ResourceManager.GetObject("Meter_narrow", resourceCulture);
+                object obj = ResourceManager.GetObject("meter_gauge", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   型 System.Drawing.Bitmap のローカライズされたリソースを検索します。
+        /// </summary>
+        internal static System.Drawing.Bitmap meter_gauge_narrow {
+            get {
+                object obj = ResourceManager.GetObject("meter_gauge_narrow", resourceCulture);
                 return ((System.Drawing.Bitmap)(obj));
             }
         }

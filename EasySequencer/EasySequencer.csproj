@@ -67,11 +67,6 @@
     <Compile Include="PianoRoll.Designer.cs">
       <DependentUpon>PianoRoll.cs</DependentUpon>
     </Compile>
-    <Compile Include="Properties\Resources.Designer.cs">
-      <AutoGen>True</AutoGen>
-      <DesignTime>True</DesignTime>
-      <DependentUpon>Resources.resx</DependentUpon>
-    </Compile>
     <Compile Include="Player.cs">
       <SubType>Form</SubType>
     </Compile>
@@ -85,6 +80,11 @@
       <DependentUpon>InstList.cs</DependentUpon>
     </Compile>
     <Compile Include="ChordHelper\Scale.cs" />
+    <Compile Include="Properties\Resources.Designer.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>Resources.resx</DependentUpon>
+    </Compile>
     <Compile Include="SynthDll.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
@@ -127,9 +127,6 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="App.config" />
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="Resources\Meter.png" />
   </ItemGroup>
   <ItemGroup>
     <None Include="Resources\font_5x7.png" />
@@ -185,7 +182,8 @@
     <None Include="icon\scroll_up.png" />
     <None Include="icon\key_symbol.png" />
     <Content Include="Resources\Keyboard.png" />
-    <Content Include="Resources\Meter_narrow.png" />
+    <Content Include="Resources\meter_gauge.png" />
+    <Content Include="Resources\meter_gauge_narrow.png" />
     <Content Include="Resources\Monitor.png" />
     <Content Include="Resources\player.png" />
     <Content Include="Resources\player_down.png" />
@@ -196,6 +194,7 @@
     <Content Include="Resources\player_seek.png" />
     <Content Include="Resources\player_stop.png" />
     <Content Include="Resources\player_up.png" />
+    <None Include="Resources\Meter.png" />
     <None Include="Resources\track_on.png" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />

@@ -145,14 +145,14 @@
   <data name="scroll_up" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>..\icon\scroll_up.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
   </data>
-  <data name="tick240" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\icon\tick240.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  <data name="edit_vib_rate" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\icon\edit_vib_rate.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
   </data>
-  <data name="player_up" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\Resources\player_up.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  <data name="meter_gauge" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\meter_gauge.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
   </data>
-  <data name="Meter" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\Resources\Meter.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  <data name="tick480" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\icon\tick480.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
   </data>
   <data name="tick096" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>..\icon\tick096.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
@@ -169,8 +169,8 @@
   <data name="player_play" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>..\Resources\player_play.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
   </data>
-  <data name="Meter_narrow" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\Resources\Meter_narrow.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  <data name="player_up" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\player_up.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
   </data>
   <data name="tone_zoom" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>..\icon\tone_zoom.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
@@ -199,14 +199,20 @@
   <data name="font_14seg" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>..\Resources\font_14seg.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
   </data>
+  <data name="Keyboard" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\Keyboard.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
   <data name="edit_fq" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>..\icon\edit_fq.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="select_multi" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\icon\select_multi.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
   </data>
   <data name="track_on" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>..\Resources\track_on.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
   </data>
-  <data name="select_multi" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\icon\select_multi.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  <data name="edit_exp" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\icon\edit_exp.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
   </data>
   <data name="tick320" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>..\icon\tick320.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
@@ -223,8 +229,8 @@
   <data name="edit_note" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>..\icon\edit_note.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
   </data>
-  <data name="edit_vib_rate" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\icon\edit_vib_rate.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  <data name="Monitor" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\Monitor.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
   </data>
   <data name="tone_zoomout" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>..\icon\tone_zoomout.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
@@ -268,6 +274,9 @@
   <data name="edit_rev" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>..\icon\edit_rev.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
   </data>
+  <data name="Meter" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\Meter.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
   <data name="edit_del_dep" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>..\icon\edit_del_dep.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
   </data>
@@ -289,14 +298,14 @@
   <data name="font_5x7" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>..\Resources\font_5x7.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
   </data>
-  <data name="Monitor" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\Resources\Monitor.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  <data name="meter_gauge_narrow" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\meter_gauge_narrow.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
   </data>
   <data name="edit_release" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>..\icon\edit_release.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
   </data>
-  <data name="edit_exp" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\icon\edit_exp.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  <data name="tick240" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\icon\tick240.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
   </data>
   <data name="player_down" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>..\Resources\player_down.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
@@ -309,11 +318,5 @@
   </data>
   <data name="player_rew" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>..\Resources\player_rew.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
-  </data>
-  <data name="tick480" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\icon\tick480.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
-  </data>
-  <data name="Keyboard" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\Resources\Keyboard.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
   </data>
 </root>

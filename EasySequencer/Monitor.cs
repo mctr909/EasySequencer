@@ -10,7 +10,8 @@ using SynthDll;
 
 namespace EasySequencer {
 	public partial class Monitor : Form {
-		Graphics mGraphMonitor;
+		Graphics mGraphKeyboard;
+		Graphics mGraphMeter;
 		Graphics mGraphUI;
 
 		Point mMouseDownPos;
@@ -113,28 +114,35 @@ namespace EasySequencer {
 		static readonly int OCT_WIDTH = (RECT_KEYS[0].Width + 1) * 7;
 
 		static readonly Size SIZE_RMS_CELL = new Size(4, 6);
-		static readonly Rectangle RECT_RMS_L = new Rectangle(499, 32, 144, 6);
-		static readonly Rectangle RECT_RMS_R = new Rectangle(499, 46, 144, 6);
-		static readonly Rectangle RECT_PEAK_L = new Rectangle(499, 39, 144, 2);
-		static readonly Rectangle RECT_PEAK_R = new Rectangle(499, 43, 144, 2);
+		static readonly Rectangle RECT_RMS_L = new Rectangle(13, 32, 144, 6);
+		static readonly Rectangle RECT_RMS_R = new Rectangle(13, 46, 144, 6);
+		static readonly Rectangle RECT_PEAK_L = new Rectangle(13, 39, 144, 2);
+		static readonly Rectangle RECT_PEAK_R = new Rectangle(13, 43, 144, 2);
 
 		public Monitor() {
 			InitializeComponent();
-
-			PicMonitor.Top = 0;
-			PicMonitor.Left = 0;
-			PicMonitor.Width = Resources.Keyboard.Width;
-			PicMonitor.Height = Resources.Keyboard.Height;
+			SuspendLayout();
+			PicKeyboard.Top = 0;
+			PicKeyboard.Left = 0;
+			PicKeyboard.Width = Resources.Keyboard.Width;
+			PicKeyboard.Height = Resources.Keyboard.Height;
+			PicMeter.Top = 0;
+			PicMeter.Left = PicKeyboard.Right;
+			PicMeter.Width = Resources.Meter.Width;
+			PicMeter.Height = Resources.Meter.Height;
 			PicUI.Top = 0;
-			PicUI.Left = PicMonitor.Right;
+			PicUI.Left = PicMeter.Right;
 			PicUI.Width = Resources.Monitor.Width;
 			PicUI.Height = Resources.Monitor.Height;
 			Width = PicUI.Right + 16;
 			Height = PicUI.Bottom + 39;
 
-			PicMonitor.Image = new Bitmap(PicMonitor.Width, PicMonitor.Height);
-			mGraphMonitor = Graphics.FromImage(PicMonitor.Image);
-			mGraphMonitor.SmoothingMode = System.Drawing.Drawing2D.SmoothingMode.None;
+			PicKeyboard.Image = new Bitmap(PicKeyboard.Width, PicKeyboard.Height);
+			mGraphKeyboard = Graphics.FromImage(PicKeyboard.Image);
+			mGraphKeyboard.SmoothingMode = System.Drawing.Drawing2D.SmoothingMode.None;
+			PicMeter.Image = new Bitmap(PicMeter.Width, PicMeter.Height);
+			mGraphMeter = Graphics.FromImage(PicMeter.Image);
+			mGraphMeter.SmoothingMode = System.Drawing.Drawing2D.SmoothingMode.None;
 			PicUI.Image = new Bitmap(PicUI.Width, PicUI.Height);
 			mGraphUI = Graphics.FromImage(PicUI.Image);
 			mGraphUI.SmoothingMode = System.Drawing.Drawing2D.SmoothingMode.None;
@@ -153,24 +161,97 @@ namespace EasySequencer {
 					g.Dispose();
 				}
 			}
+			ResumeLayout();
 		}
 
 		private void Monitor_Shown(object sender, EventArgs e) {
-			TimerMonitor.Enabled = true;
-			TimerMonitor.Interval = 33;
-			TimerMonitor.Start();
+			TimerKeyboard.Enabled = true;
+			TimerKeyboard.Interval = 16;
+			TimerKeyboard.Start();
+			TimerMeter.Enabled = true;
+			TimerMeter.Interval = 66;
+			TimerMeter.Start();
 			TimerUI.Enabled = true;
 			TimerUI.Interval = 66;
 			TimerUI.Start();
 		}
 
+		private void TimerKeyboard_Tick(object sender, EventArgs e) {
+			mGraphKeyboard.Clear(Color.Transparent);
+			for (int track = 0, chNum = 0; track < DISP_TRACKS; ++track, ++chNum) {
+				var param = Synth.GetChannel(chNum);
+				var track_y = TRACK_HEIGHT * track;
+				var transpose = (int)(param.pitch * param.bend_range / 8192.0 - 0.5);
+				for (var n = 0; n < 128; ++n) {
+					var k = n + transpose;
+					if (k < 12 || 127 < k) {
+						continue;
+					}
+					var key = RECT_KEYS[k % 12];
+					var kx = key.X + OCT_WIDTH * (k / 12 - 1);
+					var ky = key.Y + track_y;
+					var keyState = (E_KEY_STATE)Marshal.PtrToStructure<byte>(param.p_keyboard + n);
+					switch (keyState) {
+					case E_KEY_STATE.PRESS:
+						mGraphKeyboard.FillRectangle(Brushes.Red, kx, ky, key.Width, key.Height);
+						break;
+					case E_KEY_STATE.HOLD:
+						mGraphKeyboard.FillRectangle(Brushes.Blue, kx, ky, key.Width, key.Height);
+						break;
+					}
+				}
+			}
+			PicKeyboard.Image = PicKeyboard.Image;
+		}
+
+		private void TimerMeter_Tick(object sender, EventArgs e) {
+			mGraphMeter.Clear(Color.Transparent);
+			for (int track = 0, chNum = 0; track < DISP_TRACKS; ++track, ++chNum) {
+				var param = Synth.GetChannel(chNum);
+				var rmsL = Math.Sqrt(param.rms_l) * 2;
+				var rmsR = Math.Sqrt(param.rms_r) * 2;
+				var peakL = param.peak_l;
+				var peakR = param.peak_r;
+				rmsL = 20 * Math.Log10(Math.Max(rmsL, 0.0000001));
+				rmsR = 20 * Math.Log10(Math.Max(rmsR, 0.0000001));
+				peakL = 20 * Math.Log10(Math.Max(peakL, 0.0000001));
+				peakR = 20 * Math.Log10(Math.Max(peakR, 0.0000001));
+				var nrmsL = 1.0 - (rmsL - METER_MAX) / METER_MIN;
+				var nrmsR = 1.0 - (rmsR - METER_MAX) / METER_MIN;
+				var npeakL = 1.0 - (peakL - METER_MAX) / METER_MIN;
+				var npeakR = 1.0 - (peakR - METER_MAX) / METER_MIN;
+				var rmsLpx = (int)(nrmsL * RECT_RMS_L.Width + 1) / SIZE_RMS_CELL.Width * SIZE_RMS_CELL.Width;
+				var rmsRpx = (int)(nrmsR * RECT_RMS_R.Width + 1) / SIZE_RMS_CELL.Width * SIZE_RMS_CELL.Width;
+				var peakLpx = (int)(npeakL * RECT_PEAK_L.Width + 0.5);
+				var peakRpx = (int)(npeakR * RECT_PEAK_R.Width + 0.5);
+				rmsLpx = Math.Min(rmsLpx, RECT_RMS_L.Width - 1);
+				rmsRpx = Math.Min(rmsRpx, RECT_RMS_R.Width - 1);
+				peakLpx = Math.Min(peakLpx, RECT_PEAK_L.Width - 1);
+				peakRpx = Math.Min(peakRpx, RECT_PEAK_R.Width - 1);
+				var track_y = TRACK_HEIGHT * track;
+				mGraphMeter.DrawImageUnscaledAndClipped(Resources.meter_gauge, new Rectangle(
+					RECT_RMS_L.X, RECT_RMS_L.Y + track_y,
+					rmsLpx, SIZE_RMS_CELL.Height
+				));
+				mGraphMeter.DrawImageUnscaledAndClipped(Resources.meter_gauge, new Rectangle(
+					RECT_RMS_R.X, RECT_RMS_R.Y + track_y,
+					rmsRpx, SIZE_RMS_CELL.Height
+				));
+				mGraphMeter.DrawImageUnscaledAndClipped(Resources.meter_gauge_narrow, new Rectangle(
+					RECT_PEAK_L.X, RECT_PEAK_L.Y + track_y,
+					peakLpx, RECT_PEAK_L.Height
+				));
+				mGraphMeter.DrawImageUnscaledAndClipped(Resources.meter_gauge_narrow, new Rectangle(
+					RECT_PEAK_R.X, RECT_PEAK_R.Y + track_y,
+					peakRpx, RECT_PEAK_R.Height
+				));
+			}
+			PicMeter.Image = PicMeter.Image;
+		}
+
 		private void TimerUI_Tick(object sender, EventArgs e) {
 			DrawUI();
 			SendValue();
-		}
-
-		private void TimerMonitor_Tick(object sender, EventArgs e) {
-			DrawMonitor();
 		}
 
 		void PicMonitor_DoubleClick(object sender, EventArgs e) {
@@ -255,72 +336,6 @@ namespace EasySequencer {
 
 				mIsParamChg = true;
 			}
-		}
-
-		void DrawMonitor() {
-			mGraphMonitor.Clear(Color.Transparent);
-			for (int track = 0, chNum = 0; track < DISP_TRACKS; ++track, ++chNum) {
-				var param = Synth.GetChannel(chNum);
-				var track_y = TRACK_HEIGHT * track;
-				/*** Keyboard ***/
-				var transpose = (int)(param.pitch * param.bend_range / 8192.0 - 0.5);
-				for (var n = 0; n < 128; ++n) {
-					var k = n + transpose;
-					if (k < 12 || 127 < k) {
-						continue;
-					}
-					var key = RECT_KEYS[k % 12];
-					var kx = key.X + OCT_WIDTH * (k / 12 - 1);
-					var ky = key.Y + track_y;
-					var keyState = (E_KEY_STATE)Marshal.PtrToStructure<byte>(param.p_keyboard + n);
-					switch (keyState) {
-					case E_KEY_STATE.PRESS:
-						mGraphMonitor.FillRectangle(Brushes.Red, kx, ky, key.Width, key.Height);
-						break;
-					case E_KEY_STATE.HOLD:
-						mGraphMonitor.FillRectangle(Brushes.Blue, kx, ky, key.Width, key.Height);
-						break;
-					}
-				}
-				/*** Meter ***/
-				var rmsL = Math.Sqrt(param.rms_l) * 2;
-				var rmsR = Math.Sqrt(param.rms_r) * 2;
-				var peakL = param.peak_l;
-				var peakR = param.peak_r;
-				rmsL = 20 * Math.Log10(Math.Max(rmsL, 0.0000001));
-				rmsR = 20 * Math.Log10(Math.Max(rmsR, 0.0000001));
-				peakL = 20 * Math.Log10(Math.Max(peakL, 0.0000001));
-				peakR = 20 * Math.Log10(Math.Max(peakR, 0.0000001));
-				var nrmsL = 1.0 - (rmsL - METER_MAX) / METER_MIN;
-				var nrmsR = 1.0 - (rmsR - METER_MAX) / METER_MIN;
-				var npeakL = 1.0 - (peakL - METER_MAX) / METER_MIN;
-				var npeakR = 1.0 - (peakR - METER_MAX) / METER_MIN;
-				var rmsLpx = (int)(nrmsL * RECT_RMS_L.Width + 1) / SIZE_RMS_CELL.Width * SIZE_RMS_CELL.Width;
-				var rmsRpx = (int)(nrmsR * RECT_RMS_R.Width + 1) / SIZE_RMS_CELL.Width * SIZE_RMS_CELL.Width;
-				var peakLpx = (int)(npeakL * RECT_PEAK_L.Width + 0.5);
-				var peakRpx = (int)(npeakR * RECT_PEAK_R.Width + 0.5);
-				rmsLpx = Math.Min(rmsLpx, RECT_RMS_L.Width - 1);
-				rmsRpx = Math.Min(rmsRpx, RECT_RMS_R.Width - 1);
-				peakLpx = Math.Min(peakLpx, RECT_PEAK_L.Width - 1);
-				peakRpx = Math.Min(peakRpx, RECT_PEAK_R.Width - 1);
-				mGraphMonitor.DrawImageUnscaledAndClipped(Resources.Meter, new Rectangle(
-					RECT_RMS_L.X, RECT_RMS_L.Y + track_y,
-					rmsLpx, SIZE_RMS_CELL.Height
-				));
-				mGraphMonitor.DrawImageUnscaledAndClipped(Resources.Meter, new Rectangle(
-					RECT_RMS_R.X, RECT_RMS_R.Y + track_y,
-					rmsRpx, SIZE_RMS_CELL.Height
-				));
-				mGraphMonitor.DrawImageUnscaledAndClipped(Resources.Meter_narrow, new Rectangle(
-					RECT_PEAK_L.X, RECT_PEAK_L.Y + track_y,
-					peakLpx, RECT_PEAK_L.Height
-				));
-				mGraphMonitor.DrawImageUnscaledAndClipped(Resources.Meter_narrow, new Rectangle(
-					RECT_PEAK_R.X, RECT_PEAK_R.Y + track_y,
-					peakRpx, RECT_PEAK_R.Height
-				));
-			}
-			PicMonitor.Image = PicMonitor.Image;
 		}
 
 		void DrawUI() {
