@@ -22,6 +22,7 @@ namespace EasySequencer {
 		int mChangeValue;
 		string[] mPresetNames = new string[DISP_TRACKS];
 		Bitmap[] mBmpPresetNames = new Bitmap[DISP_TRACKS];
+		E_KEY_STATE[,] mKeyState = new E_KEY_STATE[16, 128];
 
 		static readonly Pen COLOR_KNOB_BLACK = new Pen(Brushes.Black, 3) {
 			StartCap = System.Drawing.Drawing2D.LineCap.Round,
@@ -177,26 +178,37 @@ namespace EasySequencer {
 		}
 
 		private void TimerKeyboard_Tick(object sender, EventArgs e) {
-			mGraphKeyboard.Clear(Color.Transparent);
 			for (int track = 0, chNum = 0; track < DISP_TRACKS; ++track, ++chNum) {
 				var param = Synth.GetChannel(chNum);
 				var track_y = TRACK_HEIGHT * track;
 				var transpose = (int)(param.pitch * param.bend_range / 8192.0 - 0.5);
 				for (var n = 0; n < 128; ++n) {
+					var keyState = (E_KEY_STATE)Marshal.PtrToStructure<byte>(param.p_keyboard + n);
 					var k = n + transpose;
 					if (k < 12 || 127 < k) {
 						continue;
 					}
+					if (mKeyState[track, k] == keyState) {
+						continue;
+					} else {
+						mKeyState[track, k] = keyState;
+					}
 					var key = RECT_KEYS[k % 12];
-					var kx = key.X + OCT_WIDTH * (k / 12 - 1);
-					var ky = key.Y + track_y;
-					var keyState = (E_KEY_STATE)Marshal.PtrToStructure<byte>(param.p_keyboard + n);
+					var rect = new Rectangle(
+						key.X + OCT_WIDTH * (k / 12 - 1),
+						key.Y + track_y,
+						key.Width,
+						key.Height
+					);
 					switch (keyState) {
 					case E_KEY_STATE.PRESS:
-						mGraphKeyboard.FillRectangle(Brushes.Red, kx, ky, key.Width, key.Height);
+						mGraphKeyboard.FillRectangle(Brushes.Red, rect);
 						break;
 					case E_KEY_STATE.HOLD:
-						mGraphKeyboard.FillRectangle(Brushes.Blue, kx, ky, key.Width, key.Height);
+						mGraphKeyboard.FillRectangle(Brushes.Blue, rect);
+						break;
+					case E_KEY_STATE.FREE:
+						mGraphKeyboard.DrawImage(PicKeyboard.BackgroundImage, rect, rect, GraphicsUnit.Pixel);
 						break;
 					}
 				}
