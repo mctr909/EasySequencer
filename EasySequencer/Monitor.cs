@@ -113,7 +113,6 @@ namespace EasySequencer {
 		static readonly int OCT_WIDTH = (RECT_KEYS[0].Width + 1) * 7;
 
 		static readonly Size SIZE_RMS_CELL = new Size(4, 6);
-		static readonly Size SIZE_PEAK_CELL = new Size(4, 2);
 		static readonly Rectangle RECT_RMS_L = new Rectangle(499, 32, 144, 6);
 		static readonly Rectangle RECT_RMS_R = new Rectangle(499, 46, 144, 6);
 		static readonly Rectangle RECT_PEAK_L = new Rectangle(499, 39, 144, 2);
@@ -298,8 +297,8 @@ namespace EasySequencer {
 				var npeakR = 1.0 - (peakR - METER_MAX) / METER_MIN;
 				var rmsLpx = (int)(nrmsL * RECT_RMS_L.Width + 1) / SIZE_RMS_CELL.Width * SIZE_RMS_CELL.Width;
 				var rmsRpx = (int)(nrmsR * RECT_RMS_R.Width + 1) / SIZE_RMS_CELL.Width * SIZE_RMS_CELL.Width;
-				var peakLpx = (int)(npeakL * RECT_PEAK_L.Width + 1) / SIZE_PEAK_CELL.Width * SIZE_PEAK_CELL.Width;
-				var peakRpx = (int)(npeakR * RECT_PEAK_R.Width + 1) / SIZE_PEAK_CELL.Width * SIZE_PEAK_CELL.Width;
+				var peakLpx = (int)(npeakL * RECT_PEAK_L.Width + 0.5);
+				var peakRpx = (int)(npeakR * RECT_PEAK_R.Width + 0.5);
 				rmsLpx = Math.Min(rmsLpx, RECT_RMS_L.Width - 1);
 				rmsRpx = Math.Min(rmsRpx, RECT_RMS_R.Width - 1);
 				peakLpx = Math.Min(peakLpx, RECT_PEAK_L.Width - 1);
@@ -314,11 +313,11 @@ namespace EasySequencer {
 				));
 				mGraphMonitor.DrawImageUnscaledAndClipped(Resources.Meter_narrow, new Rectangle(
 					RECT_PEAK_L.X, RECT_PEAK_L.Y + track_y,
-					peakLpx, SIZE_PEAK_CELL.Height
+					peakLpx, RECT_PEAK_L.Height
 				));
 				mGraphMonitor.DrawImageUnscaledAndClipped(Resources.Meter_narrow, new Rectangle(
 					RECT_PEAK_R.X, RECT_PEAK_R.Y + track_y,
-					peakRpx, SIZE_PEAK_CELL.Height
+					peakRpx, RECT_PEAK_R.Height
 				));
 			}
 			PicMonitor.Image = PicMonitor.Image;
