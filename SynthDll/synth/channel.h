@@ -94,6 +94,8 @@ public:
     E_STATE m_state = E_STATE::FREE;
     CHANNEL_PARAM m_param = { 0 };
     double m_pitch = 1.0;
+    double m_pan_re = 1.0;
+    double m_pan_im = 0.0;
     double* mp_buffer_l = nullptr;
     double* mp_buffer_r = nullptr;
     INST_INFO* mp_inst = nullptr;
@@ -105,12 +107,8 @@ private:
     byte m_nrpn_msb = 0xFF;
     byte m_data_lsb = 0;
     byte m_data_msb = 0;
-    double m_current_amp = 10000 / 16129.0;
-    double m_current_pan_re = 1.0;
-    double m_current_pan_im = 0.0;
-    double m_target_amp = 10000 / 16129.0;
-    double m_target_pan_re = 1.0;
-    double m_target_pan_im = 0.0;
+    double m_current_gain = 10000 / 16129.0;
+    double m_target_gain = 10000 / 16129.0;
     DELAY m_delay = { 0 };
     CHORUS m_chorus = { 0 };
     Synth* mp_synth = nullptr;

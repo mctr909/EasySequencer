@@ -6,7 +6,7 @@
 /******************************************************************************/
 #define CHANNEL_COUNT    256
 #define SAMPLER_COUNT    64
-#define OVER_SAMPLING    8
+#define OVER_SAMPLING    4
 #define PURGE_SPEED      0.125
 #define FREE_THRESHOLD   (1 / 10000.0) /* -80db */
 #define ACTIVE_THRESHOLD (1 / 1024.0)  /* -60db */

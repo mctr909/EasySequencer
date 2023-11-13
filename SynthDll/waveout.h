@@ -14,12 +14,11 @@ private:
     DWORD m_thread_id = 0;
     CRITICAL_SECTION m_buffer_lock = { 0 };
 
-    bool m_dostop = true;
-    bool m_stopped = true;
+    bool m_stop = true;
+    bool m_callback_stopped = true;
     bool m_thread_stopped = true;
 
     int32 m_write_count = 0;
-    int32 m_write_index = 0;
     int32 m_read_index = 0;
     int32 m_buffer_count = 0;
     int32 m_buffer_length = 0;

@@ -84,14 +84,14 @@ void
 Channel::set_amp(byte vol, byte exp) {
     m_param.vol = vol;
     m_param.exp = exp;
-    m_target_amp = vol * vol * exp * exp / 260144641.0;
+    m_target_gain = vol * vol * exp * exp / 260144641.0;
 }
 
 void
 Channel::set_pan(byte value) {
     m_param.pan = value;
-    m_target_pan_re = cos((value - 64) * 1.570796 / 127.0);
-    m_target_pan_im = sin((value - 64) * 1.570796 / 127.0);
+    m_pan_re = cos((value - 64) * 1.570796 / 127.0);
+    m_pan_im = sin((value - 64) * 1.570796 / 127.0);
 }
 
 void
@@ -207,7 +207,7 @@ Channel::note_off(byte note_num) {
         auto p_smpl = mp_synth->mpp_samplers[i];
         auto ch_param = *mp_synth->m_export_values.pp_channel_params[p_smpl->m_channel_num];
         if (p_smpl->m_state < Sampler::E_STATE::PRESS ||
-            (ch_param.is_drum && !p_smpl->m_loop_enable)) {
+            (ch_param.is_drum && !p_smpl->m_wave_info.enable_loop)) {
             continue;
         }
         if (p_smpl->m_channel_num == m_num && p_smpl->m_note_num == note_num) {
@@ -392,13 +392,11 @@ Channel::pitch_bend(byte lsb, byte msb) {
 void
 Channel::step(double* p_output_l, double* p_output_r) {
     for (int32 i = 0; i < mp_synth->m_buffer_length; i++) {
-        auto output_l = mp_buffer_l[i] * m_current_pan_re - mp_buffer_r[i] * m_current_pan_im;
-        auto output_r = mp_buffer_l[i] * m_current_pan_im + mp_buffer_r[i] * m_current_pan_re;
-        output_l *= m_current_amp;
-        output_r *= m_current_amp;
-        m_current_amp += (m_target_amp - m_current_amp) * 0.02;
-        m_current_pan_re += (m_target_pan_re - m_current_pan_re) * 0.02;
-        m_current_pan_im += (m_target_pan_im - m_current_pan_im) * 0.02;
+        auto output_l = mp_buffer_l[i];
+        auto output_r = mp_buffer_r[i];
+        output_l *= m_current_gain;
+        output_r *= m_current_gain;
+        m_current_gain += (m_target_gain - m_current_gain) * 0.02;
         mp_buffer_l[i] = 0.0;
         mp_buffer_r[i] = 0.0;
 

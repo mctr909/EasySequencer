@@ -9,25 +9,19 @@ WaveOut::callback(HWAVEOUT hwo, UINT uMsg, DWORD_PTR dwInstance, DWORD dwParam1,
     auto p_this = (WaveOut*)p_hdr->dwUser;
     switch (uMsg) {
     case MM_WOM_OPEN:
-        p_this->m_dostop = false;
-        p_this->m_stopped = false;
-        p_this->m_thread_stopped = false;
+        p_this->m_callback_stopped = false;
         break;
     case MM_WOM_CLOSE:
         break;
     case MM_WOM_DONE:
-        if (p_this->m_dostop) {
-            p_this->m_stopped = true;
+        if (p_this->m_stop) {
+            p_this->m_callback_stopped = true;
             break;
         }
         EnterCriticalSection((LPCRITICAL_SECTION)&p_this->m_buffer_lock);
-        /*** Output wave ***/
         waveOutWrite(p_this->mp_handle, p_hdr + p_this->m_read_index, sizeof(WAVEHDR));
-        if (p_this->m_write_count < 1) {
-            /*** Buffer empty ***/
-        } else {
-            /*** Set next buffer ***/
-            p_this->m_read_index = (p_this->m_read_index + 1) % p_this->m_buffer_count;
+        if (p_this->m_write_count > 0) {
+            p_this->m_read_index = ++p_this->m_read_index % p_this->m_buffer_count;
             p_this->m_write_count--;
         }
         LeaveCriticalSection((LPCRITICAL_SECTION)&p_this->m_buffer_lock);
@@ -41,34 +35,39 @@ DWORD
 WaveOut::buffer_writing_task(LPVOID* param) {
     auto p_hdr = (WAVEHDR*)param;
     auto p_this = (WaveOut*)p_hdr->dwUser;
+    p_this->m_thread_stopped = false;
+    int32 write_index = 0;
     while (true) {
-        if (p_this->m_dostop) {
+        if (p_this->m_stop) {
             p_this->m_thread_stopped = true;
             break;
         }
+        bool enable_sleep;
         EnterCriticalSection((LPCRITICAL_SECTION)&p_this->m_buffer_lock);
         if (p_this->m_buffer_count <= p_this->m_write_count + 1) {
             /*** Buffer full ***/
-            LeaveCriticalSection((LPCRITICAL_SECTION)&p_this->m_buffer_lock);
-            Sleep(1);
-            continue;
+            enable_sleep = true;
         } else {
             /*** Write Buffer ***/
-            auto p_buff = (WAVE_DATA*)(p_hdr + p_this->m_write_index)->lpData;
+            enable_sleep = false;
+            auto p_buff = (WAVE_DATA*)(p_hdr + write_index)->lpData;
             memset(p_buff, 0, p_this->m_fmt.nBlockAlign * p_this->m_buffer_length);
             p_this->mfp_buffer_writer(p_buff, p_this->mp_buffer_writer_param);
-            p_this->m_write_index = (p_this->m_write_index + 1) % p_this->m_buffer_count;
+            write_index = ++write_index % p_this->m_buffer_count;
             p_this->m_write_count++;
         }
         LeaveCriticalSection((LPCRITICAL_SECTION)&p_this->m_buffer_lock);
+        if (enable_sleep) {
+            Sleep(1);
+        }
     }
     return 0;
 }
 
 void
 WaveOut::stop() {
-    m_dostop = true;
-    while (!m_stopped || !m_thread_stopped) {
+    m_stop = true;
+    while (!m_callback_stopped || !m_thread_stopped) {
         Sleep(100);
     }
 }
@@ -85,8 +84,8 @@ WaveOut::open(
         close();
     }
     /*** Init buffer counter/writer ***/
+    m_stop = false;
     m_write_count = 0;
-    m_write_index = 0;
     m_read_index = 0;
     m_buffer_count = buffer_count;
     m_buffer_length = buffer_length;
