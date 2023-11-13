@@ -481,7 +481,7 @@ Channel::step(double* p_output_l, double* p_output_r) {
             auto r = m_param.rms_r * attenute;
             m_param.rms_l = l + output_l * output_l * delta;
             m_param.rms_r = r + output_r * output_r * delta;
-            attenute = 1.0 - mp_synth->m_delta_time;
+            attenute = 1.0 - mp_synth->m_delta_time * 0.33;
             m_param.peak_l *= attenute;
             m_param.peak_r *= attenute;
             m_param.peak_l = fmax(m_param.peak_l, output_l < 0 ? -output_l : output_l);
