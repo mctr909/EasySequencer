@@ -100,18 +100,18 @@ namespace EasySequencer {
 		};
 
 		static readonly Rectangle[] RECT_KEYS = {
-			new Rectangle(7, 44, 6, 10),  // C
+			new Rectangle(7, 45, 6, 9),   // C
 			new Rectangle(11, 29, 5, 16), // Db
-			new Rectangle(14, 44, 6, 10), // D
+			new Rectangle(14, 45, 6, 9),  // D
 			new Rectangle(18, 29, 5, 16), // Eb
-			new Rectangle(21, 44, 6, 10), // E
-			new Rectangle(28, 44, 6, 10), // F
+			new Rectangle(21, 45, 6, 9),  // E
+			new Rectangle(28, 45, 6, 9),  // F
 			new Rectangle(32, 29, 5, 16), // Gb
-			new Rectangle(35, 44, 6, 10), // G
+			new Rectangle(35, 45, 6, 9),  // G
 			new Rectangle(39, 29, 5, 16), // Ab
-			new Rectangle(42, 44, 6, 10), // A
+			new Rectangle(42, 45, 6, 9),  // A
 			new Rectangle(46, 29, 5, 16), // Bb
-			new Rectangle(49, 44, 6, 10)  // B
+			new Rectangle(49, 45, 6, 9)   // B
 		};
 
 		static readonly int OCT_WIDTH = (RECT_KEYS[0].Width + 1) * 7;
